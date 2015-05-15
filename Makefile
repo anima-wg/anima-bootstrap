@@ -1,7 +1,6 @@
-VERSION=05
+VERSION=00
 
-DRAFT=draft-richardson-6tisch-security-6top
-DRAFT1=draft-richardson-6tisch-security-architecture
+DRAFT=dtbootstrap-anima-keyinfra
 
 ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
