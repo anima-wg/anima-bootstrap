@@ -67,7 +67,7 @@
       </address>
     </author>
 
-    <date day="13" month="February" year="2015" />
+    <date year="2015" />
 
     <area>Operations and Management</area>
 
@@ -262,110 +262,6 @@
       necessary mechanisms are called out in this document to ensure all such
       edge conditions are covered by the architectural and protocol
       models.</t>
-    </section>
-
-    <section title="Domain Operator Activities">
-      <t>This section describes how an operator interacts with a domain that
-      supports the bootstrapping as described in this document.</t>
-
-      <t>[[EDNOTE: This section to be moved later in the document. The actual
-      next section should be s4.1 "Behavior of a new entity" as the first time
-      reader will want to understand that before needing to understand how to
-      setup the system.]]</t>
-
-      <section title="Instantiating the Domain Certification Authority">
-        <t>This is a one time step by the domain administrator. This is an
-        "off the shelf" CA with the exception that it is designed to work as
-        an integrated part of the security solution. This precludes the use of
-        3rd party certification authority services that do not provide support
-        for delegation of certificate issuance decisions to a domain managed
-        Registration Authority.</t>
-      </section>
-
-      <section title="Instantiating the Registrar">
-        <t>This is a one time step by the domain administrator. One or more
-        devices in the domain are configured take on a Registrar function.</t>
-
-        <t>A device can be configured to act as a Registrar or a device can
-        auto-select itself to take on this function, using a detection
-        mechanism to resolve potential conflicts and setup communication with
-        the Domain Certification Authority. Automated Registrar selection is
-        outside scope for this document.</t>
-      </section>
-
-      <section anchor="accepting" title="Accepting New Entities">
-        <t>For each New Entity the Registrar is informed of the unique
-        identifier (e.g. serial number) along with the manufacturer's
-        identifying information (e.g. manufacturer root certificate). This can
-        happen in different ways:</t>
-
-        <t><list style="numbers">
-            <t>Default acceptance: In the simplest case, the new device
-            asserts its unique identity to the registrar. The registrar
-            accepts all devices without authorization checks. This mode does
-            not provide security against intruders and is not recommended.</t>
-
-            <t>Per device acceptance: The new device asserts its unique
-            identity to the registrar. A non-technical human validates the
-            identity, for example by comparing the identity displayed by the
-            registrar (for example using a smartphone app) with the identity
-            shown on the packaging of the device. Acceptance may be triggered
-            by a click on a smartphone app "accept this device", or by other
-            forms of pairing. See also <xref
-            target="I-D.behringer-homenet-trust-bootstrap"></xref> for how the
-            approach could work in a homenet.</t>
-
-            <t>Whitelist acceptance: In larger networks, neither of the
-            previous approaches is acceptable. Default acceptance is not
-            secure, and a manual per device methods do not scale. Here, the
-            registrar is provided a priori with a list of identifiers of
-            devices that belong to the network. This list can be extracted
-            from an inventory database, or sales records. If a device is
-            detected that is not on the list of known devices, it can still be
-            manually accepted using the per device acceptance methods.</t>
-
-            <t>Automated Whitelist: an automated process that builds the
-            necessary whitelists and inserts them into the larger network
-            domain infrastructure is plausible. Once set up, no human
-            intervention is required in this process. Defining the exact
-            mechanisms for this is out of scope although the registrar
-            authorization checks is identified as the logical integration
-            point of any future work in this area.</t>
-          </list></t>
-
-        <t>None of these approaches require the network to have permanent
-        Internet connectivity. Even when the Internet based MASA service is
-        used, it is possible to pre-fetch the required information from the
-        MASA a priori, for example at time of purchase such that devices can
-        enrol later. This supports use cases where the domain network may be
-        entirely isolated during device deployment.</t>
-
-        <t>Additional policy can be stored for future authorization decisions.
-        For example an expected deployment time window or that a certain Proxy
-        must be used.</t>
-      </section>
-
-      <section title="Automatic Enrolment of Devices">
-        <t>The approach outlined in this document provides a secure zero-touch
-        method to enrol new devices without any pre-staged configuration. New
-        devices communicate with already enrolled devices of the domain, which
-        proxy between the new device and a Registrar. As a result of this
-        completely automatic operation, all devices obtain a domain based
-        certificate.</t>
-      </section>
-
-      <section title="Secure Network Operations">
-        <t>The certificate installed in the previous step can be used for all
-        subsequent operations. For example, to determine the boundaries of the
-        domain: If a neighbor has a certificate from the same trust anchor it
-        can be assumed "inside" the same organization; if not, as outside. See
-        also <xref target="boundary"></xref>. The certificate can also be used
-        to securely establish a connection between devices and central control
-        functions. Also autonomic transactions can use the domain certificates
-        to authenticate and/or encrypt direct interactions between devices.
-        The usage of the domain certificates is outside scope for this
-        document.</t>
-      </section>
     </section>
 
     <section title="Functional Overview">
@@ -874,6 +770,110 @@
           devices can be grouped into to sub domains and specific trust levels
           can be implemented between those.</t>
         </section>
+      </section>
+    </section>
+
+    <section title="Domain Operator Activities">
+      <t>This section describes how an operator interacts with a domain that
+      supports the bootstrapping as described in this document.</t>
+
+      <t>[[EDNOTE: This section to be moved later in the document. The actual
+      next section should be s4.1 "Behavior of a new entity" as the first time
+      reader will want to understand that before needing to understand how to
+      setup the system.]]</t>
+
+      <section title="Instantiating the Domain Certification Authority">
+        <t>This is a one time step by the domain administrator. This is an
+        "off the shelf" CA with the exception that it is designed to work as
+        an integrated part of the security solution. This precludes the use of
+        3rd party certification authority services that do not provide support
+        for delegation of certificate issuance decisions to a domain managed
+        Registration Authority.</t>
+      </section>
+
+      <section title="Instantiating the Registrar">
+        <t>This is a one time step by the domain administrator. One or more
+        devices in the domain are configured take on a Registrar function.</t>
+
+        <t>A device can be configured to act as a Registrar or a device can
+        auto-select itself to take on this function, using a detection
+        mechanism to resolve potential conflicts and setup communication with
+        the Domain Certification Authority. Automated Registrar selection is
+        outside scope for this document.</t>
+      </section>
+
+      <section anchor="accepting" title="Accepting New Entities">
+        <t>For each New Entity the Registrar is informed of the unique
+        identifier (e.g. serial number) along with the manufacturer's
+        identifying information (e.g. manufacturer root certificate). This can
+        happen in different ways:</t>
+
+        <t><list style="numbers">
+            <t>Default acceptance: In the simplest case, the new device
+            asserts its unique identity to the registrar. The registrar
+            accepts all devices without authorization checks. This mode does
+            not provide security against intruders and is not recommended.</t>
+
+            <t>Per device acceptance: The new device asserts its unique
+            identity to the registrar. A non-technical human validates the
+            identity, for example by comparing the identity displayed by the
+            registrar (for example using a smartphone app) with the identity
+            shown on the packaging of the device. Acceptance may be triggered
+            by a click on a smartphone app "accept this device", or by other
+            forms of pairing. See also <xref
+            target="I-D.behringer-homenet-trust-bootstrap"></xref> for how the
+            approach could work in a homenet.</t>
+
+            <t>Whitelist acceptance: In larger networks, neither of the
+            previous approaches is acceptable. Default acceptance is not
+            secure, and a manual per device methods do not scale. Here, the
+            registrar is provided a priori with a list of identifiers of
+            devices that belong to the network. This list can be extracted
+            from an inventory database, or sales records. If a device is
+            detected that is not on the list of known devices, it can still be
+            manually accepted using the per device acceptance methods.</t>
+
+            <t>Automated Whitelist: an automated process that builds the
+            necessary whitelists and inserts them into the larger network
+            domain infrastructure is plausible. Once set up, no human
+            intervention is required in this process. Defining the exact
+            mechanisms for this is out of scope although the registrar
+            authorization checks is identified as the logical integration
+            point of any future work in this area.</t>
+          </list></t>
+
+        <t>None of these approaches require the network to have permanent
+        Internet connectivity. Even when the Internet based MASA service is
+        used, it is possible to pre-fetch the required information from the
+        MASA a priori, for example at time of purchase such that devices can
+        enrol later. This supports use cases where the domain network may be
+        entirely isolated during device deployment.</t>
+
+        <t>Additional policy can be stored for future authorization decisions.
+        For example an expected deployment time window or that a certain Proxy
+        must be used.</t>
+      </section>
+
+      <section title="Automatic Enrolment of Devices">
+        <t>The approach outlined in this document provides a secure zero-touch
+        method to enrol new devices without any pre-staged configuration. New
+        devices communicate with already enrolled devices of the domain, which
+        proxy between the new device and a Registrar. As a result of this
+        completely automatic operation, all devices obtain a domain based
+        certificate.</t>
+      </section>
+
+      <section title="Secure Network Operations">
+        <t>The certificate installed in the previous step can be used for all
+        subsequent operations. For example, to determine the boundaries of the
+        domain: If a neighbor has a certificate from the same trust anchor it
+        can be assumed "inside" the same organization; if not, as outside. See
+        also <xref target="boundary"></xref>. The certificate can also be used
+        to securely establish a connection between devices and central control
+        functions. Also autonomic transactions can use the domain certificates
+        to authenticate and/or encrypt direct interactions between devices.
+        The usage of the domain certificates is outside scope for this
+        document.</t>
       </section>
     </section>
 
