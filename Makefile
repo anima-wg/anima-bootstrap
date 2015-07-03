@@ -1,4 +1,4 @@
-VERSION=00
+VERSION=XX
 
 DRAFT=dtbootstrap-anima-keyinfra
 
