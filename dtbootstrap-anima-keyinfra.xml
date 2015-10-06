@@ -5,7 +5,8 @@
 <!ENTITY RFC2119 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC7030 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7030.xml">
 ]>
-<rfc category="info" docName="draft-ietf-anima-bootstrapping-keyinfra-00"
+<rfc category="info"
+     docName="draft-ietf-anima-bootstrapping-keyinfra-01-pre01"
      ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -85,8 +86,9 @@
       the Internet. Before being authenticated, a new device has only
       link-local connectivity, and does not require a routable address. When a
       vendor provides an Internet based service, devices can be forced to join
-      only specific domains but in limited/disconnected networks or legacy environments we describe a
-      variety of options that allow bootstrapping to proceed.</t>
+      only specific domains but in limited/disconnected networks or legacy
+      environments we describe a variety of options that allow bootstrapping
+      to proceed.</t>
     </abstract>
   </front>
 
@@ -200,34 +202,36 @@
       <t></t>
 
       <figure>
-        <artwork><![CDATA[                                                    Vendor components
-                                                   .
-                                                   .+---------------+
-   +--------------Drop Ship------------------------.| Manufacturer  |
-   |                                               .+---------------+
-   |                                               .| M anufacturer |
-   |                                               .| A uthorized   |
-   |                                               .| S igning      |
-   |                                               .| A uthority    |
-   |                                               .+---------------+
-   V                                               ......   ^
-+-------+                                                   |
-| New   |        +------------+       +-----------+         |
-| Entity|<--L2-->|    Proxy   |<----->|           |         |
-|       |        +------------+       |           |         |
-|       |                             | Registrar |         |
-|       |                             |           |         |
-|       |<-----L3---------------------( may proxy )---------+
-|       |                             +-----------+
-|       |                                   |
-|       |                 +----------------------------+
-|       |<-----Enroll---->| Domain Certification       | ^
-|       |<-----Config---->|      Authority             | .
-+-------+        .        | Management and etc         | .
-                 .        +----------------------------+ .
-                 .                                       .
-                 .........................................
-                                  "domain" components
+        <artwork><![CDATA[                                          .         
+                                          .+------------------------+
+   +--------------Drop Ship-------------->.| Vendor Service         |
+   |                                      .+------------------------+
+   |                                      .| M anufacturer|         |
+   |                                      .| A uthorized  |Ownership|
+   |                                      .| S igning     |Tracker  |
+   |                                      .| A uthority   |         |
+   |                                      .+--------------+---------+
+   |                                      ..............  ^          
+   V                                                      |          
++-------+        +------------+       +-----------+       |          
+| New   +---L2--->   Proxy    +-------> Bootstrap |       |          
+| Entity|        +------------+       | Server    |       |          
+|       +---L3------------------------>           |       |          
+|       |                             +-----------+       |          
+|       |                             | Registrar |       |          
+|       |                             |           <-------+          
+|       |                             +-----+-----+                  
+|       |                                   |                        
+|       |                 +-----------------+----------+             
+|       <------Enroll-----> Domain Certification       | ^           
+|       <------Config----->      Authority             | .           
++-------+               . | Management and etc         | .           
+                        . +----------------------------+ .           
+                        .                                .           
+                        ..................................           
+                                  "Domain" components                
+
+
 
 ]]></artwork>
 
@@ -257,21 +261,35 @@
           the domain. A Proxy facilitates communication for devices that find
           themselves in an environment where they are not provided L3
           connectivity until after they are validated as members of the
-          domain.</t>
+          domain. The New Entity is unaware that they are communicating with a
+          proxy rather than directly with the Bootstrap Server. </t>
+
+          <t hangText="Bootstrap Server">The logical bootstrapping protocol
+          server that terminates the bootstrapping protocol. Internal
+          communication with the Registrar functionalities is implementation
+          dependent and out-of-scope. </t>
 
           <t hangText="MASA Service:">A Manufacturer Authorized Signing
           Authority (MASA) service on the global Internet. At a minimum the
-          MASA provides a trusted repository for audit information concerning
-          privacy protected bootstrapping events. The MASA is recommended to
-          provide ownership validation services which allows for fully secure
-          zero-touch bootstrap of domain certificates with mutual
-          authentication.</t>
+          MASA provides a trusted repository for audit log information
+          concerning privacy protected bootstrapping events. The MASA is
+          recommended to also provide ownership validation services which
+          allows for fully secure zero-touch bootstrap of domain certificates
+          with mutual authentication.</t>
+
+          <t hangText="Ownership Tracker">An Ownership Tracker service on the
+          global internet. The Ownership Tracker uses business processes to
+          accurately track ownership of all devices shipped against domains
+          that have purchased them. Although optional this step allows vendors
+          to provide additional value in cases where their sales and
+          distribution channels allow for accurately tracking such
+          ownership.</t>
         </list></t>
 
-      <t>We assume a multi-vendor network. In such an environment, there could
-      a MASA for each vendor that supports devices following this document's
-      specification, or an integrator could provide a MASA service for all
-      devices.</t>
+      <t>We assume a multi-vendor network. In such an environment there could
+      a MASA or Ownership Tracker for each vendor that supports devices
+      following this document's specification, or an integrator could provide
+      a MASA service for all devices.</t>
 
       <t>This document describes a secure zero-touch approach to bootstrapping
       a key infrastructure; if certain devices in a network do not support
@@ -298,7 +316,7 @@
       <figure>
         <artwork><![CDATA[
  +---------+                +----------+                +-----------+
- |  New    |                |          |                |  MASA     |
+ |  New    |                |          |                |  Vendor   |
  | Entity  |                |  Domain  |                |  Service  |
  |         |                |          |                | (Internet)|
  +---------+                +----------+                +-----------+
@@ -314,17 +332,21 @@
      |                           |                    [device belongs]
      |                           |                    [to domain?    ]
      |                           |                            |
-     |                           |                  [update audit log]
+     |                           |                   [update audit log]
      |                           |                            |
      |                           |<---device history log------|
      |                           |<-- authorization token-----|
+     |                           |<-- ownership voucher-------|
+     |                           |    (optional)              |
      |                           |                            |
      |                  [ still accept device?]               |
      |                           |                            |
      |<----authorization token---|                            |
+     |<----ownership voucher-----| (optional)                 |
      |<----config information----|                            |
      |                           |                            |
 [authorization token valid?]     |                            |
+[or ownership voucher valid?]    |                            |
 [apply config information]       |                            |
      |                           |                            |
      |----domain enrolment------>|                            |
@@ -361,9 +383,14 @@
 | rejected   +------+-------+
 |                   |
 |            +------v-------+
+|            | Request      |
+|            | Join         |
+|            +------+-------+
+|                   |
+|            +------v-------+
 |            |  Imprint     |   Optional
 ^------------+              <--+Manual input
-| Bad MASA   +------+-------+
+| Bad Vendor +------+-------+
 | response          |
 |            +------v-------+
 |            |  Enroll      |
@@ -397,7 +424,7 @@
 
                 <t>Obtain an IP address using existing methods, such as SLAAC
                 or DHCPv6, and search for a local registrar using DNS service
-                    discovery. [[EDNOTE: ]]If this fails:</t>
+                discovery. [[EDNOTE: ]]If this fails:</t>
 
                 <t>Obtain an IP address (as above), and search for the domain
                 registrar using a pre-defined Factory provided Internet based
@@ -410,94 +437,124 @@
             necessary). Included is a generated nonce that is specific to this
             attempt.</t>
 
+            <t>Requests to Join the Discovered domain. The device indicates
+            the Imprint methods it will accept and provides a nonce ensuring
+            that any responses can be associated with this particular
+            bootstrapping attempt. </t>
+
             <t>Imprint on the Registrar. This requires verification of the
             MASA service generated authorization token as provided by the
-            contacted Registrar. The authorization token contains the valid
-            domain(s) for this device and is signed by the MASA service. The
-            device uses a pre-installed certificate of the MASA service to
-            validate the signature of the MASA. The nonce information
-            previously provided is also checked, if it was not removed by the
-            Registrar.</t>
+            contacted Registrar or the validation of the vendor provided
+            ownership voucher. The authorization token contains the valid
+            domain for this device and is signed by the MASA service. The
+            device uses a pre-installed root certificate of the MASA service
+            to validate the signature of the MASA authorization token or the
+            Ownership Voucher. </t>
 
             <t>Enroll by accepting the domain specific information from the
-            registrar, and by enrolling a domain certificate from the
-            registrar using a standard enrollment protocol, e.g. Enrolment
+            Registrar, and by obtaining a domain certificate from the
+            Registrar using a standard enrollment protocol, e.g. Enrolment
             over Secure Transport (EST) <xref target="RFC7030"></xref>.</t>
 
-            <t>The New Entity is now a member of and Being Managed by the
+            <t>The New Entity is now a member of, and can be managed by, the
             domain and will only repeat the discovery aspects of bootstrapping
             if it is returned to factory default settings.</t>
           </list>The following sections describe each of these steps in more
         detail.</t>
 
-        <section anchor="ProxyDiscovery" title="Discovery and Identity">
-          <t>Existing architectures provide the functionality for discovery of
-          the Domain Registrar. Use of an existing architecture is preferred
-          over development of a new architecture. Discovering of a Domain
-          Proxy that facilitates communication through to the Domain Registrar
-          is simplified as "discovery of the domain". A proxy is included in
-          Figure 1 although the simplified flow in Figure 2 does not include a
-          proxy - under the assuption that the proxy forwarding is mostly
-          transparent to the New Entity. Existing architectures for
-          investigation include:</t>
+        <section anchor="ProxyDiscovery" title="Discovery">
+          <t>Existing protocols provide the functionality for discovery of the
+          Domain Bootstrap Server. The result of discovery might be
+          communication with a proxy instead of a Domain Bootstrap Server. In
+          such a case the proxy facilitates communication with the actual
+          Domain Bootstrap Server in a manner that is transparent to the New
+          Entity.</t>
 
-          <t><list style="hanging">
-              <t hangText="IEEE 802.1X">Where the New Entity can be cast as
-              the "supplicant" and the Proxy is the "authenticator". The
-              bootstrapping protocol messages are encapsulated as EAP methods.
-              The "authenticator" reencapsulates the EAPOL frames and forwards
-              them to the "Authentication Server", which provides Registrar
-              functionalities.</t>
+          <t>To discover the Domain Bootstrap Server the New Entity performs
+          the following actions in this order:</t>
 
-              <t hangText="PANA [RFC5191]">[[EDNOTE: TBD]]</t>
+          <t><list style="numbers">
+              <t>Obtains a local address using either IPv4 methods or
+              IPv6.</t>
 
-              <t hangText="ND [RFC2461] / [RFC4861]">[[EDNOTE: TBD]] NOTE:
-              Neighbor Discovery protocols do not describe a mechanism for
-              forwarding messages.</t>
-            </list>Each provides a method for the New Entity to discover and
-          initiate communication with a local neighbor which is assumed to be
-          a member of the domain infrastructure. In each protocol methods are
-          available to support encapsulation of the bootstrapping protocol
-          messages described elsewhere in this document. Other protocols for
-          transporting bootstrapping messages can be added in future
-          references.</t>
+              <t>Performs DNS-based Service Discovery [RFC6763] over Multicast
+              DNS [RFC6762] searching for the service
+              "_bootstrapks._tcp.local."</t>
 
-          <t>All security assocaitions established are between the new device
-          and the Registrar regardless of proxy operations. [[EDNOTE: this is
-          the simplest and most direct threat model but should be evaluated
-          against the anima use cases. It may be preferable to engage in
-          secure communications with the proxy itself?]]</t>
+              <t>Performs DNS-based Service Discovery [RFC6763] over normal
+              DNS operations. In this case the domain is known so the service
+              searched for is "_bootstrapks._tcp.example.com". </t>
 
-          <t>The New Entity is expected to identify itself during one of the
-          communication protocol exchanges. For example using EAP-TLS. If the
-          client identity is rejected the New Entity repeats the Discovery
-          process using the next proxy or discovery method available. If
-          multiple proxies are available the New Entity tries each until a
-          successful bootstrapping occurs. The New Entity may prioritize
-          proxies selection order as appropriate for the anticipated
+              <t>If no local bootstrapks service is located using the
+              DNS-based Sevice Discovery methods the New Entity MAY contact a
+              well known vendor provided bootstrapping server by perfoming a
+              DNS lookup using a well known URI such as
+              "bootstrapks.vendor-example.com".</t>
+            </list>Once a domain bootstrapping server is discovered the New
+          Entity communicates with the discovered server using the
+          bootstrapping protocol defined in <xref
+          target="ProtocolDetails"></xref>. The current DNS services returned
+          during each query is maintained until bootstrapping is completed. If
+          bootstrapping fails and the New Entity returns to the Discovery
+          state it picks up where it left off and continues attempting
+          bootstrapping. For example if the first Multicast DNS
+          _bootstrapks._tcp.local response doens't work then the second and
+          third responses are tried. If these fail the New Entity moves on to
+          normal DNS-based Service Discovery.</t>
+
+          <t>Once all discovered services are attempted the device SHOULD
+          return to Multicast DNS and keep trying. The New Entity may
+          prioritize selection order as appropriate for the anticipated
           environment.</t>
 
-          <t>If Proxy discovery fails the New Entity moves on to discovering a
-          Registrar directly using an appropriate L3 protocol mechanisms.</t>
+          <t>[[EDNOTE: An appropriate backoff or rate limiting strategy should
+          be defined here such that the device doesn't flood the local network
+          with queries. If the device were to eventually give up -- or at
+          least have too long between attempts -- a power cycle would restart
+          the backoff mechanism.]]</t>
 
           <t>[[EDNOTE: it is unclear yet if discovery happens on a per
           interface basis or once per device. What is the requirement around
           joining multiple domains; is this a bootstrapping requirement or is
-          this a broader autonomic requirement]] [[EDNOTE: b. carpenter: I 
-          seem to think we settled on joining one domain (which might be
-          a sub-domain) and then doing some sort of cross-certification to
-          get authenticated and authorized in another domain. If so, it isn't
-          a bootstrap requirement.]]</t>
+          this a broader autonomic requirement]] [[EDNOTE: b. carpenter: I
+          seem to think we settled on joining one domain (which might be a
+          sub-domain) and then doing some sort of cross-certification to get
+          authenticated and authorized in another domain. If so, it isn't a
+          bootstrap requirement.]]</t>
+        </section>
+
+        <section title="Identity">
+          <t>The New Entity identifies itself during the communication
+          protocol handshake. If the client identity is rejected the New
+          Entity repeats the Discovery process using the next proxy or
+          discovery method available. </t>
+
+          <t>The boostrapping protocol server is as of yet not validated. Thus
+          this connection is provisional and all data recieved is untrusted
+          until sufficiently validated even though it is over a (D)TLS
+          connection. This is aligned with the existing provisional mode of
+          EST [RFC7030] during s4.1.1 "Bootstrap Distribution of CA
+          Certificates".</t>
+
+          <t>All security associations established are between the new device
+          and the Bootstrapping server regardless of proxy operations. </t>
+        </section>
+
+        <section title="Request Join">
+          <t>The New Entity POSTs a request to join the domain to the
+          Bootstrapping server. This request contains a New Entity generated
+          nonce and informs the Bootstrapping server which imprint methods the
+          New Entity will accept. </t>
         </section>
 
         <section anchor="AcceptDomain" title="Imprint">
           <t>The domain trust anchor is received by the New Entity during the
-          boostrapping protocol methods in the form of a MASA authorization
-          token containing the domainID. The goal of the imprint state is to
-          securely obtain a copy of this trust anchor without involving human
-          interaction.</t>
+          boostrapping protocol methods in the form of either a MASA
+          authorization token containing the domainID or an explicit ownership
+          voucher. The goal of the imprint state is to securely obtain a copy
+          of this trust anchor without involving human interaction.</t>
 
-          <t>An enrollment protocol such as EST <xref target="RFC7030"></xref>
+          <t>The enrollment protocol EST <xref target="RFC7030"></xref>
           details a set of non-autonomic bootstrapping methods such as:</t>
 
           <t><list style="symbols">
@@ -515,26 +572,57 @@
               <t>and using a Certificate-Less TLS mutual authentication method
               (not an autonomic solution because the distribution of symmetric
               key material is not autonomic).</t>
-            </list>This document describes an additional autonomic method:</t>
+            </list>This document describes additional autonomic methods:</t>
 
           <t><list style="hanging">
               <t hangText="MASA authorization token">Authorization tokens are
               obtained by the Registrar from the MASA service and presented to
-              the New Entity for validation.</t>
+              the New Entity for validation. These indicate to the New Entity
+              that joining the domain has been logged by a trusted logging
+              server.</t>
+
+              <t hangText="Ownership Voucher">Ownership Vouchers are obtained
+              by the Registrar from the MASA service and explicitly indicate
+              the fully qualified domain name of the domain the new entity
+              currently belongs to. </t>
+
+              <t hangText="EST Redirect">The server MAY simply redirect the
+              client, as described in EST [RFC7030], to contact an alternate
+              server. This is most useful in the case where the New Entity has
+              resorted to a well known vendor URI and is communicating with
+              the vendor's Registrar directly. In this case the New Entity has
+              authenticated the Registrar using the local Implicit Trust
+              Anchor database and can therefore treat the redirect URI as a
+              trusted URI which can also be validated using the Implicit Trust
+              Anchor database. (As indicated in EST [RFC7030] if any of the
+              earlier discovery methods are successful then the Implicit Trust
+              Anchor database MUST NOT be used and therefore any redirect will
+              still require either the MASA authorization token or Ownership
+              Validation message be received during the subsequent
+              connection.) </t>
             </list></t>
 
-          <t>An arbitrary basic configuration information package that is
-          signed by the domain can be delivered alongside the authorization
-          token. This information is signed by the domain private keys and is
-          a one time delivery containing information such as which enrollment
-          server to communicate with and which management system to
-          communicate with. It is intended as a limited basic configuration
-          for these purposes and is not intended to deliver entire final
-          configuration to the device.</t>
+          <t>Since client authentication occurs during the TLS handshake the
+          bootstrapping server has sufficient information to apply appropriate
+          policy concerning which method to use. </t>
 
-          <t>If the autonomic methods fails the New Entity returns to
-          discovery state and attempts bootstrapping with the next available
-          discovered Registrar.</t>
+          <t>An arbitrary basic configuration information package that is
+          signed by the domain can be delivered alongside the imprint tokens.
+          This information is signed by the domain private keys and is a one
+          time delivery containing information such as which enrollment server
+          to communicate with and which management system to communicate with.
+          It is intended as a limited basic configuration for these purposes
+          and is not intended to deliver entire final configuration to the
+          device.</t>
+
+          <t>If the autonomic methods fail the New Entity returns to discovery
+          state and attempts bootstrapping with the next available discovered
+          Registrar. </t>
+
+          <t> As indicated in EST [RFC7030] the bootstrapping server MAY
+          redirect the client to an alternate server. Since this occurs after
+          client authentication the server can use this opportunity to
+          impliment appropriate policy depending on the client. </t>
         </section>
 
         <section title="Enrollment">
@@ -553,7 +641,13 @@
               credentials.</t>
 
               <t>The EST section 4.1.3 CA Certificates Response is verified
-              using the MASA authorization token provided domain identity.</t>
+              using either the MASA authorization token which provided the
+              domain identity -or-</t>
+
+              <t>The EST server is authenticated by using the Owership Voucher
+              indicated fully qualified domain name to build the EST URI such
+              that EST section 4.1.1 bootstrapping using the New Entity
+              implicit Trust Anchor database can be used. </t>
             </list></t>
         </section>
 
@@ -573,14 +667,25 @@
 
       <section title="Behavior of a proxy">
         <t>The role of the Proxy is to facilitate communications. The Proxy
-        forwards messages between the New Entity and a Registrar. Where
-        existing protocols, as detailed in <xref
-        target="ProxyDiscovery"></xref>, already provide this functionality
-        nothing additional is defined.</t>
+        forwards EST transport (TLS or DTLS) packets between the New Entity
+        and the Registrar that has been configured on the Proxy.</t>
+
+        <t>[[EDNOTE: To what extent do we need to explain how this occurs? It
+        is sufficient to indicate the basic behavior or do we need to indicate
+        here all the details? A rough implementation of an ipv4 proxy would be
+        as follows:</t>
+
+        <figure>
+          <artwork><![CDATA[socat -v tcp4-listen:443,reuseaddr,fork tcp4:registrar.example.com:443]]></artwork>
+        </figure>
+
+        <t></t>
+
+        <t>]]</t>
       </section>
 
-      <section title="Behavior of the Registrar">
-        <t>Once a registrar is established it listens for new entities and
+      <section title="Behavior of the Registrar (Bootstrap Server)">
+        <t>Once a Registrar is established it listens for new entities and
         determines if they can join the domain. The registrar delivers any
         necessary authorization information to the new device and facilitates
         enrollment with the domain PKI.</t>
@@ -638,53 +743,66 @@
 
         <section anchor="AcceptingTheEntity" title="Entity Authorization">
           <t>In a fully automated network all devices must be securely
-          identified.</t>
+          identified and authorized to join the domain.</t>
 
           <t>A Registrar accepts or declines a request to join the domain,
-          based on the authenticated identity presented and other policy
-          defined criteria such as Proxy identity. Automated acceptance
+          based on the authenticated identity presented. Automated acceptance
           criteria include:</t>
 
           <t><list style="symbols">
               <t>allow any device of a specific type (as determined by the
               IEEE 802.1AR device identity),</t>
 
-              <t>allow any device from a specific Factory (as determined by
-              the IEEE 802.1AR identity),</t>
+              <t>allow any device from a specific vendor (as determined by the
+              IEEE 802.1AR identity),</t>
 
-              <t>allow a specific device from a Factory (as determined by the
+              <t>allow a specific device from a vendor (as determined by the
               IEEE 802.1AR identity)</t>
-            </list>In all cases a Registrar must use the globally available
-          MASA service to verify that the device's history log does not
-          include unexpected Registrars. Because if a device had previously
-          registered with another domain, the registrar of that domain would
+            </list>In all cases if the device indicates that it accepts MASA
+          authorization tokens then the Registrar MUST use the globally
+          available MASA service to verify that the device's history log does
+          not include unexpected Registrars. If a device had previously
+          registered with another domain, the Registrar of that domain would
           show in the log.</t>
 
-          <t>If a device is accepted into the domain, it is then invited to
-          request a domain certificate through a certificate enrolment
-          process. The result is a common trust anchor and device certificates
-          for all autonomic devices in a domain. These certificates can
-          subsequently be used to determine the boundaries of the homenet, to
-          authenticate other domain nodes, and to autonomically enable
-          services on the homenet.</t>
+          <t>In order to validate the IEEE 802.1AR device identity the
+          Registrar maintains a database of vendor trust anchors (e.g. vendor
+          root certificates or keyIdentifiers for vendor root public keys).
+          For user interface purposes this database can be mapped to
+          colloquial vendor names. Registrars can be shipped with the trust
+          anchors of a significant number of third-party vendors within the
+          target market. </t>
 
-          <t>For each entity that will be accepted a Registrar maintains the
-          Factory CA identity and the entity's unique identifier. The Factory
-          CA identity could be implemented as the Factory CA root certificate
-          keyIdentifier (the 160-bit SHA-1 hash of the value of the BIT STRING
-          subjectPublicKey). For user interface purposes the keyIdentifier
-          information can be mapped to a colloquial Factory name (Registrars
-          can be shipped with the keyIdentifier of a significant number of
-          third-party manufacturers).</t>
+          <t>If a device is accepted into the domain, it is expected request a
+          domain certificate through a certificate enrolment process. The
+          result is a common trust anchor and device certificates for all
+          autonomic devices in a domain (these certificates can subsequently
+          be used to determine the boundaries of the homenet, to authenticate
+          other domain nodes, and to autonomically enable services on the
+          homenet). The authorization performed during this phase MAY be
+          cached for the TLS session and applied to subsequent EST enrollment
+          requests so long as the session lasts.</t>
         </section>
 
         <section title="Claiming the New Entity">
+          <t>Claiming an entity establishes an audit log at the MASA server
+          and provides the Registrar with proof, in the form of a MASA
+          authorization token, that the log entry has been inserted. As
+          indicated in <xref target="AcceptDomain"></xref> a New Entity will
+          only proceed with bootstrapping if a validated MASA authorization
+          token has been recieved. The New Entity therefore enforces that
+          bootstrapping only occurs if the claim has been logged. </t>
+
+          <t>If ownership validation methods are being used the 'claiming'
+          occured during out-of-band integration within the sales process and
+          is out-of-scope. Instead the Registar simply requests and ownership
+          validation token.</t>
+
           <t>During initial bootstrapping the New Entity provides a nonce
-          specific to the particular bootstrapping attempt. The registrar
-          should include this nonce when claiming the New Entity from the
-          Internet based MASA service. If a nonce is provided by the
-          Registrar, then claims from an unauthenticated Registrar are
-          serviced by the MASA resource.</t>
+          specific to the particular bootstrapping attempt. The Registrar
+          should include this nonce when claiming the New Entity from the MASA
+          service. Claims from an unauthenticated Registrar are only serviced
+          by the MASA resource if a nonce is provided.</t>
 
           <t>The Registrar can claim a New Entity that is not online by
           forming the request using the entities unique identifier but not
@@ -696,13 +814,7 @@
           to secure bootstrapping and therefore the Registrar MUST be
           authenticated by the MASA service.</t>
 
-          <t>Claiming an entity establishes an audit log at the MASA server
-          and provides the Registrar with proof, in the form of a MASA
-          authorization token, that the log entry has been inserted. As
-          indicated in <xref target="AcceptDomain"></xref> a New Entity will
-          only proceed with bootstrapping if a validated MASA authorization
-          token has been recieved. The New Entity therefore enforces that
-          bootstrapping only occurs if the claim has been logged.</t>
+          <t></t>
         </section>
 
         <section title="Log Verification">
@@ -877,7 +989,7 @@
         must be used.</t>
       </section>
 
-      <section title="Automatic Enrolment of Devices">
+      <section title="Automatic Enrollment of Devices">
         <t>The approach outlined in this document provides a secure zero-touch
         method to enrol new devices without any pre-staged configuration. New
         devices communicate with already enrolled devices of the domain, which
@@ -900,7 +1012,7 @@
       </section>
     </section>
 
-    <section title="Protocol Details">
+    <section anchor="ProtocolDetails" title="Protocol Details">
       <t>For simplicity the bootstrapping protocol is described as extensions
       to EST [RFC7030].</t>
 
@@ -929,7 +1041,10 @@
           during the TLS handshake as detailed in EST section 4.1.1
           ("Bootstrap Distribution of CA Certificates").</t>
 
-          <t>The New Entity request and validates a "bootstrap token" as
+          <t>The Registrar requests and validates a "MASA authorization token"
+          from the vendor authorized MASA service. </t>
+
+          <t>The New Entity requests and validates a "bootstrap token" as
           described below. At this point the New Entity has sufficient
           information to validate domain credentials.</t>
 
@@ -949,14 +1064,6 @@
       <t>In order to obtain a validated bootstrap token and history logs the
       Registrar contacts the MASA service Service using REST calls.</t>
 
-      <section title="EAP-EST">
-        <t>In order to support Proxy environments EAP-EST is defined.</t>
-
-        <t>[[EDNOTE: TBD. EST is TLS with some data. EAP-TLS and other similar
-        protocols provide an example framework for filling out this
-        section]]</t>
-      </section>
-
       <section title="Request bootstrap token">
         <t>When the New Entity reaches the EST section 4.1.1 "Bootstrap
         Distribution of CA Certificates" [[EDNOTE: out of date xref]] state
@@ -970,15 +1077,16 @@
 
         <t>Request media type: application/masanonce</t>
 
-        <t>Request format: a json file with the following:</t>
+        <t>Request format: a JSON file with the following:</t>
 
-        <t>{"nonce":"&lt;64bit nonce value&gt;"}</t>
+        <t>{"nonce":"&lt;64bit nonce value&gt;", "MASA":boolean,
+        "OwnershipValidation":boolean}</t>
 
         <t>[[EDNOTE: exact format TBD. There is an advantage to having the
         client sign the nonce (similar to a PKI Certification Signing Request)
         since this allows the MASA service to confirm the actual device
-        identity. It is not clear that there is a security benefit from
-        this.]]</t>
+        identity. It is not clear that there is a security benefit from this
+        since its the New Entity that verifies the nonce.]]</t>
 
         <t>The Registrar validates the client identity as described in EST
         [RFC7030] section 3.3.2. The registrar performs authorization as
@@ -994,10 +1102,16 @@
       <section anchor="RequestAuthzToken"
                title="Request MASA authorization token">
         <t>A registrar requests the MASA authorization token from the MASA
-        service using a REST interface.</t>
+        service using a REST interface. For completeness this is defined as an
+        optional EST message between the Registar and an EST server running on
+        the MASA service. The Registrar is NOT RECOMMENDED to make use of any
+        other EST functionality when communicating with the MASA service. (The
+        MASA service MUST properly reject any EST functionality requests it
+        does not wish to service; a requirement that holds for any REST
+        interface).</t>
 
-        <t>This is done with an HTTP POST using the operation path value of
-        "/requestMASAauthorization".</t>
+        <t>This request is done with an HTTP POST using the operation path
+        value of "/requestMASAauthorization".</t>
 
         <t>The request format is a JSON object optionally containing the nonce
         value (as obtained from the bootstrap request) and the IEEE 802.1AR
@@ -1014,20 +1128,24 @@
         when the target bootstrapping environment is not on the same network
         as the MASA server.</t>
 
-        <t>This information is encapsulated in a PKCS7 signed data structure
-        that is signed by the Registrar. The entire certificate chain, up to
-        and including the Domain CA, is included in the PKCS7.</t>
+        <t>The JSON message information is encapsulated in a PKCS7 signed data
+        structure that is signed by the Registrar. The entire certificate
+        chain, up to and including the Domain CA, MUST be included in the
+        PKCS7.</t>
 
         <t>The MASA service checks the internal consistency of the PKCS7 but
         is unable to actually authenticate the domain identity information.
         The domain is not know to the MASA server in advance and a shared
         trust anchor is not implied. The MASA server verifies that the PKCS7
         is signed by a Registrar (by checking for the cmc-idRA field in the
-        Registrar certificate) certificate that was issued by the root
-        certificate included in the PKCS7.</t>
+        Registrar certificate) certificate that was issued by a the root
+        certificate included in the PKCS7. This is sufficient for the MASA
+        service to ensure that the Registar is in fact an authorized Registar
+        of the unknown domain. </t>
 
-        <t>The domain ID is extracted from the root certificate and is used to
-        generate the MASA authorization token and to update the audit log.</t>
+        <t>The domain ID (e.g. hash of the public key of the domain) is
+        extracted from the root certificate and is used to generate the MASA
+        authorization token and to update the audit log.</t>
 
         <t>[[EDNOTE: The authorization token response format needs to be
         defined here. It consists of the nonce, if supplied, the serialnumber
@@ -1040,7 +1158,7 @@
 
         <t>[[EDNOTE: This assumes the Registrar can extract the serial number
         successfullly from the cilent certificate. The RFC4108
-        hardwareModuleName is likely the best known location.]]</t>
+        hardwareModuleName is the best known location.]]</t>
       </section>
 
       <section title="Basic Configuration Information Package">
@@ -1100,7 +1218,7 @@
       <t>A common requirement of bootstrapping is to support less secure
       operational modes for support specific use cases. The following sections
       detail specific ways that the New Entity, Registrar and MASA can be
-      configured to run in a less secure mode for the indicated reasons. </t>
+      configured to run in a less secure mode for the indicated reasons.</t>
 
       <section title="New Entity security reductions">
         <t>Although New Entity can choose to run in less secure modes this is
@@ -1169,18 +1287,24 @@
             occured is captured in the log information so that the Domain
             registrar can make appropriate security decisions when a new
             device joins the domain. This is useful to support use cases where
-            Registrars might not be online during actual device
-            deployment.</t>
+            Registrars might not be online during actual device deployment.
+            Because this results in long lived authorization tokens and do not
+            require the proof that the device is online this is only accepted
+            when the Registrar is authenticated by the MASA server and
+            authorized to provide this functionality. </t>
 
             <t>Not verifying ownership before responding with an authorization
             token. Doing so relieves the vendor providing MASA services from
             having to tracking ownership during shipping and supply chain. The
-            registrar uses the log information as a defense in depth strategy
+            Registrar uses the log information as a defense in depth strategy
             to ensure that this does not occur unexpectedly. For example when
-            purchasing used equipment a MASA response is necessary for
-            autonomic provisioning but the greatest level of security is
-            achieved when the MASA server is also performing ownership
-            validation.</t>
+            purchasing used equipment the Registrar could expect to see
+            previous (and unknown, unidentified) registrars within the log,
+            but will confirm that each such entry included a nonce and occured
+            prior to the purchase of the used equipment. A MASA response is
+            necessary for autonomic provisioning but the greatest level of
+            security is achieved when the MASA server is also performing
+            ownership validation.</t>
           </list></t>
       </section>
     </section>
@@ -1300,6 +1424,17 @@
       <t>Change Discussion:</t>
 
       <t><list style="hanging">
+          <t hangText="03">updated figures added &ldquo;ownership
+          voucher&rdquo; concepts added &ldquo;request join&rdquo; state to
+          the new entity discussions broke discovery and identity into two
+          sections added request join section expanded imprint autonomic
+          methods as per design team discussions simplified proxy discussion
+          as per design team discussions clarified &lsquo;entity
+          authorization&rsquo; clarified &lsquo;claiming the new entity&rsquo;
+          removed EAP-EST references expanded on protocol details as per
+          ownership validation options slight additions to security
+          considerations </t>
+
           <t hangText="02">Moved sections for readability, Updated
           introduction, simplified functional overview to avoid distractions
           from optional elements, addressed updated security considerations,
@@ -1315,15 +1450,15 @@
           https://www.ietf.org/proceedings/92/anima.html and "Bootstrapping
           Key Infrastructures", Pritikin, Behringer, Bjarnason</t>
 
-          <t>Intergrate "Ownership Voucher" as a valid optional format for the
-          MASA response. So long as the issuance of this is logged and
-          captured in the log response then the basic flow and threat model is
-          substantially the same. </t>
+          <t>IN PROGRESS: Intergrate "Ownership Voucher" as a valid optional
+          format for the MASA response. So long as the issuance of this is
+          logged and captured in the log response then the basic flow and
+          threat model is substantially the same.</t>
 
-          <t>Attempt to re-use existing work as per the charter: Toerless
-          notes: a) are existing [eap] options? or too complex? or doens't
-          work? b) our own method (e.g. EAP-ANIMA c) if b then investigate
-          using signaling protocol). </t>
+          <t>COMPLETE (moved to simple proxy): Attempt to re-use existing work
+          as per the charter: Toerless notes: a) are existing [eap] options?
+          or too complex? or doens't work? b) our own method (e.g. EAP-ANIMA
+          c) if b then investigate using signaling protocol).</t>
 
           <t></t>
         </list></t>
