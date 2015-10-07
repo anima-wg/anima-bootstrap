@@ -214,24 +214,23 @@
    |                                      ..............  ^          
    V                                                      |          
 +-------+        +------------+       +-----------+       |          
-| New   +---L2--->   Proxy    +-------> Bootstrap |       |          
-| Entity|        +------------+       | Server    |       |          
-|       +---L3------------------------>           |       |          
-|       |                             +-----------+       |          
-|       |                             | Registrar |       |          
-|       |                             |           <-------+          
-|       |                             +-----+-----+                  
+|       |        |            |       |           |       | 
+|       <---L2--->            |       |           |       |
+|       |   or   |   Proxy    |       | Registrar |       |          
+|       <---L3--->            <---L3-->           |       |          
+|       |        |            |       |           <-------+
+| New   |        |            |       |           |                 
+| Entity|        |            |       |           |          
+|       |        +------------+       +-----+-----+                  
 |       |                                   |                        
 |       |                 +-----------------+----------+             
-|       <------Enroll-----> Domain Certification       | ^           
-|       <------Config----->      Authority             | .           
+|       |                 | Domain Certification       | ^           
+|       |                 | Authority                  | .           
 +-------+               . | Management and etc         | .           
                         . +----------------------------+ .           
                         .                                .           
                         ..................................           
                                   "Domain" components                
-
-
 
 ]]></artwork>
 
@@ -259,15 +258,10 @@
 
           <t hangText="Proxy:">A domain entity that helps the New Entity join
           the domain. A Proxy facilitates communication for devices that find
-          themselves in an environment where they are not provided L3
+          themselves in an environment where they are not provided
           connectivity until after they are validated as members of the
           domain. The New Entity is unaware that they are communicating with a
-          proxy rather than directly with the Bootstrap Server. </t>
-
-          <t hangText="Bootstrap Server">The logical bootstrapping protocol
-          server that terminates the bootstrapping protocol. Internal
-          communication with the Registrar functionalities is implementation
-          dependent and out-of-scope. </t>
+          proxy rather than directly with the Registrar. </t>
 
           <t hangText="MASA Service:">A Manufacturer Authorized Signing
           Authority (MASA) service on the global Internet. At a minimum the
@@ -316,9 +310,9 @@
       <figure>
         <artwork><![CDATA[
  +---------+                +----------+                +-----------+
- |  New    |                |          |                |  Vendor   |
- | Entity  |                |  Domain  |                |  Service  |
- |         |                |          |                | (Internet)|
+ |  New    |     Proxy      |          |                |  Vendor   |
+ | Entity  |      not       |  Domain  |                |  Service  |
+ |         |     shown      |          |                | (Internet)|
  +---------+                +----------+                +-----------+
      |                           |                            |
      |<-------discovery--------->|                            |
@@ -474,19 +468,27 @@
           the following actions in this order:</t>
 
           <t><list style="numbers">
-              <t>Obtains a local address using either IPv4 methods or
-              IPv6.</t>
+              <t>MUST: Obtains a local address using either IPv4 or IPv6
+              methods as described in [[EDNOTE: do we need a reference?]].</t>
 
-              <t>Performs DNS-based Service Discovery [RFC6763] over Multicast
-              DNS [RFC6762] searching for the service
+              <t>MUST: Attempt to establish a TLS connection to the next hop
+              neighbor at a well known AN port building on the [[EDNOTE: AN
+              node discovery discussion, need a reference??]]. [Toerless to
+              provide updated text]</t>
+
+              <t>MUST: unsecured-GRASP as a link local discovery method?
+              [Toerless to provide updated text]</t>
+
+              <t>MAY: Performs DNS-based Service Discovery [RFC6763] over
+              Multicast DNS [RFC6762] searching for the service
               "_bootstrapks._tcp.local."</t>
 
-              <t>Performs DNS-based Service Discovery [RFC6763] over normal
-              DNS operations. In this case the domain is known so the service
-              searched for is "_bootstrapks._tcp.example.com". </t>
+              <t>MAY: Performs DNS-based Service Discovery [RFC6763] over
+              normal DNS operations. In this case the domain is known so the
+              service searched for is "_bootstrapks._tcp.example.com". </t>
 
-              <t>If no local bootstrapks service is located using the
-              DNS-based Sevice Discovery methods the New Entity MAY contact a
+              <t>MAY: If no local bootstrapks service is located using the
+              DNS-based Sevice Discovery methods the New Entity contacts a
               well known vendor provided bootstrapping server by perfoming a
               DNS lookup using a well known URI such as
               "bootstrapks.vendor-example.com".</t>
@@ -681,7 +683,9 @@
 
         <t></t>
 
-        <t>]]</t>
+        <t>There have been suggestions that a stateless proxy implementation
+        using a DTLS extension would be preferred. Is this a future
+        optimization opportunity or a short term requirement?]]</t>
       </section>
 
       <section title="Behavior of the Registrar (Bootstrap Server)">
@@ -910,6 +914,23 @@
           devices can be grouped into to sub domains and specific trust levels
           can be implemented between those.</t>
         </section>
+      </section>
+
+      <section title="Interactions with Network Access Control">
+        <t>The assumption is that Network Access Control (NAC) completes using
+        the New Entity 802.1AR credentials and results in the device having
+        sufficient connetivity to discovery and communicate with the proxy.
+        Any additional connectivity or quarantine behavior by the NAC
+        infrastructure is out-of-scope. After the devices has completed
+        bootstrapping the mechanism to trigger NAC to re-authenticate the
+        device and provide updated network privileges is also out-of-scope.
+        </t>
+
+        <t>This achieves the goal of a bootstrap architecture that can
+        integrate with NAC but does not require NAC within the network where
+        it wasn't previously required. Future optimizations can be achieved by
+        integrating the bootstrapping protocol directly into an initial EAP
+        exchange. </t>
       </section>
     </section>
 
