@@ -1,15 +1,14 @@
 
 
 
-
 ANIMA WG                                                     M. Pritikin
 Internet-Draft                                                     Cisco
 Intended status: Informational                             M. Richardson
-Expires: February 27, 2016                                           SSW
+Expires: March 25, 2016                                              SSW
                                                             M. Behringer
                                                             S. Bjarnason
                                                                    Cisco
-                                                         August 26, 2015
+                                                      September 22, 2015
 
 
                    Bootstrapping Key Infrastructures
@@ -27,7 +26,7 @@ Abstract
    networks or legacy environments we describe a variety of options that
    allow bootstrapping to proceed.
 
-Status of This Memo
+Status of this Memo
 
    This Internet-Draft is submitted in full conformance with the
    provisions of BCP 78 and BCP 79.
@@ -42,23 +41,22 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on February 27, 2016.
+   This Internet-Draft will expire on March 25, 2016.
 
 Copyright Notice
 
    Copyright (c) 2015 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016               [Page 1]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    This document is subject to BCP 78 and the IETF Trust's Legal
+
+
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 1]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    Provisions Relating to IETF Documents
    (http://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
@@ -68,60 +66,108 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 2]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
-     1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   4
-   2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   5
-   3.  Functional Overview . . . . . . . . . . . . . . . . . . . . .   6
-     3.1.  Behavior of a new entity  . . . . . . . . . . . . . . . .   7
-       3.1.1.  Discovery and Identity  . . . . . . . . . . . . . . .   9
-       3.1.2.  Imprint . . . . . . . . . . . . . . . . . . . . . . .  10
-       3.1.3.  Enrollment  . . . . . . . . . . . . . . . . . . . . .  11
-       3.1.4.  Being Managed . . . . . . . . . . . . . . . . . . . .  12
-     3.2.  Behavior of a proxy . . . . . . . . . . . . . . . . . . .  12
-     3.3.  Behavior of the Registrar . . . . . . . . . . . . . . . .  12
-       3.3.1.  Entity Authentication . . . . . . . . . . . . . . . .  13
-       3.3.2.  Entity Authorization  . . . . . . . . . . . . . . . .  13
-       3.3.3.  Claiming the New Entity . . . . . . . . . . . . . . .  14
-       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  15
-       3.3.5.  Forwarding Authorization Token plus Configuration . .  15
-     3.4.  Behavior of the MASA Service  . . . . . . . . . . . . . .  16
-       3.4.1.  Issue Authorization Token and Log the event . . . . .  16
-       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  16
-     3.5.  Leveraging the new key infrastructure / next steps  . . .  16
-       3.5.1.  Network boundaries  . . . . . . . . . . . . . . . . .  17
-   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  17
-     4.1.  Instantiating the Domain Certification Authority  . . . .  17
-     4.2.  Instantiating the Registrar . . . . . . . . . . . . . . .  17
-     4.3.  Accepting New Entities  . . . . . . . . . . . . . . . . .  17
-     4.4.  Automatic Enrolment of Devices  . . . . . . . . . . . . .  18
-     4.5.  Secure Network Operations . . . . . . . . . . . . . . . .  19
-   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  19
-     5.1.  EAP-EST . . . . . . . . . . . . . . . . . . . . . . . . .  20
-     5.2.  Request bootstrap token . . . . . . . . . . . . . . . . .  20
-     5.3.  Request MASA authorization token  . . . . . . . . . . . .  21
-     5.4.  Basic Configuration Information Package . . . . . . . . .  22
-     5.5.  Request MASA authorization log  . . . . . . . . . . . . .  22
-   6.  Reduced security operational modes  . . . . . . . . . . . . .  23
-     6.1.  New Entity security reductions  . . . . . . . . . . . . .  23
-     6.2.  Registrar security reductions . . . . . . . . . . . . . .  24
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  4
+     1.1.  Terminology  . . . . . . . . . . . . . . . . . . . . . . .  5
+   2.  Architectural Overview . . . . . . . . . . . . . . . . . . . .  5
+   3.  Functional Overview  . . . . . . . . . . . . . . . . . . . . .  7
+     3.1.  Behavior of a new entity . . . . . . . . . . . . . . . . .  8
+       3.1.1.  Discovery and Identity . . . . . . . . . . . . . . . . 10
+       3.1.2.  Imprint  . . . . . . . . . . . . . . . . . . . . . . . 11
+       3.1.3.  Enrollment . . . . . . . . . . . . . . . . . . . . . . 12
+       3.1.4.  Being Managed  . . . . . . . . . . . . . . . . . . . . 12
+     3.2.  Behavior of a proxy  . . . . . . . . . . . . . . . . . . . 13
+     3.3.  Behavior of the Registrar  . . . . . . . . . . . . . . . . 13
+       3.3.1.  Entity Authentication  . . . . . . . . . . . . . . . . 14
+       3.3.2.  Entity Authorization . . . . . . . . . . . . . . . . . 14
+       3.3.3.  Claiming the New Entity  . . . . . . . . . . . . . . . 15
+       3.3.4.  Log Verification . . . . . . . . . . . . . . . . . . . 16
+       3.3.5.  Forwarding Authorization Token plus Configuration  . . 16
+     3.4.  Behavior of the MASA Service . . . . . . . . . . . . . . . 16
+       3.4.1.  Issue Authorization Token and Log the event  . . . . . 17
+       3.4.2.  Retrieve Audit Entries from Log  . . . . . . . . . . . 17
+     3.5.  Leveraging the new key infrastructure / next steps . . . . 17
+       3.5.1.  Network boundaries . . . . . . . . . . . . . . . . . . 17
+   4.  Domain Operator Activities . . . . . . . . . . . . . . . . . . 18
+     4.1.  Instantiating the Domain Certification Authority . . . . . 18
+     4.2.  Instantiating the Registrar  . . . . . . . . . . . . . . . 18
+     4.3.  Accepting New Entities . . . . . . . . . . . . . . . . . . 18
+     4.4.  Automatic Enrolment of Devices . . . . . . . . . . . . . . 19
+     4.5.  Secure Network Operations  . . . . . . . . . . . . . . . . 19
+   5.  Protocol Details . . . . . . . . . . . . . . . . . . . . . . . 20
+     5.1.  EAP-EST  . . . . . . . . . . . . . . . . . . . . . . . . . 21
+     5.2.  Request bootstrap token  . . . . . . . . . . . . . . . . . 21
+     5.3.  Request MASA authorization token . . . . . . . . . . . . . 21
+     5.4.  Basic Configuration Information Package  . . . . . . . . . 22
+     5.5.  Request MASA authorization log . . . . . . . . . . . . . . 23
+   6.  Reduced security operational modes . . . . . . . . . . . . . . 23
+     6.1.  New Entity security reductions . . . . . . . . . . . . . . 24
+     6.2.  Registrar security reductions  . . . . . . . . . . . . . . 24
+     6.3.  MASA security reductions . . . . . . . . . . . . . . . . . 25
+   7.  Security Considerations  . . . . . . . . . . . . . . . . . . . 25
+     7.1.  Trust Model  . . . . . . . . . . . . . . . . . . . . . . . 26
+   8.  Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 26
+   9.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+     9.1.  Normative References . . . . . . . . . . . . . . . . . . . 26
+     9.2.  Informative References . . . . . . . . . . . . . . . . . . 27
+   Appendix A.  Editor notes  . . . . . . . . . . . . . . . . . . . . 27
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 28
 
 
 
-Pritikin, et al.        Expires February 27, 2016               [Page 2]
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 3]
 
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
 
-
-     6.3.  MASA security reductions  . . . . . . . . . . . . . . . .  24
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  25
-     7.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  26
-   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  26
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  26
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  26
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .  26
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  27
 
 1.  Introduction
 
@@ -143,12 +189,9 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    new entity being added:
 
    o  New entity authentication: "Who is this?  What is its identity?"
-
    o  New entity authorization: "Is it mine?  Do I want it?  What are
       the chances it has been compromised?"
-
    o  Domain authentication: "What is this domain's claimed identity?"
-
    o  Domain authorization: "Should I join it?"
 
    A precise answer to these questions can not be obtained without
@@ -160,15 +203,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    or communication with a trusted third-party.  The new entity's
    decisions are made according to verified communication with a trusted
    third-party or in a strictly auditable fasion.
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016               [Page 3]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
 
    Optimal security is achieved with IEEE 802.1AR certificates on each
    new entity, accompanied by a third-party Internet based service for
@@ -183,6 +217,14 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    infrastructure is deployed.  Since IEEE 802.1AR PKI certificates are
    used for identifying the new entity and the public key of the domain
    identity is leveraged during communiciations with an Internet based
+
+
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 4]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    service, which is itself authenticated using HTTPS, bootstrapping of
    a domain specific Public Key Infrastructure (PKI) is fully described.
    Sufficient agility to support bootstrapping alternative key
@@ -207,29 +249,20 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
       fields is often colloquially used as a humanized identity value
       but during protocol discussions the more exact term as defined
       here is used).
-
    drop ship  The physical distribution of equipment containing the
       "factory default" configuration to a final destination.  In zero-
       touch scenarios there is no staging or pre-configuration during
       drop-ship.
-
    imprint  the process where a device that wishes to join a network
       acquires it's domain specific identity.  This term is taken from
       Konrad Lorenz's work in biology with new ducklings: during a
       critical period, the duckling would assume that anything that
-      looks like a mother duck is in fact their mother. [imprinting]
-
-
-
-Pritikin, et al.        Expires February 27, 2016               [Page 4]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
+      looks like a mother duck is in fact their mother.  [imprinting]
    pledge  the prospective device, which has the identity provided to at
       the factory.  Neither the device nor the network knows if the
       device yet knows if this device belongs with this network.  This
       is definition 6, according to [pledge]
+
 
 2.  Architectural Overview
 
@@ -237,6 +270,16 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    this section.  Figure 1 provides a simplified overview of the
    components.  Each component is logical and may be combined with other
    components as necessary.
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 5]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
 
                                                        Vendor components
                                                       .
@@ -272,36 +315,34 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
    Domain:  The set of entities that trust a common key infrastructure
       trust anchor.
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016               [Page 5]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    Domain CA:  The domain Certification Authority (CA) provides
       certification functionalities to the domain.  At a minimum it
       provides certification functionalities to the Registrar and stores
       the trust anchor that defines the domain.  Optionally, it
       certifies all elements.
-
    Registrar:  A representative of the domain that is configured,
       perhaps autonomically, to decide whether a new device is allowed
       to join the domain.  The administrator of the domain interfaces
       with a Registrar to control this process.  Typically a Registrar
       is "inside" its domain.
 
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 6]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    New Entity:  A new device or virtual machine or software component
       that is not yet part of the domain.
-
    Proxy:  A domain entity that helps the New Entity join the domain.  A
       Proxy facilitates communication for devices that find themselves
       in an environment where they are not provided L3 connectivity
       until after they are validated as members of the domain.
-
    MASA Service:  A Manufacturer Authorized Signing Authority (MASA)
       service on the global Internet.  At a minimum the MASA provides a
       trusted repository for audit information concerning privacy
@@ -323,6 +364,7 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    all such edge conditions are covered by the architectural and
    protocol models.
 
+
 3.  Functional Overview
 
    Entities behave in an autonomic fashion.  They discover each other
@@ -330,19 +372,26 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    the autonomic domain.  See
    [I-D.irtf-nmrg-autonomic-network-definitions] for more information.
 
-
-
-
-Pritikin, et al.        Expires February 27, 2016               [Page 6]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    This section details the state machine and operational flow for each
    of the main three entities.  The New Entity, the Domain (primarily
    the Registrar) and the MASA service.
 
    The overall flow is shown in Figure 2:
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 7]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
 
    +---------+                +----------+                +-----------+
    |  New    |                |          |                |  MASA     |
@@ -369,14 +418,14 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
        |                  [ still accept device?]               |
        |                           |                            |
        |<----authorization token---|                            |
-       |<----domain information----|                            |
+       |<----config information----|                            |
        |                           |                            |
-  [auth token valid?]              |                            |
+  [authorization token valid?]     |                            |
+  [apply config information]       |                            |
        |                           |                            |
        |----domain enrolment------>|                            |
        |<----domain certificate----|                            |
        |                           |                            |
-
    Figure 2
 
 3.1.  Behavior of a new entity
@@ -389,9 +438,15 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
 
 
-Pritikin, et al.        Expires February 27, 2016               [Page 7]
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 8]
 
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
 
 
                 +--------------+
@@ -432,38 +487,32 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
    1.  Discover a communication channel to the "closest" Registrar by
        trying the following steps in this order:
-
        A.  Search for a Proxy on the local link using a link local
            discovery protocol (no routable addresses are required for
            this approach).  If multiple local proxies are discovered
            attempt communications with each before widening the search
            to other options.  The proxy relays information to the
            registrar.  If this fails:
-
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016               [Page 8]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
        B.  Obtain an IP address using existing methods, such as SLAAC or
            DHCPv6, and search for a local registrar using DNS service
-           discovery.  If this fails:
+           discovery.  [[EDNOTE: ]]If this fails:
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                 [Page 9]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
 
        C.  Obtain an IP address (as above), and search for the domain
            registrar using a pre-defined Factory provided Internet based
            re-direct service.  Various methods could be used, such as
            DNS or RESTful APIs.
-
    2.  Identify itself.  This is done by presenting an IEEE 802.1AR
        credentials to the discovered Registrar (via a Proxy if
        necessary).  Included is a generated nonce that is specific to
        this attempt.
-
    3.  Imprint on the Registrar.  This requires verification of the MASA
        service generated authorization token as provided by the
        contacted Registrar.  The authorization token contains the valid
@@ -472,16 +521,13 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
        validate the signature of the MASA.  The nonce information
        previously provided is also checked, if it was not removed by the
        Registrar.
-
    4.  Enroll by accepting the domain specific information from the
        registrar, and by enrolling a domain certificate from the
        registrar using a standard enrollment protocol, e.g.  Enrolment
        over Secure Transport (EST) [RFC7030].
-
    5.  The New Entity is now a member of and Being Managed by the domain
        and will only repeat the discovery aspects of bootstrapping if it
        is returned to factory default settings.
-
    The following sections describe each of these steps in more detail.
 
 3.1.1.  Discovery and Identity
@@ -498,26 +544,23 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
    IEEE 802.1X  Where the New Entity can be cast as the "supplicant" and
       the Proxy is the "authenticator".  The bootstrapping protocol
-
-
-
-Pritikin, et al.        Expires February 27, 2016               [Page 9]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
       messages are encapsulated as EAP methods.  The "authenticator"
       reencapsulates the EAPOL frames and forwards them to the
       "Authentication Server", which provides Registrar functionalities.
-
    PANA [RFC5191]  [[EDNOTE: TBD]]
-
    ND [RFC2461] / [RFC4861]  [[EDNOTE: TBD]] NOTE: Neighbor Discovery
       protocols do not describe a mechanism for forwarding messages.
-
    Each provides a method for the New Entity to discover and initiate
    communication with a local neighbor which is assumed to be a member
    of the domain infrastructure.  In each protocol methods are available
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 10]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    to support encapsulation of the bootstrapping protocol messages
    described elsewhere in this document.  Other protocols for
    transporting bootstrapping messages can be added in future
@@ -544,7 +587,11 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    [[EDNOTE: it is unclear yet if discovery happens on a per interface
    basis or once per device.  What is the requirement around joining
    multiple domains; is this a bootstrapping requirement or is this a
-   broader autonomic requirement]]
+   broader autonomic requirement]] [[EDNOTE: b. carpenter: I seem to
+   think we settled on joining one domain (which might be a sub-domain)
+   and then doing some sort of cross-certification to get authenticated
+   and authorized in another domain.  If so, it isn't a bootstrap
+   requirement.]]
 
 3.1.2.  Imprint
 
@@ -554,32 +601,28 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    securely obtain a copy of this trust anchor without involving human
    interaction.
 
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 10]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    An enrollment protocol such as EST [RFC7030] details a set of non-
    autonomic bootstrapping methods such as:
 
    o  using the Implicit Trust Anchor database (not an autonomic
       solution because the URL must be securely distributed),
-
    o  engaging a human user to authorize the CA certificate using out-
       of-band data (not an autonomic solution because the human user is
       involved),
 
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 11]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    o  using a configured Explicit TA database (not an autonomic solution
       because the distribution of an explicit TA database is not
       autonomic),
-
    o  and using a Certificate-Less TLS mutual authentication method (not
       an autonomic solution because the distribution of symmetric key
       material is not autonomic).
-
    This document describes an additional autonomic method:
 
    MASA authorization token  Authorization tokens are obtained by the
@@ -611,16 +654,8 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    (EST) [RFC7030].  The New Entity contacts the Registrar using EST as
    indicated:
 
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 11]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    o  The New Entity is authenticated using the IEEE 802.1AR
       credentials.
-
    o  The EST section 4.1.3 CA Certificates Response is verified using
       the MASA authorization token provided domain identity.
 
@@ -630,6 +665,14 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    supported.  The parsing of this data and any subsequent use of the
    data, for example communications with a Network Management System is
    out of scope but is expected to occur after bootstrapping enrollment
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 12]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    is complete.  This ensures that all communications with management
    systems which can divulge local security information (e.g. network
    topology or raw key material) is secured using the local credentials
@@ -669,9 +712,21 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
 
 
-Pritikin, et al.        Expires February 27, 2016              [Page 12]
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 13]
 
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
 
 
    Contacted by New Entity
@@ -703,7 +758,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    | token + config   |    | Device     |
    | to the Entity    |    |            |
    +------------------+    +------------+
-
    Figure 4
 
 3.3.1.  Entity Authentication
@@ -711,7 +765,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    The applicable authentication methods detailed in EST [RFC7030] are:
 
    o  the use of an IEEE 802.1AR IDevID credential,
-
    o  or the use of a secret that is transmitted out of band between the
       New Entity and the Registrar (this use case is not autonomic).
 
@@ -721,27 +774,23 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
    A Registrar accepts or declines a request to join the domain, based
    on the authenticated identity presented and other policy defined
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 13]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    criteria such as Proxy identity.  Automated acceptance criteria
    include:
 
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 14]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    o  allow any device of a specific type (as determined by the IEEE
       802.1AR device identity),
-
    o  allow any device from a specific Factory (as determined by the
       IEEE 802.1AR identity),
-
    o  allow a specific device from a Factory (as determined by the IEEE
       802.1AR identity)
-
    In all cases a Registrar must use the globally available MASA service
    to verify that the device's history log does not include unexpected
    Registrars.  Because if a device had previously registered with
@@ -778,20 +827,20 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    nonce in the claim request.  MASA authorization tokens obtained in
    this way do not have a lifetime and they provide a permanent method
    for the domain to claim the device.  Evidence of such a claim is
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 14]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    provided in the audit log entries available to any future Registrar.
    Such claims reduce the ability for future domains to secure
    bootstrapping and therefore the Registrar MUST be authenticated by
    the MASA service.
 
    Claiming an entity establishes an audit log at the MASA server and
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 15]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    provides the Registrar with proof, in the form of a MASA
    authorization token, that the log entry has been inserted.  As
    indicated in Section 3.1.2 a New Entity will only proceed with
@@ -811,11 +860,9 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
       only be configured if the MASA server is known to perform
       ownership validation or if Trusted Computing Group secure boot and
       remote attestation is available.
-
    o  Any nonce'd entries are older than when the domain is known to
       have physical possession of the new entity or that the domainIDs
       are recognized by the registrar.
-
    If any of these criteria are unacceptable to the registrar the entity
    is rejected.
 
@@ -831,17 +878,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    use the domainID information (as a trust anchor) to accept and
    validate the configuration)]]
 
-
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 15]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
 3.4.  Behavior of the MASA Service
 
    The MASA service is provided by the Factory provider on the global
@@ -851,6 +887,15 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
    The MASA service provides the following functionalities to
    Registrars:
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 16]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
 
 3.4.1.  Issue Authorization Token and Log the event
 
@@ -885,19 +930,8 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    services across the domain in a secure manner.
 
    Examples of services:
-
    o  Device management.
-
    o  Routing authentication.
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 16]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    o  Service discovery.
 
 3.5.1.  Network boundaries
@@ -908,6 +942,16 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    external devices.  Using the autonomic User Interface, specific
    devices can be grouped into to sub domains and specific trust levels
    can be implemented between those.
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 17]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
 
 4.  Domain Operator Activities
 
@@ -945,15 +989,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
        its unique identity to the registrar.  The registrar accepts all
        devices without authorization checks.  This mode does not provide
        security against intruders and is not recommended.
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 17]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    2.  Per device acceptance: The new device asserts its unique identity
        to the registrar.  A non-technical human validates the identity,
        for example by comparing the identity displayed by the registrar
@@ -962,16 +997,22 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
        click on a smartphone app "accept this device", or by other forms
        of pairing.  See also [I-D.behringer-homenet-trust-bootstrap] for
        how the approach could work in a homenet.
-
    3.  Whitelist acceptance: In larger networks, neither of the previous
        approaches is acceptable.  Default acceptance is not secure, and
        a manual per device methods do not scale.  Here, the registrar is
        provided a priori with a list of identifiers of devices that
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 18]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
        belong to the network.  This list can be extracted from an
        inventory database, or sales records.  If a device is detected
        that is not on the list of known devices, it can still be
        manually accepted using the per device acceptance methods.
-
    4.  Automated Whitelist: an automated process that builds the
        necessary whitelists and inserts them into the larger network
        domain infrastructure is plausible.  Once set up, no human
@@ -1000,16 +1041,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    this completely automatic operation, all devices obtain a domain
    based certificate.
 
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 18]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
 4.5.  Secure Network Operations
 
    The certificate installed in the previous step can be used for all
@@ -1022,6 +1053,17 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    certificates to authenticate and/or encrypt direct interactions
    between devices.  The usage of the domain certificates is outside
    scope for this document.
+
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 19]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
 
 5.  Protocol Details
 
@@ -1051,25 +1093,12 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    o  The New Entity provisionally accept the EST server certificate
       during the TLS handshake as detailed in EST section 4.1.1
       ("Bootstrap Distribution of CA Certificates").
-
    o  The New Entity request and validates a "bootstrap token" as
       described below.  At this point the New Entity has sufficient
       information to validate domain credentials.
-
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 19]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    o  The New Entity calls the EST defined /cacerts method to obtain the
       current CA certificate.  These are validated using the "bootstrap
       token".
-
    o  The New Entity completes bootstrapping as detailed in EST section
       4.1.1.
 
@@ -1080,6 +1109,17 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
    In order to obtain a validated bootstrap token and history logs the
    Registrar contacts the MASA service Service using REST calls.
+
+
+
+
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 20]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
 
 5.1.  EAP-EST
 
@@ -1114,14 +1154,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
 
    The Registrar validates the client identity as described in EST
    [RFC7030] section 3.3.2.  The registrar performs authorization as
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 20]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    detailed in Section 3.3.2.  If authorization is successful the
    Registrar obtains a MASA authorization token from the MASA service
    (see Section 5.3).
@@ -1137,6 +1169,14 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    "/requestMASAauthorization".
 
    The request format is a JSON object optionally containing the nonce
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 21]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    value (as obtained from the bootstrap request) and the IEEE 802.1AR
    identity of the device as a serial number (the full certificate is
    not needed and no proof-of-possession information for the device
@@ -1170,14 +1210,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    here.  It consists of the nonce, if supplied, the serialnumber and
    the trust anchor of the domain.  For example:
 
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 21]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    {"nonce":"<64bit nonce value>", "serialnumber", "<subjectname/
    subjectaltname serial number>","domainID":}
 
@@ -1193,6 +1225,14 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    arbitrary information package can be signed and delivered along side
    it.  This is signed by the Domain Registar.  The New Entity first
    verifies the MASA authorization token and, if it is valid, then uses
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 22]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    the domain's TA to validate the Information Package.
 
    [[EDNOTE: The package format to be specified here.  Any signed format
@@ -1225,15 +1265,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
       "nonce":"<any nonce if supplied (or NULL)>"},
    ]
 
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 22]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
    Distribution of a large log is less than ideal.  This structure can
    be optimized as follows: only the most recent nonce'd log entry is
    required in the response.  All nonce-less entries for the same
@@ -1246,9 +1277,18 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    [[EDNOTE: certificate transparency might offer an alternative log
    entry method]]
 
+
 6.  Reduced security operational modes
 
    A common requirement of bootstrapping is to support less secure
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 23]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    operational modes for support specific use cases.  The following
    sections detail specific ways that the New Entity, Registrar and MASA
    can be configured to run in a less secure mode for the indicated
@@ -1267,7 +1307,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
        when: A device Factory goes out of business or otherwise fails to
        provide a reliable MASA service or when local staging has pre-
        configured the New Entity with a known good Trust Anchor.
-
    2.  The device may be configured during staging or requested from the
        factory to not require the MASA service authorization token.  An
        entity that does not validate the domain identity is inherently
@@ -1280,37 +1319,32 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
        protocol exchange is TBD]].  This may occur when: The device
        Factory does not provide a MASA service.
 
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 23]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
 6.2.  Registrar security reductions
 
    The Registrar can choose to accept devices using less secure methods.
    These methods are RECOMMENDED when low security models are needed as
    the security decisions are being made by the local administrator:
-
    1.  The registrar may choose to accept all devices, or all devices of
        a particular type, at the administrator's discretion.  This may
        occur when: Informing the Registrar of unique identifiers of new
        entities might be operationally difficult.
-
    2.  The registrar may choose to accept devices that claim a unique
        identity without the benefit of authenticating that claimed
        identity.  This may occur when: The New Entity does not include
        an IEEE 802.1AR factory installed credential.
-
    3.  The registrar may request nonce-less authorization tokens from
        the MASA service.  These tokens can then be transmitted to the
        Registrar and stored until they are needed during bootstrapping
        operations.  This is for use cases where target network is
        protected by an air gap and therefore can not contact the MASA
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 24]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
        service during New Entity deployment.
 
 6.3.  MASA security reductions
@@ -1330,7 +1364,6 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
        device joins the domain.  This is useful to support use cases
        where Registrars might not be online during actual device
        deployment.
-
    2.  Not verifying ownership before responding with an authorization
        token.  Doing so relieves the vendor providing MASA services from
        having to tracking ownership during shipping and supply chain.
@@ -1338,16 +1371,9 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
        strategy to ensure that this does not occur unexpectedly.  For
        example when purchasing used equipment a MASA response is
        necessary for autonomic provisioning but the greatest level of
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 24]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
        security is achieved when the MASA server is also performing
        ownership validation.
+
 
 7.  Security Considerations
 
@@ -1367,6 +1393,14 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    network.  If the MASA server were to have allowed a significantly
    large number of claims this might become onerous to the MASA server
    which must maintain all the extra log entries.  Ensuring the registar
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 25]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    is representative of a valid customer domain even without validating
    ownership helps to mitigate this.
 
@@ -1390,33 +1424,23 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
    resistance, but it also implies an operational risk.  This can be
    mitigated by Registrars that request nonce-less authorization tokens.
 
-
-
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 25]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
 7.1.  Trust Model
 
    [[EDNOTE: (need to describe that we need to trust the device h/w.  To
    be completed.)]]
+
 
 8.  Acknowledgements
 
    We would like to thank the various reviewers for their input, in
    particular Markus Stenberg, Brian Carpenter, Fuyu Eleven.
 
+
 9.  References
 
 9.1.  Normative References
 
-   [IDevID]   IEEE Standard, , "IEEE 802.1AR Secure Device Identifier",
+   [IDevID]   IEEE Standard, "IEEE 802.1AR Secure Device Identifier",
               December 2009, <http://standards.ieee.org/findstds/
               standard/802.1AR-2009.html>.
 
@@ -1425,41 +1449,81 @@ Internet-Draft      Bootstrapping Key Infrastructures        August 2015
               RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
 
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 26]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
    [RFC7030]  Pritikin, M., Ed., Yee, P., Ed., and D. Harkins, Ed.,
-              "Enrollment over Secure Transport", RFC 7030, DOI
-              10.17487/RFC7030, October 2013,
+              "Enrollment over Secure Transport", RFC 7030,
+              DOI 10.17487/RFC7030, October 2013,
               <http://www.rfc-editor.org/info/rfc7030>.
 
 9.2.  Informative References
 
    [I-D.behringer-homenet-trust-bootstrap]
               Behringer, M., Pritikin, M., and S. Bjarnason,
-              "Bootstrapping Trust on a Homenet", draft-behringer-
-              homenet-trust-bootstrap-02 (work in progress), February
-              2014.
+              "Bootstrapping Trust on a Homenet",
+              draft-behringer-homenet-trust-bootstrap-02 (work in
+              progress), February 2014.
 
    [I-D.irtf-nmrg-autonomic-network-definitions]
               Behringer, M., Pritikin, M., Bjarnason, S., Clemm, A.,
               Carpenter, B., Jiang, S., and L. Ciavaglia, "Autonomic
-              Networking - Definitions and Design Goals", draft-irtf-
-              nmrg-autonomic-network-definitions-07 (work in progress),
-              March 2015.
+              Networking - Definitions and Design Goals",
+              draft-irtf-nmrg-autonomic-network-definitions-07 (work in
+              progress), March 2015.
 
    [imprinting]
-              Wikipedia, , "Wikipedia article: Imprinting", July 2015,
+              Wikipedia, "Wikipedia article: Imprinting", July 2015,
               <https://en.wikipedia.org/wiki/Imprinting_(psychology)>.
 
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 26]
-
-Internet-Draft      Bootstrapping Key Infrastructures        August 2015
-
-
-   [pledge]   Dictionary.com, , "Dictionary.com Unabridged", July 2015,
+   [pledge]   Dictionary.com, "Dictionary.com Unabridged", July 2015,
               <http://dictionary.reference.com/browse/pledge>.
+
+
+Appendix A.  Editor notes
+
+   [[EDNOTE: This section is to capturing rough notes between editors
+   and Anima Bootstrapping design team members.  This entire section to
+   be removed en masse before finalization]]
+
+   Change Discussion:
+
+   02 Moved sections for readability, Updated introduction, simplified
+      functional overview to avoid distractions from optional elements,
+      addressed updated security considerations, fleshed out state
+      machines.
+
+   The following is a non-prioritized list of work items currently
+   identified:
+   o  Continue to address gaps/opportunities highlighted by community
+      work on bootstrappping.  Refs: IETF92 "Survey of Security
+      Bootstrapping", Aana Danping He, behcet Sarikaya.  "NETCONF Zero
+      Touch Update for ANIMA"
+      https://www.ietf.org/proceedings/92/anima.html and "Bootstrapping
+
+
+
+Pritikin, et al.         Expires March 25, 2016                [Page 27]
+
+Internet-Draft      Bootstrapping Key Infrastructures     September 2015
+
+
+      Key Infrastructures", Pritikin, Behringer, Bjarnason
+   o  Intergrate "Ownership Voucher" as a valid optional format for the
+      MASA response.  So long as the issuance of this is logged and
+      captured in the log response then the basic flow and threat model
+      is substantially the same.
+   o  Attempt to re-use existing work as per the charter: Toerless
+      notes: a) are existing [eap] options? or too complex? or doens't
+      work? b) our own method (e.g.  EAP-ANIMA c) if b then investigate
+      using signaling protocol).
+   o
+
 
 Authors' Addresses
 
@@ -1500,13 +1564,5 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-
-
-
-
-Pritikin, et al.        Expires February 27, 2016              [Page 27]
+Pritikin, et al.         Expires March 25, 2016                [Page 28]
+
