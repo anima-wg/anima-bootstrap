@@ -555,6 +555,18 @@
           Bootstrapping server. This request contains a New Entity generated
           nonce and informs the Bootstrapping server which imprint methods the
           New Entity will accept. </t>
+
+          <t>As indicated in EST [RFC7030] the bootstrapping server MAY
+          redirect the client to an alternate server. This is most useful in
+          the case where the New Entity has resorted to a well known vendor
+          URI and is communicating with the vendor's Registrar directly. In
+          this case the New Entity has authenticated the Registrar using the
+          local Implicit Trust Anchor database and can therefore treat the
+          redirect URI as a trusted URI which can also be validated using the
+          Implicit Trust Anchor database. Since client authentication occurs
+          during the TLS handshake the bootstrapping server has sufficient
+          information to apply appropriate policy concerning which server to
+          redirect to. </t>
         </section>
 
         <section anchor="AcceptDomain" title="Imprint">
@@ -594,16 +606,6 @@
               by the Registrar from the MASA service and explicitly indicate
               the fully qualified domain name of the domain the new entity
               currently belongs to. </t>
-
-              <t hangText="EST Redirect">The server MAY simply redirect the
-              client, as described in EST [RFC7030], to contact an alternate
-              server. This is most useful in the case where the New Entity has
-              resorted to a well known vendor URI and is communicating with
-              the vendor's Registrar directly. In this case the New Entity has
-              authenticated the Registrar using the local Implicit Trust
-              Anchor database and can therefore treat the redirect URI as a
-              trusted URI which can also be validated using the Implicit Trust
-              Anchor database. </t>
             </list></t>
 
           <t>Since client authentication occurs during the TLS handshake the
@@ -622,11 +624,6 @@
           <t>If the autonomic methods fail the New Entity returns to discovery
           state and attempts bootstrapping with the next available discovered
           Registrar. </t>
-
-          <t>As indicated in EST [RFC7030] the bootstrapping server MAY
-          redirect the client to an alternate server. Since this occurs after
-          client authentication the server can use this opportunity to
-          impliment appropriate policy depending on the client. </t>
         </section>
 
         <section title="Enrollment">
@@ -1120,6 +1117,16 @@
 
         <t>The recieved MASA authorization token is returned to the New
         Entity.</t>
+
+        <t>As indicated in EST [RFC7030] the bootstrapping server can redirect
+        the client to an alternate server. If the New Entity authenticated the
+        Registrar using the well known URI method then the New Entity MUST
+        follow the redirect automatically and authenticate the new Registrar
+        against the redirect URI provided. If the New Entity had not yet
+        authenticated the Registrar because it was discovered and was not a
+        known-to-be-valid URI then the new Registrar must be authenticated
+        using one of the two autonomic methods described in this document.
+        </t>
       </section>
 
       <section anchor="RequestAuditToken"
