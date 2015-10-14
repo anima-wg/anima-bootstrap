@@ -567,6 +567,11 @@
           during the TLS handshake the bootstrapping server has sufficient
           information to apply appropriate policy concerning which server to
           redirect to. </t>
+
+          <t>The nonce ensures the New Entity can verify that responses are
+          specific to this bootstrapping attempt. This minimizes the use of
+          global time and provides a substantial benefit for devices without a
+          valid clock. </t>
         </section>
 
         <section anchor="AcceptDomain" title="Imprint">
@@ -1083,7 +1088,80 @@
       here as additions to EST.</t>
 
       <t>In order to obtain a validated Audit Token and Audit Log the
-      Registrar contacts the MASA service Service using REST calls.</t>
+      Registrar contacts the MASA service Service using REST calls:</t>
+
+      <figure>
+        <artwork><![CDATA[           +-----------+ +----------+ +-----------+ +----------+
+           | New       | |          | |           | |          |
+           | Entity    | | Proxy    | | Registrar | | Vendor   |
+           |           | |          | |           | |          |
+           ++----------+ +--+-------+ +-----+-----+ +--------+-+
+            |               |               |                |  
+            |               |               |                |  
+            | (D)TLS hello  |               |                |  
+Establish   +---------------> (D)TLS hello  |                |  
+(D)TLS      |               |--------------->                |  
+connection  |          (forwarding)         |                |  
+            | Server Cert   <---------------+                |  
+            <---------------+               |                |  
+            | Client Cert   |               |                |  
+            +------------------------------->                |  
+            |               |               |                |  
+HTTP REST   | POST /requestaudittoken       |                |  
+Data        +--------------------nonce------>                |  
+            |               .               | /requestaudittoken
+            |               .               +---------------->  
+            |                               <----------------+  
+            |                               | /requestauditlog  
+            |                               +---------------->  
+            | audit token or owner voucher  <----------------+  
+            <-------------------------------+                |  
+            | (optional config information) |                |  
+            |               .               |                |  
+            |               .               |                |]]></artwork>
+      <postamble>Figure 5</postamble>
+      </figure>
+
+      <t>In some use cases the Registrar may need to contact the Vendor in
+      advanced, for example when the target network is airgapped. The
+      nonceless request format is provided for this and the resulting flow is
+      slightly different. The security differences associated with not
+      knowning the nonce are discussed below:</t>
+
+      <figure>
+        <artwork><![CDATA[           +-----------+ +----------+ +-----------+ +----------+
+           | New       | |          | |           | |          |
+           | Entity    | | Proxy    | | Registrar | | Vendor   |
+           |           | |          | |           | |          |
+           ++----------+ +--+-------+ +-----+-----+ +--------+-+
+            |               |               |                |  
+            |               |               |                |  
+            |               |               | /requestaudittoken
+            |               |  (nonce       +---------------->  
+            |               |  unknown)     <----------------+  
+            |               |               | /requestauditlog  
+            |               |               +---------------->  
+            |               |               <----------------+  
+            | (D)TLS hello  |               |                |  
+Establish   +---------------> (D)TLS hello  |                |  
+(D)TLS      |               |--------------->                |  
+connection  |          (forwarding)         |                |  
+            | SerVer Cert   <---------------+                |  
+            <---------------+               |                |  
+            | Client Cert   |               |                |  
+            +------------------------------->                |  
+            |               |               |                |  
+HTTP REST   | POST /requestaudittoken       |                |  
+Data        +----------------------nonce---->   (discard     |  
+            | audit token or owner Voucher  |   nonce)       |  
+            <-------------------------------+                |  
+            | (optional config information) |                |  
+            |               .               |                |  
+            |               .               |                |]]></artwork>
+      <postamble>Figure 6</postamble>
+      </figure>
+
+      <t></t>
 
       <section title="Request Audit Token">
         <t>When the New Entity reaches the EST section 4.1.1 "Bootstrap
