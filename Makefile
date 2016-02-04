@@ -1,4 +1,4 @@
-VERSION=00
+VERSION=$(shell ./getver ${DRAFT}.xml )
 
 DRAFT=dtbootstrap-anima-keyinfra
 
@@ -12,3 +12,6 @@ ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt
 %.html: %.xml
 	unset DISPLAY; XML_LIBRARY=$(XML_LIBRARY):./src xml2rfc --html -o $@ $?
 
+
+version:
+	echo Version: ${VERSION}
