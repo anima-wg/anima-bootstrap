@@ -84,6 +84,9 @@ Table of Contents
        3.1.5.  Enrollment  . . . . . . . . . . . . . . . . . . . . .  15
        3.1.6.  Being Managed . . . . . . . . . . . . . . . . . . . .  15
      3.2.  Behavior of a proxy . . . . . . . . . . . . . . . . . . .  16
+       3.2.1.  CoAP connection to Registrar  . . . . . . . . . . . .  16
+       3.2.2.  HTTPS proxy connection to Registrar . . . . . . . . .  16
+       3.2.3.  Additional consideration  . . . . . . . . . . . . . .  17
      3.3.  Behavior of the Registrar (Bootstrap Server)  . . . . . .  17
        3.3.1.  Entity Authentication . . . . . . . . . . . . . . . .  18
        3.3.2.  Entity Authorization  . . . . . . . . . . . . . . . .  18
@@ -103,9 +106,6 @@ Table of Contents
      4.4.  Automatic Enrollment of Devices . . . . . . . . . . . . .  24
      4.5.  Secure Network Operations . . . . . . . . . . . . . . . .  24
    5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  25
-     5.1.  Request Audit Token . . . . . . . . . . . . . . . . . . .  27
-     5.2.  Request Audit Token from MASA . . . . . . . . . . . . . .  28
-     5.3.  Basic Configuration Information Package . . . . . . . . .  30
 
 
 
@@ -114,6 +114,9 @@ Pritikin, et al.         Expires August 30, 2016                [Page 2]
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
+     5.1.  Request Audit Token . . . . . . . . . . . . . . . . . . .  27
+     5.2.  Request Audit Token from MASA . . . . . . . . . . . . . .  28
+     5.3.  Basic Configuration Information Package . . . . . . . . .  30
      5.4.  Request MASA authorization log  . . . . . . . . . . . . .  30
    6.  Reduced security operational modes  . . . . . . . . . . . . .  31
      6.1.  New Entity security reductions  . . . . . . . . . . . . .  31
@@ -159,9 +162,6 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    A precise answer to these questions can not be obtained without
    leveraging some established key infrastructure(s).  A complexity that
    this protocol deals with are dealing with devices from a variety of
-   vendors, and a network infrastructure (the domain) that is operated
-   by parties that do not have any priveledged relationship with the
-   device vendors.  The domain's decisions are based on the new entity's
 
 
 
@@ -170,6 +170,9 @@ Pritikin, et al.         Expires August 30, 2016                [Page 3]
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
+   vendors, and a network infrastructure (the domain) that is operated
+   by parties that do not have any priveledged relationship with the
+   device vendors.  The domain's decisions are based on the new entity's
    authenticated identity, as established by verification of previously
    installed credentials such as a manufacturer installed IEEE 802.1AR
    certificate, and verified back-end information such as a configured
@@ -215,9 +218,6 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
       often colloquially used as a humanized identity value but during
       protocol discussions the more exact term as defined here is used).
 
-   drop ship:  The physical distribution of equipment containing the
-      "factory default" configuration to a final destination.  In zero-
-
 
 
 
@@ -226,6 +226,8 @@ Pritikin, et al.         Expires August 30, 2016                [Page 4]
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
+   drop ship:  The physical distribution of equipment containing the
+      "factory default" configuration to a final destination.  In zero-
       touch scenarios there is no staging or pre-configuration during
       drop-ship.
 
@@ -272,8 +274,6 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    fulfilled from distributed warehouse from a common stock and shipped
    directly to the target location at the request of the domain owner is
    explicitely supported.  That stock ("SKU") could be provided to a
-   number of potential domain owners, and the eventual domain owner will
-   not know a-priori which device will go to which location.
 
 
 
@@ -281,6 +281,9 @@ Pritikin, et al.         Expires August 30, 2016                [Page 5]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
+
+   number of potential domain owners, and the eventual domain owner will
+   not know a-priori which device will go to which location.
 
    Specifically, there are protocol aspects described here which might
    result in congestion collapse or energy-exhaustion of intermediate
@@ -314,9 +317,6 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    this section.  Figure 1 provides a simplified overview of the
    components.  Each component is logical and may be combined with other
    components as necessary.
-
-
-
 
 
 
@@ -861,6 +861,8 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    device, with available capabilities for the proxy function similar to
    many class 2 IoT devices.
 
+3.2.1.  CoAP connection to Registrar
+
    The proxy MUST implement an IPIP (protocol 41) encapsulation function
    for CoAP traffic to the configured UDP port on the registrar.  The
    choice of CoAP as the mandatory to implement protocol rather than
@@ -882,14 +884,12 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    interface in order so that the proxy can stateless return the reply
    packets to the correct link.
 
+3.2.2.  HTTPS proxy connection to Registrar
+
    The proxy SHOULD also provide one of: an IPIP encapsulation of HTTP
    traffic on TCP port TBD to the registrar, an HTTP proxy which accepts
    URLs that reach the registrary, or a TCP circuit proxy that connects
    the New Node to the Registrary.
-
-   In order to make the HTTP choice above transparent to the New Node,
-   the New Node will always initicate an HTTP connection, and will
-
 
 
 
@@ -898,6 +898,8 @@ Pritikin, et al.         Expires August 30, 2016               [Page 16]
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
+   In order to make the HTTP choice above transparent to the New Node,
+   the New Node will always initicate an HTTP connection, and will
    always send an appropriate CONNECT message to initiate an HTTPS
    connection to the registrar.
 
@@ -916,6 +918,8 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    (see section 4.1 of [RFC5386] and all of [RFC5660], except that a
    simple IPIP tunnel is used rather than an IPsec tunnel).
 
+3.2.3.  Additional consideration
+
    The document [I-D.richardson-anima-state-for-joinrouter] provides a
    more extensive analysis of the alternatives.
 
@@ -924,8 +928,8 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    indicate here all the details?  A rough implementation of an ipv4
    proxy would be as follows:
 
-             socat -v tcp4-listen:443,reuseaddr,fork
-             tcp4:registrar.example.com:443
+               socat -v tcp4-listen:443,reuseaddr,fork
+               tcp4:registrar.example.com:443
 
    There have been suggestions that a stateless proxy implementation
    using a DTLS extension would be preferred.  Is this a future
@@ -939,10 +943,6 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    enrollment with the domain PKI.
 
    Registrar behavior is as follows:
-
-
-
-
 
 
 
