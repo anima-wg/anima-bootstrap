@@ -568,6 +568,7 @@
               well known vendor provided bootstrapping server by perfoming a
               DNS lookup using a well known URI such as
               "bootstrapks.vendor-example.com".</t>
+
             </list>Once a domain bootstrapping server is discovered the New
           Entity communicates with the discovered server using the
           bootstrapping protocol defined in <xref
@@ -710,7 +711,8 @@
           Transport (EST) [RFC7030]. The New Entity contacts the Registrar
           using EST as indicated:</t>
 
-          <t><list style="symbols">
+          <t>
+            <list style="symbols">
               <t>The New Entity is authenticated using the IEEE 802.1AR
               credentials.</t>
 
@@ -721,8 +723,10 @@
               <t>The EST server is authenticated by using the Owership Voucher
               indicated fully qualified domain name to build the EST URI such
               that EST section 4.1.1 bootstrapping using the New Entity
-              implicit Trust Anchor database can be used. </t>
-            </list></t>
+              implicit Trust Anchor database can be used.
+              </t>
+            </list>
+          </t>
         </section>
 
         <section title="Being Managed">
@@ -739,10 +743,84 @@
         </section>
       </section>
 
-      <section title="Behavior of a proxy">
+      <section anchor="proxybehaviour" title="Behavior of a proxy">
         <t>The role of the Proxy is to facilitate communications. The Proxy
         forwards EST transport (TLS or DTLS) packets between the New Entity
         and the Registrar that has been configured on the Proxy.</t>
+
+        <t>
+          In order to permit the proxy functionality to be implemented on
+          the maximum variety of devices the chosen mechanism SHOULD use the
+          minimum amount of state on the proxy device.  While many devices in
+          the ANIMA target space will be rather large routers, the proxy
+          function is likely to be implemented in the control plane CPU such a
+          device, with available capabilities for the proxy function similar to
+          many class 2 IoT devices.
+        </t>
+
+        <section anchor="coapconnection" title="CoAP connection to Registrar">
+          <t>The proxy MUST implement an IPIP (protocol 41) encapsulation
+          function for CoAP traffic to the configured UDP port on the
+          registrar.  The
+          choice of CoAP as the mandatory to implement protocol rather than HTTP
+          maximizes code reuse on the smallest of devices.</t>
+
+          <t>As a result of the Proxy Discovery process in section
+          <xref target="ProxyDiscovery"></xref>, the port number
+          exposed by the proxy does not need to be well known, or require an
+          IANA allocation.  The address and port of the Registar will be
+          discovered by the GRASP protocol inside the ACP.
+          For the IPIP encapsulation methods, the port announced by the
+          Proxy MUST be the same as on the registrar.
+          </t>
+
+          <t>The IPIP encapsulation allows the proxy to forward traffic which
+          is otherwise not to be forwarded, as the traffic between New Node
+          and Proxy use IPv6 Link Local addresses. </t>
+
+          <t>If the Proxy device has more than one interface on which it
+          offers the proxy function, then it must select a unique IP address
+          per interface in order so that the proxy can stateless return the
+          reply packets to the correct link.
+          </t>
+        </section>
+
+        <section title="HTTPS proxy connection to Registrar">
+          <t>The proxy SHOULD also provide one of: an IPIP encapsulation of
+          HTTP traffic on TCP port TBD to the registrar, an HTTP proxy which
+          accepts URLs that reach the registrary, or a TCP circuit proxy that
+          connects the New Node to the Registrary.
+          </t>
+
+          <t>
+            In order to make the HTTP choice above transparent to the New Node,
+            the New Node will always initicate an HTTP connection, and will
+            always send an appropriate CONNECT message to initiate an HTTPS
+            connection to the registrar.
+          </t>
+          <t>
+            When the Proxy provides a circuit proxy to the Registrar, then
+            the Registrar will be required to always accept HTTP connections,
+            and be willing to perform an HTTP proxy (CONNECT) operation to
+            itself, and then initiate HTTPS.
+          </t>
+          <t>
+            When the Proxy provides a stateless IPIP encapsulation to the
+            Registrary, then the Registar will have to perform IPIP
+            decapsulation, remembering the originating outer IPIP source
+            address in order to qualify the inner link-local address.
+            Being able to connect a TCP (HTTP) or UDP (CoAP) socket to
+            a link-local address with an encapsulated IPIP header requires
+            API extensions beyond <xref target="RFC3542" /> for UDP use, and
+            requires a form of connection latching (see section 4.1 of
+            <xref target="RFC5386"/> and all of <xref target="RFC5660" />,
+            except that a simple IPIP tunnel is used rather than an IPsec
+            tunnel).
+          </t>
+        </section>
+
+        <t>The document <xref target="I-D.richardson-anima-state-for-joinrouter" /> provides a more extensive
+        analysis of the alternatives.</t>
 
         <t>[[EDNOTE: To what extent do we need to explain how this occurs? It
         is sufficient to indicate the basic behavior or do we need to indicate
@@ -752,8 +830,6 @@
         <figure>
           <artwork><![CDATA[socat -v tcp4-listen:443,reuseaddr,fork tcp4:registrar.example.com:443]]></artwork>
         </figure>
-
-        <t></t>
 
         <t>There have been suggestions that a stateless proxy implementation
         using a DTLS extension would be preferred. Is this a future
@@ -1555,6 +1631,9 @@ Data        +----------------------nonce---->   (discard     |
 
       &RFC7030;
 
+      <?rfc include="reference.RFC.3542" ?>
+      <?rfc include="reference.RFC.5386" ?>
+      <?rfc include="reference.RFC.5660" ?>
       <?rfc include="reference.RFC.7228" ?>
       <reference anchor="IDevID"
                  target="http://standards.ieee.org/findstds/standard/802.1AR-2009.html">
@@ -1573,6 +1652,7 @@ Data        +----------------------nonce---->   (discard     |
 
       &I-D.irtf-nmrg-autonomic-network-definitions;
       <?rfc include="reference.I-D.ietf-ace-actors" ?>
+      <?rfc include="reference.I-D.richardson-anima-state-for-joinrouter" ?>
 
       <reference anchor="imprinting"
                  target="https://en.wikipedia.org/wiki/Imprinting_(psychology)">

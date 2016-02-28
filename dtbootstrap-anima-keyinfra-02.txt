@@ -5,11 +5,11 @@
 ANIMA WG                                                     M. Pritikin
 Internet-Draft                                                     Cisco
 Intended status: Informational                             M. Richardson
-Expires: August 13, 2016                                             SSW
+Expires: August 30, 2016                                             SSW
                                                             M. Behringer
                                                             S. Bjarnason
                                                                    Cisco
-                                                       February 10, 2016
+                                                       February 27, 2016
 
 
                    Bootstrapping Key Infrastructures
@@ -42,7 +42,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 13, 2016.
+   This Internet-Draft will expire on August 30, 2016.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 1]
+Pritikin, et al.         Expires August 30, 2016                [Page 1]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -84,49 +84,49 @@ Table of Contents
        3.1.5.  Enrollment  . . . . . . . . . . . . . . . . . . . . .  15
        3.1.6.  Being Managed . . . . . . . . . . . . . . . . . . . .  15
      3.2.  Behavior of a proxy . . . . . . . . . . . . . . . . . . .  16
-     3.3.  Behavior of the Registrar (Bootstrap Server)  . . . . . .  16
-       3.3.1.  Entity Authentication . . . . . . . . . . . . . . . .  17
-       3.3.2.  Entity Authorization  . . . . . . . . . . . . . . . .  17
-       3.3.3.  Claiming the New Entity . . . . . . . . . . . . . . .  18
-       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  19
-       3.3.5.  Forwarding Audit Token plus Configuration . . . . . .  19
-     3.4.  Behavior of the MASA Service  . . . . . . . . . . . . . .  20
-       3.4.1.  Issue Authorization Token and Log the event . . . . .  20
-       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  20
-     3.5.  Leveraging the new key infrastructure / next steps  . . .  21
-       3.5.1.  Network boundaries  . . . . . . . . . . . . . . . . .  21
-     3.6.  Interactions with Network Access Control  . . . . . . . .  21
-   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  21
-     4.1.  Instantiating the Domain Certification Authority  . . . .  22
-     4.2.  Instantiating the Registrar . . . . . . . . . . . . . . .  22
-     4.3.  Accepting New Entities  . . . . . . . . . . . . . . . . .  22
-     4.4.  Automatic Enrollment of Devices . . . . . . . . . . . . .  23
-     4.5.  Secure Network Operations . . . . . . . . . . . . . . . .  23
-   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  24
-     5.1.  Request Audit Token . . . . . . . . . . . . . . . . . . .  26
-     5.2.  Request Audit Token from MASA . . . . . . . . . . . . . .  27
-     5.3.  Basic Configuration Information Package . . . . . . . . .  29
+     3.3.  Behavior of the Registrar (Bootstrap Server)  . . . . . .  17
+       3.3.1.  Entity Authentication . . . . . . . . . . . . . . . .  18
+       3.3.2.  Entity Authorization  . . . . . . . . . . . . . . . .  18
+       3.3.3.  Claiming the New Entity . . . . . . . . . . . . . . .  19
+       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  20
+       3.3.5.  Forwarding Audit Token plus Configuration . . . . . .  20
+     3.4.  Behavior of the MASA Service  . . . . . . . . . . . . . .  21
+       3.4.1.  Issue Authorization Token and Log the event . . . . .  21
+       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  21
+     3.5.  Leveraging the new key infrastructure / next steps  . . .  22
+       3.5.1.  Network boundaries  . . . . . . . . . . . . . . . . .  22
+     3.6.  Interactions with Network Access Control  . . . . . . . .  22
+   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  22
+     4.1.  Instantiating the Domain Certification Authority  . . . .  23
+     4.2.  Instantiating the Registrar . . . . . . . . . . . . . . .  23
+     4.3.  Accepting New Entities  . . . . . . . . . . . . . . . . .  23
+     4.4.  Automatic Enrollment of Devices . . . . . . . . . . . . .  24
+     4.5.  Secure Network Operations . . . . . . . . . . . . . . . .  24
+   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  25
+     5.1.  Request Audit Token . . . . . . . . . . . . . . . . . . .  27
+     5.2.  Request Audit Token from MASA . . . . . . . . . . . . . .  28
+     5.3.  Basic Configuration Information Package . . . . . . . . .  30
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 2]
+Pritikin, et al.         Expires August 30, 2016                [Page 2]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
-     5.4.  Request MASA authorization log  . . . . . . . . . . . . .  29
-   6.  Reduced security operational modes  . . . . . . . . . . . . .  30
-     6.1.  New Entity security reductions  . . . . . . . . . . . . .  30
-     6.2.  Registrar security reductions . . . . . . . . . . . . . .  30
-     6.3.  MASA security reductions  . . . . . . . . . . . . . . . .  31
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  31
-     7.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  33
-   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  33
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  33
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  33
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .  33
-   Appendix A.  Editor notes . . . . . . . . . . . . . . . . . . . .  34
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  35
+     5.4.  Request MASA authorization log  . . . . . . . . . . . . .  30
+   6.  Reduced security operational modes  . . . . . . . . . . . . .  31
+     6.1.  New Entity security reductions  . . . . . . . . . . . . .  31
+     6.2.  Registrar security reductions . . . . . . . . . . . . . .  31
+     6.3.  MASA security reductions  . . . . . . . . . . . . . . . .  32
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  32
+     7.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  34
+   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  34
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  34
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  34
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  35
+   Appendix A.  Editor notes . . . . . . . . . . . . . . . . . . . .  35
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  36
 
 1.  Introduction
 
@@ -165,7 +165,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 3]
+Pritikin, et al.         Expires August 30, 2016                [Page 3]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -221,7 +221,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 4]
+Pritikin, et al.         Expires August 30, 2016                [Page 4]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -277,7 +277,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 5]
+Pritikin, et al.         Expires August 30, 2016                [Page 5]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -333,7 +333,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 6]
+Pritikin, et al.         Expires August 30, 2016                [Page 6]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -389,7 +389,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 7]
+Pritikin, et al.         Expires August 30, 2016                [Page 7]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -445,7 +445,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 8]
+Pritikin, et al.         Expires August 30, 2016                [Page 8]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -456,44 +456,44 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
    The overall flow is shown in Figure 2:
 
- +---------+                +----------+                +-----------+
- |  New    |     Proxy      |          |                |  Vendor   |
- | Entity  |      not       |  Domain  |                |  Service  |
- |         |     shown      |          |                | (Internet)|
- +---------+                +----------+                +-----------+
-     |                           |                            |
-     |<-------discovery--------->|                            |
-     |---IEEE 802.1AR identity-->|                            |
-     |                           |                            |
-     |                     [accept device?]                   |
-     |                           |                            |
-     |                           |---IEEE 802.1AR identity--->|
-     |                           |---Domain ID--------------->|
-     |                           |                            |
-     |                           |                    [optional: does
-     |                           |                     the device belong
-     |                           |                     to the domain?]
-     |                           |                            |
-     |                           |                   [update audit log]
-     |                           |                            |
-     |                           |<---device audit log--------|
-     |                           |<---audit token-------------|
-     |                           |<-- ownership voucher-------|
-     |                           |    (optional)              |
-     |                           |                            |
-     |                  [ still accept device?]               |
-     |                           |                            |
-     |<----audit token-----------|                            |
-     |<----ownership voucher-----| (optional)                 |
-     |<----config information----|                            |
-     |                           |                            |
-[audit token valid?]             |                            |
-[or ownership voucher valid?]    |                            |
-[apply config information]       |                            |
-     |                           |                            |
-     |----domain enrollment----->|                            |
-     |<----domain certificate----|                            |
-     |                           |                            |
+    +---------+                +----------+                +-----------+
+    |  New    |     Proxy      |          |                |  Vendor   |
+    | Entity  |      not       |  Domain  |                |  Service  |
+    |         |     shown      |          |                | (Internet)|
+    +---------+                +----------+                +-----------+
+        |                           |                            |
+        |<-------discovery--------->|                            |
+        |---IEEE 802.1AR identity-->|                            |
+        |                           |                            |
+        |                     [accept device?]                   |
+        |                           |                            |
+        |                           |---IEEE 802.1AR identity--->|
+        |                           |---Domain ID--------------->|
+        |                           |                            |
+        |                           |                 [optional: does
+        |                           |                the device belong
+        |                           |                  to the domain?]
+        |                           |                            |
+        |                           |                [update audit log]
+        |                           |                            |
+        |                           |<---device audit log--------|
+        |                           |<---audit token-------------|
+        |                           |<-- ownership voucher-------|
+        |                           |    (optional)              |
+        |                           |                            |
+        |                  [ still accept device?]               |
+        |                           |                            |
+        |<----audit token-----------|                            |
+        |<----ownership voucher-----| (optional)                 |
+        |<----config information----|                            |
+        |                           |                            |
+   [audit token valid?]             |                            |
+   [or ownership voucher valid?]    |                            |
+   [apply config information]       |                            |
+        |                           |                            |
+        |----domain enrollment----->|                            |
+        |<----domain certificate----|                            |
+        |                           |                            |
 
    Figure 2
 
@@ -501,7 +501,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016                [Page 9]
+Pritikin, et al.         Expires August 30, 2016                [Page 9]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -557,7 +557,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 10]
+Pritikin, et al.         Expires August 30, 2016               [Page 10]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -613,7 +613,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 11]
+Pritikin, et al.         Expires August 30, 2016               [Page 11]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -669,7 +669,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 12]
+Pritikin, et al.         Expires August 30, 2016               [Page 12]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -725,7 +725,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 13]
+Pritikin, et al.         Expires August 30, 2016               [Page 13]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -781,7 +781,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 14]
+Pritikin, et al.         Expires August 30, 2016               [Page 14]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -837,7 +837,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 15]
+Pritikin, et al.         Expires August 30, 2016               [Page 15]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -853,12 +853,79 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
    forwards EST transport (TLS or DTLS) packets between the New Entity
    and the Registrar that has been configured on the Proxy.
 
+   In order to permit the proxy functionality to be implemented on the
+   maximum variety of devices the chosen mechanism SHOULD use the
+   minimum amount of state on the proxy device.  While many devices in
+   the ANIMA target space will be rather large routers, the proxy
+   function is likely to be implemented in the control plane CPU such a
+   device, with available capabilities for the proxy function similar to
+   many class 2 IoT devices.
+
+   The proxy MUST implement an IPIP (protocol 41) encapsulation function
+   for CoAP traffic to the configured UDP port on the registrar.  The
+   choice of CoAP as the mandatory to implement protocol rather than
+   HTTP maximizes code reuse on the smallest of devices.
+
+   As a result of the Proxy Discovery process in section Section 3.1.1,
+   the port number exposed by the proxy does not need to be well known,
+   or require an IANA allocation.  The address and port of the Registar
+   will be discovered by the GRASP protocol inside the ACP.  For the
+   IPIP encapsulation methods, the port announced by the Proxy MUST be
+   the same as on the registrar.
+
+   The IPIP encapsulation allows the proxy to forward traffic which is
+   otherwise not to be forwarded, as the traffic between New Node and
+   Proxy use IPv6 Link Local addresses.
+
+   If the Proxy device has more than one interface on which it offers
+   the proxy function, then it must select a unique IP address per
+   interface in order so that the proxy can stateless return the reply
+   packets to the correct link.
+
+   The proxy SHOULD also provide one of: an IPIP encapsulation of HTTP
+   traffic on TCP port TBD to the registrar, an HTTP proxy which accepts
+   URLs that reach the registrary, or a TCP circuit proxy that connects
+   the New Node to the Registrary.
+
+   In order to make the HTTP choice above transparent to the New Node,
+   the New Node will always initicate an HTTP connection, and will
+
+
+
+
+Pritikin, et al.         Expires August 30, 2016               [Page 16]
+
+Internet-Draft      Bootstrapping Key Infrastructures      February 2016
+
+
+   always send an appropriate CONNECT message to initiate an HTTPS
+   connection to the registrar.
+
+   When the Proxy provides a circuit proxy to the Registrar, then the
+   Registrar will be required to always accept HTTP connections, and be
+   willing to perform an HTTP proxy (CONNECT) operation to itself, and
+   then initiate HTTPS.
+
+   When the Proxy provides a stateless IPIP encapsulation to the
+   Registrary, then the Registar will have to perform IPIP
+   decapsulation, remembering the originating outer IPIP source address
+   in order to qualify the inner link-local address.  Being able to
+   connect a TCP (HTTP) or UDP (CoAP) socket to a link-local address
+   with an encapsulated IPIP header requires API extensions beyond
+   [RFC3542] for UDP use, and requires a form of connection latching
+   (see section 4.1 of [RFC5386] and all of [RFC5660], except that a
+   simple IPIP tunnel is used rather than an IPsec tunnel).
+
+   The document [I-D.richardson-anima-state-for-joinrouter] provides a
+   more extensive analysis of the alternatives.
+
    [[EDNOTE: To what extent do we need to explain how this occurs?  It
    is sufficient to indicate the basic behavior or do we need to
    indicate here all the details?  A rough implementation of an ipv4
    proxy would be as follows:
 
-  socat -v tcp4-listen:443,reuseaddr,fork tcp4:registrar.example.com:443
+             socat -v tcp4-listen:443,reuseaddr,fork
+             tcp4:registrar.example.com:443
 
    There have been suggestions that a stateless proxy implementation
    using a DTLS extension would be preferred.  Is this a future
@@ -882,18 +949,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-Pritikin, et al.         Expires August 13, 2016               [Page 16]
+Pritikin, et al.         Expires August 30, 2016               [Page 17]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -949,7 +1005,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 17]
+Pritikin, et al.         Expires August 30, 2016               [Page 18]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1005,7 +1061,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 18]
+Pritikin, et al.         Expires August 30, 2016               [Page 19]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1061,7 +1117,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 19]
+Pritikin, et al.         Expires August 30, 2016               [Page 20]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1117,7 +1173,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 20]
+Pritikin, et al.         Expires August 30, 2016               [Page 21]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1173,7 +1229,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 21]
+Pritikin, et al.         Expires August 30, 2016               [Page 22]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1229,7 +1285,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 22]
+Pritikin, et al.         Expires August 30, 2016               [Page 23]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1285,7 +1341,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 23]
+Pritikin, et al.         Expires August 30, 2016               [Page 24]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1341,7 +1397,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 24]
+Pritikin, et al.         Expires August 30, 2016               [Page 25]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1397,7 +1453,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 25]
+Pritikin, et al.         Expires August 30, 2016               [Page 26]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1453,7 +1509,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 26]
+Pritikin, et al.         Expires August 30, 2016               [Page 27]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1509,7 +1565,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 27]
+Pritikin, et al.         Expires August 30, 2016               [Page 28]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1565,7 +1621,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 28]
+Pritikin, et al.         Expires August 30, 2016               [Page 29]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1621,7 +1677,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 29]
+Pritikin, et al.         Expires August 30, 2016               [Page 30]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1677,7 +1733,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 30]
+Pritikin, et al.         Expires August 30, 2016               [Page 31]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1733,7 +1789,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 31]
+Pritikin, et al.         Expires August 30, 2016               [Page 32]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1789,7 +1845,7 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 32]
+Pritikin, et al.         Expires August 30, 2016               [Page 33]
 
 Internet-Draft      Bootstrapping Key Infrastructures      February 2016
 
@@ -1817,6 +1873,17 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
               DOI 10.17487/RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
 
+   [RFC3542]  Stevens, W., Thomas, M., Nordmark, E., and T. Jinmei,
+              "Advanced Sockets Application Program Interface (API) for
+              IPv6", RFC 3542, May 2003.
+
+   [RFC5386]  Williams, N. and M. Richardson, "Better-Than-Nothing
+              Security: An Unauthenticated Mode of IPsec", RFC 5386,
+              November 2008.
+
+   [RFC5660]  Williams, N., "IPsec Channels: Connection Latching",
+              RFC 5660, October 2009.
+
    [RFC7030]  Pritikin, M., Ed., Yee, P., Ed., and D. Harkins, Ed.,
               "Enrollment over Secure Transport", RFC 7030,
               DOI 10.17487/RFC7030, October 2013,
@@ -1826,6 +1893,18 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
               Constrained-Node Networks", RFC 7228,
               DOI 10.17487/RFC7228, May 2014,
               <http://www.rfc-editor.org/info/rfc7228>.
+
+
+
+
+
+
+
+
+Pritikin, et al.         Expires August 30, 2016               [Page 34]
+
+Internet-Draft      Bootstrapping Key Infrastructures      February 2016
+
 
 9.2.  Informative References
 
@@ -1841,21 +1920,17 @@ Internet-Draft      Bootstrapping Key Infrastructures      February 2016
               environments", draft-ietf-ace-actors-02 (work in
               progress), October 2015.
 
-
-
-
-
-Pritikin, et al.         Expires August 13, 2016               [Page 33]
-
-Internet-Draft      Bootstrapping Key Infrastructures      February 2016
-
-
    [I-D.irtf-nmrg-autonomic-network-definitions]
               Behringer, M., Pritikin, M., Bjarnason, S., Clemm, A.,
               Carpenter, B., Jiang, S., and L. Ciavaglia, "Autonomic
               Networking - Definitions and Design Goals", draft-irtf-
               nmrg-autonomic-network-definitions-07 (work in progress),
               March 2015.
+
+   [I-D.richardson-anima-state-for-joinrouter]
+              Richardson, M., "Considerations for stateful vs stateless
+              join router in ANIMA bootstrap", draft-richardson-anima-
+              state-for-joinrouter-00 (work in progress), January 2016.
 
    [imprinting]
               Wikipedia, , "Wikipedia article: Imprinting", July 2015,
@@ -1879,6 +1954,14 @@ Appendix A.  Editor notes
       simplified proxy discussion as per design team discussions
       clarified 'entity authorization' clarified 'claiming the new
       entity' removed EAP-EST references expanded on protocol details as
+
+
+
+Pritikin, et al.         Expires August 30, 2016               [Page 35]
+
+Internet-Draft      Bootstrapping Key Infrastructures      February 2016
+
+
       per ownership validation options slight additions to security
       considerations
 
@@ -1896,15 +1979,6 @@ Appendix A.  Editor notes
       Touch Update for ANIMA" https://www.ietf.org/proceedings/92/
       anima.html and "Bootstrapping Key Infrastructures", Pritikin,
       Behringer, Bjarnason
-
-
-
-
-
-Pritikin, et al.         Expires August 13, 2016               [Page 34]
-
-Internet-Draft      Bootstrapping Key Infrastructures      February 2016
-
 
    o  IN PROGRESS: Intergrate "Ownership Voucher" as a valid optional
       format for the MASA response.  So long as the issuance of this is
@@ -1936,6 +2010,14 @@ Authors' Addresses
    URI:   http://www.sandelman.ca/
 
 
+
+
+
+Pritikin, et al.         Expires August 30, 2016               [Page 36]
+
+Internet-Draft      Bootstrapping Key Infrastructures      February 2016
+
+
    Michael H. Behringer
    Cisco
 
@@ -1957,4 +2039,34 @@ Authors' Addresses
 
 
 
-Pritikin, et al.         Expires August 13, 2016               [Page 35]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.         Expires August 30, 2016               [Page 37]
