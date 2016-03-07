@@ -251,7 +251,14 @@
           Specifically, there are protocol aspects described here which might
           result in congestion collapse or energy-exhaustion of intermediate
           battery powered routers in an LLN.  Those types of networks SHOULD
-          NOT use this solution.
+          NOT use this solution. These limitations are predominately related
+          to the large credential and key sizes required for device 
+          authentication. Defining symmetric key techniques that meet
+          the operational requirements is out-of-scope but the underlying
+          protocol operations (TLS handshake and signing structures) have
+          sufficient algorithm agility to support such techniques when
+          defined. 
+          
         </t>
         <t>
           The imprint protocol described here could, however, be used by
@@ -777,8 +784,9 @@
       <section anchor="proxybehaviour" title="Behavior of a Proxy">
         <t>
           The role of the Proxy is to facilitate communications. The Proxy
-          forwards EST transport (TLS or DTLS) packets between the New Entity
-          and the Registrar that has been configured on the Proxy.
+          forwards packets between the New Entity
+          and the Registrar that has been configured on the Proxy. The Proxy
+          does not terminate the (d)TLS handshake. 
         </t>
 
         <t>
@@ -791,13 +799,23 @@
           many class 2 IoT devices.
         </t>
 
+        <t>
+            The document <xref target="I-D.richardson-anima-state-for-joinrouter" /> provides 
+            a more extensive analysis of the alternative proxy methods.
+        </t>
+
         <section anchor="coapconnection" title="CoAP connection to Registrar">
           <t>
             The proxy MUST implement an IPIP (protocol 41) encapsulation
             function for CoAP traffic to the configured UDP port on the
-            registrar.  The
-            choice of CoAP as the mandatory to implement protocol rather
-            than HTTP maximizes code reuse on the smallest of devices.
+            registrar.  The proxy does not terminate the CoAP DTLS connection.
+            [[EDNOTE: The choice of CoAP as the mandatory to implement protocol rather
+            than HTTP maximizes code reuse on the smallest of devices. Unfortunately this means
+            this document will have to include the EST over CoAP details as additional 
+            sections. The alternative is to make 'HTTPS proxy' method the mandatory 
+            to implement and provide a less friendly environment for the smallest
+            of devices. This is a decision we'll have to see addressed by the 
+            broader team.]]
           </t>
 
           <t>As a result of the Proxy Discovery process in section
@@ -823,25 +841,29 @@
         <section title="HTTPS proxy connection to Registrar">
           <t>The proxy SHOULD also provide one of: an IPIP encapsulation of
           HTTP traffic on TCP port TBD to the registrar, an HTTP proxy which
-          accepts URLs that reach the registrary, or a TCP circuit proxy that
-          connects the New Node to the Registrary.
+          accepts URLs that reach the Registrar, or a TCP circuit proxy that
+          connects the New Node to the Registrar.
           </t>
 
           <t>
             In order to make the HTTP choice above transparent to the New Node,
-            the New Node will always initicate an HTTP connection, and will
+            the New Node will always initiate an HTTP connection, and will
             always send an appropriate CONNECT message to initiate an HTTPS
-            connection to the registrar.
+            connection to the registrar. [[EDNOTE: The CONNECT syntax 
+            is that the New Entity specifies the Registrar server
+            in the CONNECT line. See RFC7231 s4.3.6. We wish the Proxy
+            to override any value with the locally known-to-the-proxy
+            Registrar address.]]
           </t>
           <t>
-            When the Proxy provides a circuit proxy to the Registrar, then
-            the Registrar will be required to always accept HTTP connections,
+            When the Proxy provides a circuit proxy to the Registrar the Registrar 
+            MUST accept HTTP connections,
             and be willing to perform an HTTP proxy (CONNECT) operation to
             itself, and then initiate HTTPS.
           </t>
           <t>
             When the Proxy provides a stateless IPIP encapsulation to the
-            Registrary, then the Registar will have to perform IPIP
+            Registrar, then the Registrar will have to perform IPIP
             decapsulation, remembering the originating outer IPIP source
             address in order to qualify the inner link-local address.
             Being able to connect a TCP (HTTP) or UDP (CoAP) socket to
@@ -852,30 +874,6 @@
             except that a simple IPIP tunnel is used rather than an IPsec
             tunnel).
           </t>
-        </section>
-
-        <section title="Additional consideration">
-          <t>
-            The document <xref target="I-D.richardson-anima-state-for-joinrouter" /> provides a more extensive
-            analysis of the alternatives.
-          </t>
-
-          <t>[[EDNOTE: To what extent do we need to explain how this occurs? It
-          is sufficient to indicate the basic behavior or do we need to indicate
-          here all the details? A rough implementation of an ipv4 proxy would be
-          as follows:
-          </t>
-
-          <figure>
-            <artwork><![CDATA[
-            socat -v tcp4-listen:443,reuseaddr,fork
-            tcp4:registrar.example.com:443
-            ]]></artwork>
-          </figure>
-
-          <t>There have been suggestions that a stateless proxy implementation
-          using a DTLS extension would be preferred. Is this a future
-          optimization opportunity or a short term requirement?]]</t>
         </section>
       </section>
 
@@ -1350,6 +1348,19 @@ Data        +----------------------nonce---->   (discard     |
 
       <t></t>
 
+      <section title="EST over CoAP">
+          <t>[[EDNOTE: In order to support smaller devices the above section
+              on Proxy behavior introduces mandatory to implement
+              support for CoAP support by the Proxy. This implies similar
+              support by the New Entity and Registar and means that the 
+              EST protocol operation encapsulation into CoAP needs to 
+              be described. EST is HTTP based and "CoaP is designed
+              to easily interface with HTTP for integration" [RFC7252]
+              so this section is anticipated to be relatively straightforward. 
+              A complexity is that the large message sizes necessary
+              for bootstrapping will require support for [draft-ietf-core-block].]]
+              </t>
+      </section>
       <section title="Request Audit Token">
         <t>When the New Entity reaches the EST section 4.1.1 "Bootstrap
         Distribution of CA Certificates" state but wishes to proceed in a
