@@ -215,7 +215,8 @@
             bootstrapping to proceed. </t>
 
             <t hangText="Ownership Voucher:">A signed voucher from the vendor
-            vouching that a specific domain "owns" the new entity. </t>
+            vouching that a specific domain "owns" the new entity as 
+            defined in <xref target="I-D.ietf-netconf-zerotouch"/>.</t>
           </list></t>
       </section>
       <section title="Scope of solution">
@@ -424,17 +425,18 @@
       |         (d)TLS via the Proxy            |                    |
       |<--Registrar TLS server authentication---|                    |
   [PROVISIONAL accept of server cert]           |                    |
-      P                     |                   |                    |
       P---IEEE 802.1AR client authentication--->|                    |
-      P---nonce-------------------------------->|                    |
+      P                     |                   |                    |
+      P---Request Audit Token (include nonce)-->|                    |
       P                     |                   |                    |
       P                     |       /--->       |                    |
       P                     |       |      [accept device?]          |
       P                     |       |      [contact Vendor]          |
-      P                     |       |           |--IEEE 802.1AR ID-->|
+      P                     |       |           |--New Entity ID---->|    
       P                     |       |           |--Domain ID-------->|
       P                     |       |           |--optional:nonce--->|
-      P                     |       |           |                    |      
+      P                     |       |           |     [extract DomainID]      
+      P                     |       |           |                    |     
       P                     |    optional:      |     [update audit log]
       P                     |       |can        |                    |
       P                     |       |occur      |     optional: is   |
@@ -449,12 +451,9 @@
       P                     |                   |                    |
       P                     |       [verify audit log or voucher]    |
       P                     |                   |                    |
-      P<----------------------------------------|                    |
-      P   Audit token and/or ownership voucher  |                    |
-      P                     |                   |                    |
-  [verify provisional cert] |                   |                    |
-  [against the audit token] |                   |                    |
-  [and/or ownership voucher]|                   |                    |
+      P<--Audit token and/or ownership voucher--|                    |
+  [verify response         ]|                   |                    |
+  [verify provisional cert ]|                   |                    |
       |                     |                   |                    |
       |---------------------------------------->|                    |
       | Continue with RFC7030 enrollment        |                    |
@@ -541,7 +540,7 @@
                 If this fails:</t>
                 <t>Attempt to contact a proxy via a well known 
                 vendor provided URI. This proxy will likely work 
-                in concert with a vendor provide registar service.</t>
+                in concert with a vendor provide registrar service.</t>
               </list></t>
 
             <t>Identify itself. This is done by presenting an IEEE 802.1AR
@@ -710,7 +709,8 @@
               <t hangText="Ownership Voucher">Ownership Vouchers are obtained
               by the Registrar from the MASA service and explicitly indicate
               the fully qualified domain name of the domain the new entity
-              currently belongs to. </t>
+              currently belongs to. The Ownership Voucher is defined in 
+              <xref target="I-D.ietf-netconf-zerotouch"/>.</t>
             </list></t>
 
           <t>Since client authentication occurs during the TLS handshake the
@@ -987,9 +987,12 @@
           is no requirement for the vendor to definitively know that
           the device is owned by the Registrar.</t>
 
-          <t>Registrar's obtain the MASA URI via static configuration or by
-          extracting it from the IEEE 802.1AR credentail. [[EDNOTE: An
-          appropriate extension for indicating the MASA URI could be defined
+          <t>Registrar's obtain the Vendor URI via static configuration or by
+          extracting it from the IEEE 802.1AR credential. The imprint
+          method supported by the New Entity is known from the IEEE 802.1AR
+          credential. [[EDNOTE: An
+          appropriate extension for indicating the Vendor URI and imprint 
+          method could be defined
           using the methods described in 
           <xref target="I-D.lear-mud-framework"/>]]. </t>
 
@@ -1424,14 +1427,15 @@ Data        +----------------------nonce---->   (discard     |
         identity of the device as a serial number (the full certificate is not
         needed and no proof-of-possession information for the device identity
         is included). The New Entity's serial number is extracted from the
-        subject name :</t>
+        IEEE 802.1AR subject name:</t>
 
         <t>{"nonce":"&lt;64bit nonce value&gt;", "serialnumber",
         "&lt;subjectname/subjectaltname serial number&gt;"}</t>
 
-        <t>Inclusion of the nonce is optional because the Registar might
-        request an authorization token when the New Entity is not online, or
-        when the target bootstrapping environment is not on the same network
+        <t>The Registrar MAY exclude the nonce from the request. Doing 
+        so allows the Registrar to request an authorization token when 
+        the New Entity is not online, or when the target bootstrapping 
+        environment is not on the same network
         as the MASA server. If a nonce is not provided the MASA server MUST 
         authenticate the client as described in EST [RFC7030] section 3.3.2. The registrar 
         performs authorization as detailed in <xref target="AcceptingTheEntity"></xref>. 
@@ -1444,31 +1448,22 @@ Data        +----------------------nonce---->   (discard     |
         PKCS7.</t>
 
         <t>The MASA service checks the internal consistency of the PKCS7 but
-        is unable to actually authenticate the domain identity information.
+        MAY not authenticate the domain identity information.
         The domain is not know to the MASA server in advance and a shared
-        trust anchor is not implied. The MASA server verifies that the PKCS7
-        is signed by a Registrar (by checking for the cmc-idRA field in the
-        Registrar certificate) certificate that was issued by a the root
-        certificate included in the PKCS7. This is sufficient for the MASA
-        service to ensure that the Registar is in fact an authorized Registar
+        trust anchor is not implied. The MASA server MUST verify that the PKCS7
+        is signed by a Registrar certificate (by checking for the cmc-idRA field) 
+        that was issued by a the root certificate included in the PKCS7. This 
+        ensures that the Registar is in fact an authorized Registrar
         of the unknown domain. </t>
 
         <t>The domain ID (e.g. hash of the public key of the domain) is
-        extracted from the root certificate and is used to generate the MASA
-        authorization token and to update the audit log.</t>
-
-        <t>[[EDNOTE: The authorization token response format needs to be
-        defined here. It consists of the nonce, if supplied, the serialnumber
-        and the trust anchor of the domain. For example:</t>
+        extracted from the root certificate and is used to populate the MASA
+        authorization token and to update the audit log. The authorization
+        token consists of the nonce, if supplied, the serialnumber
+        and the domain identity:</t>
 
         <t>{"nonce":"&lt;64bit nonce value&gt;", "serialnumber",
         "&lt;subjectname/subjectaltname serial number&gt;","domainID":}</t>
-
-        <t>]]</t>
-
-        <t>[[EDNOTE: This assumes the Registrar can extract the serial number
-        successfullly from the cilent certificate. The RFC4108
-        hardwareModuleName is the best known location.]]</t>
 
         <t>[[EDNOTE: There is a strong similarity between this and the
         previous section. Both involve requesting the Audit Token from the
@@ -1485,11 +1480,22 @@ Data        +----------------------nonce---->   (discard     |
         verifies the Audit Token and, if it is valid, then uses the domain's
         TA to validate the Information Package.</t>
 
+    <t>[[EDNOTE: The domainID as included in the log and as sent in the 
+        authorization token is only a hash of the domain root
+        certificate. This is insufficient for the new entity to 
+        move out of the provisional state as it needs a full
+        root certificate to validate the TLS certificate chain. This 
+        information package could be used to deliver the full
+        certificate or the full certificate could be included in the
+        authorization token. Lacking either the new entity needs
+        to stay in the provisional state until it performs an 
+        RFC7030 /getcacerts to obtain the full certificate chain.]]</t>
+    
         <t>[[EDNOTE: The package format to be specified here. Any signed
         format is viable and ideally one can simply be specified from netconf.
         The Registar knows the New Entity device type from the 802.1AR
         credential and so is able to determine the proper format for the
-        configuration]]</t>
+        configuration.]]</t>
       </section>
 
       <section title="Request MASA authorization log">
@@ -1519,15 +1525,23 @@ Data        +----------------------nonce---->   (discard     |
           </figure></t>
 
         <t>Distribution of a large log is less than ideal. This structure can
-        be optimized as follows: only the most recent nonce'd log entry is
-        required in the response. All nonce-less entries for the same domainID
+        be optimized as follows: All nonce-less entries for the same domainID
         can be condensed into the single most recent nonceless entry.</t>
 
         <t>The Registrar uses this log information to make an informed
-        decision regarding the continued bootstrapping of the New Entity.</t>
+        decision regarding the continued bootstrapping of the New Entity.
+        For example if the log includes unexpected domainIDs this is 
+        indicative of problematic imprints by the new entity. If unexpected
+        nonce-less entries exist this is indicative of the permanant 
+        ability for the unknown domain to trigger a reset of the device
+        and take over management of it. Equipment that is purchased
+        pre-owned can be expected to have an extensive history.</t>
+        
+        <t>Log entries containing the Domain's ID can be compared
+            against local history logs in search of discrepancies.</t>
 
-        <t>[[EDNOTE: certificate transparency might offer an alternative log
-        entry method]]</t>
+        <t>[[EDNOTE: certificate transparency style use of merkle tree 
+            hash's might offer an alternative log entry method]]</t>
       </section>
     </section>
 
@@ -1585,7 +1599,8 @@ Data        +----------------------nonce---->   (discard     |
         MUST NOT be the default state because it permanently degrades the
         security for all other uses cases. </t>
 
-        <t>The device may have an operational mode where it skips Audit Token or Ownership Voucher
+        <t>The device may have an operational mode where it skips Audit Token 
+            or Ownership Voucher
         validation one time. For example if a physical button is depressed
         during the bootstrapping operation. This can be useful if the vendor
         service is unavailable. This behavior SHOULD be available via local
@@ -1757,9 +1772,11 @@ Data        +----------------------nonce---->   (discard     |
       &I-D.behringer-autonomic-network-framework;
 
       &I-D.irtf-nmrg-autonomic-network-definitions;
+ 
       <?rfc include="reference.I-D.ietf-ace-actors" ?>
       <?rfc include="reference.I-D.richardson-anima-state-for-joinrouter" ?>
       <?rfc include="reference.I-D.lear-mud-framework" ?>
+      <?rfc include="reference.I-D.ietf-netconf-zerotouch" ?>
 
       <reference anchor="imprinting"
                  target="https://en.wikipedia.org/wiki/Imprinting_(psychology)">
