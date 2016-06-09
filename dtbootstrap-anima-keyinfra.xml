@@ -1363,7 +1363,7 @@ Data        +----------------------nonce---->   (discard     |
           <artwork><![CDATA[{
  "version":"1",
  "nonce":"<64bit nonce value>", 
- "OwnershipValidation":<boolean>
+ "OwnershipValidation":true
 }]]></artwork>
         </figure>
 
@@ -1417,14 +1417,18 @@ Data        +----------------------nonce---->   (discard     |
         value (as obtained from the bootstrap request) and the IEEE 802.1AR
         identity of the device as a serial number (the full certificate is not
         needed and no proof-of-possession information for the device identity
-        is included). The New Entity's serial number is extracted from the
-        IEEE 802.1AR subject name:</t>
+        is included). The AuthorityKeyIdentifier value from the certificate is
+        included to ensure a statistically unique identity. The New Entity's
+        serial number is extracted from the IEEE 802.1AR subject name
+        id-at-serialNumber or it is the base64 encoded RFC4108
+        hardwareModuleName hwSerialNum:</t>
 
         <figure>
           <artwork><![CDATA[{
  "version":"1",
  "nonce":"<64bit nonce value>", 
- "serialnumber":"<subjectname/subjectaltname serial number>"
+ "IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier">,
+ "DevIDSerialNumber":"<id-at-serialNumber or base64 encoded hardwareModuleName hwSerialNum>",
 }]]></artwork>
         </figure>
 
@@ -1433,12 +1437,16 @@ Data        +----------------------nonce---->   (discard     |
         <t>The Registrar MAY exclude the nonce from the request. Doing so
         allows the Registrar to request an authorization token when the New
         Entity is not online, or when the target bootstrapping environment is
-        not on the same network as the MASA server. If a nonce is not provided
-        the MASA server MUST authenticate the client as described in EST
-        [RFC7030] section 3.3.2. The registrar performs authorization as
-        detailed in <xref target="AcceptingTheEntity"></xref>. If
-        authorization is successful the Registrar obtains an Audit Token from
-        the MASA service (see <xref target="RequestAuditToken"></xref>).</t>
+        not on the same network as the MASA server (this requires the
+        Registrar to learn the appropriate DevIDSerialNumber field from the
+        physical device labeling or from the sales channel -- how this occurs
+        is out-of-scope of this document). If a nonce is not provided the MASA
+        server MUST authenticate the client as described in EST [RFC7030]
+        section 3.3.2 to reduce the risk of DDoS attacks. The registrar
+        performs authorization as detailed in <xref
+        target="AcceptingTheEntity"></xref>. If authorization is successful
+        the Registrar obtains an Audit Token from the MASA service (see <xref
+        target="RequestAuditToken"></xref>).</t>
 
         <t>The JSON message information is encapsulated in a PKCS7 signed data
         structure that is signed by the Registrar. The entire certificate
@@ -1480,7 +1488,8 @@ Data        +----------------------nonce---->   (discard     |
           <artwork><![CDATA[{
  "version":"1",
  "nonce":"<64bit nonce value>", 
- "serialnumber":"<subjectname/subjectaltname serial number>",
+ "IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier">,
+ "DevIDSerialNumber":"<id-at-serialNumber>",
  "domainCAcert":"<the domain CA's certificate>"
 }]]></artwork>
         </figure>
