@@ -5,7 +5,7 @@
 <!ENTITY RFC2119 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC7030 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7030.xml">
 ]>
-<rfc category="info" docName="draft-ietf-anima-bootstrapping-keyinfra-02"
+<rfc category="info" docName="draft-ietf-anima-bootstrapping-keyinfra-03"
      ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -581,7 +581,12 @@
               well known vendor provided bootstrapping server by performing a
               DNS lookup using a well known URI such as
               "bootstrapks.vendor-example.com".</t>
-            </list>Once a Registrar is discovered (technically a communication
+            </list></t>
+
+          <t>[[EDNOTE: The above language doesn't result in a mandatory to
+          implemnet discovery method. At best it SHOULD/RECOMMENDs.]]</t>
+
+          <t>Once a Registrar is discovered (technically a communication
           channel through a Proxy) the New Entity communicates with the
           Registrar using the bootstrapping protocol defined in <xref
           target="ProtocolDetails"></xref>. The current DNS services returned
@@ -648,8 +653,8 @@
         <section anchor="AcceptDomain" title="Imprint">
           <t>The domain trust anchor is received by the New Entity during the
           bootstrapping protocol methods in the form of either an Audit Token
-          containing the domainID or an explicit ownership voucher. The goal
-          of the imprint state is to securely obtain a copy of this trust
+          containing the domain CA cert or an explicit ownership voucher. The
+          goal of the imprint state is to securely obtain a copy of this trust
           anchor without involving human interaction.</t>
 
           <t>The enrollment protocol EST <xref target="RFC7030"></xref>
@@ -689,14 +694,10 @@
           bootstrapping server has sufficient information to apply appropriate
           policy concerning which method to use.</t>
 
-          <t>An arbitrary basic configuration information package that is
-          signed by the domain can be delivered alongside the Audit Token or
-          ownership validation. This information is signed by the domain
-          private keys and is a one time delivery containing information such
-          as which enrollment server to communicate with and which management
-          system to communicate with. It is intended as a limited basic
-          configuration for these purposes and is not intended to deliver
-          entire final configuration to the device.</t>
+          <t>The audit token contains the domain's public key material as
+          provided to the MASA service by the Registrar. This provides
+          sufficient information to the client to complete automated
+          bootstrapping with the local key infrastructure.</t>
 
           <t>If the autonomic methods fail the New Entity returns to discovery
           state and attempts bootstrapping with the next available discovered
@@ -726,7 +727,16 @@
               Voucher indicated fully qualified domain name to build the EST
               URI such that EST section 4.1.1 bootstrapping using the New
               Entity implicit Trust Anchor database can be used.</t>
-            </list></t>
+            </list>Once the Audit Token is received, as specified in this
+          document, the client has sufficient information to leverage the
+          existing communication channel with the Registrar to continue an EST
+          RFC7030 enrollment. Enrollment picks up at RFC7030 section 4.1.1.
+          bootstrapping where the audit token provides the "out-of-band" CA
+          certificate fingerprint (in this case the full CA certificate) such
+          that the client can now complete the TLS server authentication. At
+          this point the client continues with EST enrollment operations
+          including "CA Certificates Request", "CSR Attributes" and "Client
+          Certificate Request" or "Server-Side Key Generation".</t>
         </section>
 
         <section title="Being Managed">
@@ -987,18 +997,6 @@
           the entity is rejected. The Registrar MAY be configured to ignore
           the history of the device but it is RECOMMENDED that this only be
           configured if hardware assisted NEA [RFC5209] is supported.</t>
-        </section>
-
-        <section title="Forwarding Audit Token plus Configuration">
-          <t>The Registrar forwards the received Audit Token to the New
-          Entity. To simplify the message flows an initial configuration
-          package can be delivered at this time which is signed by a
-          representative of the domain.</t>
-
-          <t>[[EDNOTE: format TBD. The configuration package signature data
-          must contain the full certificate path sufficient for the new entity
-          to use the domainID information (as a trust anchor) to accept and
-          validate the configuration)]]</t>
         </section>
       </section>
 
@@ -1361,14 +1359,25 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>Request format: a JSON file with the following:</t>
 
-        <t>{"nonce":"&lt;64bit nonce value&gt;",
-        "OwnershipValidation":boolean}</t>
+        <figure>
+          <artwork><![CDATA[{
+ "nonce":"<64bit nonce value>", 
+ "OwnershipValidation":boolean
+}]]></artwork>
+        </figure>
+
+        <t></t>
 
         <t>[[EDNOTE: exact format TBD. There is an advantage to having the
         client sign the nonce (similar to a PKI Certification Signing Request)
         since this allows the MASA service to confirm the actual device
         identity. It is not clear that there is a security benefit from this
         since its the New Entity that verifies the nonce.]]</t>
+
+        <t>[[EDNOTE: If we want to consider future versions either the version
+        information in imparted using the URI, the HTTP content-type, or some
+        version field within the JSON itself. Which is the preferred
+        method?]]</t>
 
         <t>The Registrar validates the client identity as described in EST
         [RFC7030] section 3.3.2. The registrar performs authorization as
@@ -1410,8 +1419,15 @@ Data        +----------------------nonce---->   (discard     |
         is included). The New Entity's serial number is extracted from the
         IEEE 802.1AR subject name:</t>
 
-        <t>{"nonce":"&lt;64bit nonce value&gt;", "serialnumber",
-        "&lt;subjectname/subjectaltname serial number&gt;"}</t>
+        <figure>
+          <artwork><![CDATA[{
+ "nonce":"<64bit nonce value>", 
+ "serialnumber", 
+ "<subjectname/subjectaltname serial number>"
+}]]></artwork>
+        </figure>
+
+        <t></t>
 
         <t>The Registrar MAY exclude the nonce from the request. Doing so
         allows the Registrar to request an authorization token when the New
@@ -1439,12 +1455,7 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>The domain ID (e.g. hash of the public key of the domain) is
         extracted from the root certificate and is used to populate the MASA
-        authorization token and to update the audit log. The authorization
-        token consists of the nonce, if supplied, the serialnumber and the
-        domain identity:</t>
-
-        <t>{"nonce":"&lt;64bit nonce value&gt;", "serialnumber",
-        "&lt;subjectname/subjectaltname serial number&gt;","domainID":}</t>
+        authorization token and to update the audit log.</t>
 
         <t>[[EDNOTE: There is a strong similarity between this and the
         previous section. Both involve requesting the Audit Token from the
@@ -1454,28 +1465,47 @@ Data        +----------------------nonce---->   (discard     |
         unify these sections or make the distinctions more clear]]</t>
       </section>
 
-      <section title="Basic Configuration Information Package">
-        <t>When the MASA authorization token is returned to the New Entity an
-        arbitrary information package can be signed and delivered along side
-        it. This is signed by the Domain Registrar. The New Entity first
-        verifies the Audit Token and, if it is valid, then uses the domain's
-        TA to validate the Information Package.</t>
+      <section title="Audit Token Response">
+        <t>The authorization token response to requests from the device and
+        requests from the Registrar is the same format. The Registrar either
+        caches prior MASA responses or dynamically requests a new Audit Token
+        based on local policy.</t>
 
-        <t>[[EDNOTE: The domainID as included in the log and as sent in the
-        authorization token is only a hash of the domain root certificate.
-        This is insufficient for the new entity to move out of the provisional
-        state as it needs a full root certificate to validate the TLS
-        certificate chain. This information package could be used to deliver
-        the full certificate or the full certificate could be included in the
-        authorization token. Lacking either the new entity needs to stay in
-        the provisional state until it performs an RFC7030 /getcacerts to
-        obtain the full certificate chain.]]</t>
+        <t>The authorization token consists of the nonce, if supplied, the
+        serial number information identifying the device and the domain CA
+        certificate extracted from the request:</t>
 
-        <t>[[EDNOTE: The package format to be specified here. Any signed
-        format is viable and ideally one can simply be specified from netconf.
-        The Registar knows the New Entity device type from the 802.1AR
-        credential and so is able to determine the proper format for the
-        configuration.]]</t>
+        <figure>
+          <artwork><![CDATA[{
+ "nonce":"<64bit nonce value>", 
+ "serialnumber", 
+ "<subjectname/subjectaltname serial number>",
+ "domainCAcert": <the domain CA's certificate>
+}]]></artwork>
+        </figure>
+
+        <t>The 'domainCAcert' element of this message contains the domain CA's
+        public key. This is specific to bootstrapping a public key
+        infrastructure. To support bootstrapping other key infrastructures
+        additional domain identity types might be defined in the future.
+        Clients MUST be prepared to ignore additional fields they do not
+        recognize. Clients MUST be prepared to parse and fail gracefully from
+        an audit token response that does not contain a 'domainCAcert' field
+        at all. </t>
+
+        <t>The audit token response is encapsulated in a PKCS7 signed data
+        structure that is signed by the MASA server. The New Entity verifies
+        this signed message using the IEEE 802.1AR manufacturer installed
+        trust anchor. The New Entity installs this trust anchor and proceeds
+        with EST RFC7030 enrollment. The newly installed trust anchor is used
+        as an EST RFC7030 Explicit Trust Anchor, and can be used to
+        authenticate dynamically discovered EST server's that contain the
+        id-kp-cmcRA extended key usage extension as detailed in EST RFC7030
+        section 3.6.1.</t>
+
+        <t>[[EDNOTE: Using PKCS7 consistent with the request format as
+        specified above. An alternative format would be the RFC7515 JSON Web
+        Signature (JSWS)]]</t>
       </section>
 
       <section title="Request MASA authorization log">
@@ -1491,13 +1521,13 @@ Data        +----------------------nonce---->   (discard     |
         <t><figure>
             <artwork><![CDATA["log":[
   {"date":"<date/time of the entry>"},
-   "domainID":"<domainID as extracted from the root
+   "domainID":"<domainID as extracted from the domain CA
                 certificate within the PKCS7 of the
                 audit token request>",
    "nonce":"<any nonce if supplied (or NULL)>"},
 
   {"date":"<date/time of the entry>"},
-   "domainID":"<domainID as extracted from the root
+   "domainID":"<domainID as extracted from the domain CA
                 certificate within the PKCS7 of the
                 audit token request>",
    "nonce":"<any nonce if supplied (or NULL)>"},
@@ -1506,7 +1536,7 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>Distribution of a large log is less than ideal. This structure can
         be optimized as follows: All nonce-less entries for the same domainID
-        can be condensed into the single most recent nonceless entry.</t>
+        MAY be condensed into the single most recent nonceless entry.</t>
 
         <t>The Registrar uses this log information to make an informed
         decision regarding the continued bootstrapping of the New Entity. For
@@ -1604,7 +1634,9 @@ Data        +----------------------nonce---->   (discard     |
             <t>The registrar MAY choose to accept devices that claim a unique
             identity without the benefit of authenticating that claimed
             identity. This could occur when the New Entity does not include an
-            IEEE 802.1AR factory installed credential.</t>
+            IEEE 802.1AR factory installed credential. [[EDNOTE: a
+            man-in-the-middle attack at this point might be distinct from just
+            an un-authenticated]]</t>
 
             <t>The registrar MAY request nonce-less Audit Tokens from the MASA
             service. These tokens can then be transmitted to the Registrar and
