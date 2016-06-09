@@ -1304,49 +1304,6 @@ Data        +----------------------nonce---->   (discard     |
 
       <t></t>
 
-      <section title="IEEE 802.1AR as client identity">
-        <t>The Registrar authenticates the client and performs authorization
-        checks to ensure this client is expected to join the domain. This
-        require a common procedure for representing and verifying the identity
-        of the client. The methods detailed in [RFC6125] such as matching DNS
-        Domain Name or Application Service Type are not directly
-        applicable.</t>
-
-        <t>Clients presents an IEEE 802.AR certificate complete with subject
-        field identifying the device uniquely in the Distinguished Name
-        serialNumber subfield. The subjectAltName MAY contain a
-        hardwareModuleName as specified in RFC4108. The Registrar extracts
-        this information and compares against a per vendor access control
-        list. (This can be implemented with a single database table so long as
-        the authority key identifier is also maintained and checked to ensure
-        that no two vendors collide in their use of serialNumber's).</t>
-
-        <t>When enrollment is complete and a local certificate is issued to
-        the new device the local CA has complete control over the namespace.
-        If this credential is intended for RFC6125 style TLS connections where
-        servers are identified by a server's DNS-ID identity the CA is likely
-        to ensure the dNSName field is populated. For Anima purposes the IEEE
-        802.1AR serialNumber and hardwareModuleName fields MUST be propagated
-        to the issued certificate.</t>
-
-        <t>[[EDNOTE: the above authority key identifier trick works for
-        database lookups and here the inclusion of the DNS name would serve
-        the same purpose. Alternatively an Anima specified domain specific
-        identifier must be indicated.]]</t>
-      </section>
-
-      <section title="EST over CoAP">
-        <t>[[EDNOTE: In order to support smaller devices the above section on
-        Proxy behavior introduces mandatory to implement support for CoAP
-        support by the Proxy. This implies similar support by the New Entity
-        and Registrar and means that the EST protocol operation encapsulation
-        into CoAP needs to be described. EST is HTTP based and "CoaP is
-        designed to easily interface with HTTP for integration" [RFC7252] so
-        this section is anticipated to be relatively straightforward. A
-        complexity is that the large message sizes necessary for bootstrapping
-        will require support for [draft-ietf-core-block].]]</t>
-      </section>
-
       <section title="Request Audit Token">
         <t>When the New Entity reaches the EST section 4.1.1 "Bootstrap
         Distribution of CA Certificates" state but wishes to proceed in a
@@ -1458,15 +1415,16 @@ Data        +----------------------nonce---->   (discard     |
         <t>The JSON message information is encapsulated in a PKCS7 signed data
         structure that is signed by the Registrar. The entire certificate
         chain, up to and including the Domain CA, MUST be included in the
-        PKCS7. The MASA service checks the internal consistency of the PKCS7
-        but does not authenticate the domain identity information. The domain
-        is not know to the MASA server in advance and a shared trust anchor is
-        not implied. The MASA server MUST verify that the PKCS7 is signed by a
-        Registrar certificate (by checking for the cmc-idRA field) that was
-        issued by a the root certificate included in the PKCS7. This ensures
-        that the Registrar making the claim is an authorized Registrar of the
-        unauthenticated domain. The EST style client authentication (TLS and
-        HTTP) is used to provide a DDoS prevention strategy.</t>
+        PKCS7 SignedData certificates structure. The MASA service checks the
+        internal consistency of the PKCS7 but does not authenticate the domain
+        identity information. The domain is not know to the MASA server in
+        advance and a shared trust anchor is not implied. The MASA server MUST
+        verify that the PKCS7 is signed by a Registrar certificate (by
+        checking for the cmc-idRA field) that was issued by a the root
+        certificate included in the PKCS7. This ensures that the Registrar
+        making the claim is an authorized Registrar of the unauthenticated
+        domain. The EST style client authentication (TLS and HTTP) is used to
+        provide a DDoS prevention strategy.</t>
 
         <t>The domain ID (e.g. hash of the public key of the domain) is
         extracted from the root certificate and is used to populate the MASA
@@ -1570,6 +1528,62 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>[[EDNOTE: certificate transparency style use of merkle tree hash's
         might offer an alternative log entry method]]</t>
+      </section>
+
+      <section title="EST Integration for PKI bootstrapping">
+        <t>The prior sections describe EST extensions necessary to enable
+        fully automated bootstrapping. Although the audit token
+        request/response structure members IDevIDAuthorityKeyIdentifier and
+        DevIDSerialNumber are specific to PKI bootstrapping these are the only
+        PKI specific aspects of the extensions and future work might replace
+        them with non-PKI structures. </t>
+
+        <t>This subsection provides guidance concerning EST options to ensure
+        consistent bootstrapping operations for PKI deployments. </t>
+
+        <section title="CSR Attributes">
+          <t>Automated bootstrapping occurs without local administrative
+          configuration of the New Entity. In some deployments its plausible
+          that the New Entity generates a certificate request containing only
+          identity information known to the New Entity (essentially the IDevID
+          information) and ultimately receives a certificate containing domain
+          specific identity information. Conceptually the CA has complete
+          control over all fields issued in the end entity certificate.
+          Realistically this is operationally difficult with the current
+          status of PKI certificate authority deployments where the CSR is
+          submitted to the CA via a number of non-standard protoocols. </t>
+
+          <t>To alleviate operational difficulty the New Entity MUST request
+          the EST "CSR Attributes" from the EST server. This allows the local
+          infrastructure to inform the New Entity of the proper fields to
+          include in the generated CSR. </t>
+
+          <t>If the hardwareModuleName in the IDevID is populated then it MUST
+          be propagated to the LDevID along with the hwSerialNum. If the
+          IDevID does not have a hwType the registar MUST insert a unique
+          hwType and assign a unique hwSerialNum. [[EDNOTE: how to generate a
+          unique hwType is TBD]].</t>
+
+          <t>The Registar MUST also confirm the resulting CSR is formatted as
+          indicated before forwarding the request to a CA. If the Registar is
+          communicating with the CA using a protocol like full CMC which
+          provides mechanisms to override the CSR attributes, then these
+          mechanisms MAY be used even if the client ignores CSR Attribute
+          guidance.</t>
+        </section>
+
+        <section title="EST over CoAP">
+          <t>[[EDNOTE: In order to support smaller devices the above section
+          on Proxy behavior introduces mandatory to implement support for CoAP
+          support by the Proxy. This implies similar support by the New Entity
+          and Registrar and means that the EST protocol operation
+          encapsulation into CoAP needs to be described. EST is HTTP based and
+          "CoaP is designed to easily interface with HTTP for integration"
+          [RFC7252] so this section is anticipated to be relatively
+          straightforward. A complexity is that the large message sizes
+          necessary for bootstrapping will require support for
+          [draft-ietf-core-block].]]</t>
+        </section>
       </section>
     </section>
 
