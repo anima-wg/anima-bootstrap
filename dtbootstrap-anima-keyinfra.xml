@@ -1452,7 +1452,7 @@ Data        +----------------------nonce---->   (discard     |
           <artwork><![CDATA[{
  "version":"1",
  "nonce":"<64bit nonce value>", 
- "IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier">,
+ "IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier>",
  "DevIDSerialNumber":"<id-at-serialNumber>",
  "domainCAcert":"<the domain CA's certificate>"
 }]]></artwork>
@@ -1570,6 +1570,43 @@ Data        +----------------------nonce---->   (discard     |
           provides mechanisms to override the CSR attributes, then these
           mechanisms MAY be used even if the client ignores CSR Attribute
           guidance.</t>
+        </section>
+
+        <section title="Verification of Success">
+          <t>For automated bootstrapping of devices the adminstrative elements
+          providing bootstrapping also provide indications to the system
+          administrators concerning device lifecycle status. This might
+          include information concerning attempted bootstrapping messages seen
+          by the client, MASA provides logs and status of credential
+          enrollment. The EST protocol assumes an end user and therefore does
+          not include a final success indication back to the server. This is
+          insufficient for automated use cases.</t>
+
+          <t>To indicate successful enrollment the client SHOULD re-negotiate
+          the EST TLS session using the newly obtained credentials. This
+          occurs by the client initiating a new TLS ClientHello message on the
+          existing TLS connection. The client MAY simply close the old TLS
+          session and start a new one. The server MUST support either
+          model.</t>
+
+          <t>The client HTTP POSTs the following to the server at the EST well
+          known URI /success. The server always responds with HTTP 200 OK.
+          </t>
+
+          <t><figure>
+              <artwork><![CDATA[{
+  "version":"1",
+  "Success":TRUE
+  "LDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier>",
+  "DevIDSerialNumber":"<id-at-serialNumber>",
+}]]></artwork>
+            </figure>The server MUST support receiving this message. Within
+          the server logs the server MUST capture if this message was recieved
+          over an TLS session with a matching client certificate. This allows
+          for clients that wish to minimize their crypto operations to simpy
+          POST this response without renegotiating the TLS session - at the
+          cost of the server not being able to accurately verify that
+          enrollment was truly successful.</t>
         </section>
 
         <section title="EST over CoAP">
