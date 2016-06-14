@@ -409,7 +409,7 @@
       |                     |                   |                    |
       |<------------------->|<----------------->|                    |
       |         (d)TLS via the Proxy            |                    |
-      |<--Registrar TLS server authentication---|                    |
+      |<--Registrar TLS server authentication-->|                    |
   [PROVISIONAL accept of server cert]           |                    |
       P---IEEE 802.1AR client authentication--->|                    |
       P                     |                   |                    |
@@ -1304,7 +1304,7 @@ Data        +----------------------nonce---->   (discard     |
 
       <t></t>
 
-      <section title="Request Audit Token">
+      <section title="Request Audit Token from the Registrar">
         <t>When the New Entity reaches the EST section 4.1.1 "Bootstrap
         Distribution of CA Certificates" state but wishes to proceed in a
         fully automated fashion it makes a request for a MASA authorization
@@ -1454,7 +1454,7 @@ Data        +----------------------nonce---->   (discard     |
  "nonce":"<64bit nonce value>", 
  "IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier>",
  "DevIDSerialNumber":"<id-at-serialNumber>",
- "domainCAcert":"<the domain CA's certificate>"
+ "domainCAcert":"<the base64 encoded domain CA's certificate>"
 }]]></artwork>
         </figure>
 
@@ -1489,8 +1489,14 @@ Data        +----------------------nonce---->   (discard     |
         <t>This is done with an HTTP GET using the operation path value of
         "/requestMASAlog".</t>
 
-        <t>The log data returned is a file consisting of all previous log
-        entries. For example:</t>
+        <t>The client HTTP POSTs the same Audit Token Request as for
+        requesting an audit token but now posts it the /requestMASAlog URI
+        instead. The IDevIDAuthorityKeyIdentifier and DevIDSerialNumber
+        informs the MASA server which log is requested so the appropriate log
+        can be prepared for the response. </t>
+
+        <t>A log data file is returned consisting of all previous log entries.
+        For example:</t>
 
         <t><figure>
             <artwork><![CDATA[{
@@ -1499,12 +1505,12 @@ Data        +----------------------nonce---->   (discard     |
     {
      "date":"<date/time of the entry>",
      "domainID":"<domainID as extracted from the domain CA certificate within the PKCS7 of the audit token request>",
-     "nonce":"<any nonce if supplied (or NULL)>"
+     "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     },
     {
      "date":"<date/time of the entry>",
      "domainID":"<domainID as extracted from the domain CA certificate within the PKCS7 of the audit token request>",
-     "nonce":"<any nonce if supplied (or NULL)>"
+     "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     }
   ]
 }]]></artwork>
@@ -1517,11 +1523,11 @@ Data        +----------------------nonce---->   (discard     |
         <t>The Registrar uses this log information to make an informed
         decision regarding the continued bootstrapping of the New Entity. For
         example if the log includes unexpected domainIDs this is indicative of
-        problematic imprints by the new entity. If unexpected nonce-less
-        entries exist this is indicative of the permanent ability for the
-        unknown domain to trigger a reset of the device and take over
-        management of it. Equipment that is purchased pre-owned can be
-        expected to have an extensive history.</t>
+        problematic imprints by the new entity. If the log includes nonce-less
+        entries this is indicative of the permanent ability for the indicated
+        domain to trigger a reset of the device and take over management of
+        it. Equipment that is purchased pre-owned can be expected to have an
+        extensive history.</t>
 
         <t>Log entries containing the Domain's ID can be compared against
         local history logs in search of discrepancies.</t>
