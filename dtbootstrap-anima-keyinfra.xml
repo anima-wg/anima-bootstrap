@@ -390,11 +390,11 @@
 
       <figure>
         <artwork><![CDATA[
-     +--------+         +-------+      +------------+     +------------+
-     | New    |         | Proxy |      | Domain     |     | Vendor     |
-     | Entity |         |       |      | Registrar  |     | Service    |
-     |        |         |       |      |            |     | (Internet  |
-     +--------+         +-------+      +------------+     +------------+
+     +--------+         +---------+    +------------+     +------------+
+     | New    |         | Circuit |    | Domain     |     | Vendor     |
+     | Entity |         | Proxy   |    | Registrar  |     | Service    |
+     |        |         |         |    |            |     | (Internet  |
+     +--------+         +---------+    +------------+     +------------+
       |                     |                   |                    |
       |<-RFC3927 IPv4 adr   |                   |                    |
     or|<-RFC4862 IPv6 adr   |                   |                    |
@@ -407,9 +407,9 @@
       | mDNS broadcast      |                   |                    |
       | response or periodic|                   |                    |
       |                     |                   |                    |
-      |<------------------->|<----------------->|                    |
-      |         (d)TLS via the Proxy            |                    |
-      |<--Registrar TLS server authentication-->|                    |
+      |<------------------->C<----------------->|                    |
+      |            TLS via the Circuit Proxy    |                    |
+      |<--Registrar TLS server authentication---|                    |
   [PROVISIONAL accept of server cert]           |                    |
       P---IEEE 802.1AR client authentication--->|                    |
       P                     |                   |                    |
@@ -517,10 +517,9 @@
             Registrar.</t>
 
             <t>Identify itself. This is done by presenting an IEEE 802.1AR
-            credentials to the discovered Registrar (via the Proxy) in a
-            (d)TLS handshake. (Although the Registrar is also authenticated
-            these credentials are only provisionally accepted at this
-            time).</t>
+            credentials to the discovered Registrar (via the Proxy) in a TLS
+            handshake. (Although the Registrar is also authenticated these
+            credentials are only provisionally accepted at this time).</t>
 
             <t>Requests to Join the discovered Registrar. The acceptable
             imprint methods are indicated along with a nonce ensuring that any
@@ -532,7 +531,7 @@
             service "Ownership Voucher". Either of these responses contains
             sufficient information for the New Entity to complete
             authentication of the Registrar. (The New Entity can now finish
-            authentication of the Registrar (d)TLS server certificate)</t>
+            authentication of the Registrar TLS server certificate)</t>
 
             <t>Enroll by accepting the domain specific information from the
             Registrar, and by obtaining a domain certificate from the
@@ -621,8 +620,8 @@
 
           <t>The bootstrapping protocol server is not authenticated. Thus this
           connection is provisional and all data received is untrusted until
-          sufficiently validated even though it is over a (D)TLS connection.
-          This is aligned with the existing provisional mode of EST [RFC7030]
+          sufficiently validated even though it is over a TLS connection. This
+          is aligned with the existing provisional mode of EST [RFC7030]
           during s4.1.1 "Bootstrap Distribution of CA Certificates".</t>
 
           <t>All security associations established are between the new device
@@ -765,7 +764,7 @@
       <section anchor="proxybehaviour" title="Behavior of a Proxy">
         <t>The role of the Proxy is to facilitate communications. The Proxy
         forwards packets between the New Entity and the Registrar that has
-        been configured on the Proxy. The Proxy does not terminate the (d)TLS
+        been configured on the Proxy. The Proxy does not terminate the TLS
         handshake.</t>
 
         <t>In order to permit the proxy functionality to be implemented on the
@@ -1231,20 +1230,19 @@
 
       <figure>
         <artwork><![CDATA[           +-----------+ +----------+ +-----------+ +----------+
-           | New       | |          | |           | |          |
+           | New       | | Circuit  | |           | |          |
            | Entity    | | Proxy    | | Registrar | | Vendor   |
            |           | |          | |           | |          |
            ++----------+ +--+-------+ +-----+-----+ +--------+-+
             |               |               |                |
             |               |               |                |
-            | (D)TLS hello  |               |                |
-Establish   +---------------> (D)TLS hello  |                |
-(D)TLS      |               |--------------->                |
-connection  |          (forwarding)         |                |
-            | Server Cert   <---------------+                |
-            <---------------+               |                |
+            |   TLS hello   |  TLS hello    |                |
+Establish   +---------------C--------------->                |
+TLS         |               |               |                |
+connection  |               | Server Cert   |                |
+            <---------------C---------------+                |
             | Client Cert   |               |                |
-            +------------------------------->                |
+            +---------------C--------------->                |
             |               |               |                |
 HTTP REST   | POST /requestaudittoken       |                |
 Data        +--------------------nonce------>                |
@@ -1270,7 +1268,7 @@ Data        +--------------------nonce------>                |
 
       <figure>
         <artwork><![CDATA[           +-----------+ +----------+ +-----------+ +----------+
-           | New       | |          | |           | |          |
+           | New       | | Circuit  | |           | |          |
            | Entity    | | Proxy    | | Registrar | | Vendor   |
            |           | |          | |           | |          |
            ++----------+ +--+-------+ +-----+-----+ +--------+-+
@@ -1282,14 +1280,12 @@ Data        +--------------------nonce------>                |
             |               |               | /requestauditlog
             |               |               +---------------->
             |               |               <----------------+
-            | (D)TLS hello  |               |                |
-Establish   +---------------> (D)TLS hello  |                |
-(D)TLS      |               |--------------->                |
-connection  |          (forwarding)         |                |
-            | SerVer Cert   <---------------+                |
-            <---------------+               |                |
+            |   TLS hello   |  TLS hello    |                |
+Establish   +---------------C--------------->                |
+TLS         |               |               |                |
+connection  |               | Server Cert   |                |
+            <---------------C---------------+                |
             | Client Cert   |               |                |
-            +------------------------------->                |
             |               |               |                |
 HTTP REST   | POST /requestaudittoken       |                |
 Data        +----------------------nonce---->   (discard     |
@@ -1630,10 +1626,10 @@ Data        +----------------------nonce---->   (discard     |
           and Registrar and means that the EST protocol operation
           encapsulation into CoAP needs to be described. EST is HTTP based and
           "CoaP is designed to easily interface with HTTP for integration"
-          [RFC7252] so this section is anticipated to be relatively
-          straightforward. A complexity is that the large message sizes
-          necessary for bootstrapping will require support for
-          [draft-ietf-core-block].]]</t>
+          [RFC7252]. Use of CoAP implies Datagram TLS (DTLS) wherever this
+          document describes TLS handshake specifics. A complexity is that the
+          large message sizes necessary for bootstrapping will require support
+          for [draft-ietf-core-block].]]</t>
         </section>
       </section>
     </section>
@@ -1647,11 +1643,11 @@ Data        +----------------------nonce---->   (discard     |
       <section title="Trust Model">
         <figure>
           <artwork><![CDATA[
-+--------+         +-------+      +------------+     +------------+
-| New    |         | Proxy |      | Domain     |     | Vendor     |
-| Entity |         |       |      | Registrar  |     | Service    |
-|        |         |       |      |            |     | (Internet  |
-+--------+         +-------+      +------------+     +------------+
++--------+         +---------+    +------------+     +------------+
+| New    |         | Circuit |    | Domain     |     | Vendor     |
+| Entity |         | Proxy   |    | Registrar  |     | Service    |
+|        |         |         |    |            |     | (Internet  |
++--------+         +---------+    +------------+     +------------+
               ]]></artwork>
 
           <postamble>Figure 7</postamble>
