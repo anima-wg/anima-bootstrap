@@ -708,6 +708,60 @@
           Registrar.</t>
         </section>
 
+        <section title="When the actual time is unknown">
+          <t>Many devices when bootstrapping do not have knowledge of the
+          current time. Mechanisms like Network Time Protocols can not be
+          secured until bootstrapping is complete. Therefore bootstrapping is
+          defined in a method that does not require knowledge of the current
+          time. </t>
+
+          <t>Unfortunately there are moments during bootstrapping when
+          certificates are verified, such as during the TLS handshake, where
+          validity periods are confirmed. This paradoxical "catch-22" is
+          resolved by the New Entity maintaining a concept of the current
+          "window" of presumed time validity that is continually refined
+          throughout the bootstrapping process as follows:</t>
+
+          <t><list style="symbols">
+              <t>Initially the New Entity does not know the current time. The
+              nonce included in join attempts provides an alternate mechanism
+              for the New Entity to ensure responses are associated with a
+              particular bootstrapping attempt. Nonceless audit tokens from
+              the MASA server are always valid and thus time is not needed.
+              </t>
+
+              <t>In accordance with IEEE 802.1AR and RFC5280 all manufacturing
+              installed certificates and trust anchors are assumed to have
+              infinite lifetimes. All such certificates "SHOULD be assigned
+              the GeneralizedTime value of 99991231235959Z" [RFC5280]. The New
+              Entity, Registrar and MASA server MUST ignore any other validity
+              period information in these credentials and treat the effective
+              lifetime as 99991231235959Z. This ensures that client
+              authentication (see <xref target="entityauthentication"></xref>)
+              and the audit token signature (see <xref
+              target="AuditTokenResponse"></xref>) can always be verified
+              during RFC5280 path validation.</t>
+
+              <t>Once the audit token is accepted the validity period of the
+              domainCAcert in the token (see <xref
+              target="AuditTokenResponse"></xref>) now describes a valid time
+              window. Any subsequent certificate validity periods checked
+              during RFC5280 path validation MUST occur within this
+              window.</t>
+
+              <t>When accepting an enrollment certificate the validity period
+              within the new end entity certificate is assumed to be valid by
+              the New Entity. The New Entity is now willing to use this
+              credential for client authentication. </t>
+            </list></t>
+
+          <t>Once in this state the New Entity has a valid trust anchor with
+          the local domain and has a locally issued credential. These MAY be
+          used to secure distribution of more accurate time information
+          although specification of such a protocol is out-of-scope of this
+          document.</t>
+        </section>
+
         <section title="Enrollment">
           <t>As the final step of bootstrapping a Registrar helps to issue a
           domain specific credential to the New Entity. For simplicity in this
@@ -888,12 +942,13 @@
           <postamble>Figure 4</postamble>
         </figure>
 
-        <section title="Entity Authentication">
+        <section anchor="entityauthentication" title="Entity Authentication">
           <t>The applicable authentication methods detailed in EST [RFC7030]
           are:</t>
 
           <t><list style="symbols">
-              <t>the use of an IEEE 802.1AR IDevID credential,</t>
+              <t>the use of an IEEE 802.1AR IDevID credential during the TLS
+              client authentication,</t>
 
               <t>or the use of a secret that is transmitted out of band
               between the New Entity and the Registrar (this use case is not
@@ -1447,7 +1502,7 @@ Data        +----------------------nonce---->   (discard     |
         unify these sections or make the distinctions more clear]]</t>
       </section>
 
-      <section title="Audit Token Response">
+      <section anchor="AuditTokenResponse" title="Audit Token Response">
         <t>The authorization token response to requests from the device and
         requests from the Registrar are in the same format. The Registrar
         either caches prior MASA responses or dynamically requests a new Audit
