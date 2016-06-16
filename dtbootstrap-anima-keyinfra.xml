@@ -1442,9 +1442,17 @@ Data        +----------------------nonce---->   (discard     |
 
       <section title="Audit Token Response">
         <t>The authorization token response to requests from the device and
-        requests from the Registrar is the same format. The Registrar either
-        caches prior MASA responses or dynamically requests a new Audit Token
-        based on local policy.</t>
+        requests from the Registrar are in the same format. The Registrar
+        either caches prior MASA responses or dynamically requests a new Audit
+        Token based on local policy.</t>
+
+        <t>If the the join operation is successful, the server response MUST
+        contain an HTTP 200 response code with a content-type of
+        "application/authorization-token". The server MUST answer with a
+        suitable 4xx or 5xx HTTP [RFC2616] error code when a problem occurs.
+        The response data from the MASA server MUST be a plaintext
+        human-readable error message containing explanatory information
+        describing why the request was rejected.</t>
 
         <t>The authorization token consists of the nonce, if supplied, the
         serial number information identifying the device and the domain CA
@@ -1489,6 +1497,39 @@ Data        +----------------------nonce---->   (discard     |
         expansions of the certs and signatures within the JWS message are of
         minimal size -- it is not yet clear to this author how that would work
         out]]</t>
+      </section>
+
+      <section title="Audit Token Status Telemetry ">
+        <t>For automated bootstrapping of devices the adminstrative elements
+        providing bootstrapping also provide indications to the system
+        administrators concerning device lifecycle status. To facilitate this
+        those elements need telemetry information concerning the device's
+        status.</t>
+
+        <t>To indicate New Entity status regarding the audit token the client
+        SHOULD post a status message.</t>
+
+        <t>The client HTTP POSTs the following to the server at the EST well
+        known URI /requestaudittoken_status. The Status field indicates if the
+        audit token was acceptable. If it was not acceptable the Reason string
+        indicates why. In the failure case this message is being sent to an
+        unauthenticated, potentially malicious Registrar and therefore the
+        Reason string SHOULD NOT provide information beneficial to an
+        attacker. The operational benefit of this telemetry information is
+        balanced against the operational costs of not recording that an audit
+        token was ignored by a client the registar expected to continue
+        joining the domain.</t>
+
+        <t><figure>
+            <artwork><![CDATA[{
+  "version":"1",
+  "Status":FALSE /* TRUE=Success, FALSE=Fail"
+  "Reason":"Informative human readable message"
+}]]></artwork>
+          </figure>The server SHOULD respond with an HTTP 200 but MAY simply
+        fail with an HTTP 404 error. The client ignores any response. Within
+        the server logs the server SHOULD capture this telemetry
+        information.</t>
       </section>
 
       <section title="MASA authorization log Request ">
@@ -1595,7 +1636,7 @@ Data        +----------------------nonce---->   (discard     |
           guidance.</t>
         </section>
 
-        <section title="Verification of Success">
+        <section title="Enrollment Status Telemetry">
           <t>For automated bootstrapping of devices the adminstrative elements
           providing bootstrapping also provide indications to the system
           administrators concerning device lifecycle status. This might
@@ -1612,23 +1653,33 @@ Data        +----------------------nonce---->   (discard     |
           session and start a new one. The server MUST support either
           model.</t>
 
+          <t>In the case of a failure the Reason string indicates why the most
+          recent enrollment failed. The SubjectKeyIdentifier field MUST be
+          included if the enrollment attempt was for a keypair that is locally
+          known to the client. If EST /serverkeygen was used and failed then
+          the this field is ommited from the status telemetry.</t>
+
           <t>The client HTTP POSTs the following to the server at the EST well
-          known URI /success. The server always responds with HTTP 200 OK.</t>
+          known URI /enrollstatus. </t>
 
           <t><figure>
               <artwork><![CDATA[{
   "version":"1",
-  "Success":TRUE
-  "LDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier>",
-  "DevIDSerialNumber":"<id-at-serialNumber>",
+  "Status":TRUE /* TRUE=Success, FALSE=Fail"
+  "Reason":"Informative human readable message"
+  "SubjectKeyIdentifier":"<base64 encoded subjectkeyidentifier for the enrollment that failed>"
 }]]></artwork>
-            </figure>The server MUST support receiving this message. Within
-          the server logs the server MUST capture if this message was recieved
-          over an TLS session with a matching client certificate. This allows
-          for clients that wish to minimize their crypto operations to simpy
-          POST this response without renegotiating the TLS session - at the
-          cost of the server not being able to accurately verify that
-          enrollment was truly successful.</t>
+            </figure></t>
+
+          <t>The server SHOULD respond with an HTTP 200 but MAY simply fail
+          with an HTTP 404 error. </t>
+
+          <t>Within the server logs the server MUST capture if this message
+          was recieved over an TLS session with a matching client certificate.
+          This allows for clients that wish to minimize their crypto
+          operations to simpy POST this response without renegotiating the TLS
+          session - at the cost of the server not being able to accurately
+          verify that enrollment was truly successful.</t>
         </section>
 
         <section title="EST over CoAP">
