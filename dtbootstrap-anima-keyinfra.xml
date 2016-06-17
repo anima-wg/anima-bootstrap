@@ -1244,40 +1244,38 @@
     </section>
 
     <section anchor="ProtocolDetails" title="Protocol Details">
-      <t>For simplicity the bootstrapping protocol is described as extensions
-      to EST [RFC7030]. The new entity establishes a TLS connection with the
-      Registrar through the circuit proxy (see <xref
-      target="proxybehaviour"></xref>) but the TLS connection is with the
-      Registar so for this section the New Entity is the TLS client and the
-      Registrar is the TLS server.</t>
+      <t>A bootstrapping protocol could be implemented as an independent
+      protocol from EST, but for simplicity and to reduce the number of TLS
+      connections and crypto operations required on the New Entity, it is
+      described specifically as extensions to EST. These extensions MUST be
+      supported by the Registrar EST server within the same .well-known URI
+      tree as the existing EST URIs as described in [RFC7030] section
+      3.2.2.</t>
 
-      <t>EST provides a bootstrapping mechanism for new entities that are
-      configured with the URI of the EST server such that the Implicit TA
-      database can be used to authenticate the EST server. Alternatively EST
-      clients can "engage a human user to authorize the CA certificate using
-      out-of-band data such as a CA certificate". EST does not provide a
-      completely automated method of bootstrapping the PKI as both of these
-      methods require some user input (either of the URI or authorizing the CA
-      certificate).</t>
-
-      <t>This section details additional EST functionality that support
-      automated bootstrapping of the public key infrastructure. These
-      additions provide for fully automated bootstrapping. These additions are
-      to be optionally supported by the EST server within the same .well-known
-      URI tree as the existing EST URIs.</t>
-
-      <t>The "New Entity" is the EST client and the "Registrar" is the EST
+      <t>The new entity establishes a TLS connection with the Registrar
+      through the circuit proxy (see <xref target="proxybehaviour"></xref>)
+      but the TLS connection is with the Registar; so for this section the
+      "New Entity" is the TLS client and the "Registrar" is the TLS
       server.</t>
 
-      <t>The extensions for the client are as follows:</t>
+      <t>Establishment of the TLS connection for bootstrapping is as specified
+      for EST [RFC7030]. In particular server identity and client identity are
+      as described in EST [RFC7030] section 3.3. In EST [RFC7030] provisional
+      server authentication for bootstrapping is described in section 4.1.1
+      wherein EST clients can "engage a human user to authorize the CA
+      certificate using out-of-band data such as a CA certificate" or wherein
+      a human user configures the URI of the EST server for Implicit TA based
+      authentication. As described in this document, <xref
+      target="CompletingAuthenticationBootstrapping"></xref>, a new method of
+      bootstrapping now provides a completely automating method of
+      bootstrapping PKI.</t>
+
+      <t>The extensions for the New Entity client are as follows:</t>
 
       <t><list style="symbols">
           <t>The New Entity provisionally accept the EST server certificate
-          during the TLS handshake as detailed in EST section 4.1.1
-          ("Bootstrap Distribution of CA Certificates").</t>
-
-          <t>The Registrar requests and validates the Audit Token from the
-          vendor authorized MASA service.</t>
+          during the TLS handshake as detailed in <xref
+          target="CompletingAuthenticationBootstrapping"></xref>.</t>
 
           <t>The New Entity requests and validates the Audit Token as
           described below. At this point the New Entity has sufficient
@@ -1290,11 +1288,6 @@
           <t>The New Entity completes bootstrapping as detailed in EST section
           4.1.1.</t>
         </list></t>
-
-      <t>These extensions could be implemented as an independent protocol from
-      EST but since the overlap with basic enrollment is extensive,
-      particularly with respect to client authorization, they are defined here
-      as additions to EST.</t>
 
       <t>In order to obtain a validated Audit Token and Audit Log the
       Registrar contacts the MASA service Service using REST calls:</t>
@@ -1370,6 +1363,19 @@ Data        +----------------------nonce---->   (discard     |
       </figure>
 
       <t></t>
+
+      <t>The extensions for the Registrar server are as follows:</t>
+
+      <t><list style="symbols">
+          <t>The Registrar requests and validates the Audit Token from the
+          vendor authorized MASA service.</t>
+
+          <t>The Registrar forwards the Audit Token to the New Entity when
+          requested.</t>
+
+          <t>The Registar performs log verifications in addition to local
+          authorization checks before accepting the New Entity device. </t>
+        </list></t>
 
       <section anchor="RequestAuditTokenFromRegistrar"
                title="Request Audit Token from the Registrar">
@@ -1566,7 +1572,8 @@ Data        +----------------------nonce---->   (discard     |
         the domainCAcert trust anchor to immediately validate the currently
         provisional TLS connection to the Registrar.</t>
 
-        <section title="Completing authentication of Provisional TLS connection">
+        <section anchor="CompletingAuthenticationBootstrapping"
+                 title="Completing authentication of Provisional TLS connection">
           <t>If the Registrar's credential can not be verified using the
           domainCAcert trust anchor the TLS connection is immediately
           discarded and the New Entity abandons attempts to bootstrap with
