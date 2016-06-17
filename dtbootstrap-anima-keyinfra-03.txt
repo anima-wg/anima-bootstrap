@@ -1687,7 +1687,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    {
     "version":"1",
     "nonce":"<64bit nonce value>",
-    "OwnershipValidation":true
    }
 
    [[EDNOTE: exact format TBD.  There is an advantage to having the
@@ -1729,6 +1728,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    (The MASA service MUST properly reject any EST functionality requests
    it does not wish to service; a requirement that holds for any REST
    interface).
+
 
 
 
@@ -2225,14 +2225,14 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 6.3.  Registrar security reductions
 
    The Registrar can choose to accept devices using less secure methods.
-   These methods are RECOMMENDED when low security models are needed as
-   the security decisions are being made by the local administrator:
+   These methods are acceptable when low security models are needed, as
+   the security decisions are being made by the local administrator, but
+   they MUST NOT be the default behavior:
 
    1.  The registrar MAY choose to accept all devices, or all devices of
        a particular type, at the administrator's discretion.  This could
        occur when informing the Registrar of unique identifiers of new
        entities might be operationally difficult.
-
 
 
 
@@ -2245,9 +2245,12 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    2.  The registrar MAY choose to accept devices that claim a unique
        identity without the benefit of authenticating that claimed
        identity.  This could occur when the New Entity does not include
-       an IEEE 802.1AR factory installed credential.  [[EDNOTE: a man-
-       in-the-middle attack at this point might be distinct from just an
-       un-authenticated]]
+       an IEEE 802.1AR factory installed credential.  New Entities
+       without an IDevID credential MAY form the Section 5.1 request
+       using the Section 5.2 format to ensure the New Entity's serial
+       number information is provided to the Registar.  The New Entity
+       MAY refused to provide a TLS client certificate (as one is not
+       available).
 
    3.  The registrar MAY request nonce-less Audit Tokens from the MASA
        service.  These tokens can then be transmitted to the Registrar
@@ -2288,9 +2291,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
        use this functionality only in concert with Ownership Validation
        tracking.
 
-   2.  Not verifying ownership before responding with an Audit Token.
-       This is expected to be a common operational model because doing
-
 
 
 Pritikin, et al.        Expires December 18, 2016              [Page 41]
@@ -2298,6 +2298,8 @@ Pritikin, et al.        Expires December 18, 2016              [Page 41]
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
+   2.  Not verifying ownership before responding with an Audit Token.
+       This is expected to be a common operational model because doing
        so relieves the vendor providing MASA services from having to
        tracking ownership during shipping and supply chain and allows
        for a very low overhead MASA service.  The Registrar uses the
@@ -2343,8 +2345,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
    To facilitate auditing the New Entity reports on audit token parsing
    status.  In the case of a failure this information is informative to
-   the potentially malicious Registar but this is included because the
-   operational benefits are concidered beneficial.
 
 
 
@@ -2353,6 +2353,9 @@ Pritikin, et al.        Expires December 18, 2016              [Page 42]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
+
+   the potentially malicious Registar but this is included because the
+   operational benefits are concidered beneficial.
 
    As indicated in EST [RFC7030] the connection is provisional and
    untrusted until the server is successfully authorized.  If the server
@@ -2374,7 +2377,8 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 8.  Acknowledgements
 
    We would like to thank the various reviewers for their input, in
-   particular Markus Stenberg, Brian Carpenter, Fuyu Eleven.
+   particular Markus Stenberg, Brian Carpenter, Fuyu Eleven, Toerless
+   Eckert, Eliot Lear and Sergey Kasatkin.
 
 9.  References
 
@@ -2398,10 +2402,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
               Configuration of IPv4 Link-Local Addresses", RFC 3927,
               DOI 10.17487/RFC3927, May 2005,
               <http://www.rfc-editor.org/info/rfc3927>.
-
-
-
-
 
 
 
