@@ -614,17 +614,20 @@
           the backoff mechanism.]]</t>
         </section>
 
-        <section title="Identity">
+        <section anchor="identity" title="Identity">
           <t>The New Entity identifies itself during the communication
           protocol handshake. If the client identity is rejected the New
           Entity repeats the Discovery process using the next proxy or
           discovery method available.</t>
 
-          <t>The bootstrapping protocol server is not authenticated. Thus this
-          connection is provisional and all data received is untrusted until
-          sufficiently validated even though it is over a TLS connection. This
-          is aligned with the existing provisional mode of EST [RFC7030]
-          during s4.1.1 "Bootstrap Distribution of CA Certificates".</t>
+          <t>The bootstrapping protocol server is not initially authenticated.
+          Thus the connection is provisional and all data received is
+          untrusted until sufficiently validated even though it is over a TLS
+          connection. This is aligned with the existing provisional mode of
+          EST [RFC7030] during s4.1.1 "Bootstrap Distribution of CA
+          Certificates". See <xref target="AuditTokenResponse"></xref> for
+          more information about when the TLS connection authenticated is
+          completed.</t>
 
           <t>All security associations established are between the new device
           and the Bootstrapping server regardless of proxy operations.</t>
@@ -708,12 +711,12 @@
           Registrar.</t>
         </section>
 
-        <section title="When the actual time is unknown">
+        <section anchor="timeunknown" title="Lack of realtime clock">
           <t>Many devices when bootstrapping do not have knowledge of the
           current time. Mechanisms like Network Time Protocols can not be
           secured until bootstrapping is complete. Therefore bootstrapping is
           defined in a method that does not require knowledge of the current
-          time. </t>
+          time.</t>
 
           <t>Unfortunately there are moments during bootstrapping when
           certificates are verified, such as during the TLS handshake, where
@@ -727,8 +730,8 @@
               nonce included in join attempts provides an alternate mechanism
               for the New Entity to ensure responses are associated with a
               particular bootstrapping attempt. Nonceless audit tokens from
-              the MASA server are always valid and thus time is not needed.
-              </t>
+              the MASA server are always valid and thus time is not
+              needed.</t>
 
               <t>In accordance with IEEE 802.1AR and RFC5280 all manufacturing
               installed certificates and trust anchors are assumed to have
@@ -752,7 +755,7 @@
               <t>When accepting an enrollment certificate the validity period
               within the new end entity certificate is assumed to be valid by
               the New Entity. The New Entity is now willing to use this
-              credential for client authentication. </t>
+              credential for client authentication.</t>
             </list></t>
 
           <t>Once in this state the New Entity has a valid trust anchor with
@@ -1062,7 +1065,7 @@
           distributed consensus technologies that integrate the audit token
           with a current technologies such as block-chain or hash trees or the
           like. Doing so is out of the scope of this document but are
-          anticipated improvements for future work. </t>
+          anticipated improvements for future work.</t>
         </section>
       </section>
 
@@ -1530,6 +1533,20 @@ Data        +----------------------nonce---->   (discard     |
 }]]></artwork>
         </figure>
 
+        <t>The audit token response is encapsulated in a <xref
+        target="RFC5652"></xref> Signed-data that is signed by the MASA
+        server. The New Entity verifies this signed message using the IEEE
+        802.1AR manufacturer installed trust anchor. [[EDNOTE: Using is CMS
+        consistent with the request format as specified above and is
+        consistent with the alignment of this bootstrapping document with EST,
+        a PKIX enrollment protocol that includes Certificate Management over
+        CMS. An alternative format would be the RFC7515 JSON Web Signature
+        (JWS), which would allow clients that do not use fullCMC messages to
+        avoid CMS entirely. Use of JWS would likely include a discussion of
+        CBOR in order ensure the base64 expansions of the certs and signatures
+        within the JWS message are of minimal size -- it is not yet clear to
+        this author how that would work out]]</t>
+
         <t>The 'domainCAcert' element of this message contains the domain CA's
         public key. This is specific to bootstrapping a public key
         infrastructure. To support bootstrapping other key infrastructures
@@ -1539,26 +1556,45 @@ Data        +----------------------nonce---->   (discard     |
         an audit token response that does not contain a 'domainCAcert' field
         at all.</t>
 
-        <t>The audit token response is encapsulated in a <xref
-        target="RFC5652"></xref> Signed-data that is signed by the MASA
-        server. The New Entity verifies this signed message using the IEEE
-        802.1AR manufacturer installed trust anchor. The New Entity installs
-        this trust anchor and proceeds with EST RFC7030 enrollment. The newly
-        installed trust anchor is used as an EST RFC7030 Explicit Trust
-        Anchor, and can be used to authenticate dynamically discovered EST
-        server's that contain the id-kp-cmcRA extended key usage extension as
-        detailed in EST RFC7030 section 3.6.1.</t>
+        <t>To minimize the size of the audit token response message the
+        domainCAcert is not a complete distribution of the EST section 4.1.3
+        CA Certificate Response. </t>
 
-        <t>[[EDNOTE: Using is CMS consistent with the request format as
-        specified above and is consistent with the alignment of this
-        bootstrapping document with EST, a PKIX enrollment protocol that
-        includes Certificate Management over CMS. An alternative format would
-        be the RFC7515 JSON Web Signature (JWS), which would allow clients
-        that do not use fullCMC messages to avoid CMS entirely. Use of JWS
-        would likely include a discussion of CBOR in order ensure the base64
-        expansions of the certs and signatures within the JWS message are of
-        minimal size -- it is not yet clear to this author how that would work
-        out]]</t>
+        <t>The New Entity installs the domainCAcert trust anchor. As indicated
+        in <xref target="identity"></xref> the newly installed trust anchor is
+        used as an EST RFC7030 Explicit Trust Anchor. The New Entity MUST use
+        the domainCAcert trust anchor to immediately validate the currently
+        provisional TLS connection to the Registrar.</t>
+
+        <section title="Completing authentication of Provisional TLS connection">
+          <t>If the Registrar's credential can not be verified using the
+          domainCAcert trust anchor the TLS connection is immediately
+          discarded and the New Entity abandons attempts to bootstrap with
+          this discovered registrar.</t>
+
+          <t>The following behaviors on the Registrar and New Entity are in
+          addition to normal PKIX operations:</t>
+
+          <t><list style="symbols">
+              <t>The EST server MUST use a certificate that chains to the
+              domainCAcert. This means that when the EST server obtains
+              renewed credentials the credentials included in the <xref
+              target="RequestAuditToken"></xref> request match the chain used
+              in the current provisional TLS connection.</t>
+
+              <t>The New Entity PKIX path validation of the Registrar validity
+              period information is as described in <xref
+              target="timeunknown"></xref>.</t>
+            </list>The domainCAcert trust anchor can be used to authenticate
+          dynamically discovered EST server's that contain the id-kp-cmcRA
+          extended key usage extension as detailed in EST RFC7030 section
+          3.6.1 but to reduce system complexity the New Entity SHOULD avoid
+          additional discovery operations. Instead the New entity SHOULD
+          communicate directly with the Registrar as the EST server to
+          complete PKI local certificate enrollment. [[EDNOTE: It is
+          reasonable to mandate that the existing TLS connection be re-used?
+          e.g. MUST &gt;&gt; SHOULD?]]</t>
+        </section>
       </section>
 
       <section title="Audit Token Status Telemetry ">
@@ -1658,10 +1694,27 @@ Data        +----------------------nonce---->   (discard     |
         PKI specific aspects of the extensions and future work might replace
         them with non-PKI structures.</t>
 
-        <t>This subsection provides guidance concerning EST options to ensure
-        consistent bootstrapping operations for PKI deployments.</t>
+        <t>The prior sections provide functionality for the New Entity to
+        obtain a trust anchor representative of the Domain. The following
+        section describe using EST to obtain a locally issued PKI certificate.
+        The New Entity MAY perform alternative enrollment methods or proceed
+        to use its IDevID credential indefinately, but those that leverage the
+        discovered Registrar to proceed with certificate enrollment MUST
+        implement the following EST choices.</t>
 
-        <section title="CSR Attributes">
+        <section title="EST Distribution of CA Certificates">
+          <t>The New Entity MUST request the full EST Distribution of CA
+          Certificates message. See RFC7030, section 4.1.</t>
+
+          <t>This ensures that the New Entity has the complete set of current
+          CA certificates beyond the domainCAcert (see <xref
+          target="AuditTokenResponse"></xref> for a discussion of the
+          limitations). Although these restrictions are acceptable for the
+          Registrar integrated with initial bootstrapping they are not
+          appropriate for ongoing PKIX end entity certificate validation.</t>
+        </section>
+
+        <section title="EST CSR Attributes">
           <t>Automated bootstrapping occurs without local administrative
           configuration of the New Entity. In some deployments its plausible
           that the New Entity generates a certificate request containing only
@@ -1698,6 +1751,11 @@ Data        +----------------------nonce---->   (discard     |
           guidance.</t>
         </section>
 
+        <section title="EST Client Certificate Request">
+          <t>The New Entity MUST request a new client certificate. See
+          RFC7030, section 4.2.</t>
+        </section>
+
         <section title="Enrollment Status Telemetry">
           <t>For automated bootstrapping of devices the adminstrative elements
           providing bootstrapping also provide indications to the system
@@ -1721,8 +1779,8 @@ Data        +----------------------nonce---->   (discard     |
           known to the client. If EST /serverkeygen was used and failed then
           the this field is ommited from the status telemetry.</t>
 
-          <t>The client HTTP POSTs the following to the server at the EST well
-          known URI /enrollstatus. </t>
+          <t>The client HTTP POSTs the following to the server at the new EST
+          well known URI /enrollstatus.</t>
 
           <t><figure>
               <artwork><![CDATA[{
@@ -1734,7 +1792,7 @@ Data        +----------------------nonce---->   (discard     |
             </figure></t>
 
           <t>The server SHOULD respond with an HTTP 200 but MAY simply fail
-          with an HTTP 404 error. </t>
+          with an HTTP 404 error.</t>
 
           <t>Within the server logs the server MUST capture if this message
           was recieved over an TLS session with a matching client certificate.
