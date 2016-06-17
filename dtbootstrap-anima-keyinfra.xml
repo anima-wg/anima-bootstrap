@@ -522,10 +522,9 @@
             handshake. (Although the Registrar is also authenticated these
             credentials are only provisionally accepted at this time).</t>
 
-            <t>Requests to Join the discovered Registrar. The acceptable
-            imprint methods are indicated along with a nonce ensuring that any
-            responses can be associated with this particular bootstrapping
-            attempt.</t>
+            <t>Requests to Join the discovered Registrar. A unique nonce is
+            included ensuring that any responses can be associated with this
+            particular bootstrapping attempt.</t>
 
             <t>Imprint on the Registrar. This requires verification of the
             vendor service "Audit Token" or the validation of the vendor
@@ -1412,11 +1411,6 @@ Data        +----------------------nonce---->   (discard     |
         identity. It is not clear that there is a security benefit from this
         since its the New Entity that verifies the nonce.]]</t>
 
-        <t>[[EDNOTE: If we want to consider future versions either the version
-        information in imparted using the URI, the HTTP content-type, or some
-        version field within the JSON itself. Which is the preferred
-        method?]]</t>
-
         <t>The Registrar validates the client identity as described in EST
         [RFC7030] section 3.3.2. The registrar performs authorization as
         detailed in Section 3.3.2. If authorization is successful the
@@ -1433,7 +1427,21 @@ Data        +----------------------nonce---->   (discard     |
         against the redirect URI provided. If the New Entity had not yet
         authenticated the Registrar because it was discovered and was not a
         known-to-be-valid URI then the new Registrar must be authenticated
-        using one of the two autonomic methods described in this document.</t>
+        using one of the two autonomic methods described in this document.
+        Similarly the Registar MAY respond with an HTTP 202 ("the request has
+        been accepted for processing, but the processing has not been
+        completed") as described in EST [RFC7030] section 4.2.3. </t>
+
+        <t>Recall that during this communication with the Registar the TLS
+        authentication is only provisional. The New Entity client MUST handle
+        all data from the Registrar with upmost care. In particular the New
+        Entity MUST only allow a single redirection and MUST only support a
+        delay of five seconds before declaring the Registrar a failure and
+        moving on to the next discovered Registrar. As detailed in <xref
+        target="ProxyDiscovery"></xref> if no suitable Registrar is found the
+        New Entity restarts the state machine and tries again. So a Registrar
+        that is unable to complete the transaction the first time will have
+        future chances. </t>
       </section>
 
       <section anchor="RequestAuditToken"
