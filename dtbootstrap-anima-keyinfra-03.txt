@@ -5,11 +5,11 @@
 ANIMA WG                                                     M. Pritikin
 Internet-Draft                                                     Cisco
 Intended status: Informational                             M. Richardson
-Expires: December 17, 2016                                           SSW
+Expires: December 18, 2016                                           SSW
                                                             M. Behringer
                                                             S. Bjarnason
                                                                    Cisco
-                                                           June 15, 2016
+                                                           June 16, 2016
 
 
         Bootstrapping Remote Secure Key Infrastructures (BRSKI)
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 17, 2016.
+   This Internet-Draft will expire on December 18, 2016.
 
 
 
@@ -53,7 +53,7 @@ Status of This Memo
 
 
 
-Pritikin, et al.        Expires December 17, 2016               [Page 1]
+Pritikin, et al.        Expires December 18, 2016               [Page 1]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -77,66 +77,72 @@ Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
      1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   4
-     1.2.  Scope of solution . . . . . . . . . . . . . . . . . . . .   5
-     1.3.  Trust bootstrap . . . . . . . . . . . . . . . . . . . . .   6
+     1.2.  Scope of solution . . . . . . . . . . . . . . . . . . . .   6
+     1.3.  Trust bootstrap . . . . . . . . . . . . . . . . . . . . .   7
    2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   7
    3.  Functional Overview . . . . . . . . . . . . . . . . . . . . .   9
-     3.1.  Behavior of a New Entity  . . . . . . . . . . . . . . . .  10
-       3.1.1.  Discovery . . . . . . . . . . . . . . . . . . . . . .  12
-       3.1.2.  Identity  . . . . . . . . . . . . . . . . . . . . . .  13
-       3.1.3.  Request Join  . . . . . . . . . . . . . . . . . . . .  14
-       3.1.4.  Imprint . . . . . . . . . . . . . . . . . . . . . . .  14
-       3.1.5.  Enrollment  . . . . . . . . . . . . . . . . . . . . .  15
-       3.1.6.  Being Managed . . . . . . . . . . . . . . . . . . . .  16
-     3.2.  Behavior of a Proxy . . . . . . . . . . . . . . . . . . .  16
-       3.2.1.  CoAP connection to Registrar  . . . . . . . . . . . .  17
-       3.2.2.  HTTPS proxy connection to Registrar . . . . . . . . .  17
-     3.3.  Behavior of the Registrar (Bootstrap Server)  . . . . . .  18
-       3.3.1.  Entity Authentication . . . . . . . . . . . . . . . .  19
-       3.3.2.  Entity Authorization  . . . . . . . . . . . . . . . .  19
-       3.3.3.  Claiming the New Entity . . . . . . . . . . . . . . .  20
-       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  21
-     3.4.  Behavior of the MASA Service  . . . . . . . . . . . . . .  22
-       3.4.1.  Issue Authorization Token and Log the event . . . . .  22
-       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  22
-     3.5.  Leveraging the new key infrastructure / next steps  . . .  22
-       3.5.1.  Network boundaries  . . . . . . . . . . . . . . . . .  23
-     3.6.  Interactions with Network Access Control  . . . . . . . .  23
-   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  23
-     4.1.  Instantiating the Domain Certification Authority  . . . .  23
-     4.2.  Instantiating the Registrar . . . . . . . . . . . . . . .  23
-     4.3.  Accepting New Entities  . . . . . . . . . . . . . . . . .  24
+     3.1.  Behavior of a New Entity  . . . . . . . . . . . . . . . .  11
+       3.1.1.  Discovery . . . . . . . . . . . . . . . . . . . . . .  13
+       3.1.2.  Identity  . . . . . . . . . . . . . . . . . . . . . .  14
+       3.1.3.  Request Join  . . . . . . . . . . . . . . . . . . . .  15
+       3.1.4.  Imprint . . . . . . . . . . . . . . . . . . . . . . .  15
+       3.1.5.  Lack of realtime clock  . . . . . . . . . . . . . . .  16
+       3.1.6.  Enrollment  . . . . . . . . . . . . . . . . . . . . .  17
+       3.1.7.  Being Managed . . . . . . . . . . . . . . . . . . . .  18
+     3.2.  Behavior of a Proxy . . . . . . . . . . . . . . . . . . .  18
+       3.2.1.  CoAP connection to Registrar  . . . . . . . . . . . .  19
+       3.2.2.  HTTPS proxy connection to Registrar . . . . . . . . .  19
+     3.3.  Behavior of the Registrar (Bootstrap Server)  . . . . . .  20
+       3.3.1.  Entity Authentication . . . . . . . . . . . . . . . .  21
+       3.3.2.  Entity Authorization  . . . . . . . . . . . . . . . .  21
+       3.3.3.  Claiming the New Entity . . . . . . . . . . . . . . .  22
+       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  23
+     3.4.  Behavior of the MASA Service  . . . . . . . . . . . . . .  24
+       3.4.1.  Issue Authorization Token and Log the event . . . . .  24
+       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  24
+     3.5.  Leveraging the new key infrastructure / next steps  . . .  24
+       3.5.1.  Network boundaries  . . . . . . . . . . . . . . . . .  25
+     3.6.  Interactions with Network Access Control  . . . . . . . .  25
+   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  25
+     4.1.  Instantiating the Domain Certification Authority  . . . .  25
+     4.2.  Instantiating the Registrar . . . . . . . . . . . . . . .  25
 
 
 
-Pritikin, et al.        Expires December 17, 2016               [Page 2]
+Pritikin, et al.        Expires December 18, 2016               [Page 2]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
-     4.4.  Automatic Enrollment of Devices . . . . . . . . . . . . .  25
-     4.5.  Secure Network Operations . . . . . . . . . . . . . . . .  25
-   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  25
-     5.1.  Request Audit Token from the Registrar  . . . . . . . . .  28
-     5.2.  Request Audit Token from MASA . . . . . . . . . . . . . .  29
-     5.3.  Audit Token Response  . . . . . . . . . . . . . . . . . .  31
-     5.4.  MASA authorization log Request  . . . . . . . . . . . . .  32
-     5.5.  MASA authorization log Response . . . . . . . . . . . . .  32
-     5.6.  EST Integration for PKI bootstrapping . . . . . . . . . .  33
-       5.6.1.  CSR Attributes  . . . . . . . . . . . . . . . . . . .  33
-       5.6.2.  Verification of Success . . . . . . . . . . . . . . .  34
-       5.6.3.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  35
-   6.  Reduced security operational modes  . . . . . . . . . . . . .  35
-     6.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  35
-     6.2.  New Entity security reductions  . . . . . . . . . . . . .  36
-     6.3.  Registrar security reductions . . . . . . . . . . . . . .  36
-     6.4.  MASA security reductions  . . . . . . . . . . . . . . . .  37
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  38
-   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  39
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  39
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  39
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .  40
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  41
+     4.3.  Accepting New Entities  . . . . . . . . . . . . . . . . .  26
+     4.4.  Automatic Enrollment of Devices . . . . . . . . . . . . .  27
+     4.5.  Secure Network Operations . . . . . . . . . . . . . . . .  27
+   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  27
+     5.1.  Request Audit Token from the Registrar  . . . . . . . . .  30
+     5.2.  Request Audit Token from MASA . . . . . . . . . . . . . .  31
+     5.3.  Audit Token Response  . . . . . . . . . . . . . . . . . .  33
+       5.3.1.  Completing authentication of Provisional TLS
+               connection  . . . . . . . . . . . . . . . . . . . . .  34
+     5.4.  Audit Token Status Telemetry  . . . . . . . . . . . . . .  35
+     5.5.  MASA authorization log Request  . . . . . . . . . . . . .  35
+     5.6.  MASA authorization log Response . . . . . . . . . . . . .  36
+     5.7.  EST Integration for PKI bootstrapping . . . . . . . . . .  36
+       5.7.1.  EST Distribution of CA Certificates . . . . . . . . .  37
+       5.7.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  37
+       5.7.3.  EST Client Certificate Request  . . . . . . . . . . .  38
+       5.7.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  38
+       5.7.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  39
+   6.  Reduced security operational modes  . . . . . . . . . . . . .  39
+     6.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  39
+     6.2.  New Entity security reductions  . . . . . . . . . . . . .  40
+     6.3.  Registrar security reductions . . . . . . . . . . . . . .  40
+     6.4.  MASA security reductions  . . . . . . . . . . . . . . . .  41
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  42
+   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  43
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  43
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  43
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  44
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  45
 
 1.  Introduction
 
@@ -157,18 +163,17 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    described as four distinct steps between the existing domain and the
    new entity being added:
 
+
+
+Pritikin, et al.        Expires December 18, 2016               [Page 3]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
    o  New entity authentication: "Who is this?  What is its identity?"
 
    o  New entity authorization: "Is it mine?  Do I want it?  What are
       the chances it has been compromised?"
-
-
-
-
-Pritikin, et al.        Expires December 17, 2016               [Page 3]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
 
    o  Domain authentication: "What is this domain's claimed identity?"
 
@@ -214,18 +219,17 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    "OPTIONAL" in this document are to be interpreted as described in
    [RFC2119].
 
-   The following terms are defined for clarity:
-
-   DomainID:  The domain identity is the 160-bit SHA-1 hash of the BIT
-      STRING of the subjectPublicKey of the domain trust anchor that is
 
 
-
-Pritikin, et al.        Expires December 17, 2016               [Page 4]
+Pritikin, et al.        Expires December 18, 2016               [Page 4]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
+   The following terms are defined for clarity:
+
+   DomainID:  The domain identity is the 160-bit SHA-1 hash of the BIT
+      STRING of the subjectPublicKey of the domain trust anchor that is
       stored by the Domain CA.  This is consistent with the RFC5280
       Certification Authority subject key identifier of the Domain CA's
       self signed root certificate.  (A string value bound to the Domain
@@ -269,19 +273,19 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
       specific domain "owns" the new entity as defined in
       [I-D.ietf-netconf-zerotouch].
 
-1.2.  Scope of solution
-
-   Questions have been posed as to whether this solution is suitable in
-   general for Internet of Things (IoT) networks.  In general the answer
 
 
 
 
-Pritikin, et al.        Expires December 17, 2016               [Page 5]
+Pritikin, et al.        Expires December 18, 2016               [Page 5]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
+1.2.  Scope of solution
+
+   Questions have been posed as to whether this solution is suitable in
+   general for Internet of Things (IoT) networks.  In general the answer
    is no, but the terminology of [RFC7228] is best used to describe the
    boundaries.
 
@@ -324,20 +328,22 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    questions above are resolved is in scope.  It is simply the actual
    on-the-wire imprint protocol which is likely inappropriate.
 
+
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016               [Page 6]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
 1.3.  Trust bootstrap
 
    The imprint protocol results in a secure relationship between the
    domain registrar and the new device.  If the new device is
    sufficiently constrained that the ACE protocol should be leveraged
    for operation, (see [I-D.ietf-ace-actors]), and the domain registrar
-
-
-
-Pritikin, et al.        Expires December 17, 2016               [Page 6]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
-
    is also the Client Authorization Server or the Authorization Server,
    then it may be appropriate to use this secure channel to exchange ACE
    tokens.
@@ -348,6 +354,45 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    this section.  Figure 1 provides a simplified overview of the
    components.  Each component is logical and may be combined with other
    components as necessary.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016               [Page 7]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
 
                                              .
                                              .+------------------------+
@@ -387,13 +432,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
       Certificate Authority, Management components and any existing
       entity that is already a member of the domain.
 
-
-
-Pritikin, et al.        Expires December 17, 2016               [Page 7]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
-
    Domain CA:  The domain Certification Authority (CA) provides
       certification functionalities to the domain.  At a minimum it
       provides certification functionalities to the Registrar and stores
@@ -403,6 +441,15 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    Registrar:  A representative of the domain that is configured,
       perhaps autonomically, to decide whether a new device is allowed
       to join the domain.  The administrator of the domain interfaces
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016               [Page 8]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
       with a Registrar to control this process.  Typically a Registrar
       is "inside" its domain.
 
@@ -441,15 +488,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    this approach, they can still be bootstrapped manually.  Although
    manual deployment is not scalable and is not a focus of this document
    the necessary mechanisms are called out in this document to ensure
-
-
-
-
-Pritikin, et al.        Expires December 17, 2016               [Page 8]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
-
    such edge conditions are covered by the architectural and protocol
    models.
 
@@ -460,17 +498,25 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    autonomic domain.  See [I-D.irtf-nmrg-autonomic-network-definitions]
    for more information.
 
+
+
+
+Pritikin, et al.        Expires December 18, 2016               [Page 9]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
    This section details the state machine and operational flow for each
    of the main three entities.  The New Entity, the Domain (primarily
    the Registrar) and the MASA service.
 
    A representative flow is shown in Figure 2:
 
-     +--------+         +-------+      +------------+     +------------+
-     | New    |         | Proxy |      | Domain     |     | Vendor     |
-     | Entity |         |       |      | Registrar  |     | Service    |
-     |        |         |       |      |            |     | (Internet  |
-     +--------+         +-------+      +------------+     +------------+
+     +--------+         +---------+    +------------+     +------------+
+     | New    |         | Circuit |    | Domain     |     | Vendor     |
+     | Entity |         | Proxy   |    | Registrar  |     | Service    |
+     |        |         |         |    |            |     | (Internet  |
+     +--------+         +---------+    +------------+     +------------+
       |                     |                   |                    |
       |<-RFC3927 IPv4 adr   |                   |                    |
     or|<-RFC4862 IPv6 adr   |                   |                    |
@@ -483,9 +529,9 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
       | mDNS broadcast      |                   |                    |
       | response or periodic|                   |                    |
       |                     |                   |                    |
-      |<------------------->|<----------------->|                    |
-      |         (d)TLS via the Proxy            |                    |
-      |<--Registrar TLS server authentication-->|                    |
+      |<------------------->C<----------------->|                    |
+      |            TLS via the Circuit Proxy    |                    |
+      |<--Registrar TLS server authentication---|                    |
   [PROVISIONAL accept of server cert]           |                    |
       P---IEEE 802.1AR client authentication--->|                    |
       P                     |                   |                    |
@@ -498,14 +544,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
       P                     |       |           |--Domain ID-------->|
       P                     |       |           |--optional:nonce--->|
       P                     |       |           |     [extract DomainID]
-
-
-
-Pritikin, et al.        Expires December 17, 2016               [Page 9]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
-
       P                     |       |           |                    |
       P                     |    optional:      |     [update audit log]
       P                     |       |can        |                    |
@@ -516,6 +554,14 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
       P                     |       |           |<-device audit log--|
       P                     |       |           |                    |
       P                     |       |           |  choice:           |
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 10]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
       P                     |       |           |<-audit token-------|
       P                     |       |           |<-or: ownership-----|
       P                     |       \---->      |      voucher       |
@@ -557,7 +603,17 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 10]
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 11]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -606,14 +662,14 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    1.  Discover a communication channel to the "closest" Registrar.
 
    2.  Identify itself.  This is done by presenting an IEEE 802.1AR
-       credentials to the discovered Registrar (via the Proxy) in a
-       (d)TLS handshake.  (Although the Registrar is also authenticated
-       these credentials are only provisionally accepted at this time).
+       credentials to the discovered Registrar (via the Proxy) in a TLS
+       handshake.  (Although the Registrar is also authenticated these
+       credentials are only provisionally accepted at this time).
 
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 11]
+Pritikin, et al.        Expires December 18, 2016              [Page 12]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -628,7 +684,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
        service "Ownership Voucher".  Either of these responses contains
        sufficient information for the New Entity to complete
        authentication of the Registrar.  (The New Entity can now finish
-       authentication of the Registrar (d)TLS server certificate)
+       authentication of the Registrar TLS server certificate)
 
    5.  Enroll by accepting the domain specific information from the
        Registrar, and by obtaining a domain certificate from the
@@ -669,7 +725,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 12]
+Pritikin, et al.        Expires December 18, 2016              [Page 13]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -688,10 +744,11 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
        example.com".
 
    [[EDNOTE: The above language doesn't result in a mandatory to
-   implemnet discovery method.  At best it SHOULD/RECOMMENDs.]]
+   implement discovery method.  At best it SHOULD/RECOMMENDs.]]
 
-   Once a Registrar is discovered (technically a communication channel
-   through a Proxy) the New Entity communicates with the Registrar using
+   DNS-based service discovery communicates the local proxy IPv4 or IPv6
+   address and port to the New Entity.  Once a proxy is discovered the
+   New Entity communicates with the Registrar through the proxy using
    the bootstrapping protocol defined in Section 5.  The current DNS
    services returned during each query is maintained until bootstrapping
    is completed.  If bootstrapping fails and the New Entity returns to
@@ -718,20 +775,21 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    the Discovery process using the next proxy or discovery method
    available.
 
-   The bootstrapping protocol server is not authenticated.  Thus this
-   connection is provisional and all data received is untrusted until
-   sufficiently validated even though it is over a (D)TLS connection.
+   The bootstrapping protocol server is not initially authenticated.
+   Thus the connection is provisional and all data received is untrusted
+   until sufficiently validated even though it is over a TLS connection.
 
 
 
-
-Pritikin, et al.        Expires December 17, 2016              [Page 13]
+Pritikin, et al.        Expires December 18, 2016              [Page 14]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
    This is aligned with the existing provisional mode of EST [RFC7030]
-   during s4.1.1 "Bootstrap Distribution of CA Certificates".
+   during s4.1.1 "Bootstrap Distribution of CA Certificates".  See
+   Section 5.3 for more information about when the TLS connection
+   authenticated is completed.
 
    All security associations established are between the new device and
    the Bootstrapping server regardless of proxy operations.
@@ -779,9 +837,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 14]
+Pritikin, et al.        Expires December 18, 2016              [Page 15]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -819,7 +875,62 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    state and attempts bootstrapping with the next available discovered
    Registrar.
 
-3.1.5.  Enrollment
+3.1.5.  Lack of realtime clock
+
+   Many devices when bootstrapping do not have knowledge of the current
+   time.  Mechanisms like Network Time Protocols can not be secured
+   until bootstrapping is complete.  Therefore bootstrapping is defined
+   in a method that does not require knowledge of the current time.
+
+   Unfortunately there are moments during bootstrapping when
+   certificates are verified, such as during the TLS handshake, where
+   validity periods are confirmed.  This paradoxical "catch-22" is
+   resolved by the New Entity maintaining a concept of the current
+   "window" of presumed time validity that is continually refined
+   throughout the bootstrapping process as follows:
+
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 16]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
+   o  Initially the New Entity does not know the current time.  The
+      nonce included in join attempts provides an alternate mechanism
+      for the New Entity to ensure responses are associated with a
+      particular bootstrapping attempt.  Nonceless audit tokens from the
+      MASA server are always valid and thus time is not needed.
+
+   o  In accordance with IEEE 802.1AR and RFC5280 all manufacturing
+      installed certificates and trust anchors are assumed to have
+      infinite lifetimes.  All such certificates "SHOULD be assigned the
+      GeneralizedTime value of 99991231235959Z" [RFC5280].  The New
+      Entity, Registrar and MASA server MUST ignore any other validity
+      period information in these credentials and treat the effective
+      lifetime as 99991231235959Z.  This ensures that client
+      authentication (see Section 3.3.1) and the audit token signature
+      (see Section 5.3) can always be verified during RFC5280 path
+      validation.
+
+   o  Once the audit token is accepted the validity period of the
+      domainCAcert in the token (see Section 5.3) now describes a valid
+      time window.  Any subsequent certificate validity periods checked
+      during RFC5280 path validation MUST occur within this window.
+
+   o  When accepting an enrollment certificate the validity period
+      within the new end entity certificate is assumed to be valid by
+      the New Entity.  The New Entity is now willing to use this
+      credential for client authentication.
+
+   Once in this state the New Entity has a valid trust anchor with the
+   local domain and has a locally issued credential.  These MAY be used
+   to secure distribution of more accurate time information although
+   specification of such a protocol is out-of-scope of this document.
+
+3.1.6.  Enrollment
 
    As the final step of bootstrapping a Registrar helps to issue a
    domain specific credential to the New Entity.  For simplicity in this
@@ -837,7 +948,8 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 15]
+
+Pritikin, et al.        Expires December 18, 2016              [Page 17]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -861,7 +973,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    including "CA Certificates Request", "CSR Attributes" and "Client
    Certificate Request" or "Server-Side Key Generation".
 
-3.1.6.  Being Managed
+3.1.7.  Being Managed
 
    Functionality to provide generic "configuration" information is
    supported.  The parsing of this data and any subsequent use of the
@@ -884,8 +996,8 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
    The role of the Proxy is to facilitate communications.  The Proxy
    forwards packets between the New Entity and the Registrar that has
-   been configured on the Proxy.  The Proxy does not terminate the
-   (d)TLS handshake.
+   been configured on the Proxy.  The Proxy does not terminate the TLS
+   handshake.
 
    In order to permit the proxy functionality to be implemented on the
    maximum variety of devices the chosen mechanism SHOULD use the
@@ -893,7 +1005,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 16]
+Pritikin, et al.        Expires December 18, 2016              [Page 18]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -949,7 +1061,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 17]
+Pritikin, et al.        Expires December 18, 2016              [Page 19]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -1005,7 +1117,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 18]
+Pritikin, et al.        Expires December 18, 2016              [Page 20]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -1046,7 +1158,8 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
    The applicable authentication methods detailed in EST [RFC7030] are:
 
-   o  the use of an IEEE 802.1AR IDevID credential,
+   o  the use of an IEEE 802.1AR IDevID credential during the TLS client
+      authentication,
 
    o  or the use of a secret that is transmitted out of band between the
       New Entity and the Registrar (this use case is not autonomic).
@@ -1060,8 +1173,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-
-Pritikin, et al.        Expires December 17, 2016              [Page 19]
+Pritikin, et al.        Expires December 18, 2016              [Page 21]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -1117,7 +1229,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 20]
+Pritikin, et al.        Expires December 18, 2016              [Page 22]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -1167,16 +1279,20 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    of the device but it is RECOMMENDED that this only be configured if
    hardware assisted NEA [RFC5209] is supported.
 
+   This document specifies a simple log format as provided by the MASA
+   service to the registar.  This format could be improved by
+   distributed consensus technologies that integrate the audit token
 
 
 
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 21]
+Pritikin, et al.        Expires December 18, 2016              [Page 23]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
+
+   with a current technologies such as block-chain or hash trees or the
+   like.  Doing so is out of the scope of this document but are
+   anticipated improvements for future work.
 
 3.4.  Behavior of the MASA Service
 
@@ -1222,17 +1338,15 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
    o  Routing authentication.
 
-   o  Service discovery.
 
 
 
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 22]
+Pritikin, et al.        Expires December 18, 2016              [Page 24]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
+
+   o  Service discovery.
 
 3.5.1.  Network boundaries
 
@@ -1280,16 +1394,15 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
    A device can be configured to act as a Registrar or a device can
    auto-select itself to take on this function, using a detection
-   mechanism to resolve potential conflicts and setup communication with
 
 
 
-
-Pritikin, et al.        Expires December 17, 2016              [Page 23]
+Pritikin, et al.        Expires December 18, 2016              [Page 25]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
+   mechanism to resolve potential conflicts and setup communication with
    the Domain Certification Authority.  Automated Registrar selection is
    outside scope for this document.
 
@@ -1340,8 +1453,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-
-Pritikin, et al.        Expires December 17, 2016              [Page 24]
+Pritikin, et al.        Expires December 18, 2016              [Page 26]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
@@ -1375,7 +1487,10 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 5.  Protocol Details
 
    For simplicity the bootstrapping protocol is described as extensions
-   to EST [RFC7030].
+   to EST [RFC7030].  The new entity establishes a TLS connection with
+   the Registrar through the circuit proxy (see Section 3.2) but the TLS
+   connection is with the Registar so for this section the New Entity is
+   the TLS client and the Registrar is the TLS server.
 
    EST provides a bootstrapping mechanism for new entities that are
    configured with the URI of the EST server such that the Implicit TA
@@ -1392,15 +1507,15 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    are to be optionally supported by the EST server within the same
    .well-known URI tree as the existing EST URIs.
 
-   The "New Entity" is the EST client and the "Registrar" is the EST
-   server.
 
 
-
-Pritikin, et al.        Expires December 17, 2016              [Page 25]
+Pritikin, et al.        Expires December 18, 2016              [Page 27]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
+
+   The "New Entity" is the EST client and the "Registrar" is the EST
+   server.
 
    The extensions for the client are as follows:
 
@@ -1424,7 +1539,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
    These extensions could be implemented as an independent protocol from
    EST but since the overlap with basic enrollment is extensive,
-   particularly with respect to client authorization, they are presented
+   particularly with respect to client authorization, they are defined
    here as additions to EST.
 
    In order to obtain a validated Audit Token and Audit Log the
@@ -1450,29 +1565,25 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 26]
+Pritikin, et al.        Expires December 18, 2016              [Page 28]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
               +-----------+ +----------+ +-----------+ +----------+
-              | New       | |          | |           | |          |
+              | New       | | Circuit  | |           | |          |
               | Entity    | | Proxy    | | Registrar | | Vendor   |
               |           | |          | |           | |          |
               ++----------+ +--+-------+ +-----+-----+ +--------+-+
                |               |               |                |
                |               |               |                |
-               | (D)TLS hello  |               |                |
-   Establish   +---------------> (D)TLS hello  |                |
-   (D)TLS      |               |--------------->                |
-   connection  |          (forwarding)         |                |
-               | Server Cert   <---------------+                |
-               <---------------+               |                |
+               |   TLS hello   |  TLS hello    |                |
+   Establish   +---------------C--------------->                |
+   TLS         |               |               |                |
+   connection  |               | Server Cert   |                |
+               <---------------C---------------+                |
                | Client Cert   |               |                |
-               +------------------------------->                |
+               +---------------C--------------->                |
                |               |               |                |
    HTTP REST   | POST /requestaudittoken       |                |
    Data        +--------------------nonce------>                |
@@ -1509,13 +1620,14 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 27]
+
+Pritikin, et al.        Expires December 18, 2016              [Page 29]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
               +-----------+ +----------+ +-----------+ +----------+
-              | New       | |          | |           | |          |
+              | New       | | Circuit  | |           | |          |
               | Entity    | | Proxy    | | Registrar | | Vendor   |
               |           | |          | |           | |          |
               ++----------+ +--+-------+ +-----+-----+ +--------+-+
@@ -1527,14 +1639,12 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
                |               |               | /requestauditlog
                |               |               +---------------->
                |               |               <----------------+
-               | (D)TLS hello  |               |                |
-   Establish   +---------------> (D)TLS hello  |                |
-   (D)TLS      |               |--------------->                |
-   connection  |          (forwarding)         |                |
-               | SerVer Cert   <---------------+                |
-               <---------------+               |                |
+               |   TLS hello   |  TLS hello    |                |
+   Establish   +---------------C--------------->                |
+   TLS         |               |               |                |
+   connection  |               | Server Cert   |                |
+               <---------------C---------------+                |
                | Client Cert   |               |                |
-               +------------------------------->                |
                |               |               |                |
    HTTP REST   | POST /requestaudittoken       |                |
    Data        +----------------------nonce---->   (discard     |
@@ -1562,15 +1672,15 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    be easily predicted.  The nonce MUST NOT be reused for multiple
    attempts to join a network domain.
 
+   Request media type: application/auditnonce
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 28]
+
+Pritikin, et al.        Expires December 18, 2016              [Page 30]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
-
-   Request media type: application/auditnonce
 
    Request format: a JSON file with the following:
 
@@ -1617,17 +1727,16 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    service although the Registrar is not required to make use of any
    other EST functionality when communicating with the MASA service.
    (The MASA service MUST properly reject any EST functionality requests
+   it does not wish to service; a requirement that holds for any REST
+   interface).
 
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 29]
+Pritikin, et al.        Expires December 18, 2016              [Page 31]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
-
-   it does not wish to service; a requirement that holds for any REST
-   interface).
 
    This is done with an HTTP POST using the operation path value of
    "/requestaudittoken".
@@ -1662,28 +1771,28 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    authorization is successful the Registrar obtains an Audit Token from
    the MASA service (see Section 5.2).
 
-   The JSON message information is encapsulated in a PKCS7 signed data
-   structure that is signed by the Registrar.  The entire certificate
-   chain, up to and including the Domain CA, MUST be included in the
-   PKCS7 SignedData certificates structure.  The MASA service checks the
-   internal consistency of the PKCS7 but does not authenticate the
-   domain identity information.  The domain is not know to the MASA
-   server in advance and a shared trust anchor is not implied.  The MASA
-   server MUST verify that the PKCS7 is signed by a Registrar
-   certificate (by checking for the cmc-idRA field) that was issued by a
-   the root certificate included in the PKCS7.  This ensures that the
-   Registrar making the claim is an authorized Registrar of the
+   The JSON message information is encapsulated in a [RFC5652] Signed-
+   data that is signed by the Registrar.  The entire certificate chain,
+   up to and including the Domain CA, MUST be included in the
+   CertificateSet structure.  The MASA service checks the internal
+   consistency of the CMS but does not authenticate the domain identity
+   information.  The domain is not know to the MASA server in advance
+   and a shared trust anchor is not implied.  The MASA server MUST
+   verify that the CMS is signed by a Registrar certificate (by checking
+   for the cmc-idRA field) that was issued by a the root certificate
+   included in the CMS.  This ensures that the Registrar making the
+   claim is an authorized Registrar of the unauthenticated domain.  The
+   EST style client authentication (TLS and HTTP) is used to provide a
+   DDoS prevention strategy.
 
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 30]
+
+Pritikin, et al.        Expires December 18, 2016              [Page 32]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
-
-   unauthenticated domain.  The EST style client authentication (TLS and
-   HTTP) is used to provide a DDoS prevention strategy.
 
    The domain ID (e.g. hash of the public key of the domain) is
    extracted from the root certificate and is used to populate the MASA
@@ -1699,9 +1808,17 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 5.3.  Audit Token Response
 
    The authorization token response to requests from the device and
-   requests from the Registrar is the same format.  The Registrar either
-   caches prior MASA responses or dynamically requests a new Audit Token
-   based on local policy.
+   requests from the Registrar are in the same format.  The Registrar
+   either caches prior MASA responses or dynamically requests a new
+   Audit Token based on local policy.
+
+   If the the join operation is successful, the server response MUST
+   contain an HTTP 200 response code with a content-type of
+   "application/authorization-token".  The server MUST answer with a
+   suitable 4xx or 5xx HTTP [RFC2616] error code when a problem occurs.
+   The response data from the MASA server MUST be a plaintext human-
+   readable error message containing explanatory information describing
+   why the request was rejected.
 
    The authorization token consists of the nonce, if supplied, the
    serial number information identifying the device and the domain CA
@@ -1715,6 +1832,28 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
     "domainCAcert":"<the base64 encoded domain CA's certificate>"
    }
 
+   The audit token response is encapsulated in a [RFC5652] Signed-data
+   that is signed by the MASA server.  The New Entity verifies this
+   signed message using the IEEE 802.1AR manufacturer installed trust
+   anchor.  [[EDNOTE: Using is CMS consistent with the request format as
+   specified above and is consistent with the alignment of this
+   bootstrapping document with EST, a PKIX enrollment protocol that
+   includes Certificate Management over CMS.  An alternative format
+   would be the RFC7515 JSON Web Signature (JWS), which would allow
+   clients that do not use fullCMC messages to avoid CMS entirely.  Use
+   of JWS would likely include a discussion of CBOR in order ensure the
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 33]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
+   base64 expansions of the certs and signatures within the JWS message
+   are of minimal size -- it is not yet clear to this author how that
+   would work out]]
+
    The 'domainCAcert' element of this message contains the domain CA's
    public key.  This is specific to bootstrapping a public key
    infrastructure.  To support bootstrapping other key infrastructures
@@ -1724,29 +1863,85 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    from an audit token response that does not contain a 'domainCAcert'
    field at all.
 
-   The audit token response is encapsulated in a PKCS7 signed data
-   structure that is signed by the MASA server.  The New Entity verifies
-   this signed message using the IEEE 802.1AR manufacturer installed
-   trust anchor.  The New Entity installs this trust anchor and proceeds
-   with EST RFC7030 enrollment.  The newly installed trust anchor is
-   used as an EST RFC7030 Explicit Trust Anchor, and can be used to
+   To minimize the size of the audit token response message the
+   domainCAcert is not a complete distribution of the EST section 4.1.3
+   CA Certificate Response.
+
+   The New Entity installs the domainCAcert trust anchor.  As indicated
+   in Section 3.1.2 the newly installed trust anchor is used as an EST
+   RFC7030 Explicit Trust Anchor.  The New Entity MUST use the
+   domainCAcert trust anchor to immediately validate the currently
+   provisional TLS connection to the Registrar.
+
+5.3.1.  Completing authentication of Provisional TLS connection
+
+   If the Registrar's credential can not be verified using the
+   domainCAcert trust anchor the TLS connection is immediately discarded
+   and the New Entity abandons attempts to bootstrap with this
+   discovered registrar.
+
+   The following behaviors on the Registrar and New Entity are in
+   addition to normal PKIX operations:
+
+   o  The EST server MUST use a certificate that chains to the
+      domainCAcert.  This means that when the EST server obtains renewed
+      credentials the credentials included in the Section 5.2 request
+      match the chain used in the current provisional TLS connection.
+
+   o  The New Entity PKIX path validation of the Registrar validity
+      period information is as described in Section 3.1.5.
+
+   The domainCAcert trust anchor can be used to authenticate dynamically
+   discovered EST server's that contain the id-kp-cmcRA extended key
+   usage extension as detailed in EST RFC7030 section 3.6.1 but to
+   reduce system complexity the New Entity SHOULD avoid additional
+   discovery operations.  Instead the New entity SHOULD communicate
+   directly with the Registrar as the EST server to complete PKI local
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 31]
+
+Pritikin, et al.        Expires December 18, 2016              [Page 34]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
-   authenticate dynamically discovered EST server's that contain the id-
-   kp-cmcRA extended key usage extension as detailed in EST RFC7030
-   section 3.6.1.
+   certificate enrollment.  [[EDNOTE: It is reasonable to mandate that
+   the existing TLS connection be re-used? e.g.  MUST >> SHOULD?]]
 
-   [[EDNOTE: Using PKCS7 consistent with the request format as specified
-   above.  An alternative format would be the RFC7515 JSON Web Signature
-   (JSWS)]]
+5.4.  Audit Token Status Telemetry
 
-5.4.  MASA authorization log Request
+   For automated bootstrapping of devices the adminstrative elements
+   providing bootstrapping also provide indications to the system
+   administrators concerning device lifecycle status.  To facilitate
+   this those elements need telemetry information concerning the
+   device's status.
+
+   To indicate New Entity status regarding the audit token the client
+   SHOULD post a status message.
+
+   The client HTTP POSTs the following to the server at the EST well
+   known URI /requestaudittoken_status.  The Status field indicates if
+   the audit token was acceptable.  If it was not acceptable the Reason
+   string indicates why.  In the failure case this message is being sent
+   to an unauthenticated, potentially malicious Registrar and therefore
+   the Reason string SHOULD NOT provide information beneficial to an
+   attacker.  The operational benefit of this telemetry information is
+   balanced against the operational costs of not recording that an audit
+   token was ignored by a client the registar expected to continue
+   joining the domain.
+
+   {
+     "version":"1",
+     "Status":FALSE /* TRUE=Success, FALSE=Fail"
+     "Reason":"Informative human readable message"
+   }
+
+   The server SHOULD respond with an HTTP 200 but MAY simply fail with
+   an HTTP 404 error.  The client ignores any response.  Within the
+   server logs the server SHOULD capture this telemetry information.
+
+5.5.  MASA authorization log Request
 
    A registrar requests the MASA authorization log from the MASA service
    using this EST extension.
@@ -1760,7 +1955,14 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    server which log is requested so the appropriate log can be prepared
    for the response.
 
-5.5.  MASA authorization log Response
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 35]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
+5.6.  MASA authorization log Response
 
    A log data file is returned consisting of all log entries.  For
    example:
@@ -1770,12 +1972,12 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
   "events":[
     {
      "date":"<date/time of the entry>",
-     "domainID":"<domainID as extracted from the domain CA certificate within the PKCS7 of the audit token request>",
+     "domainID":"<domainID as extracted from the domain CA certificate within the CMS of the audit token request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     },
     {
      "date":"<date/time of the entry>",
-     "domainID":"<domainID as extracted from the domain CA certificate within the PKCS7 of the audit token request>",
+     "domainID":"<domainID as extracted from the domain CA certificate within the CMS of the audit token request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     }
   ]
@@ -1784,15 +1986,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    Distribution of a large log is less than ideal.  This structure can
    be optimized as follows: All nonce-less entries for the same domainID
    MAY be condensed into the single most recent nonceless entry.
-
-
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 32]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
 
    The Registrar uses this log information to make an informed decision
    regarding the continued bootstrapping of the New Entity.  For example
@@ -1809,7 +2002,7 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    [[EDNOTE: certificate transparency style use of merkle tree hash's
    might offer an alternative log entry method]]
 
-5.6.  EST Integration for PKI bootstrapping
+5.7.  EST Integration for PKI bootstrapping
 
    The prior sections describe EST extensions necessary to enable fully
    automated bootstrapping.  Although the audit token request/response
@@ -1818,10 +2011,34 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    aspects of the extensions and future work might replace them with
    non-PKI structures.
 
-   This subsection provides guidance concerning EST options to ensure
-   consistent bootstrapping operations for PKI deployments.
 
-5.6.1.  CSR Attributes
+
+Pritikin, et al.        Expires December 18, 2016              [Page 36]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
+   The prior sections provide functionality for the New Entity to obtain
+   a trust anchor representative of the Domain.  The following section
+   describe using EST to obtain a locally issued PKI certificate.  The
+   New Entity MAY perform alternative enrollment methods or proceed to
+   use its IDevID credential indefinately, but those that leverage the
+   discovered Registrar to proceed with certificate enrollment MUST
+   implement the following EST choices.
+
+5.7.1.  EST Distribution of CA Certificates
+
+   The New Entity MUST request the full EST Distribution of CA
+   Certificates message.  See RFC7030, section 4.1.
+
+   This ensures that the New Entity has the complete set of current CA
+   certificates beyond the domainCAcert (see Section 5.3 for a
+   discussion of the limitations).  Although these restrictions are
+   acceptable for the Registrar integrated with initial bootstrapping
+   they are not appropriate for ongoing PKIX end entity certificate
+   validation.
+
+5.7.2.  EST CSR Attributes
 
    Automated bootstrapping occurs without local administrative
    configuration of the New Entity.  In some deployments its plausible
@@ -1842,20 +2059,21 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    [[EDNOTE: The following sentence is specific to anima purposes and
    should be moved to an appropriate anima document so as to keep
    bootstrapping as generic as possible: What we want are a 'domain
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 33]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
-
    name' stored in [TBD] and an 'ACP IPv6 address' stored in the
    iPAddress field as specified in RFC5208 s4.2.1.6. ref ACP draft where
    certificate verification [TBD].  These should go into the
    subjectaltname in the [TBD] fields.]].  If the hardwareModuleName in
    the IDevID is populated then it SHOULD by default be propagated to
    the LDevID along with the hwSerialNum.  The registar SHOULD support
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 37]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
    local policy concerning this functionality.  [[EDNOTE: extensive use
    of EST CSR Attributes might need an new OID definition]].
 
@@ -1866,7 +2084,12 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    mechanisms MAY be used even if the client ignores CSR Attribute
    guidance.
 
-5.6.2.  Verification of Success
+5.7.3.  EST Client Certificate Request
+
+   The New Entity MUST request a new client certificate.  See RFC7030,
+   section 4.2.
+
+5.7.4.  Enrollment Status Telemetry
 
    For automated bootstrapping of devices the adminstrative elements
    providing bootstrapping also provide indications to the system
@@ -1883,43 +2106,52 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    TLS connection.  The client MAY simply close the old TLS session and
    start a new one.  The server MUST support either model.
 
-   The client HTTP POSTs the following to the server at the EST well
-   known URI /success.  The server always responds with HTTP 200 OK.
+   In the case of a failure the Reason string indicates why the most
+   recent enrollment failed.  The SubjectKeyIdentifier field MUST be
+   included if the enrollment attempt was for a keypair that is locally
+   known to the client.  If EST /serverkeygen was used and failed then
+   the this field is ommited from the status telemetry.
 
-   {
-     "version":"1",
-     "Success":TRUE
-     "LDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier>",
-     "DevIDSerialNumber":"<id-at-serialNumber>",
-   }
+   The client HTTP POSTs the following to the server at the new EST well
+   known URI /enrollstatus.
 
-   The server MUST support receiving this message.  Within the server
-   logs the server MUST capture if this message was recieved over an TLS
-   session with a matching client certificate.  This allows for clients
-   that wish to minimize their crypto operations to simpy POST this
-   response without renegotiating the TLS session - at the cost of the
+{
+  "version":"1",
+  "Status":TRUE /* TRUE=Success, FALSE=Fail"
+  "Reason":"Informative human readable message"
+  "SubjectKeyIdentifier":"<base64 encoded subjectkeyidentifier for the enrollment that failed>"
+}
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 34]
+
+Pritikin, et al.        Expires December 18, 2016              [Page 38]
 
 Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
-   server not being able to accurately verify that enrollment was truly
-   successful.
+   The server SHOULD respond with an HTTP 200 but MAY simply fail with
+   an HTTP 404 error.
 
-5.6.3.  EST over CoAP
+   Within the server logs the server MUST capture if this message was
+   recieved over an TLS session with a matching client certificate.
+   This allows for clients that wish to minimize their crypto operations
+   to simpy POST this response without renegotiating the TLS session -
+   at the cost of the server not being able to accurately verify that
+   enrollment was truly successful.
+
+5.7.5.  EST over CoAP
 
    [[EDNOTE: In order to support smaller devices the above section on
    Proxy behavior introduces mandatory to implement support for CoAP
    support by the Proxy.  This implies similar support by the New Entity
    and Registrar and means that the EST protocol operation encapsulation
    into CoAP needs to be described.  EST is HTTP based and "CoaP is
-   designed to easily interface with HTTP for integration" [RFC7252] so
-   this section is anticipated to be relatively straightforward.  A
-   complexity is that the large message sizes necessary for
-   bootstrapping will require support for [draft-ietf-core-block].]]
+   designed to easily interface with HTTP for integration" [RFC7252].
+   Use of CoAP implies Datagram TLS (DTLS) wherever this document
+   describes TLS handshake specifics.  A complexity is that the large
+   message sizes necessary for bootstrapping will require support for
+   [draft-ietf-core-block].]]
 
 6.  Reduced security operational modes
 
@@ -1931,11 +2163,11 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 6.1.  Trust Model
 
-   +--------+         +-------+      +------------+     +------------+
-   | New    |         | Proxy |      | Domain     |     | Vendor     |
-   | Entity |         |       |      | Registrar  |     | Service    |
-   |        |         |       |      |            |     | (Internet  |
-   +--------+         +-------+      +------------+     +------------+
+   +--------+         +---------+    +------------+     +------------+
+   | New    |         | Circuit |    | Domain     |     | Vendor     |
+   | Entity |         | Proxy   |    | Registrar  |     | Service    |
+   |        |         |         |    |            |     | (Internet  |
+   +--------+         +---------+    +------------+     +------------+
 
    Figure 7
 
@@ -1945,6 +2177,15 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
       endpoint assessment techniques are RECOMMENDED but are out-of-
       scope of this document.
 
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 39]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
    Proxy:  Provides proxy functionalities but is not involved in
       security considerations.
 
@@ -1952,15 +2193,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
       all decisions.  When ownership vouchers are involved the Registrar
       is only a conduit and all security decisions are made on the
       vendor service.
-
-
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 35]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
 
    Vendor Service, MASA:  This form of vendor service is trusted to
       accurately log all claim attempts and to provide authoritative log
@@ -2001,6 +2233,15 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
        occur when informing the Registrar of unique identifiers of new
        entities might be operationally difficult.
 
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 40]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
    2.  The registrar MAY choose to accept devices that claim a unique
        identity without the benefit of authenticating that claimed
        identity.  This could occur when the New Entity does not include
@@ -2010,14 +2251,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
    3.  The registrar MAY request nonce-less Audit Tokens from the MASA
        service.  These tokens can then be transmitted to the Registrar
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 36]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
-
        and stored until they are needed during bootstrapping operations.
        This is for use cases where target network is protected by an air
        gap and therefore can not contact the MASA service during New
@@ -2057,6 +2290,14 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
    2.  Not verifying ownership before responding with an Audit Token.
        This is expected to be a common operational model because doing
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 41]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
        so relieves the vendor providing MASA services from having to
        tracking ownership during shipping and supply chain and allows
        for a very low overhead MASA service.  The Registrar uses the
@@ -2064,15 +2305,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
        that this does not occur unexpectedly (for example when
        purchasing new equipment the Registrar would throw an error if
        any audit log information is reported).
-
-
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 37]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
 
 7.  Security Considerations
 
@@ -2109,6 +2341,19 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    o  In the advent of an unexpectedly lost bootstrapping connection the
       Registrar repeats the request for audit log information.
 
+   To facilitate auditing the New Entity reports on audit token parsing
+   status.  In the case of a failure this information is informative to
+   the potentially malicious Registar but this is included because the
+   operational benefits are concidered beneficial.
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 42]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
    As indicated in EST [RFC7030] the connection is provisional and
    untrusted until the server is successfully authorized.  If the server
    provides a redirect response the client MUST follow the redirect but
@@ -2122,14 +2367,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
    or the MASA service could go offline (for example if a vendor went
    out of business).  This functionality provides benefits such as theft
    resistance, but it also implies an operational risk to the Domain
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 38]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
-
    that Vendor behavior could limit future bootstrapping of the device
    by the Domain.  This can be mitigated by Registrars that request
    nonce-less authorization tokens.
@@ -2162,6 +2399,17 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
               DOI 10.17487/RFC3927, May 2005,
               <http://www.rfc-editor.org/info/rfc3927>.
 
+
+
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 43]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
    [RFC4862]  Thomson, S., Narten, T., and T. Jinmei, "IPv6 Stateless
               Address Autoconfiguration", RFC 4862,
               DOI 10.17487/RFC4862, September 2007,
@@ -2172,19 +2420,13 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
               DOI 10.17487/RFC5386, November 2008,
               <http://www.rfc-editor.org/info/rfc5386>.
 
+   [RFC5652]  Housley, R., "Cryptographic Message Syntax (CMS)", STD 70,
+              RFC 5652, DOI 10.17487/RFC5652, September 2009,
+              <http://www.rfc-editor.org/info/rfc5652>.
+
    [RFC5660]  Williams, N., "IPsec Channels: Connection Latching",
               RFC 5660, DOI 10.17487/RFC5660, October 2009,
               <http://www.rfc-editor.org/info/rfc5660>.
-
-
-
-
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 39]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
 
    [RFC6762]  Cheshire, S. and M. Krochmal, "Multicast DNS", RFC 6762,
               DOI 10.17487/RFC6762, February 2013,
@@ -2212,6 +2454,18 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
               homenet-trust-bootstrap-02 (work in progress), February
               2014.
 
+
+
+
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 44]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
+
+
    [I-D.ietf-ace-actors]
               Gerdes, S., Seitz, L., Selander, G., and C. Bormann, "An
               architecture for authorization in constrained
@@ -2235,13 +2489,6 @@ Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
               draft-lear-mud-framework-00 (work in progress), January
               2016.
 
-
-
-Pritikin, et al.        Expires December 17, 2016              [Page 40]
-
-Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
-
-
    [I-D.richardson-anima-state-for-joinrouter]
               Richardson, M., "Considerations for stateful vs stateless
               join router in ANIMA bootstrap", draft-richardson-anima-
@@ -2260,6 +2507,19 @@ Authors' Addresses
    Cisco
 
    Email: pritikin@cisco.com
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 45]
+
+Internet-DraBootstrapping Remote Secure Key Infrastructures (  June 2016
 
 
    Michael C. Richardson
@@ -2293,4 +2553,24 @@ Authors' Addresses
 
 
 
-Pritikin, et al.        Expires December 17, 2016              [Page 41]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.        Expires December 18, 2016              [Page 46]
