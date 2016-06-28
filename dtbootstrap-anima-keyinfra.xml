@@ -243,6 +243,12 @@
         potential domain owners, and the eventual domain owner will not know
         a-priori which device will go to which location.</t>
 
+        <t>The bootstraping process can take minutes to complete depending on
+        the network infrastructure and device processing speed. The network
+        communication itself is not "chatty" but there can be delays for
+        privacy reasons. This protocol is not intended for low latency
+        handoffs. </t>
+
         <t>Specifically, there are protocol aspects described here which might
         result in congestion collapse or energy-exhaustion of intermediate
         battery powered routers in an LLN. Those types of networks SHOULD NOT
@@ -350,8 +356,8 @@
 
           <t hangText="MASA Service:">A Manufacturer Authorized Signing
           Authority (MASA) service on the global Internet. The MASA provides a
-          trusted repository for audit log information concerning privacy
-          protected bootstrapping events.</t>
+          repository for audit log information concerning privacy protected
+          bootstrapping events.</t>
 
           <t hangText="Ownership Tracker">An Ownership Tracker service on the
           global internet. The Ownership Tracker uses business processes to
@@ -552,7 +558,7 @@
           Proxy is always assumed.</t>
 
           <t>To discover the Domain Bootstrap Server the New Entity performs
-          the following actions in this order:</t>
+          the following actions:</t>
 
           <t><list style="letters">
               <t>MUST: Obtains a local address using either IPv4 or IPv6
@@ -561,37 +567,35 @@
               target="RFC3927"></xref> Dynamic Configuration of IPv4
               Link-Local Addresses.</t>
 
-              <t>MAY: Performs DNS-based Service Discovery <xref
+              <t>MUST: Performs DNS-based Service Discovery <xref
               target="RFC6763"></xref> over Multicast DNS <xref
               target="RFC6762"></xref> searching for the service
               "_bootstrapks._tcp.local.". To prevent unaccceptable levels of
-              network traffic the mechanisms specified in <xref
-              target="RFC6762"></xref> section 5 MUST be followed.</t>
-
-              <t>SHOULD: Listen for an unsolicited broadcast response as
-              described in <xref target="RFC6762"></xref>. This allows devices
-              to avoid announcing their presence via mDNS broadcasts and
-              instead silently join a network by watching for periodic
+              network traffic the congestion avoidance mechanisms specified in
+              <xref target="RFC6762"></xref> section 7 MUST be followed. The
+              New Entity SHOULD listen for an unsolicited broadcast response
+              as described in <xref target="RFC6762"></xref>. This allows
+              devices to avoid announcing their presence via mDNS broadcasts
+              and instead silently join a network by watching for periodic
               unsolicited broadcast responses.</t>
 
               <t>MAY: Performs DNS-based Service Discovery [RFC6763] over
-              normal DNS operations. In this case the domain is known so the
-              service searched for is "_bootstrapks._tcp.example.com".</t>
+              normal DNS operations. The service searched for is
+              "_bootstrapks._tcp.example.net". In this case the domain
+              "example.net" is discovered as described in <xref
+              target="RFC6763"></xref> section 11. </t>
 
               <t>MAY: If no local bootstrapks service is located using the
               DNS-based Service Discovery methods the New Entity contacts a
               well known vendor provided bootstrapping server by performing a
               DNS lookup using a well known URI such as
-              "bootstrapks.vendor-example.com".</t>
-            </list></t>
-
-          <t>[[EDNOTE: The above language doesn't result in a mandatory to
-          implement discovery method. At best it SHOULD/RECOMMENDs.]]</t>
-
-          <t>DNS-based service discovery communicates the local proxy IPv4 or
-          IPv6 address and port to the New Entity. Once a proxy is discovered
-          the New Entity communicates with the Registrar through the proxy
-          using the bootstrapping protocol defined in <xref
+              "bootstrapks.vendor-example.com". The details of the URI are
+              vendor specific. Vendors that leverage this method SHOULD
+              provision appropriately. </t>
+            </list>DNS-based service discovery communicates the local proxy
+          IPv4 or IPv6 address and port to the New Entity. Once a proxy is
+          discovered the New Entity communicates with the Registrar through
+          the proxy using the bootstrapping protocol defined in <xref
           target="ProtocolDetails"></xref>. The current DNS services returned
           during each query is maintained until bootstrapping is completed. If
           bootstrapping fails and the New Entity returns to the Discovery
@@ -601,16 +605,19 @@
           third responses are tried. If these fail the New Entity moves on to
           normal DNS-based Service Discovery.</t>
 
-          <t>Once all discovered services are attempted the device SHOULD
-          return to Multicast DNS and keep trying. The New Entity may
-          prioritize selection order as appropriate for the anticipated
-          environment.</t>
+          <t>Each discovery method attempted SHOULD exponentially back-off
+          attempts (to a maximum of one hour) to avoid overloading that
+          discovery methods network infrastructure. The back-off timer for
+          each method MUST be independent of other methods. Methods SHOULD be
+          run in parallel to avoid head of queue problems. Once a connection
+          to a Registrar is established (e.g. establishment of a TLS session
+          key) there are expectations of more timely responses, see <xref
+          target="RequestAuditTokenFromRegistrar"></xref>.</t>
 
-          <t>[[EDNOTE: An appropriate backoff or rate limiting strategy should
-          be defined here such that the device doesn't flood the local network
-          with queries. If the device were to eventually give up -- or at
-          least have too long between attempts -- a power cycle would restart
-          the backoff mechanism.]]</t>
+          <t>Once all discovered services are attempted the device SHOULD
+          return to Multicast DNS. It should periodically retry the vendor
+          specific mechanisms. The New Entity may prioritize selection order
+          as appropriate for the anticipated environment.</t>
         </section>
 
         <section anchor="identity" title="Identity">
@@ -687,7 +694,7 @@
               <t hangText="MASA audit token">Audit tokens are obtained by the
               Registrar from the MASA service and presented to the New Entity
               for validation. These indicate to the New Entity that joining
-              the domain has been logged by a trusted logging server.</t>
+              the domain has been logged by a logging service.</t>
 
               <t hangText="Ownership Voucher">Ownership Vouchers are obtained
               by the Registrar from the MASA service and explicitly indicate
@@ -1373,7 +1380,7 @@ Data        +----------------------nonce---->   (discard     |
           requested.</t>
 
           <t>The Registar performs log verifications in addition to local
-          authorization checks before accepting the New Entity device. </t>
+          authorization checks before accepting the New Entity device.</t>
         </list></t>
 
       <section anchor="RequestAuditTokenFromRegistrar"
@@ -1390,7 +1397,9 @@ Data        +----------------------nonce---->   (discard     |
         generated by the client for each request. This nonce MUST be a
         cryptographically strong random or pseudo-random number that can not
         be easily predicted. The nonce MUST NOT be reused for multiple
-        attempts to join a network domain.</t>
+        attempts to join a network domain. The nonce assures the New Entity
+        that the audit token response is associated with this bootstrapping
+        attempt and is not a replay.</t>
 
         <t>Request media type: application/auditnonce</t>
 
@@ -1405,11 +1414,13 @@ Data        +----------------------nonce---->   (discard     |
 
         <t></t>
 
-        <t>[[EDNOTE: exact format TBD. There is an advantage to having the
-        client sign the nonce (similar to a PKI Certification Signing Request)
-        since this allows the MASA service to confirm the actual device
-        identity. It is not clear that there is a security benefit from this
-        since its the New Entity that verifies the nonce.]]</t>
+        <t>[[EDNOTE: Even if the nonce was signed it would provide no defense
+        against rogue registrars; although it would assure the MASA that a
+        certified new entity exists. To protect against rogue registrars a
+        nonce component generated by the MASA (a new round trip) would be
+        required). Instead this is addressed by requiring MASA &amp; Registrar
+        authentications but it is worth exploring additional protections. This
+        to be explored more at IETF96.]] </t>
 
         <t>The Registrar validates the client identity as described in EST
         [RFC7030] section 3.3.2. The registrar performs authorization as
@@ -1430,7 +1441,7 @@ Data        +----------------------nonce---->   (discard     |
         using one of the two autonomic methods described in this document.
         Similarly the Registar MAY respond with an HTTP 202 ("the request has
         been accepted for processing, but the processing has not been
-        completed") as described in EST [RFC7030] section 4.2.3. </t>
+        completed") as described in EST [RFC7030] section 4.2.3.</t>
 
         <t>Recall that during this communication with the Registar the TLS
         authentication is only provisional. The New Entity client MUST handle
@@ -1441,7 +1452,7 @@ Data        +----------------------nonce---->   (discard     |
         target="ProxyDiscovery"></xref> if no suitable Registrar is found the
         New Entity restarts the state machine and tries again. So a Registrar
         that is unable to complete the transaction the first time will have
-        future chances. </t>
+        future chances.</t>
       </section>
 
       <section anchor="RequestAuditToken"
@@ -1511,13 +1522,6 @@ Data        +----------------------nonce---->   (discard     |
         <t>The domain ID (e.g. hash of the public key of the domain) is
         extracted from the root certificate and is used to populate the MASA
         authorization token and to update the audit log.</t>
-
-        <t>[[EDNOTE: There is a strong similarity between this and the
-        previous section. Both involve requesting the Audit Token from the
-        upstream element. Because there are differing requirements on the data
-        submitted and the signing of that data they are specified in distinct
-        sections. The design team should have a meeting to discuss how to
-        unify these sections or make the distinctions more clear]]</t>
       </section>
 
       <section anchor="AuditTokenResponse" title="Audit Token Response">
@@ -1551,16 +1555,17 @@ Data        +----------------------nonce---->   (discard     |
         <t>The audit token response is encapsulated in a <xref
         target="RFC5652"></xref> Signed-data that is signed by the MASA
         server. The New Entity verifies this signed message using the IEEE
-        802.1AR manufacturer installed trust anchor. [[EDNOTE: Using is CMS
-        consistent with the request format as specified above and is
-        consistent with the alignment of this bootstrapping document with EST,
-        a PKIX enrollment protocol that includes Certificate Management over
-        CMS. An alternative format would be the RFC7515 JSON Web Signature
-        (JWS), which would allow clients that do not use fullCMC messages to
-        avoid CMS entirely. Use of JWS would likely include a discussion of
-        CBOR in order ensure the base64 expansions of the certs and signatures
-        within the JWS message are of minimal size -- it is not yet clear to
-        this author how that would work out]]</t>
+        802.1AR manufacturer installed trust anchor. </t>
+
+        <t>[[EDNOTE: Using CMS is consistent with the alignment of this
+        bootstrapping document with EST, a PKIX enrollment protocol that
+        includes Certificate Management over CMS. An alternative format would
+        be the RFC7515 JSON Web Signature (JWS), which would allow clients
+        that do not use fullCMC messages to avoid CMS entirely. Use of JWS
+        would likely include a discussion of CBOR in order ensure the base64
+        expansions of the certs and signatures within the JWS message are of
+        minimal size -- it is not yet clear to this author how that would work
+        out]]</t>
 
         <t>The 'domainCAcert' element of this message contains the domain CA's
         public key. This is specific to bootstrapping a public key
@@ -1573,7 +1578,7 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>To minimize the size of the audit token response message the
         domainCAcert is not a complete distribution of the EST section 4.1.3
-        CA Certificate Response. </t>
+        CA Certificate Response.</t>
 
         <t>The New Entity installs the domainCAcert trust anchor. As indicated
         in <xref target="identity"></xref> the newly installed trust anchor is
@@ -1601,15 +1606,19 @@ Data        +----------------------nonce---->   (discard     |
               <t>The New Entity PKIX path validation of the Registrar validity
               period information is as described in <xref
               target="timeunknown"></xref>.</t>
-            </list>The domainCAcert trust anchor can be used to authenticate
-          dynamically discovered EST server's that contain the id-kp-cmcRA
-          extended key usage extension as detailed in EST RFC7030 section
-          3.6.1 but to reduce system complexity the New Entity SHOULD avoid
-          additional discovery operations. Instead the New entity SHOULD
-          communicate directly with the Registrar as the EST server to
-          complete PKI local certificate enrollment. [[EDNOTE: It is
-          reasonable to mandate that the existing TLS connection be re-used?
-          e.g. MUST &gt;&gt; SHOULD?]]</t>
+            </list>Because the domainCAcert trust anchor is installed as an
+          Explicit Trust Anchor it can be used to authenticate any dynamically
+          discovered EST server that contain the id-kp-cmcRA extended key
+          usage extension as detailed in EST RFC7030 section 3.6.1; but to
+          reduce system complexity the New Entity SHOULD avoid additional
+          discovery operations. Instead the New entity SHOULD communicate
+          directly with the Registrar as the EST server to complete PKI local
+          certificate enrollment. Additionally the New Entity SHOULD use the
+          existing TLS connection to proceed with EST enrollment, thus
+          reducing the total amount of cryptographic and round trip operations
+          required during bootstrapping. [[EDNOTE: It is reasonable to mandate
+          that the existing TLS connection be re-used? e.g. MUST &gt;&gt;
+          SHOULD?]]</t>
         </section>
       </section>
 
@@ -1699,9 +1708,6 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>Log entries containing the Domain's ID can be compared against
         local history logs in search of discrepancies.</t>
-
-        <t>[[EDNOTE: certificate transparency style use of merkle tree hash's
-        might offer an alternative log entry method]]</t>
       </section>
 
       <section title="EST Integration for PKI bootstrapping">
@@ -1927,7 +1933,7 @@ Data        +----------------------nonce---->   (discard     |
             refused to provide a TLS client certificate (as one is not
             available). The New Entity SHOULD support HTTP-based or
             certificate-less TLS authentication as described in EST RFC7030
-            section 3.3.2. </t>
+            section 3.3.2.</t>
 
             <t>The registrar MAY request nonce-less Audit Tokens from the MASA
             service. These tokens can then be transmitted to the Registrar and
