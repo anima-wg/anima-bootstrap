@@ -1,0 +1,377 @@
+This set of minutes covers meetings in August 2016 and September 2016,
+up to September 13, 2016.  Warning: fixed-width ASCII art, pick the right
+font, or it will probably be unreadable.
+
+Previous minutes were posted on August 16 for meetings after IETF96.
+         https://www.ietf.org/mail-archive/web/netconf/current/msg11652.html
+
+A history of meetings covered:
+  2016-08-23 - Max, Kent, mcr on mobile
+  2016-08-30 - mcr away camping, Max got dragged elsewhere, meeting
+               was cancelled.
+  2016-09-06 - Max, Kent, mcr
+  2016-09-13 - Max, Kent, mcr, Toerless, Michael Behringer (muted entire time?)
+
+Future meetings:
+  2016-09-20, 2016-09-27, 2016-10-04, 2016-10-11,
+  2016-10-18, 2016-10-25, 2016-11-01.
+  2016-11-08 -- cancelled, too close to IETF97.
+
+
+0) the old webex expired, and a new one was created.
+   WEEKLY INVITE, SEE ANIMA BOOTSTRAP WIKI:
+        https://trac.tools.ietf.org/wg/anima/trac/wiki/Bootstrap
+
+
+1) The chairs queried us about whether we were "done yet", and the answer was
+   that we need another two weeks to beat on your document.
+   EXEC SUMMARY:  We have essentially specified pretty much everything,
+                  but some doubts have arrived as to whether our chosen
+                  architecture and technologies are the best, and we are
+                  letting ourselves decide if there are some critical
+                  decisions we should revise NOW.
+                  In particular, those decisions align the technology better
+                  with both NETCONF and IoT needs, and may be also result
+                  in a simpler security footprint.
+
+
+
+
+  2016-08-23 - Max, Kent, mcr on mobile
+  2016-08-30 - mcr away camping
+  2016-09-06 - Max, Kent, mcr
+  2016-09-13 - Max, Kent, mcr, Toerless, Michael Behringer (muted entire time?)
+
+2) At the 2016-08-16, as previously minuted, the decision arrived that we
+want to have a WG document (Informational) about the ownership voucher.
+During subsequent discussions, further discussions suggest that in fact it is
+not a private matter, and that it probably (reading between lines) should
+be a standards track specification, or a reference to such a document.
+
+It was suggested that OAUTH bound tokens might provide the right model,
+or perhaps JSON Web Tokens, or ???
+
+cf:
+   https://tools.ietf.org/html/rfc6750
+   https://tools.ietf.org/html/draft-wahlstroem-ace-cbor-web-token-00
+
+We discussed whether we could just have the ownership voucher definition
+pasted into the BRSKI document in a way that made it clear it was mostly
+identical to the netconf format, but the pushback was that having it in
+a clear document referenced by both made it clear that it was the same thing.
+The value of having a single document was mostly a process simplification
+concern, and letting us move forward.
+
+ACTION: Kent said he would start a document in his git repo, but I don't
+        think that actually happened yet, unless it was system-keychain?
+
+
+3) mcr was uncomfortable with the level of detail/protocol around getting
+   the pledge to put the "right things" into the CSR.
+
+A number pointers were inserted into the notes:
+
+  https://tools.ietf.org/html/draft-ietf-anima-bootstrapping-keyinfra-03#section-5.7.2
+
+  https://tools.ietf.org/html/draft-ietf-netconf-system-keychain-00#section-3
+  section https://tools.ietf.org/html/draft-ietf-netconf-system-keychain-00#section-2.3
+
+includes YANG action statement "generate-certifacte-signing-request" that
+takes input PKCS#10 structures 'subject' and 'attributes', and generates
+output structure 'certificate-signing-request' (the CSR itself).
+
+ACTION ITEM (max): form an articulate position on how this push model
+         discussion migth integrate with the anima pull model -- as a thought
+         excercise.
+
+         NOTE from mcr: 6tisch would prefer a pull model (server/NMS
+                  initiated) as well for bandwidth management reasons, and
+                  I'm trying to reverse it back to client initiated, with
+                  some way to manage bandwidth...
+
+
+4) the 2016-09-06 and 2016-09-13 meetings dealt a lot with the notion of
+   roles and role reversals, and much terminology was abused, and confused.
+
+We wrote some definitions, which are reorganized in these minutes as follows:
+
+Actors are: 1) new device ("pledge")
+            2) registrar (ANIMA term)
+               management system (NETCONF) ("NMS")
+               JCE (6tisch)
+
+The roles that can be taken are:
+a) TCP-initiator ("SYN")
+b) TCP-responder ("SYN+ACK")
+c) TLS-client
+d) TLS-server
+e) HTTP client/CoAP client
+f) HTTP server/CoAP server
+g) RESTCONF client / 6p client
+h) RESTCONF server / 6p server
+i) EST (7030) client
+j) EST (7030) server
+
+
+I) The ANIMA cast list is as follows:
+    i) pledge is TCP-initiator, TLS-client, HTTP/EST client.
+   ii) registar is TCP-responder, TLS-server, EST server.
+
+II) In NETCONF, cast list is as follows:
+    i) pledge is TCP-initiator, TLS-server, RESTCONF server.
+   ii) NMS is TCP-responder, TLS-client, RESTCONF client.
+
+III) In 6tisch, cast list is as follows:
+    i) pledge is DAD-client, DTLS-server, CoAP server, 6p server.
+   ii) JCE is DTLS-client, CoAP-client, 6p client.
+      [Only maybe DTLS is replaced with EDHOC]
+
+
+We had some significant discussions about the advantage of the NETCONF
+"call-home" role reversal, and explained in this time sequence diagram that
+has the TCP and TLS activities:
+
+FIGURE 20160906: Solution Overview
+
+      NETCONF/RESTCONF                    NETCONF/RESTCONF
+           Server (h)                        Client (g)
+        (anima new device)                  (anima registrar)
+         |                                    |
+         |         1. TCP                     |
+         |-------------SYN------------------->|  Just a SYN, SYN/ACK.
+         |<------------SYN/ACK----------------|
+         |                                    |
+         |                                    |
+         |         2. SSH/TLS                 |
+         |<------------ClientHello------------| same TCP connection.
+         |-------------ServerHello-(cert)---->| Registrar verifies
+         |                                    |  802.1AR cert, and
+         |                                    |  obtains auth token
+         |<------------client cert------------| <- client cert
+         |                                    |    = ownership voucher/auth
+         |                                    |      token
+         |<------------extension auth token---| * modification or
+         |                                    |   extensions to TLS handshake
+         |                                    |
+         |                                    |  (NOTE: This is an idea
+         |                                    |    around optimizing the
+         |                                    |  initial authentication.
+         |                                    |   netconf/restconf
+         |                                    |   DOES NOT explore this either)
+         |   continue with BRSKI or           |
+         |          NETCONF/RESTCONF etc:     |
+         |         3. NETCONF/RESTCONF        |
+         |<-----------------------------------|
+         |                                    |
+         Note: arrows point from the "client" to
+          the "server" at each protocol layer
+
+
+It was noting:  By flipping the TLS connection the handshake works out nicely
+   in our favor: the TLSCertificate payload is the 802.1AR cert and then
+   *after* it is authenticated the client could respond with the ownership
+   voucher cert  assuming the necessary extension could be defined.
+
+some additional TLS time sequence diagrams:
+     https://www.cs.cmu.edu/~mmaass/tpm_tls/report.html
+or   http://etutorials.org/shared/images/tutorials/tutorial_113/09fig03.gif
+or   https://tools.ietf.org/html/rfc5878#section-6
+
+Compare this to the flow in BRSKI:
+   https://tools.ietf.org/html/draft-ietf-anima-bootstrapping-keyinfra-03#section-3
+
+at about:
+      |            TLS via the Circuit Proxy    |
+      |<--Registrar TLS server authentication---|
+      |                                         |
+  [PROVISIONAL accept of server cert]           |
+      P                                         |
+      P---IEEE 802.1AR client authentication--->|
+      P                                         |
+
+[then doing REST stuff to get out of P state]
+
+We discussed at length: Is this optimization worth pursuing NOW or can it be
+                        handled as a true optimization in later work?
+
+                        ** delaying this incurs technical debt **
+
+It might involve the REST interface being flipped. This makes re-use of
+existing libraries harder.
+
+This netconf draft addresses how the interface might be implmented:
+https://tools.ietf.org/html/draft-ietf-netconf-system-keychain-00
+(thus DRAFT vs EST RFC7030)
+
+Our path to RFC is quicker/easier if we reference RFCs.
+But this role reversal isn't a bad idea at all!!!
+
+But from this it appears that the “server” is consistently the device. See also:
+
+https://tools.ietf.org/html/rfc6241 (netconf)
+  “the client can be a script or
+   application typically running as part of a network manager.  The
+   server is typically a network device.  The terms "device" and
+   "server" are used interchangeably in this document”
+
+
+QUESTION: in all of netconf/restconf is the device always passive?
+
+ACTION ITEM FOR MAX: Continue this conversastion with a more detailed
+       discussion of what the netconf provisional state actually is (they
+       don't spell it out).
+
+Tentative plan: maintain current flows and work toward optimization in
+          netconf by partnering with netconf folks?
+
+5) We discussed:
+
+  https://tools.ietf.org/html/draft-ietf-netconf-system-keychain-00 could
+      replace [suppliment]  EST, but needs some extensions for ANIMA.
+
+      (It can't replace because the server isn't long term appropriate for
+       knowing when the client needs to obtain a new cert etc. I think its
+       suppliment).
+
+  This is contrasted to netconf, where the management infrastructure is
+  driving the state machine.  So the mgmt drives to push the initial
+  certificate.
+
+  But, certificates have lifetimes, and (unless they are ~infinite~), the
+  client knows when it needs to renew the certificate, and so it still has to
+  have a state machine to enable to renew.
+
+  Renew is built-in to EST, but system-keychain doesn't deal with it?
+  Kent: client can send notification, but agrees that client has to initiate
+          the callback, so that the NMS can push a new certificate down.
+
+
+A lot of the discussion then revolved around if we could reduce the
+time/complexity of the provisional state, as it is a likely avenue of attack
+or implementation flaws.
+
+   - flipping the TLS connection and having a TLS extension for the auth
+   token / ownership voucher this would require a new doc for a TLS extension.
+
+
+
+
+                +--------------+
+                |   Start      |
+                |              |
+                +------+-------+
+                       |
+                +------v-------+
+                |  Discover    |
+   +------------>              |
+   |            +------+-------+
+   |                   |
+   |            +------v-------+
+   |            |  Identity    |
+   ^------------+              |
+   | rejected   +------+-------+
+   |                   |           <-- 1. moving imprint to here as part of
+   |                   |                   TLS handshake this reduces the
+   |                   |                   provisional state.
+   |            +------v-------+    This is an interesting/great/cool
+   |            |              |    optimization but would slow us down a lot
+   |            |              |     to define the needed extension auth token.
+   |            | Request      |
+   |            | Join         |
+   |            +------+-------+
+   |                   |
+   |            +------v-------+
+   |            |  Imprint     |   Optional
+   ^------------+              <--+Manual input
+   | Bad Vendor +------+-------+
+   | response          |
+   |            +------v-------+
+   |            |  Enroll      | <-- 2. should this be driven by the
+   |            |              |     registrar/netconf style server
+   ^------------+              |     as server side state
+   |            |              |     (e.g. netconf-system-keychain)
+   | Enroll     +------+-------+     this is implied because the order of
+   |                   |             the TLS in netconf call home
+   | Failure           |             but we could swap the roles again
+   |                   |             to get back to EST (current anima draft)
+   |            +------v-------+
+   |            |  Being       |
+   ^------------+  Managed     |
+    Factory     +--------------+
+    reset
+
+We discussed the question as to whether or not a decision about 1,
+and 2 were linked in any way?  Does TRUE(1) force TRUE(2)? (NO)
+Does FALSE(2) imply FALSE(1)?  (NO)
+
+ACTION ITEM for MCR: Can we use RFC5878 (SAML) to replace ownership / auth
+                     token extension need?
+
+
+Here is a TLS State diagram adapted from RFC5878, section 6, anotated
+to include where the provision state would be.
+
+
+
+Client                                                   Server
+
+    ClientHello (no extensions) -------->                            |0
+                                        ServerHello (no extensions)  |0
+                                                       Certificate*  |0
+                                                 ServerKeyExchange*  |0
+                                                CertificateRequest*  |0
+                                <--------           ServerHelloDone  |0
+    Certificate*                                                     |0
+    ClientKeyExchange                                                |0
+    CertificateVerify*                                               |0
+    [ChangeCipherSpec]                                               |0
+    Finished                    -------->                            |1
+                                                 [ChangeCipherSpec]  |0
+                                <--------                  Finished  |1
+
+                  { THIS IS PROVISIONAL STATE!!!! }
+
+    ClientHello (w/ extensions) -------->                            |1
+                                        ServerHello (w/ extensions)  |1
+                                  SupplementalData (w/ authz data)*  |1
+                                                       Certificate*  |1
+                                                 ServerKeyExchange*  |1
+                                                CertificateRequest*  |1
+                                <--------           ServerHelloDone  |1
+    SupplementalData (w/ authz data)*                                |1
+    Certificate*                                                     |1
+    ClientKeyExchange                                                |1
+    CertificateVerify*                                               |1
+    [ChangeCipherSpec]                                               |1
+    Finished                    -------->                            |2
+                                                 [ChangeCipherSpec]  |1
+                                <--------                  Finished  |2
+
+
+SAML would work well, if a bit verbose, but this will fail for
+bearer tokens!!!
+https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+JWT might be simpler.
+
+    PLEDGE                                                REGISTRAR
+                                <--MITM-- ClientHello (w/ extensions)
+
+    ServerHello (no extensions) ---MITM->
+    Certificate (IDevID)
+    ServerKeyExchange* (DH)
+    CertificateRequest
+    ServerHelloDone
+                                <X-MITM--  SupplementalData (w/ authz data)*
+                                               Certificate*
+                                               ClientKeyExchange
+                                               CertificateVerify*
+                                               Finished
+
+                                <---MITM   ClientHello
+                                           ....
+
+
+    Finished                    ---MITM->
+                           <CRYPTO STARTS HERE>
+
+
