@@ -1,0 +1,252 @@
+This set of minutes covers meetings in September 2016 and October 2016,
+     September 20, 2016: mcr, kent, max, michael behringer,
+     October   04, 2016: mcr, max, MichaelB, kent, toerless
+     October   11, 2016: mcr, michaelB, Toerless, Kent, Max (meeting went
+                         until 12:30)
+
+0) the old webex expired, and a new one was created.
+   WEEKLY INVITE, SEE ANIMA BOOTSTRAP WIKI:
+        https://trac.tools.ietf.org/wg/anima/trac/wiki/Bootstrap
+
+Summary: over the three weeks we had many discussions about the exact format
+         and nature of the ownership voucher, and the different modes in
+         which enrollment can occur.
+
+Summary of actions:
+ACTION: mcr to find some text about why JSON seems to be preferred among
+        "new kids"
+ACTION: max to run the ownership voucher model to build an example
+        authorization token and ensure it all got covered
+        kent to expand 2.2 (examples)
+        mcr go add the GRASP text for registrar discovery by the proxy
+        mcr to add text to "Privacy Considerations" section about
+            implications of direction of TLS connections, and who reveals
+            identity first.
+
+
+On 2016-09-27 we closed off some lingering discussion about possible FLIP.
+
+Summary: because the pledge identity is required to generate the ownership
+         voucher we must expose the pledge to an active attacker
+
+     mcr: if the pledge exposes a hash'd identity this might resolve the
+     problem. This only works in the non-flipped case because in the
+     non-flipped case the client authentication is optional in TLS. (the
+     current draft indicates we must authenticate the client)
+
+     In order to preserve the identity of the pledge in the case of the
+     active attacker, we would have to modify the cryptographic mechanism in
+     a way beyond what TLS1.3 can provide.
+
+     This topic is moot given that the MASA server does not verify ownership
+     itself -- instead it only logs the events for registrar's to do their own
+     verification. [The exact paragraph for this is not clear in the -03
+     draft. TODO: make this clearer!]. This implies that any crypto/handshake
+     optimization is ultimately only an optimization and an active attacker
+     can in fact obtain the device identity. So the best we can do is ensure
+     logging occurs at the MASA. But this would have been available to the
+     Registrar anyway, and more directly, when the crypto handshake
+     failed. Max's position: another pre-mature optimization.
+
+     mcr: points out that authoritative MASA servers could shut this down.
+
+     This should be explained further in the security considerations
+     section. (There is already similar text there).
+
+On 2016-10-04 we attempted to make a TODO list for things missing indraft,
+noting that 2016-10-31 is the Internet Draft submission cut-off.
+
+1. Section 3.2 (proxy behavior) updated to indicate use of GRASP to find
+   Registrar.  This might require GRASP objective for registrar discovery be
+   added. Could be defined in the bootstrap document.
+   Provide any guidance re GRASP options so that implementation is clear.
+   Maintain clarity on how a proxy / registrar works when GRASP is not
+   available (e.g. proxy config or other discovery is an option)
+
+2. A finalized format for the ownership voucher/authorization token that is
+   common.
+   And has a single NEW name to avoid confusion with prior discussions ("MASA
+   token"?) The "mode" of the MASA server (if it does "audit mode" or
+   "ownership validation") could be indicated in this MASA token.
+   Kent's draft is: https://github.com/netconf-wg/ownership-voucher/blob/master/draft-kwatsen-netconf-ownership-voucher.xml
+   https://tools.ietf.org/html/rfc7515#section-4.1.6
+
+   *** would like a more prescriptive document ***
+
+3. https://tools.ietf.org/html/draft-ietf-anima-bootstrapping-keyinfra-03#section-3.1.1
+does not specify a GRASP mechanism for proxy discovery, should it?
+  max feels, "no" because defining an insecure mode of GRASP is difficult.
+  mcr feels, "no" because discovery by multicast UDP but replys are by TCP
+      which means the new node needs to open a TCP port to get a reply back. We
+      just had a long conversation about TCP/UDP etc (re flipping the handshake)
+      and this adds more confusion.
+  group conclusion: close this. "No". (agreement on the call is noted; with
+        toerless voting for grasp but accepting the group decision)
+
+
+On 2016-10-11:
+
+We discussed the ways in which draft-kwatsen-netconf-ownership-voucher.xml
+instantiates itself into JSON, and we discussed concrete choices for a way
+to sign this object:
+  1) JOSE
+  2) JWT
+  3) PKCS7 signed object
+
+We had much discussion which we based upon some mis-understandings of
+the terms for the for various steps, and also this raporteur suggests
+that we working with different mental models as to what is going on.
+That discussion is rather hard to capture into minutes.
+
+We further discussed the following abstracted time sequence diagram:
+
+  pledge         registrar          masa            vendor
+(A)  <**************************************MIC*******
+                               [at  manufacturing time]
+
+(B)  -----MIC------->  [probably as part of (D)TLS ClientCertificate]
+(C)  --audit nonce-->  [5.1 /requestaudittoken]
+        [nonce]
+(D)                  -req audit-token->
+                      [5.2 /requestaudittoken]
+                      SigRegistrar([nonce + 802.1AR serial-number])
+
+(E)                  <-- [authz token]--
+                      [5.3 application/authorization-token]
+                      SigMasa([DevIDSerialNumber, domainCAcert])
+
+(F)  <--audit token---
+      (object from E)
+
+     <-attributes-----
+     ---cert req----->
+     <--LDevID--------
+
+
+(A) IDevID installed my manufacturer, at build time. Includes
+    anchor certificate(s) for manufacturer.
+
+(B) information about the New Entity's ID
+(C) using provisional EST connection, an audit nonce is requested.
+    section 5.1
+(D) the registrar contacts the MASA for an audit token (5.2)
+(E) an authorization token is returned (5.3)
+(F) the authorization token (which acts as an ownership voucher) is
+    returned to the New Entity, ending the provisional part.
+
+In our discussions last week and the week before, we had a lot of debate
+as to whether the contents of (E) needs to have any meaning to the Registrar,
+and if so, what meaning does it have.
+
+We had a lot of confusion between the terms audit token, authorization token
+and ownership voucher.  (Looking above, it seems reasonable as audit
+token and authorization token are mixed up in C,D,E, with an authorization
+token being the reply to the /requestaudittoken query!)
+
+Some JSON diagrams that came from  draft-kwatsen-netconf-ownership-voucher.xml
+(which, fully formatted was distributed by email, and is also at:
+   http://www.sandelman.ca/tmp/draft-kwatsen-netconf-ownership-voucher-00.txt )
+
+{  "ietf-ownership-voucher:voucher":
+    {    "assertion": "logged",
+          "owner-id": "Registrar3245",
+          "unique-id": "JADA123456789",
+               or:  "unique-id": ["JADA123456789",
+                                  "AAA123456789 ",
+                                  "CCC123456789"]   ???
+          "created-on": "2016-10-07T19:31:42Z",
+          "nonce": "987987623489567",  }
+}
+
+{  "ietf-ownership-voucher:voucher":
+    {    "assertion": [ "logged", "owned" ]
+          "owner-id": {
+               "type"  : [ "DN", "owner-cert", "CA-fingerprint" ]
+               "value"  : "Registrar3245"
+           }
+          "unique-id": {
+              "type" : ["single", "list", "other"]
+              "value" : "JADA123456789",
+              or:
+       "value": ["JADA123456789",  "AAA123456789 ",  "CCC123456789"]
+         or:
+       "value": <other>
+          "created-on": "2016-10-07T19:31:42Z",
+          "nonce": "987987623489567",  }
+}
+
+   <voucher xmlns="urn:ietf:params:xml:ns:yang:ietf-ownership-voucher">
+        <assertion>verified</assertion>
+        <owner-id>owner-23452345</owner-id>
+        <unique-id>AAA123456789</unique-id>
+        <unique-id>BBB123456789</unique-id>
+        <unique-id>CCC123456789</unique-id>
+        <created-on>2016-10-07T19:31:42Z</created-on>
+    </voucher>
+
+The owner certificate:
+       Owner Certificate:  The term "owner certificate" is used in this
+       document to represent an X.509 certificate, signed by the
+       device's manufacturer or delegate, that binds an owner identity
+       to the owner's private key, which the owner can subsequently use
+       to sign artifacts.  The owner certificate is used by devices when
+       validating owner signatures on signed data.  The owner
+       certificate is formally defined by the "owner-certificate"
+       container in the YANG module defined in Section 7.4.
+
+This implies that the manufacturer issues the owner certificate to the
+https://tools.ietf.org/html/draft-ietf-netconf-zerotouch-09#section-6.3
+
+MCR dug up an email from 2014, which is at:
+  ^^^^^ could there be a hierarchy of these?
+  see:
+  https://mailarchive.ietf.org/arch/msg/6tisch-security/2kObJLkLlhuI-HU9s5yqfRm0n00
+
+and asked for feedback on this, which was received last week.
+
+ACTION: mcr to find some text about why JSON seems to be preferred.
+
+This diagram grew to explain the audit-only scenario, but is probably needs
+to be revised to show just the audit-only situation.
+
+
+   MASA ------ MASA-token ----------------->   Registrar
+                \-- audit-log (MASA signed)...........|
+                 \                                    v  proceed only if log is "OK" (no unexpected element)
+                  \-- XXX                 ............|  -------------------->   Pledge (Client)
+                        ownership-voucher (manufacturer signed)
+                          Validation: see section https://tools.ietf.org/html/draft-ietf-netconf-zerotouch-09#section-6.3
+                              1) manufacturer signature on voucher
+                              2) pledge serial in voucher matches
+                              3) owner-id in voucher is validated
+                     or authorization-token/audit-token (MASA signed)
+                        need to eliminate one term. MAX: correct term is audit-token
+                        authorizes to join to domain identified with SHA256 hash of
+                        public key of CA of domain
+
+                        Contentions:
+                             format/content of "owner-id" in ownership voucher:
+                                  just SHA256 (MAX) or DN of a certificate (Kent original proposal)
+                                    - DN requires MASA/manufacturer to run PKI service
+                                    - Kent: Trust-model of public-CA is dangerous
+
+
+Since the audit log goes to the registrar, and the tokens/voucher goes to the
+pledge, they should be independently signed, so that they can be pass on
+separately.
+
+The pledge has to verify the MIC, needs the manufacturer signing key.
+
+The registrar has to verify that the audit-log has properly signed by the
+MASA.
+
+audit-token is a subset of the audit-log, is a statement by the MASA that the
+MASA has logged the claim.
+
+An authorization token/audit-token is an object signed by the MASA server,
+which is sent to the pledge, and authorizes the pledge to join a network,
+noting that this activity has been audited (logged).
+
+An ownership voucher contains the PKCS-name (DN) of the particular domain to
+join.
+
