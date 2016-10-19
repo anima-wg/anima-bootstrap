@@ -205,15 +205,13 @@
             identity installed by a third-party (e.g., vendor, manufacturer or
             integrator).</t>
 
-            <t hangText="Audit Token:">A signed token from the manufacturer
-            authorized signing authority indicating that the bootstrapping
-            event has been successfully logged. This has been referred to as
-            an "authorization token" indicating that it authorizes
-            bootstrapping to proceed.</t>
+            <t hangText="Audit Token:">A signed token from the MASA service
+            indicating that the bootstrapping event has been successfully
+            logged. </t>
 
-            <t hangText="Ownership Voucher:">A signed voucher from the vendor
-            vouching that a specific domain "owns" the pledge as defined in
-            <xref target="I-D.ietf-netconf-zerotouch"></xref>.</t>
+            <t hangText="Ownership Voucher:">A signed token from the MASA
+            service vouching that a specific domain "owns" the pledge. it is
+            defined in <xref target="I-D.ietf-netconf-zerotouch"></xref>.</t>
 
             <t hangText="Domain:">The set of entities that trust a common key
             infrastructure trust anchor. This includes the Proxy, Registrar,
@@ -239,10 +237,10 @@
             domain. The pledge is unaware that they are communicating with a
             proxy rather than directly with the Registrar.</t>
 
-            <t hangText="MASA Service:">A Manufacturer Authorized Signing
-            Authority (MASA) service on the global Internet. The MASA provides
-            a repository for audit log information concerning privacy
-            protected bootstrapping events.</t>
+            <t hangText="MASA Service:">A third-party Manufacturer Authorized
+            Signing Authority (MASA) service on the global Internet. The MASA
+            provides a repository for audit log information concerning privacy
+            protected bootstrapping events. It does not track ownership.</t>
 
             <t hangText="Ownership Tracker">An Ownership Tracker service on
             the global internet. The Ownership Tracker uses business processes
@@ -378,8 +376,7 @@
     <section title="Functional Overview">
       <t>Entities behave in an autonomic fashion. They discover each other and
       autonomically bootstrap into a key infrastructure delineating the
-      autonomic domain. See <xref
-      target="RFC7575"></xref> for more
+      autonomic domain. See <xref target="RFC7575"></xref> for more
       information.</t>
 
       <t>This section details the state machine and operational flow for each
@@ -996,14 +993,13 @@
 
         <section title="Claiming the New Entity">
           <t>Claiming an entity establishes an audit log at the MASA server
-          and provides the Registrar with proof, in the form of a MASA
-          authorization token, that the log entry has been inserted. As
-          indicated in <xref target="AcceptDomain"></xref> a Pledge will only
-          proceed with bootstrapping if a validated MASA authorization token
-          has been received. The Pledge therefore enforces that bootstrapping
-          only occurs if the claim has been logged. There is no requirement
-          for the vendor to definitively know that the device is owned by the
-          Registrar.</t>
+          and provides the Registrar with proof, in the form of a MASA audit
+          token, that the log entry has been inserted. As indicated in <xref
+          target="AcceptDomain"></xref> a Pledge will only proceed with
+          bootstrapping if a validated MASA audit token has been received. The
+          Pledge therefore enforces that bootstrapping only occurs if the
+          claim has been logged. There is no requirement for the vendor to
+          definitively know that the device is owned by the Registrar.</t>
 
           <t>Registrar's obtain the Vendor URI via static configuration or by
           extracting it from the IEEE 802.1AR credential. The imprint method
@@ -1372,8 +1368,8 @@ Data        +----------------------nonce---->   (discard     |
                title="Request Audit Token from the Registrar">
         <t>When the Pledge reaches the EST section 4.1.1 "Bootstrap
         Distribution of CA Certificates" state but wishes to proceed in a
-        fully automated fashion it makes a request for a MASA authorization
-        token from the Registrar.</t>
+        fully automated fashion it makes a request for a MASA audit token from
+        the Registrar.</t>
 
         <t>This is done with an HTTPS POST using the operation path value of
         "/requestaudittoken".</t>
@@ -1413,8 +1409,7 @@ Data        +----------------------nonce---->   (discard     |
         Registrar obtains an Audit Token from the MASA service (see Section
         5.2).</t>
 
-        <t>The received MASA authorization token is returned to the
-        Pledge.</t>
+        <t>The received MASA audit token is returned to the Pledge.</t>
 
         <t>As indicated in EST [RFC7030] the bootstrapping server can redirect
         the client to an alternate server. If the Pledge authenticated the
@@ -1477,10 +1472,10 @@ Data        +----------------------nonce---->   (discard     |
         <t></t>
 
         <t>The Registrar MAY exclude the nonce from the request. Doing so
-        allows the Registrar to request an authorization token when the Pledge
-        is not online, or when the target bootstrapping environment is not on
-        the same network as the MASA server (this requires the Registrar to
-        learn the appropriate DevIDSerialNumber field from the physical device
+        allows the Registrar to request an audit token when the Pledge is not
+        online, or when the target bootstrapping environment is not on the
+        same network as the MASA server (this requires the Registrar to learn
+        the appropriate DevIDSerialNumber field from the physical device
         labeling or from the sales channel -- how this occurs is out-of-scope
         of this document). If a nonce is not provided the MASA server MUST
         authenticate the client as described in EST [RFC7030] section 3.3.2 to
@@ -1505,14 +1500,14 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>The domain ID (e.g. hash of the public key of the domain) is
         extracted from the root certificate and is used to populate the MASA
-        authorization token and to update the audit log.</t>
+        audit token and to update the audit log.</t>
       </section>
 
       <section anchor="AuditTokenResponse" title="Audit Token Response">
-        <t>The authorization token response to requests from the device and
-        requests from the Registrar are in the same format. The Registrar
-        either caches prior MASA responses or dynamically requests a new Audit
-        Token based on local policy.</t>
+        <t>The audit token response to requests from the device and requests
+        from the Registrar are in the same format. The Registrar either caches
+        prior MASA responses or dynamically requests a new Audit Token based
+        on local policy.</t>
 
         <t>If the the join operation is successful, the server response MUST
         contain an HTTP 200 response code with a content-type of
@@ -1522,8 +1517,8 @@ Data        +----------------------nonce---->   (discard     |
         human-readable error message containing explanatory information
         describing why the request was rejected.</t>
 
-        <t>The authorization token consists of the nonce, if supplied, the
-        serial number information identifying the device and the domain CA
+        <t>The audit token consists of the nonce, if supplied, the serial
+        number information identifying the device and the domain CA
         certificate extracted from the request:</t>
 
         <figure>
@@ -2038,7 +2033,7 @@ Data        +----------------------nonce---->   (discard     |
       resistance, but it also implies an operational risk to the Domain that
       Vendor behavior could limit future bootstrapping of the device by the
       Domain. This can be mitigated by Registrars that request nonce-less
-      authorization tokens.</t>
+      audit tokens.</t>
     </section>
 
     <section title="Acknowledgements">
