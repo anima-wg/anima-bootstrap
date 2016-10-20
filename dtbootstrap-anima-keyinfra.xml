@@ -511,13 +511,12 @@
         <t>State descriptions for the pledge are as follows:</t>
 
         <t><list style="numbers">
-            <t>Discover a communication channel to the "closest"
-            Registrar.</t>
+            <t>Discover a communication channel to a Registrar.</t>
 
             <t>Identify itself. This is done by presenting an IEEE 802.1AR
             credentials to the discovered Registrar (via the Proxy) in a TLS
-            handshake. (Although the Registrar is also authenticated these
-            credentials are only provisionally accepted at this time).</t>
+            handshake. (The Registrar credentials are only provisionally
+            accepted at this time).</t>
 
             <t>Requests to Join the discovered Registrar. A unique nonce is
             included ensuring that any responses can be associated with this
@@ -542,21 +541,22 @@
         detail.</t>
 
         <section anchor="ProxyDiscovery" title="Discovery">
-          <t>The result of discovery is logically communication with a Proxy
-          instead of a Domain Registrar but in such a case the proxy
-          facilitates communication with the actual Domain Registrar in a
-          manner that is transparent to the Pledge. Therefore or clarity a
-          Proxy is always assumed.</t>
+          <t>The result of discovery is a logical communication with a
+          Registrar, through a Proxy. The Proxy is transparent to the Pledge
+          but is always assumed to exist.</t>
 
-          <t>To discover the Domain Bootstrap Server the Pledge performs the
-          following actions:</t>
+          <t>To discover the Registrar the Pledge performs the following
+          actions:</t>
 
           <t><list style="letters">
               <t>MUST: Obtains a local address using either IPv4 or IPv6
               methods as described in <xref target="RFC4862"></xref> IPv6
               Stateless Address AutoConfiguration or <xref
               target="RFC3927"></xref> Dynamic Configuration of IPv4
-              Link-Local Addresses.</t>
+              Link-Local Addresses. The Plege MAY obtain an IP address via
+              DHCP [RFC2131]. The DHCP provided parameters for the Domain Name
+              System can be used to perform step (d) DNS operations if all
+              local discovery attempts fail (see below). </t>
 
               <t>MUST: Performs DNS-based Service Discovery <xref
               target="RFC6763"></xref> over Multicast DNS <xref
@@ -572,8 +572,8 @@
 
               <t>MAY: Performs DNS-based Service Discovery [RFC6763] over
               normal DNS operations. The service searched for is
-              "_bootstrapks._tcp.example.net". In this case the domain
-              "example.net" is discovered as described in <xref
+              "_bootstrapks._tcp.example.com". In this case the domain
+              "example.com" is discovered as described in <xref
               target="RFC6763"></xref> section 11.</t>
 
               <t>MAY: If no local bootstrapks service is located using the
@@ -581,8 +581,8 @@
               known vendor provided bootstrapping server by performing a DNS
               lookup using a well known URI such as
               "bootstrapks.vendor-example.com". The details of the URI are
-              vendor specific. Vendors that leverage this method SHOULD
-              provision appropriately.</t>
+              vendor specific. Vendors that leverage this method on the Pledge
+              are responsible for providing the bootstrapks service.</t>
             </list>DNS-based service discovery communicates the local proxy
           IPv4 or IPv6 address and port to the Pledge. Once a proxy is
           discovered the Pledge communicates with a Registrar through the
