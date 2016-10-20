@@ -678,7 +678,8 @@
               <t>and using a Certificate-Less TLS mutual authentication method
               (not an autonomic solution because the distribution of symmetric
               key material is not autonomic).</t>
-            </list>This document describes additional autonomic methods:</t>
+            </list>This document describes autonomic methods that MUST be
+          supported by the Pledge:</t>
 
           <t><list style="hanging">
               <t hangText="MASA audit token">Audit tokens are obtained by a
@@ -722,24 +723,16 @@
           bootstrapping process as follows:</t>
 
           <t><list style="symbols">
-              <t>Initially the Pledge does not know the current time. The
-              nonce included in join attempts provides an alternate mechanism
-              for the Pledge to ensure responses are associated with a
-              particular bootstrapping attempt. Nonceless audit tokens from
-              the MASA server are always valid and thus time is not
-              needed.</t>
+              <t>Initially the Pledge does not know the current time. </t>
 
-              <t>In accordance with IEEE 802.1AR and RFC5280 all manufacturing
-              installed certificates and trust anchors are assumed to have
-              infinite lifetimes. All such certificates "SHOULD be assigned
-              the GeneralizedTime value of 99991231235959Z" [RFC5280]. The
-              Pledge, Registrar and MASA server MUST ignore any other validity
-              period information in these credentials and treat the effective
-              lifetime as 99991231235959Z. This ensures that client
-              authentication (see <xref target="entityauthentication"></xref>)
-              and the audit token signature (see <xref
-              target="AuditTokenResponse"></xref>) can always be verified
-              during RFC5280 path validation.</t>
+              <t>During Pledge authentiation by the Registrar a realtime clock
+              can be used by the Registrar. This bullet expands on a closely
+              related issue regarding Pledge lifetimes. RFC5280 indicates that
+              long lived Pledge certifiates "SHOULD be assigned the
+              GeneralizedTime value of 99991231235959Z" [RFC5280] so the
+              Registrar MUST support such lifetimes and SHOULD support
+              ignoring Pledge lifetimes if they did not follow the RFC5280
+              recommendations. </t>
 
               <t>Once the audit token is accepted the validity period of the
               domainCAcert in the token (see <xref
@@ -759,6 +752,15 @@
           to secure distribution of more accurate time information although
           specification of such a protocol is out-of-scope of this
           document.</t>
+
+          <t>The nonce included in join attempts provides an alternate
+          mechanism for the Pledge to ensure Audit Token responses are
+          associated with a particular bootstrapping attempt. Nonceless Audit
+          Tokens from the MASA server are always valid and thus time is not
+          needed. </t>
+
+          <t>Ownership Vouchers include time information and MUST be validated
+          a realtime clock.</t>
         </section>
 
         <section title="Enrollment">
