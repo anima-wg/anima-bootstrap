@@ -220,7 +220,7 @@
 
             <t hangText="Domain CA:">The domain Certification Authority (CA)
             provides certification functionalities to the domain. At a minimum
-            it provides certification functionalities to the Registrar and
+            it provides certification functionalities to a Registrar and
             stores the trust anchor that defines the domain. Optionally, it
             certifies all elements.</t>
 
@@ -235,7 +235,7 @@
             find themselves in an environment where they are not provided
             connectivity until after they are validated as members of the
             domain. The pledge is unaware that they are communicating with a
-            proxy rather than directly with the Registrar.</t>
+            proxy rather than directly with a Registrar.</t>
 
             <t hangText="MASA Service:">A third-party Manufacturer Authorized
             Signing Authority (MASA) service on the global Internet. The MASA
@@ -254,9 +254,9 @@
 
       <section title="Scope of solution">
         <t>Questions have been posed as to whether this solution is suitable
-        in general for Internet of Things (IoT) networks. In general the
-        answer is no, but the terminology of <xref target="RFC7228"></xref> is
-        best used to describe the boundaries.</t>
+        in general for Internet of Things (IoT) networks. This depends on the
+        capabilities of the devices in question. The terminology of <xref
+        target="RFC7228"></xref> is best used to describe the boundaries.</t>
 
         <t>The entire solution described in this document is aimed in general
         at non-constrained (i.e. class 2+) devices operating on a
@@ -278,9 +278,9 @@
 
         <t>The bootstraping process can take minutes to complete depending on
         the network infrastructure and device processing speed. The network
-        communication itself is not "chatty" but there can be delays for
-        privacy reasons. This protocol is not intended for low latency
-        handoffs.</t>
+        communication itself is not optimized for speed; the discovery process
+        allows for the Pledge to avoid broadcasting for privacy reasons. This
+        protocol is not intended for low latency handoffs.</t>
 
         <t>Specifically, there are protocol aspects described here which might
         result in congestion collapse or energy-exhaustion of intermediate
@@ -305,8 +305,8 @@
       </section>
 
       <section title="Trust bootstrap">
-        <t>The imprint protocol results in a secure relationship between the
-        domain registrar and the new device. If the new device is sufficiently
+        <t>The imprint protocol results in a secure relationship between a
+        domain Registrar and the Pledge. If the new device is sufficiently
         constrained that the ACE protocol should be leveraged for operation,
         (see <xref target="I-D.ietf-ace-actors"></xref>), and the domain
         registrar is also the Client Authorization Server or the Authorization
@@ -380,7 +380,7 @@
       information.</t>
 
       <t>This section details the state machine and operational flow for each
-      of the main three entities. The pledge, the domain (primarily the
+      of the main three entities. The pledge, the domain (primarily a
       Registrar) and the MASA service.</t>
 
       <t>A representative flow is shown in Figure 2:</t>
@@ -526,13 +526,13 @@
             vendor service "Audit Token" or the validation of the vendor
             service "Ownership Voucher". Either of these responses contains
             sufficient information for the pledge to complete authentication
-            of the Registrar. (The pledge can now finish authentication of the
+            of a Registrar. (The pledge can now finish authentication of the
             Registrar TLS server certificate)</t>
 
-            <t>Enroll by accepting the domain specific information from the
-            Registrar, and by obtaining a domain certificate from the
-            Registrar using a standard enrollment protocol, e.g. Enrollment
-            over Secure Transport (EST) <xref target="RFC7030"></xref>.</t>
+            <t>Enroll by accepting the domain specific information from a
+            Registrar, and by obtaining a domain certificate from a Registrar
+            using a standard enrollment protocol, e.g. Enrollment over Secure
+            Transport (EST) <xref target="RFC7030"></xref>.</t>
 
             <t>The Pledge is now a member of, and can be managed by, the
             domain and will only repeat the discovery aspects of bootstrapping
@@ -584,7 +584,7 @@
               provision appropriately.</t>
             </list>DNS-based service discovery communicates the local proxy
           IPv4 or IPv6 address and port to the Pledge. Once a proxy is
-          discovered the Pledge communicates with the Registrar through the
+          discovered the Pledge communicates with a Registrar through the
           proxy using the bootstrapping protocol defined in <xref
           target="ProtocolDetails"></xref>. The current DNS services returned
           during each query is maintained until bootstrapping is completed. If
@@ -680,15 +680,15 @@
             </list>This document describes additional autonomic methods:</t>
 
           <t><list style="hanging">
-              <t hangText="MASA audit token">Audit tokens are obtained by the
+              <t hangText="MASA audit token">Audit tokens are obtained by a
               Registrar from the MASA service and presented to the Pledge for
               validation. These indicate to the Pledge that joining the domain
               has been logged by a logging service.</t>
 
               <t hangText="Ownership Voucher">Ownership Vouchers are obtained
-              by the Registrar from the MASA service and explicitly indicate
-              the fully qualified domain name of the domain the Pledge belongs
-              to. The Ownership Voucher is defined in <xref
+              by a Registrar from the MASA service and explicitly indicate the
+              fully qualified domain name of the domain the Pledge belongs to.
+              The Ownership Voucher is defined in <xref
               target="I-D.ietf-netconf-zerotouch"></xref>.</t>
             </list></t>
 
@@ -697,7 +697,7 @@
           policy concerning which method to use.</t>
 
           <t>The audit token contains the domain's public key material as
-          provided to the MASA service by the Registrar. This provides
+          provided to the MASA service by a Registrar. This provides
           sufficient information to the client to complete automated
           bootstrapping with the local key infrastructure.</t>
 
@@ -768,8 +768,8 @@
           Certification Authority.</t>
 
           <t>Enrollment proceeds as described in Enrollment over Secure
-          Transport (EST) [RFC7030]. The Pledge contacts the Registrar using
-          EST as indicated:</t>
+          Transport (EST) [RFC7030]. The Pledge contacts a Registrar using EST
+          as indicated:</t>
 
           <t><list style="symbols">
               <t>The Pledge is authenticated using the IEEE 802.1AR
@@ -785,7 +785,7 @@
               implicit Trust Anchor database can be used.</t>
             </list>Once the Audit Token is received, as specified in this
           document, the client has sufficient information to leverage the
-          existing communication channel with the Registrar to continue an EST
+          existing communication channel with a Registrar to continue an EST
           RFC7030 enrollment. Enrollment picks up at RFC7030 section 4.1.1.
           bootstrapping where the audit token provides the "out-of-band" CA
           certificate fingerprint (in this case the full CA certificate) such
@@ -869,12 +869,12 @@
         <section title="HTTPS proxy connection to Registrar">
           <t>The proxy SHOULD also provide one of: an IPIP encapsulation of
           HTTP traffic on TCP port TBD to the registrar, or a TCP circuit
-          proxy that connects the New Node to the Registrar.</t>
+          proxy that connects the Pledge to a Registrar.</t>
 
-          <t>When the Proxy provides a circuit proxy to the Registrar the
+          <t>When the Proxy provides a circuit proxy to a Registrar the
           Registrar MUST accept HTTPS connections.</t>
 
-          <t>When the Proxy provides a stateless IPIP encapsulation to the
+          <t>When the Proxy provides a stateless IPIP encapsulation to a
           Registrar, then the Registrar will have to perform IPIP
           decapsulation, remembering the originating outer IPIP source address
           in order to qualify the inner link-local address. This is a kind of
@@ -893,7 +893,7 @@
 
       <section title="Behavior of the Registrar (Bootstrap Server)">
         <t>Once a Registrar is established it listens for new entities and
-        determines if they can join the domain. The registrar delivers any
+        determines if they can join the domain. a Registrar delivers any
         necessary authorization information to the new device and facilitates
         enrollment with the domain PKI.</t>
 
@@ -935,7 +935,7 @@
           <postamble>Figure 4</postamble>
         </figure>
 
-        <section anchor="entityauthentication" title="Entity Authentication">
+        <section anchor="entityauthentication" title="Pledge Authentication">
           <t>The applicable authentication methods detailed in EST [RFC7030]
           are:</t>
 
@@ -944,12 +944,12 @@
               client authentication,</t>
 
               <t>or the use of a secret that is transmitted out of band
-              between the Pledge and the Registrar (this use case is not
+              between the Pledge and a Registrar (this use case is not
               autonomic).</t>
             </list></t>
         </section>
 
-        <section anchor="AcceptingTheEntity" title="Entity Authorization">
+        <section anchor="AcceptingTheEntity" title="Pledge Authorization">
           <t>In a fully automated network all devices must be securely
           identified and authorized to join the domain.</t>
 
@@ -966,19 +966,19 @@
 
               <t>allow a specific device from a vendor (as determined by the
               IEEE 802.1AR identity)</t>
-            </list>Since all New Entities accept Audit Tokens the Registrar
-          MUST use the vendor provided MASA service to verify that the
-          device's history log does not include unexpected Registrars. If a
-          device had previously registered with another domain, the Registrar
-          of that domain would show in the log.</t>
+            </list>Since all Pledges accept Audit Tokens a Registrar MUST use
+          the vendor provided MASA service to verify that the device's history
+          log does not include unexpected Registrars. If a device had
+          previously registered with another domain, a Registrar of that
+          domain would show in the log.</t>
 
-          <t>In order to validate the IEEE 802.1AR device identity the
-          Registrar maintains a database of vendor trust anchors (e.g. vendor
-          root certificates or keyIdentifiers for vendor root public keys).
-          For user interface purposes this database can be mapped to
-          colloquial vendor names. Registrars can be shipped with the trust
-          anchors of a significant number of third-party vendors within the
-          target market.</t>
+          <t>In order to validate the IEEE 802.1AR device identity a Registrar
+          maintains a database of vendor trust anchors (e.g. vendor root
+          certificates or keyIdentifiers for vendor root public keys). For
+          user interface purposes this database can be mapped to colloquial
+          vendor names. Registrars can be shipped with the trust anchors of a
+          significant number of third-party vendors within the target
+          market.</t>
 
           <t>If a device is accepted into the domain, it is expected request a
           domain certificate through a certificate enrollment process. The
@@ -993,7 +993,7 @@
 
         <section title="Claiming the New Entity">
           <t>Claiming an entity establishes an audit log at the MASA server
-          and provides the Registrar with proof, in the form of a MASA audit
+          and provides a Registrar with proof, in the form of a MASA audit
           token, that the log entry has been inserted. As indicated in <xref
           target="AcceptDomain"></xref> a Pledge will only proceed with
           bootstrapping if a validated MASA audit token has been received. The
@@ -1021,20 +1021,20 @@
           to claim the device. Evidence of such a claim is provided in the
           audit log entries available to any future Registrar. Such claims
           reduce the ability for future domains to secure bootstrapping and
-          therefore the Registrar MUST be authenticated by the MASA
-          service.</t>
+          therefore the Registrar MUST be authenticated by the MASA service
+          although no requirement is implied that the MASA associates this
+          authentication with ownership.</t>
 
           <t>An ownership voucher requires the vendor to definitively know
           that a device is owned by a specific domain. The method used to
-          "claim" this are out-of-scope. The Registrar simply requests an
+          "claim" this are out-of-scope. A Registrar simply requests an
           ownership validation token and the Pledge trusts the response.</t>
         </section>
 
         <section title="Log Verification">
-          <t>The Registrar requests the log information for the Pledge from
-          the MASA service. The log is verified to confirm that the following
-          is true to the satisfaction of the Registrar's configured
-          policy:</t>
+          <t>A Registrar requests the log information for the Pledge from the
+          MASA service. The log is verified to confirm that the following is
+          true to the satisfaction of a Registrar's configured policy:</t>
 
           <t><list style="symbols">
               <t>Any nonceless entries in the log are associated with
@@ -1043,9 +1043,9 @@
               <t>Any nonce'd entries are older than when the domain is known
               to have physical possession of the Pledge or that the domainIDs
               are recognized by the registrar.</t>
-            </list>If any of these criteria are unacceptable to the registrar
-          the entity is rejected. The Registrar MAY be configured to ignore
-          the history of the device but it is RECOMMENDED that this only be
+            </list>If any of these criteria are unacceptable to a Registrar
+          the entity is rejected. A Registrar MAY be configured to ignore the
+          history of the device but it is RECOMMENDED that this only be
           configured if hardware assisted NEA [RFC5209] is supported.</t>
 
           <t>This document specifies a simple log format as provided by the
@@ -1164,12 +1164,12 @@
 
         <t><list style="numbers">
             <t>Default acceptance: In the simplest case, the new device
-            asserts its unique identity to the registrar. The registrar
-            accepts all devices without authorization checks. This mode does
-            not provide security against intruders and is not recommended.</t>
+            asserts its unique identity to a Registrar. The registrar accepts
+            all devices without authorization checks. This mode does not
+            provide security against intruders and is not recommended.</t>
 
             <t>Per device acceptance: The new device asserts its unique
-            identity to the registrar. A non-technical human validates the
+            identity to a Registrar. A non-technical human validates the
             identity, for example by comparing the identity displayed by the
             registrar (for example using a smartphone app) with the identity
             shown on the packaging of the device. Acceptance may be triggered
@@ -1276,8 +1276,8 @@
           4.1.1.</t>
         </list></t>
 
-      <t>In order to obtain a validated Audit Token and Audit Log the
-      Registrar contacts the MASA service Service using REST calls:</t>
+      <t>In order to obtain a validated Audit Token and Audit Log a Registrar
+      contacts the MASA service Service using REST calls:</t>
 
       <figure>
         <artwork><![CDATA[           +-----------+ +----------+ +-----------+ +----------+
@@ -1351,7 +1351,7 @@ Data        +----------------------nonce---->   (discard     |
 
       <t></t>
 
-      <t>The extensions for the Registrar server are as follows:</t>
+      <t>The extensions for a Registrar server are as follows:</t>
 
       <t><list style="symbols">
           <t>The Registrar requests and validates the Audit Token from the
@@ -1369,7 +1369,7 @@ Data        +----------------------nonce---->   (discard     |
         <t>When the Pledge reaches the EST section 4.1.1 "Bootstrap
         Distribution of CA Certificates" state but wishes to proceed in a
         fully automated fashion it makes a request for a MASA audit token from
-        the Registrar.</t>
+        a Registrar.</t>
 
         <t>This is done with an HTTPS POST using the operation path value of
         "/requestaudittoken".</t>
@@ -1412,10 +1412,10 @@ Data        +----------------------nonce---->   (discard     |
         <t>The received MASA audit token is returned to the Pledge.</t>
 
         <t>As indicated in EST [RFC7030] the bootstrapping server can redirect
-        the client to an alternate server. If the Pledge authenticated the
+        the client to an alternate server. If the Pledge authenticated a
         Registrar using the well known URI method then the Pledge MUST follow
         the redirect automatically and authenticate the new Registrar against
-        the redirect URI provided. If the Pledge had not yet authenticated the
+        the redirect URI provided. If the Pledge had not yet authenticated a
         Registrar because it was discovered and was not a known-to-be-valid
         URI then the new Registrar must be authenticated using one of the two
         autonomic methods described in this document. Similarly the Registar
@@ -1437,9 +1437,9 @@ Data        +----------------------nonce---->   (discard     |
 
       <section anchor="RequestAuditToken"
                title="Request Audit Token from MASA">
-        <t>The Registrar requests the Audit Token from the MASA service using
-        a REST interface. For simplicity this is defined as an optional EST
-        message between the Registrar and an EST server running on the MASA
+        <t>A Registrar requests the Audit Token from the MASA service using a
+        REST interface. For simplicity this is defined as an optional EST
+        message between a Registrar and an EST server running on the MASA
         service although the Registrar is not required to make use of any
         other EST functionality when communicating with the MASA service. (The
         MASA service MUST properly reject any EST functionality requests it
@@ -1471,16 +1471,16 @@ Data        +----------------------nonce---->   (discard     |
 
         <t></t>
 
-        <t>The Registrar MAY exclude the nonce from the request. Doing so
-        allows the Registrar to request an audit token when the Pledge is not
-        online, or when the target bootstrapping environment is not on the
-        same network as the MASA server (this requires the Registrar to learn
-        the appropriate DevIDSerialNumber field from the physical device
-        labeling or from the sales channel -- how this occurs is out-of-scope
-        of this document). If a nonce is not provided the MASA server MUST
+        <t>A Registrar MAY exclude the nonce from the request. Doing so allows
+        the Registrar to request an audit token when the Pledge is not online,
+        or when the target bootstrapping environment is not on the same
+        network as the MASA server (this requires the Registrar to learn the
+        appropriate DevIDSerialNumber field from the physical device labeling
+        or from the sales channel -- how this occurs is out-of-scope of this
+        document). If a nonce is not provided the MASA server MUST
         authenticate the client as described in EST [RFC7030] section 3.3.2 to
-        reduce the risk of DDoS attacks. The registrar performs authorization
-        as detailed in <xref target="AcceptingTheEntity"></xref>. If
+        reduce the risk of DDoS attacks. A Registrar performs authorization as
+        detailed in <xref target="AcceptingTheEntity"></xref>. If
         authorization is successful the Registrar obtains an Audit Token from
         the MASA service (see <xref target="RequestAuditToken"></xref>).</t>
 
@@ -1505,7 +1505,7 @@ Data        +----------------------nonce---->   (discard     |
 
       <section anchor="AuditTokenResponse" title="Audit Token Response">
         <t>The audit token response to requests from the device and requests
-        from the Registrar are in the same format. The Registrar either caches
+        from a Registrar are in the same format. A Registrar either caches
         prior MASA responses or dynamically requests a new Audit Token based
         on local policy.</t>
 
@@ -1563,17 +1563,17 @@ Data        +----------------------nonce---->   (discard     |
         <xref target="identity"></xref> the newly installed trust anchor is
         used as an EST RFC7030 Explicit Trust Anchor. The Pledge MUST use the
         domainCAcert trust anchor to immediately validate the currently
-        provisional TLS connection to the Registrar.</t>
+        provisional TLS connection to a Registrar.</t>
 
         <section anchor="CompletingAuthenticationBootstrapping"
                  title="Completing authentication of Provisional TLS connection">
-          <t>If the Registrar's credential can not be verified using the
+          <t>If a Registrar's credential can not be verified using the
           domainCAcert trust anchor the TLS connection is immediately
           discarded and the Pledge abandons attempts to bootstrap with this
           discovered registrar.</t>
 
-          <t>The following behaviors on the Registrar and Pledge are in
-          addition to normal PKIX operations:</t>
+          <t>The following behaviors on a Registrar and Pledge are in addition
+          to normal PKIX operations:</t>
 
           <t><list style="symbols">
               <t>The EST server MUST use a certificate that chains to the
@@ -1582,7 +1582,7 @@ Data        +----------------------nonce---->   (discard     |
               target="RequestAuditToken"></xref> request match the chain used
               in the current provisional TLS connection.</t>
 
-              <t>The Pledge PKIX path validation of the Registrar validity
+              <t>The Pledge PKIX path validation of a Registrar validity
               period information is as described in <xref
               target="timeunknown"></xref>.</t>
             </list>Because the domainCAcert trust anchor is installed as an
@@ -1676,9 +1676,9 @@ Data        +----------------------nonce---->   (discard     |
         be optimized as follows: All nonce-less entries for the same domainID
         MAY be condensed into the single most recent nonceless entry.</t>
 
-        <t>The Registrar uses this log information to make an informed
-        decision regarding the continued bootstrapping of the Pledge. For
-        example if the log includes unexpected domainIDs this is indicative of
+        <t>A Registrar uses this log information to make an informed decision
+        regarding the continued bootstrapping of the Pledge. For example if
+        the log includes unexpected domainIDs this is indicative of
         problematic imprints by the Pledge. If the log includes nonce-less
         entries this is indicative of the permanent ability for the indicated
         domain to trigger a reset of the device and take over management of
@@ -1713,7 +1713,7 @@ Data        +----------------------nonce---->   (discard     |
           <t>This ensures that the Pledge has the complete set of current CA
           certificates beyond the domainCAcert (see <xref
           target="AuditTokenResponse"></xref> for a discussion of the
-          limitations). Although these restrictions are acceptable for the
+          limitations). Although these restrictions are acceptable for a
           Registrar integrated with initial bootstrapping they are not
           appropriate for ongoing PKIX end entity certificate validation.</t>
         </section>
@@ -1852,10 +1852,10 @@ Data        +----------------------nonce---->   (discard     |
             <t hangText="Proxy:">Provides proxy functionalities but is not
             involved in security considerations.</t>
 
-            <t hangText="Registrar:">When interacting with a MASA server the
+            <t hangText="Registrar:">When interacting with a MASA server a
             Registrar makes all decisions. When ownership vouchers are
-            involved the Registrar is only a conduit and all security
-            decisions are made on the vendor service.</t>
+            involved a Registrar is only a conduit and all security decisions
+            are made on the vendor service.</t>
 
             <t hangText="Vendor Service, MASA:">This form of vendor service is
             trusted to accurately log all claim attempts and to provide
@@ -1889,17 +1889,16 @@ Data        +----------------------nonce---->   (discard     |
       </section>
 
       <section title="Registrar security reductions">
-        <t>The Registrar can choose to accept devices using less secure
-        methods. These methods are acceptable when low security models are
-        needed, as the security decisions are being made by the local
-        administrator, but they MUST NOT be the default behavior:<list
-            style="numbers">
-            <t>The registrar MAY choose to accept all devices, or all devices
-            of a particular type, at the administrator's discretion. This
-            could occur when informing the Registrar of unique identifiers of
-            new entities might be operationally difficult.</t>
+        <t>A Registrar can choose to accept devices using less secure methods.
+        These methods are acceptable when low security models are needed, as
+        the security decisions are being made by the local administrator, but
+        they MUST NOT be the default behavior:<list style="numbers">
+            <t>A registrar MAY choose to accept all devices, or all devices of
+            a particular type, at the administrator's discretion. This could
+            occur when informing all Registrars of unique identifiers of new
+            entities might be operationally difficult.</t>
 
-            <t>The registrar MAY choose to accept devices that claim a unique
+            <t>A registrar MAY choose to accept devices that claim a unique
             identity without the benefit of authenticating that claimed
             identity. This could occur when the Pledge does not include an
             IEEE 802.1AR factory installed credential. New Entities without an
@@ -1911,20 +1910,20 @@ Data        +----------------------nonce---->   (discard     |
             be statically configured on the Pledge). The Pledge MAY refused to
             provide a TLS client certificate (as one is not available). The
             Pledge SHOULD support HTTP-based or certificate-less TLS
-            authentication as described in EST RFC7030 section 3.3.2. The
-            registrar MUST NOT accept unauthenticated New Entities unless it
+            authentication as described in EST RFC7030 section 3.3.2. A
+            Registrar MUST NOT accept unauthenticated New Entities unless it
             has been configured to do so by an administrator that has verified
-            that only expected new entities can communicate with the Registrar
+            that only expected new entities can communicate with a Registrar
             (presumably via a physically secured perimeter).</t>
 
-            <t>The registrar MAY request nonce-less Audit Tokens from the MASA
+            <t>A Registrar MAY request nonce-less Audit Tokens from the MASA
             service. These tokens can then be transmitted to the Registrar and
             stored until they are needed during bootstrapping operations. This
             is for use cases where target network is protected by an air gap
             and therefore can not contact the MASA service during Pledge
             deployment.</t>
 
-            <t>The registrar MAY ignore unrecognized nonce-less Audit Log
+            <t>A registrar MAY ignore unrecognized nonce-less Audit Log
             entries. This could occur when used equipment is purchased with a
             valid history being deployed in air gap networks that required
             permanent Audit Tokens.</t>
@@ -1962,7 +1961,7 @@ Data        +----------------------nonce---->   (discard     |
             This is expected to be a common operational model because doing so
             relieves the vendor providing MASA services from having to
             tracking ownership during shipping and supply chain and allows for
-            a very low overhead MASA service. The Registrar uses the audit log
+            a very low overhead MASA service. A Registrar uses the audit log
             information as a defense in depth strategy to ensure that this
             does not occur unexpectedly (for example when purchasing new
             equipment the Registrar would throw an error if any audit log
@@ -1987,7 +1986,7 @@ Data        +----------------------nonce---->   (discard     |
       device into account when deciding to join such devices into their
       network. If the MASA server were to have allowed a significantly large
       number of claims this might become onerous to the MASA server which must
-      maintain all the extra log entries. Ensuring the Registrar is
+      maintain all the extra log entries. Ensuring a Registrar is
       representative of a valid customer domain even without validating
       ownership helps to mitigate this.</t>
 
