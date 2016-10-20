@@ -689,8 +689,7 @@
 
               <t hangText="Ownership Voucher">Ownership Vouchers are obtained
               by a Registrar from the MASA service and explicitly indicate the
-              fully qualified domain name of the domain the Pledge belongs to.
-              The Ownership Voucher is defined in <xref
+              owner of the Pledge. The Ownership Voucher is defined in <xref
               target="I-D.ietf-netconf-zerotouch"></xref>.</t>
             </list></t>
 
@@ -698,10 +697,12 @@
           bootstrapping server has sufficient information to apply appropriate
           policy concerning which method to use.</t>
 
-          <t>The audit token contains the domain's public key material as
+          <t>The Audit Token contains the domain's public key material as
           provided to the MASA service by a Registrar. This provides
           sufficient information to the client to complete automated
-          bootstrapping with the local key infrastructure.</t>
+          bootstrapping with the local key infrastructure. The Ownership
+          Voucher contains the Owner Certificate which the Pledge uses to
+          authenticate the TLS connection.</t>
 
           <t>If the autonomic methods fail the Pledge returns to discovery
           state and attempts bootstrapping with the next available discovered
@@ -771,8 +772,8 @@
           Certification Authority.</t>
 
           <t>Enrollment proceeds as described in Enrollment over Secure
-          Transport (EST) [RFC7030]. The Pledge contacts a Registrar using EST
-          as indicated:</t>
+          Transport (EST) [RFC7030]. The Pledge contacts a Registrar via a
+          proxy using EST as indicated:</t>
 
           <t><list style="symbols">
               <t>The Pledge is authenticated using the IEEE 802.1AR
@@ -783,19 +784,20 @@
               -or-</t>
 
               <t>The EST server is authenticated by using the Ownership
-              Voucher indicated fully qualified domain name to build the EST
+              Voucher. indicated fully qualified domain name to build the EST
               URI such that EST section 4.1.1 bootstrapping using the Pledge
               implicit Trust Anchor database can be used.</t>
-            </list>Once the Audit Token is received, as specified in this
-          document, the client has sufficient information to leverage the
-          existing communication channel with a Registrar to continue an EST
-          RFC7030 enrollment. Enrollment picks up at RFC7030 section 4.1.1.
-          bootstrapping where the audit token provides the "out-of-band" CA
-          certificate fingerprint (in this case the full CA certificate) such
-          that the client can now complete the TLS server authentication. At
-          this point the client continues with EST enrollment operations
-          including "CA Certificates Request", "CSR Attributes" and "Client
-          Certificate Request" or "Server-Side Key Generation".</t>
+            </list>Once the Audit Token or Ownership Voucher is received, as
+          specified in this document, the client has sufficient information to
+          leverage the existing communication channel with a Registrar to
+          continue an EST RFC7030 enrollment. Enrollment picks up at RFC7030
+          section 4.1.1. bootstrapping where the audit token provides the
+          "out-of-band" CA certificate fingerprint (in this case the full CA
+          certificate) such that the client can now complete the TLS server
+          authentication. At this point the client continues with EST
+          enrollment operations including "CA Certificates Request", "CSR
+          Attributes" and "Client Certificate Request" or "Server-Side Key
+          Generation".</t>
         </section>
 
         <section title="Being Managed">
