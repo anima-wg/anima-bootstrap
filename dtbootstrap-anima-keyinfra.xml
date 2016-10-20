@@ -897,11 +897,13 @@
         </section>
       </section>
 
-      <section title="Behavior of the Registrar (Bootstrap Server)">
-        <t>Once a Registrar is established it listens for new entities and
-        determines if they can join the domain. a Registrar delivers any
-        necessary authorization information to the new device and facilitates
-        enrollment with the domain PKI.</t>
+      <section title="Behavior of the Registrar">
+        <t>A Registrar listens for Pledges and determines if they can join the
+        domain. A Registrar obtains either Audit Tokens or Ownership Vouchers
+        from the MASA service and delivers them to the Pledge as well as
+        facilitating enrollment with the domain PKI. </t>
+
+        <t>A Registrar is typically configured manually.</t>
 
         <t>Registrar behavior is as follows:</t>
 
@@ -952,7 +954,13 @@
               <t>or the use of a secret that is transmitted out of band
               between the Pledge and a Registrar (this use case is not
               autonomic).</t>
-            </list></t>
+            </list>In order to validate the IEEE 802.1AR device identity a
+          Registrar maintains a database of vendor trust anchors (e.g. vendor
+          root certificates or keyIdentifiers for vendor root public keys).
+          For user interface purposes this database can be mapped to
+          colloquial vendor names. Registrars can be shipped with the trust
+          anchors of a significant number of third-party vendors within the
+          target market.</t>
         </section>
 
         <section anchor="AcceptingTheEntity" title="Pledge Authorization">
@@ -971,30 +979,22 @@
               IEEE 802.1AR identity),</t>
 
               <t>allow a specific device from a vendor (as determined by the
-              IEEE 802.1AR identity)</t>
+              IEEE 802.1AR identity) against a domain white list. (The
+              mechanism for checking a shared white list potentiatlly used by
+              multiple Registrars is out of scope). </t>
             </list>Since all Pledges accept Audit Tokens a Registrar MUST use
           the vendor provided MASA service to verify that the device's history
           log does not include unexpected Registrars. If a device had
           previously registered with another domain, a Registrar of that
           domain would show in the log.</t>
 
-          <t>In order to validate the IEEE 802.1AR device identity a Registrar
-          maintains a database of vendor trust anchors (e.g. vendor root
-          certificates or keyIdentifiers for vendor root public keys). For
-          user interface purposes this database can be mapped to colloquial
-          vendor names. Registrars can be shipped with the trust anchors of a
-          significant number of third-party vendors within the target
-          market.</t>
-
-          <t>If a device is accepted into the domain, it is expected request a
-          domain certificate through a certificate enrollment process. The
-          result is a common trust anchor and device certificates for all
-          autonomic devices in a domain (these certificates can subsequently
-          be used to determine the boundaries of the homenet, to authenticate
-          other domain nodes, and to autonomically enable services on the
-          homenet). The authorization performed during this phase MAY be
-          cached for the TLS session and applied to subsequent EST enrollment
-          requests so long as the session lasts.</t>
+          <t>If a Pledge is accepted into the domain, it is expected to
+          request a domain certificate through a certificate enrollment
+          process. The result is a common trust anchor and device certificates
+          for all autonomic devices in a domain (these certificates can be
+          used for other methods, for example boundary detection,
+          auto-securing protocols, etc.). The authorization performed during
+          this phase is used for EST enrollment requests.</t>
         </section>
 
         <section title="Claiming the New Entity">
