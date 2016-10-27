@@ -205,13 +205,22 @@
             identity installed by a third-party (e.g., vendor, manufacturer or
             integrator).</t>
 
-            <t hangText="Audit Token:">A signed token from the MASA service
-            indicating that the bootstrapping event has been successfully
-            logged. </t>
+            <t hangText="Voucher">A signed statement from the MASA service
+            that indicates to a Pledge the cryptographic identity of the
+            Registrar it should trust. There are different types of vouchers
+            depending on how that trust verified.</t>
 
-            <t hangText="Ownership Voucher:">A signed token from the MASA
-            service vouching that a specific domain "owns" the pledge. it is
-            defined in <xref target="I-D.ietf-netconf-zerotouch"></xref>.</t>
+            <t hangText="Audit Voucher:">A voucher from the MASA service that
+            indicates that the bootstrapping event has been successfully
+            logged. The Registrar is primarily responsible for verifying the
+            logs and ensuring domain network security. </t>
+
+            <t hangText="Ownership Voucher:">A voucher from the MASA service
+            that indicates the explicit owner identity. The MASA is primarily
+            responsible for tracking ownership using out-of-band sales channel
+            integration (the definition of which is out-of-scope of this
+            document). It is defined in <xref
+            target="I-D.ietf-netconf-zerotouch"></xref>.</t>
 
             <t hangText="Domain:">The set of entities that trust a common key
             infrastructure trust anchor. This includes the Proxy, Registrar,
@@ -410,7 +419,7 @@
   [PROVISIONAL accept of server cert]           |                    |
       P---IEEE 802.1AR client authentication--->|                    |
       P                     |                   |                    |
-      P---Request Audit Token (include nonce)-->|                    |
+      P---Request Voucher (include nonce)------>|                    |
       P                     |                   |                    |
       P                     |       /--->       |                    |
       P                     |       |      [accept device?]          |
@@ -422,21 +431,18 @@
       P                     |       |           |                    |
       P                     |    optional:      |     [update audit log]
       P                     |       |can        |                    |
-      P                     |       |occur      |     optional: is   |
-      P                     |       |in         |     an ownership   |
-      P                     |       |advance    |     voucher available?
+      P                     |       |occur      |                    |
+      P                     |       |in         |                    |
+      P                     |       |advance    |                    |
       P                     |       |           |                    |
       P                     |       |           |<-device audit log--|
-      P                     |       |           |                    |
-      P                     |       |           |  choice:           |
-      P                     |       |           |<-audit token-------|
-      P                     |       |           |<-or: ownership-----|
-      P                     |       \---->      |      voucher       |
+      P                     |       |           |<- voucher ---------|
+      P                     |       \---->      |                    |
       P                     |                   |                    |
-      P                     |       [verify audit log or voucher]    |
+      P                     |       [verify audit log and voucher]   |
       P                     |                   |                    |
-      P<--Audit token and/or ownership voucher--|                    |
-  [verify response         ]|                   |                    |
+      P<------voucher---------------------------|                    |
+  [verify voucher ]         |                   |                    |
   [verify provisional cert ]|                   |                    |
       |                     |                   |                    |
       |---------------------------------------->|                    |
@@ -523,11 +529,10 @@
             particular bootstrapping attempt.</t>
 
             <t>Imprint on the Registrar. This requires verification of the
-            vendor service provided "Audit Token" or "Ownership Voucher".
-            Either of these responses contains sufficient information for the
-            pledge to complete authentication of a Registrar. (The pledge can
-            now finish authentication of the Registrar TLS server
-            certificate)</t>
+            vendor service provided "Audit" or "Ownership" Voucher. Either of
+            these responses contains sufficient information for the pledge to
+            complete authentication of a Registrar. (The pledge can now finish
+            authentication of the Registrar TLS server certificate)</t>
 
             <t>Enroll by accepting the domain specific information from a
             Registrar, and by obtaining a domain certificate from a Registrar
@@ -655,10 +660,9 @@
 
         <section anchor="AcceptDomain" title="Imprint">
           <t>The domain trust anchor is received by the Pledge during the
-          bootstrapping protocol methods in the form of either an Audit Token
-          containing the domain CA cert or an explicit ownership voucher. The
-          goal of the imprint state is to securely obtain a copy of this trust
-          anchor without involving human interaction.</t>
+          bootstrapping protocol methods in the form of a voucher. The goal of
+          the imprint state is to securely obtain a copy of this trust anchor
+          without involving human interaction.</t>
 
           <t>The enrollment protocol EST <xref target="RFC7030"></xref>
           details a set of non-autonomic bootstrapping methods such as:</t>
@@ -682,7 +686,7 @@
           supported by the Pledge:</t>
 
           <t><list style="hanging">
-              <t hangText="MASA audit token">Audit tokens are obtained by a
+              <t hangText="Audit Voucher">Audit Vouchers are obtained by a
               Registrar from the MASA service and presented to the Pledge for
               validation. These indicate to the Pledge that joining the domain
               has been logged by a logging service.</t>
@@ -697,7 +701,7 @@
           bootstrapping server has sufficient information to apply appropriate
           policy concerning which method to use.</t>
 
-          <t>The Audit Token contains the domain's public key material as
+          <t>The Audit Voucher contains the domain's public key material as
           provided to the MASA service by a Registrar. This provides
           sufficient information to the client to complete automated
           bootstrapping with the local key infrastructure. The Ownership
@@ -735,8 +739,8 @@
               ignoring Pledge lifetimes if they did not follow the RFC5280
               recommendations. </t>
 
-              <t>Once the audit token is accepted the validity period of the
-              domainCAcert in the token (see <xref
+              <t>Once the Audit Voucher is accepted the validity period of the
+              domainCAcert in the voucher (see <xref
               target="AuditTokenResponse"></xref>) now describes a valid time
               window. Any subsequent certificate validity periods checked
               during RFC5280 path validation MUST occur within this
@@ -755,13 +759,13 @@
           document.</t>
 
           <t>The nonce included in join attempts provides an alternate
-          mechanism for the Pledge to ensure Audit Token responses are
+          mechanism for the Pledge to ensure Audit Voucher responses are
           associated with a particular bootstrapping attempt. Nonceless Audit
-          Tokens from the MASA server are always valid and thus time is not
+          Vouchers from the MASA server are always valid and thus time is not
           needed. </t>
 
           <t>Ownership Vouchers include time information and MUST be validated
-          a realtime clock.</t>
+          using a realtime clock.</t>
         </section>
 
         <section title="Enrollment">
@@ -771,33 +775,20 @@
           acting as an RFC5280 Registration Authority for the Domain
           Certification Authority.</t>
 
-          <t>Enrollment proceeds as described in Enrollment over Secure
-          Transport (EST) [RFC7030]. The Pledge contacts a Registrar via a
-          proxy using EST as indicated:</t>
+          <t>Enrollment proceeds as described in <xref
+          target="RFC7030"></xref>. Authentication of the EST server is done
+          using the Voucher rather than the methods defined in EST.</t>
 
-          <t><list style="symbols">
-              <t>The Pledge is authenticated using the IEEE 802.1AR
-              credentials.</t>
-
-              <t>The EST section 4.1.3 CA Certificates Response is verified
-              using either the Audit Token which provided the domain identity
-              -or-</t>
-
-              <t>The EST server is authenticated by using the Ownership
-              Voucher. indicated fully qualified domain name to build the EST
-              URI such that EST section 4.1.1 bootstrapping using the Pledge
-              implicit Trust Anchor database can be used.</t>
-            </list>Once the Audit Token or Ownership Voucher is received, as
-          specified in this document, the client has sufficient information to
-          leverage the existing communication channel with a Registrar to
-          continue an EST RFC7030 enrollment. Enrollment picks up at RFC7030
-          section 4.1.1. bootstrapping where the audit token provides the
-          "out-of-band" CA certificate fingerprint (in this case the full CA
-          certificate) such that the client can now complete the TLS server
-          authentication. At this point the client continues with EST
-          enrollment operations including "CA Certificates Request", "CSR
-          Attributes" and "Client Certificate Request" or "Server-Side Key
-          Generation".</t>
+          <t>Once the Audit or Ownership Voucher is received, as specified in
+          this document, the client has sufficient information to leverage the
+          existing communication channel with a Registrar to continue an EST
+          RFC7030 enrollment. Enrollment picks up at RFC7030 section 4.1.1.
+          bootstrapping where the Audit Voucher provides the "out-of-band" CA
+          certificate fingerprint (in this case the full CA certificate) such
+          that the client can now complete the TLS server authentication. At
+          this point the client continues with EST enrollment operations
+          including "CA Certificates Request", "CSR Attributes" and "Client
+          Certificate Request" or "Server-Side Key Generation".</t>
         </section>
 
         <section title="Being Managed">
@@ -899,9 +890,9 @@
 
       <section title="Behavior of the Registrar">
         <t>A Registrar listens for Pledges and determines if they can join the
-        domain. A Registrar obtains either Audit Tokens or Ownership Vouchers
-        from the MASA service and delivers them to the Pledge as well as
-        facilitating enrollment with the domain PKI. </t>
+        domain. A Registrar obtains a Voucher from the MASA service and
+        delivers them to the Pledge as well as facilitating enrollment with
+        the domain PKI. </t>
 
         <t>A Registrar is typically configured manually.</t>
 
@@ -936,7 +927,7 @@
 +-------v----------+    +----v-------+
 | Forward          |    |            |
 | Audit            |    | Reject     |
-| token + config   |    | Device     |
+| voucher + config |    | Device     |
 | to the Entity    |    |            |
 +------------------+    +------------+]]></artwork>
 
@@ -982,9 +973,9 @@
               IEEE 802.1AR identity) against a domain white list. (The
               mechanism for checking a shared white list potentiatlly used by
               multiple Registrars is out of scope). </t>
-            </list>Since all Pledges accept Audit Tokens a Registrar MUST use
-          the vendor provided MASA service to verify that the device's history
-          log does not include unexpected Registrars. If a device had
+            </list>Since all Pledges accept Audit Vouchers a Registrar MUST
+          use the vendor provided MASA service to verify that the device's
+          history log does not include unexpected Registrars. If a device had
           previously registered with another domain, a Registrar of that
           domain would show in the log.</t>
 
@@ -999,11 +990,11 @@
 
         <section title="Claiming the New Entity">
           <t>Claiming an entity establishes an audit log at the MASA server
-          and provides a Registrar with proof, in the form of a MASA audit
-          token, that the log entry has been inserted. As indicated in <xref
+          and provides a Registrar with proof, in the form of a MASA Audit
+          Voucher, that the log entry has been inserted. As indicated in <xref
           target="AcceptDomain"></xref> a Pledge will only proceed with
-          bootstrapping if a validated MASA audit token has been received. The
-          Pledge therefore enforces that bootstrapping only occurs if the
+          bootstrapping if a validated MASA Audit Voucher has been received.
+          The Pledge therefore enforces that bootstrapping only occurs if the
           claim has been logged. There is no requirement for the vendor to
           definitively know that the device is owned by the Registrar.</t>
 
@@ -1022,19 +1013,20 @@
 
           <t>The Registrar can claim a Pledge that is not online by forming
           the request using the entities unique identifier and not including a
-          nonce in the claim request. Audit Tokens obtained in this way do not
-          have a lifetime and they provide a permanent method for the domain
-          to claim the device. Evidence of such a claim is provided in the
-          audit log entries available to any future Registrar. Such claims
+          nonce in the claim request. Audit Voucher obtained in this way do
+          not have a lifetime and they provide a permanent method for the
+          domain to claim the device. Evidence of such a claim is provided in
+          the audit log entries available to any future Registrar. Such claims
           reduce the ability for future domains to secure bootstrapping and
           therefore the Registrar MUST be authenticated by the MASA service
           although no requirement is implied that the MASA associates this
           authentication with ownership.</t>
 
-          <t>An ownership voucher requires the vendor to definitively know
+          <t>An Ownership Voucher requires the vendor to definitively know
           that a device is owned by a specific domain. The method used to
-          "claim" this are out-of-scope. A Registrar simply requests an
-          ownership validation token and the Pledge trusts the response.</t>
+          "claim" this are out-of-scope. A MASA ignores or reports failures
+          when an attempt is made to claim a device that has a an Ownership
+          Voucher. </t>
         </section>
 
         <section title="Log Verification">
@@ -1056,7 +1048,7 @@
 
           <t>This document specifies a simple log format as provided by the
           MASA service to the registar. This format could be improved by
-          distributed consensus technologies that integrate the audit token
+          distributed consensus technologies that integrate the Audit Voucher
           with a current technologies such as block-chain or hash trees or the
           like. Doing so is out of the scope of this document but are
           anticipated improvements for future work.</t>
@@ -1067,19 +1059,22 @@
         <t>The MASA service is provided by the Factory provider on the global
         Internet. The URI of this service is well known. The URI SHOULD also
         be provided as an IEEE 802.1AR IDevID X.509 extension (a "MASA Audit
-        Token Distribution Point" extension).</t>
+        Voucher Distribution Point" extension).</t>
 
         <t>The MASA service provides the following functionalities to
         Registrars:</t>
 
-        <section title="Issue Authorization Token and Log the event">
+        <section title="Issue Audit Voucher and Log the event">
           <t>A Registrar POSTs a claim message optionally containing the
           bootstrap nonce to the MASA server.</t>
 
           <t>If a nonce is provided the MASA service responds to all requests.
           The MASA service verifies the Registrar is representative of the
           domain and generates a privacy protected log entry before responding
-          with the Audit Token.</t>
+          with the Audit Voucher. For the simple log format defined in this
+          document using the DomainID is considered sufficient privacy. Future
+          work to improve the logging mechanism could include additional
+          privacy protections. </t>
 
           <t>If a nonce is not provided then the MASA service MUST
           authenticate the Registrar as a valid customer. This prevents denial
@@ -1270,20 +1265,20 @@
           the TLS handshake as detailed in <xref
           target="CompletingAuthenticationBootstrapping"></xref>.</t>
 
-          <t>The Pledge requests and validates the Audit Token as described
+          <t>The Pledge requests and validates the Audit Voucher as described
           below. At this point the Pledge has sufficient information to
           validate domain credentials.</t>
 
           <t>The Pledge calls the EST defined /cacerts method to obtain the
           current CA certificate. These are validated using the Audit
-          Token.</t>
+          Voucher.</t>
 
           <t>The Pledge completes bootstrapping as detailed in EST section
           4.1.1.</t>
         </list></t>
 
-      <t>In order to obtain a validated Audit Token and Audit Log a Registrar
-      contacts the MASA service Service using REST calls:</t>
+      <t>In order to obtain a validated Audit Voucher and Audit Log a
+      Registrar contacts the MASA service Service using REST calls:</t>
 
       <figure>
         <artwork><![CDATA[           +-----------+ +----------+ +-----------+ +----------+
@@ -1301,14 +1296,14 @@ connection  |               | Server Cert   |                |
             | Client Cert   |               |                |
             +---------------C--------------->                |
             |               |               |                |
-HTTP REST   | POST /requestaudittoken       |                |
+HTTP REST   | POST /requestvoucher          |                |
 Data        +--------------------nonce------>                |
-            |               .               | /requestaudittoken
+            |               .               | /requestvoucher|
             |               .               +---------------->
             |                               <----------------+
-            |                               | /requestauditlog
+            |                               | /requestlog    |
             |                               +---------------->
-            | audit token or owner voucher  <----------------+
+            |            voucher            <----------------+
             <-------------------------------+                |
             | (optional config information) |                |
             |               .               |                |
@@ -1331,10 +1326,10 @@ Data        +--------------------nonce------>                |
            ++----------+ +--+-------+ +-----+-----+ +--------+-+
             |               |               |                |
             |               |               |                |
-            |               |               | /requestaudittoken
+            |               |               | /requestvoucher|
             |               |  (nonce       +---------------->
             |               |  unknown)     <----------------+
-            |               |               | /requestauditlog
+            |               |               | /requestlog    |
             |               |               +---------------->
             |               |               <----------------+
             |   TLS hello   |  TLS hello    |                |
@@ -1344,9 +1339,9 @@ connection  |               | Server Cert   |                |
             <---------------C---------------+                |
             | Client Cert   |               |                |
             |               |               |                |
-HTTP REST   | POST /requestaudittoken       |                |
+HTTP REST   | POST /requestvoucher          |                |
 Data        +----------------------nonce---->   (discard     |
-            | audit token or owner Voucher  |   nonce)       |
+            |            voucher            |   nonce)       |
             <-------------------------------+                |
             | (optional config information) |                |
             |               .               |                |
@@ -1360,10 +1355,10 @@ Data        +----------------------nonce---->   (discard     |
       <t>The extensions for a Registrar server are as follows:</t>
 
       <t><list style="symbols">
-          <t>The Registrar requests and validates the Audit Token from the
+          <t>The Registrar requests and validates the Audit Voucher from the
           vendor authorized MASA service.</t>
 
-          <t>The Registrar forwards the Audit Token to the Pledge when
+          <t>The Registrar forwards the Audit Voucher to the Pledge when
           requested.</t>
 
           <t>The Registar performs log verifications in addition to local
@@ -1371,22 +1366,20 @@ Data        +----------------------nonce---->   (discard     |
         </list></t>
 
       <section anchor="RequestAuditTokenFromRegistrar"
-               title="Request Audit Token from the Registrar">
-        <t>When the Pledge reaches the EST section 4.1.1 "Bootstrap
-        Distribution of CA Certificates" state but wishes to proceed in a
-        fully automated fashion it makes a request for a MASA audit token from
-        a Registrar.</t>
+               title="Request Voucher from the Registrar">
+        <t>When the Pledge bootstraps it makes a request for a Voucher from a
+        Registrar.</t>
 
         <t>This is done with an HTTPS POST using the operation path value of
-        "/requestaudittoken".</t>
+        "/requestvoucher".</t>
 
         <t>The request format is JSON object containing a 64bit nonce
         generated by the client for each request. This nonce MUST be a
         cryptographically strong random or pseudo-random number that can not
         be easily predicted. The nonce MUST NOT be reused for multiple
         attempts to join a network domain. The nonce assures the Pledge that
-        the audit token response is associated with this bootstrapping attempt
-        and is not a replay.</t>
+        the Audit Voucher response is associated with this bootstrapping
+        attempt and is not a replay.</t>
 
         <t>Request media type: application/auditnonce</t>
 
@@ -1412,10 +1405,10 @@ Data        +----------------------nonce---->   (discard     |
         <t>The Registrar validates the client identity as described in EST
         [RFC7030] section 3.3.2. The registrar performs authorization as
         detailed in Section 3.3.2. If authorization is successful the
-        Registrar obtains an Audit Token from the MASA service (see Section
+        Registrar obtains an Voucher from the MASA service (see Section
         5.2).</t>
 
-        <t>The received MASA audit token is returned to the Pledge.</t>
+        <t>The received Voucher is forwarded to the Pledge.</t>
 
         <t>As indicated in EST [RFC7030] the bootstrapping server can redirect
         the client to an alternate server. If the Pledge authenticated a
@@ -1441,19 +1434,18 @@ Data        +----------------------nonce---->   (discard     |
         chances.</t>
       </section>
 
-      <section anchor="RequestAuditToken"
-               title="Request Audit Token from MASA">
-        <t>A Registrar requests the Audit Token from the MASA service using a
-        REST interface. For simplicity this is defined as an optional EST
-        message between a Registrar and an EST server running on the MASA
-        service although the Registrar is not required to make use of any
-        other EST functionality when communicating with the MASA service. (The
-        MASA service MUST properly reject any EST functionality requests it
-        does not wish to service; a requirement that holds for any REST
+      <section anchor="RequestAuditToken" title="Request Voucher from MASA">
+        <t>A Registrar requests a Voucher from the MASA service using a REST
+        interface. For simplicity this is defined as an optional EST message
+        between a Registrar and an EST server running on the MASA service
+        although the Registrar is not required to make use of any other EST
+        functionality when communicating with the MASA service. (The MASA
+        service MUST properly reject any EST functionality requests it does
+        not wish to service; a requirement that holds for any REST
         interface).</t>
 
         <t>This is done with an HTTP POST using the operation path value of
-        "/requestaudittoken".</t>
+        "/requestvoucher".</t>
 
         <t>The request format is a JSON object optionally containing the nonce
         value (as obtained from the bootstrap request) and the IEEE 802.1AR
@@ -1478,17 +1470,17 @@ Data        +----------------------nonce---->   (discard     |
         <t></t>
 
         <t>A Registrar MAY exclude the nonce from the request. Doing so allows
-        the Registrar to request an audit token when the Pledge is not online,
-        or when the target bootstrapping environment is not on the same
-        network as the MASA server (this requires the Registrar to learn the
+        the Registrar to request a Voucher when the Pledge is not online, or
+        when the target bootstrapping environment is not on the same network
+        as the MASA server (this requires the Registrar to learn the
         appropriate DevIDSerialNumber field from the physical device labeling
         or from the sales channel -- how this occurs is out-of-scope of this
         document). If a nonce is not provided the MASA server MUST
         authenticate the client as described in EST [RFC7030] section 3.3.2 to
         reduce the risk of DDoS attacks. A Registrar performs authorization as
         detailed in <xref target="AcceptingTheEntity"></xref>. If
-        authorization is successful the Registrar obtains an Audit Token from
-        the MASA service (see <xref target="RequestAuditToken"></xref>).</t>
+        authorization is successful the Registrar obtains an Voucher from the
+        MASA service (see <xref target="RequestAuditToken"></xref>).</t>
 
         <t>The JSON message information is encapsulated in a <xref
         target="RFC5652"></xref> Signed-data that is signed by the Registrar.
@@ -1504,26 +1496,27 @@ Data        +----------------------nonce---->   (discard     |
         domain. The EST style client authentication (TLS and HTTP) is used to
         provide a DDoS prevention strategy.</t>
 
-        <t>The domain ID (e.g. hash of the public key of the domain) is
-        extracted from the root certificate and is used to populate the MASA
-        audit token and to update the audit log.</t>
+        <t>The root certificate is extracted and used to populate the Audit
+        Voucher. The domain ID (e.g. hash of the public key of the domain) is
+        extracted from the root certificate and is used to update the audit
+        log. </t>
       </section>
 
-      <section anchor="AuditTokenResponse" title="Audit Token Response">
-        <t>The audit token response to requests from the device and requests
-        from a Registrar are in the same format. A Registrar either caches
-        prior MASA responses or dynamically requests a new Audit Token based
-        on local policy.</t>
+      <section anchor="AuditTokenResponse" title="Audit Voucher Response">
+        <t>The voucher response to requests from the device and requests from
+        a Registrar are in the same format. A Registrar either caches prior
+        MASA responses or dynamically requests a new Voucher based on local
+        policy.</t>
 
         <t>If the the join operation is successful, the server response MUST
         contain an HTTP 200 response code with a content-type of
-        "application/authorization-token". The server MUST answer with a
+        "application/authorizationvoucher". The server MUST answer with a
         suitable 4xx or 5xx HTTP [RFC2616] error code when a problem occurs.
         The response data from the MASA server MUST be a plaintext
         human-readable error message containing explanatory information
         describing why the request was rejected.</t>
 
-        <t>The audit token consists of the nonce, if supplied, the serial
+        <t>The Audit Voucher consists of the nonce, if supplied, the serial
         number information identifying the device and the domain CA
         certificate extracted from the request:</t>
 
@@ -1537,7 +1530,7 @@ Data        +----------------------nonce---->   (discard     |
 }]]></artwork>
         </figure>
 
-        <t>The audit token response is encapsulated in a <xref
+        <t>The Audit Voucher response is encapsulated in a <xref
         target="RFC5652"></xref> Signed-data that is signed by the MASA
         server. The Pledge verifies this signed message using the IEEE 802.1AR
         manufacturer installed trust anchor.</t>
@@ -1558,10 +1551,10 @@ Data        +----------------------nonce---->   (discard     |
         additional domain identity types might be defined in the future.
         Clients MUST be prepared to ignore additional fields they do not
         recognize. Clients MUST be prepared to parse and fail gracefully from
-        an audit token response that does not contain a 'domainCAcert' field
+        an Audit Voucher response that does not contain a 'domainCAcert' field
         at all.</t>
 
-        <t>To minimize the size of the audit token response message the
+        <t>To minimize the size of the Audit Voucher response message the
         domainCAcert is not a complete distribution of the EST section 4.1.3
         CA Certificate Response.</t>
 
@@ -1607,25 +1600,25 @@ Data        +----------------------nonce---->   (discard     |
         </section>
       </section>
 
-      <section title="Audit Token Status Telemetry ">
+      <section title="Voucher Status Telemetry ">
         <t>For automated bootstrapping of devices the adminstrative elements
         providing bootstrapping also provide indications to the system
         administrators concerning device lifecycle status. To facilitate this
         those elements need telemetry information concerning the device's
         status.</t>
 
-        <t>To indicate Pledge status regarding the audit token the client
+        <t>To indicate Pledge status regarding the Audit Voucher the client
         SHOULD post a status message.</t>
 
         <t>The client HTTP POSTs the following to the server at the EST well
-        known URI /requestaudittoken_status. The Status field indicates if the
-        audit token was acceptable. If it was not acceptable the Reason string
-        indicates why. In the failure case this message is being sent to an
+        known URI /voucher_status. The Status field indicates if the Voucher
+        was acceptable. If it was not acceptable the Reason string indicates
+        why. In the failure case this message is being sent to an
         unauthenticated, potentially malicious Registrar and therefore the
         Reason string SHOULD NOT provide information beneficial to an
         attacker. The operational benefit of this telemetry information is
-        balanced against the operational costs of not recording that an audit
-        token was ignored by a client the registar expected to continue
+        balanced against the operational costs of not recording that an
+        Voucher was ignored by a client the registar expected to continue
         joining the domain.</t>
 
         <t><figure>
@@ -1645,13 +1638,13 @@ Data        +----------------------nonce---->   (discard     |
         service using this EST extension.</t>
 
         <t>This is done with an HTTP GET using the operation path value of
-        "/requestMASAlog".</t>
+        "/requestauditlog".</t>
 
-        <t>The client HTTP POSTs the same Audit Token Request as for
-        requesting an audit token but now posts it the /requestMASAlog URI
-        instead. The IDevIDAuthorityKeyIdentifier and DevIDSerialNumber
-        informs the MASA server which log is requested so the appropriate log
-        can be prepared for the response.</t>
+        <t>The client HTTP POSTs the same Voucher Request as for requesting an
+        audit token but now posts it to the /requestauditlog URI instead. The
+        IDevIDAuthorityKeyIdentifier and DevIDSerialNumber informs the MASA
+        server which log is requested so the appropriate log can be prepared
+        for the response.</t>
       </section>
 
       <section title="MASA authorization log Response">
@@ -1665,13 +1658,13 @@ Data        +----------------------nonce---->   (discard     |
     {
      "date":"<date/time of the entry>",
      "domainID":"<domainID as extracted from the domain CA certificate
-                  within the CMS of the audit token request>",
+                  within the CMS of the audit voucher request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     },
     {
      "date":"<date/time of the entry>",
      "domainID":"<domainID as extracted from the domain CA certificate
-                  within the CMS of the audit token request>",
+                  within the CMS of the audit voucher request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     }
   ]
@@ -1697,7 +1690,7 @@ Data        +----------------------nonce---->   (discard     |
 
       <section title="EST Integration for PKI bootstrapping">
         <t>The prior sections describe EST extensions necessary to enable
-        fully automated bootstrapping. Although the audit token
+        fully automated bootstrapping. Although the Audit Voucher
         request/response structure members IDevIDAuthorityKeyIdentifier and
         DevIDSerialNumber are specific to PKI bootstrapping these are the only
         PKI specific aspects of the extensions and future work might replace
@@ -1859,7 +1852,7 @@ Data        +----------------------nonce---->   (discard     |
             involved in security considerations.</t>
 
             <t hangText="Registrar:">When interacting with a MASA server a
-            Registrar makes all decisions. When ownership vouchers are
+            Registrar makes all decisions. When Ownership Vouchers are
             involved a Registrar is only a conduit and all security decisions
             are made on the vendor service.</t>
 
@@ -1882,13 +1875,13 @@ Data        +----------------------nonce---->   (discard     |
         NOT be the default state because it permanently degrades the security
         for all other uses cases.</t>
 
-        <t>The device may have an operational mode where it skips Audit Token
-        or Ownership Voucher validation one time. For example if a physical
-        button is depressed during the bootstrapping operation. This can be
-        useful if the vendor service is unavailable. This behavior SHOULD be
-        available via local configuration or physical presence methods to
-        ensure new entities can always be deployed even when autonomic methods
-        fail. This allows for unsecure imprint.</t>
+        <t>The device may have an operational mode where it skips Voucher
+        validation one time. For example if a physical button is depressed
+        during the bootstrapping operation. This can be useful if the vendor
+        service is unavailable. This behavior SHOULD be available via local
+        configuration or physical presence methods to ensure new entities can
+        always be deployed even when autonomic methods fail. This allows for
+        unsecure imprint.</t>
 
         <t>It is RECOMMENDED that this only be available if hardware assisted
         NEA [RFC5209] is supported.</t>
@@ -1922,17 +1915,18 @@ Data        +----------------------nonce---->   (discard     |
             that only expected new entities can communicate with a Registrar
             (presumably via a physically secured perimeter).</t>
 
-            <t>A Registrar MAY request nonce-less Audit Tokens from the MASA
-            service. These tokens can then be transmitted to the Registrar and
-            stored until they are needed during bootstrapping operations. This
-            is for use cases where target network is protected by an air gap
-            and therefore can not contact the MASA service during Pledge
+            <t>A Registrar MAY request nonce-less Audit Vouchers from the MASA
+            service (by not including a nonce in the request). These Audit
+            Vouchers can then be transmitted to the Registrar and stored until
+            they are needed during bootstrapping operations. This is for use
+            cases where target network is protected by an air gap and
+            therefore can not contact the MASA service during Pledge
             deployment.</t>
 
             <t>A registrar MAY ignore unrecognized nonce-less Audit Log
             entries. This could occur when used equipment is purchased with a
             valid history being deployed in air gap networks that required
-            permanent Audit Tokens.</t>
+            permanent Audit Vouchers.</t>
           </list></t>
 
         <t>These modes are not available for devices that require a vendor
@@ -1948,27 +1942,27 @@ Data        +----------------------nonce---->   (discard     |
         by:</t>
 
         <t><list style="numbers">
-            <t>Not enforcing that a Nonce is in the Audit Token. This results
-            in distribution of Audit Tokens that never expire and in effect
-            makes the Domain an always trusted entity to the Pledge during any
-            subsequent bootstrapping attempts. That this occurred is captured
-            in the log information so that the Domain registrar can make
-            appropriate security decisions when a Pledge joins the Domain.
-            This is useful to support use cases where Registrars might not be
-            online during actual device deployment. Because this results in
-            long lived Audit Tokens and do not require the proof that the
-            device is online this is only accepted when the Registrar is
-            authenticated by the MASA server and authorized to provide this
+            <t>Not enforcing that a Nonce is in the Audit Voucher. This
+            results in distribution of Audit Voucher that never expire and in
+            effect makes the Domain an always trusted entity to the Pledge
+            during any subsequent bootstrapping attempts. That this occurred
+            is captured in the log information so that the Domain registrar
+            can make appropriate security decisions when a Pledge joins the
+            Domain. This is useful to support use cases where Registrars might
+            not be online during actual device deployment. Because this
+            results in long lived Audit Voucher and do not require the proof
+            that the device is online this is only accepted when the Registrar
+            is authenticated by the MASA server and authorized to provide this
             functionality. The MASA server is RECOMMENDED to use this
             functionality only in concert with Ownership Validation
             tracking.</t>
 
-            <t>Not verifying ownership before responding with an Audit Token.
-            This is expected to be a common operational model because doing so
-            relieves the vendor providing MASA services from having to
-            tracking ownership during shipping and supply chain and allows for
-            a very low overhead MASA service. A Registrar uses the audit log
-            information as a defense in depth strategy to ensure that this
+            <t>Not verifying ownership before responding with an Audit
+            Voucher. This is expected to be a common operational model because
+            doing so relieves the vendor providing MASA services from having
+            to tracking ownership during shipping and supply chain and allows
+            for a very low overhead MASA service. A Registrar uses the audit
+            log information as a defense in depth strategy to ensure that this
             does not occur unexpectedly (for example when purchasing new
             equipment the Registrar would throw an error if any audit log
             information is reported).</t>
@@ -2000,7 +1994,7 @@ Data        +----------------------nonce---->   (discard     |
       the MASA service directly after the real Registrar obtains an
       authorization log. If the attacker could also force the bootstrapping
       protocol to reset there is a theoretical opportunity for the attacker to
-      use the Audit Token to take control of the Pledge but then proceed to
+      use the Audit Voucher to take control of the Pledge but then proceed to
       enroll with the target domain. Possible prevention mechanisms
       include:</t>
 
@@ -2012,10 +2006,12 @@ Data        +----------------------nonce---->   (discard     |
           the Registrar repeats the request for audit log information.</t>
         </list></t>
 
-      <t>To facilitate auditing the Pledge reports on audit token parsing
-      status. In the case of a failure this information is informative to the
-      potentially malicious Registar but this is included because the
-      operational benefits are concidered beneficial.</t>
+      <t>To facilitate logging and administrative oversight the Pledge reports
+      on Audit Voucher parsing status to the Registrar. In the case of a
+      failure this information is informative to a potentially malicious
+      Registar but this is RECOMMENDED anyway because of the operational
+      benefits of an informed administrator in cases where the failure is
+      indicative of a problem.</t>
 
       <t>As indicated in EST [RFC7030] the connection is provisional and
       untrusted until the server is successfully authorized. If the server
@@ -2032,13 +2028,13 @@ Data        +----------------------nonce---->   (discard     |
       statement that clients only "SHOULD" support such a model. This reflects
       current (not great) practices but is NOT RECOMMENDED.</t>
 
-      <t>The MASA service could lock a claim and refuse to issue a new token
+      <t>The MASA service could lock a claim and refuse to issue a new voucher
       or the MASA service could go offline (for example if a vendor went out
       of business). This functionality provides benefits such as theft
       resistance, but it also implies an operational risk to the Domain that
       Vendor behavior could limit future bootstrapping of the device by the
       Domain. This can be mitigated by Registrars that request nonce-less
-      audit tokens.</t>
+      Audit Vouchers.</t>
     </section>
 
     <section title="Acknowledgements">
