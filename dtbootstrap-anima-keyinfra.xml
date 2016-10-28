@@ -83,16 +83,16 @@
 
     <abstract>
       <t>This document specifies automated bootstrapping of a remote secure
-      key infrastructure (BRSKI) using vendor installed IEEE 802.1AR
-      manufacturing installed certificates, in combination with a vendor based
-      service on the Internet. Before being authenticated, a new device has
-      only link-local connectivity, and does not require a routable address.
-      When a vendor provides an Internet based service devices can be
-      redirected to a local service. In limited/disconnected networks or
-      legacy environments we describe a variety of options that allow
-      bootstrapping to proceed. Support for lower security models, including
-      devices with minimal identity, is described for legacy reasons but not
-      encouraged.</t>
+      key infrastructure (BRSKI) using vendor installed X.509 certificate, in
+      combination with a vendor authorized service on the Internet.
+      Bootstrapping a new device can occur using a routable address and a
+      cloud service, or using only link-local connectivity, or on
+      limited/disconnected networks. Support for lower security models,
+      including devices with minimal identity, is described for legacy reasons
+      but not encouraged. Bootstrapping is complete when the cryptographic
+      identity of the new key infrastructure is successfully deployed to the
+      device but the established secure connection can be used to deploy a
+      locally issued certificate to the device as well.</t>
     </abstract>
   </front>
 
@@ -106,14 +106,13 @@
       pre-provisioned on each new device in a costly and non-scalable manner.
       This document describes a zero-touch approach to bootstrapping an entity
       by securing the initial distribution of key material using third-party
-      generic keying material, such as a manufacturer installed IEEE 802.1AR
-      certificate <xref target="IDevID"></xref>, and a corresponding
-      third-party service on the Internet.</t>
+      issued X.509 certificates and cryptographically signed "vouchers" issued
+      by a new form of cloud service. </t>
 
       <t>The two sides of an association being bootstrapped authenticate each
       other and then determine appropriate authorization. This process is
       described as four distinct steps between the existing domain and the
-      Pledge, or pledge, being added:</t>
+      device, or "pledge", being added:</t>
 
       <t><list style="symbols">
           <t>Pledge authentication: "Who is this? What is its identity?"</t>
@@ -136,19 +135,18 @@
       third-party. The third-party is not required to provide sales channel
       ownership tracking nor is it required to authenticate the domain.</t>
 
-      <t>Optimal security is achieved with IEEE 802.1AR certificates on each
-      pledge, accompanied by a third-party (e.g., vendor, manufacturer or
-      integrator) Internet based service for verification. Bootstrapping
-      concepts run to completion with less requirements, but are then less
-      secure. A domain can choose to accept lower levels of security when a
-      trusted third-party is not available so that bootstrapping proceeds even
-      at the risk of reduced security. Only the domain can make these
-      decisions based on administrative input and known behavior of the
-      pledge.</t>
+      <t>Optimal security is achieved with X.509 certificates on each Pledge,
+      accompanied by a third-party (e.g., vendor, manufacturer or integrator)
+      Internet based service for verification. Bootstrapping concepts run to
+      completion with less requirements, but are then less secure. A domain
+      can choose to accept lower levels of security when a trusted third-party
+      is not available so that bootstrapping proceeds even at the risk of
+      reduced security. Only the domain can make these decisions based on
+      administrative input and known behavior of the pledge.</t>
 
       <t>The result of bootstrapping is that a domain specific key
-      infrastructure is deployed. Since IEEE 802.1AR PKI certificates are used
-      for identifying the pledge, and the public key of the domain identity is
+      infrastructure is deployed. Since X.509 PKI certificates are used for
+      identifying the pledge, and the public key of the domain identity is
       leveraged during communications with an Internet based service, which is
       itself authenticated using HTTPS, bootstrapping of a domain specific
       Public Key Infrastructure (PKI) is described. Sufficient agility to
@@ -258,6 +256,16 @@
             allows vendors to provide additional value in cases where their
             sales and distribution channels allow for accurately tracking of
             such ownership.</t>
+
+            <t hangText="IDevID">An Initial Device Identity X.509 certificate
+            installed by the vendor on new equipment. The <xref
+            target="IDevID"></xref> certificate format is the primary example.
+            In particular the X.509 certificate needs to contain the device's
+            serial number in a well known location in order to perform white
+            list operations and in order to extract it for inclusion in
+            messages to the MASA service. The subject field&rsquo;s DN
+            encoding MUST include the &ldquo;serialNumber&rdquo; attribute
+            with the device&rsquo;s unique serial number. </t>
           </list></t>
       </section>
 
@@ -306,6 +314,15 @@
         instance, smart light bulbs are usually mains powered, and speak
         802.11). It could also be used by non-constrained devices across a
         non-energy constrained, but challenged network (such as 802.15.4).</t>
+
+        <t>The use of an IDevID that is consistant with <xref
+        target="IDevID"></xref> allows for alignment with 802.1X network
+        access control methods which could need to complete before
+        bootstrapping can be initiated. This document presumes that network
+        access control has either already occured, is not required, or is
+        integrated by the proxy and registrar in such a way that the device
+        itself does not need to be aware of the details. Further integration
+        is not in scope. </t>
 
         <t>Some aspects are in scope for constrained devices on challenged
         networks: the certificate contents, and the process by which the four
@@ -417,7 +434,7 @@
       |            TLS via the Circuit Proxy    |                    |
       |<--Registrar TLS server authentication---|                    |
   [PROVISIONAL accept of server cert]           |                    |
-      P---IEEE 802.1AR client authentication--->|                    |
+      P---X.509 client authentication---------->|                    |
       P                     |                   |                    |
       P---Request Voucher (include nonce)------>|                    |
       P                     |                   |                    |
@@ -519,8 +536,8 @@
         <t><list style="numbers">
             <t>Discover a communication channel to a Registrar.</t>
 
-            <t>Identify itself. This is done by presenting an IEEE 802.1AR
-            credentials to the discovered Registrar (via the Proxy) in a TLS
+            <t>Identify itself. This is done by presenting an IDevID X.509
+            credential to the discovered Registrar (via the Proxy) in a TLS
             handshake. (The Registrar credentials are only provisionally
             accepted at this time).</t>
 
@@ -939,13 +956,13 @@
           are:</t>
 
           <t><list style="symbols">
-              <t>the use of an IEEE 802.1AR IDevID credential during the TLS
-              client authentication,</t>
+              <t>the use of an IDevID X.509 credential during the TLS client
+              authentication,</t>
 
               <t>or the use of a secret that is transmitted out of band
               between the Pledge and a Registrar (this use case is not
               autonomic).</t>
-            </list>In order to validate the IEEE 802.1AR device identity a
+            </list>In order to validate the IDevID X.509 credential a
           Registrar maintains a database of vendor trust anchors (e.g. vendor
           root certificates or keyIdentifiers for vendor root public keys).
           For user interface purposes this database can be mapped to
@@ -964,20 +981,34 @@
 
           <t><list style="symbols">
               <t>allow any device of a specific type (as determined by the
-              IEEE 802.1AR device identity),</t>
+              X.509 IDevID),</t>
 
               <t>allow any device from a specific vendor (as determined by the
-              IEEE 802.1AR identity),</t>
+              X.509 IDevID),</t>
 
               <t>allow a specific device from a vendor (as determined by the
-              IEEE 802.1AR identity) against a domain white list. (The
-              mechanism for checking a shared white list potentiatlly used by
-              multiple Registrars is out of scope). </t>
-            </list>Since all Pledges accept Audit Vouchers a Registrar MUST
-          use the vendor provided MASA service to verify that the device's
-          history log does not include unexpected Registrars. If a device had
-          previously registered with another domain, a Registrar of that
-          domain would show in the log.</t>
+              X.509 IDevID) against a domain white list. (The mechanism for
+              checking a shared white list potentiatlly used by multiple
+              Registrars is out of scope). </t>
+            </list></t>
+
+          <t>To look the Pledge up in a domain white list a consistent method
+          for extracting device identity from the X.509 certificate is
+          required. RFC6125 describes Domain-Based Application Service
+          identity but here we require Vendor Device-Based identity. The
+          subject field's DN encoding MUST include the "serialNumber"
+          attribute with the device's unique serial number. In the language of
+          RFC6125 this provides for a SERIALNUM-ID category of identifier that
+          can be included in a certificate and therefore that can also be used
+          for matching purposes. The SERIALNUM-ID whitelist is collated
+          according to vendor trust anchor since serial numbers are not
+          globally unique. </t>
+
+          <t>Since all Pledges accept Audit Vouchers a Registrar MUST use the
+          vendor provided MASA service to verify that the device's history log
+          does not include unexpected Registrars. If a device had previously
+          registered with another domain, a Registrar of that domain would
+          show in the log.</t>
 
           <t>If a Pledge is accepted into the domain, it is expected to
           request a domain certificate through a certificate enrollment
@@ -999,8 +1030,8 @@
           definitively know that the device is owned by the Registrar.</t>
 
           <t>Registrar's obtain the Vendor URI via static configuration or by
-          extracting it from the IEEE 802.1AR credential. The imprint method
-          supported by the Pledge is known from the IEEE 802.1AR credential.
+          extracting it from the X.509 IDevID credential. The imprint method
+          supported by the Pledge is known from the X.509 IDevID credential.
           [[EDNOTE: An appropriate extension for indicating the Vendor URI and
           imprint method could be defined using the methods described in <xref
           target="I-D.lear-mud-framework"></xref>]].</t>
@@ -1058,8 +1089,8 @@
       <section title="Behavior of the MASA Service">
         <t>The MASA service is provided by the Factory provider on the global
         Internet. The URI of this service is well known. The URI SHOULD also
-        be provided as an IEEE 802.1AR IDevID X.509 extension (a "MASA Audit
-        Voucher Distribution Point" extension).</t>
+        be provided as an X.509 IDevID extension (a "MASA Audit Voucher
+        Distribution Point" extension).</t>
 
         <t>The MASA service provides the following functionalities to
         Registrars:</t>
@@ -1117,9 +1148,9 @@
 
       <section title="Interactions with Network Access Control">
         <t>The assumption is that Network Access Control (NAC) completes using
-        the Pledge 802.1AR credentials and results in the device having
-        sufficient connectivity to discovery and communicate with the proxy.
-        Any additional connectivity or quarantine behavior by the NAC
+        the Pledge 's X.509 IDevID credentials and results in the device
+        having sufficient connectivity to discovery and communicate with the
+        proxy. Any additional connectivity or quarantine behavior by the NAC
         infrastructure is out-of-scope. After the devices has completed
         bootstrapping the mechanism to trigger NAC to re-authenticate the
         device and provide updated network privileges is also
@@ -1448,14 +1479,13 @@ Data        +----------------------nonce---->   (discard     |
         "/requestvoucher".</t>
 
         <t>The request format is a JSON object optionally containing the nonce
-        value (as obtained from the bootstrap request) and the IEEE 802.1AR
-        identity of the device as a serial number (the full certificate is not
-        needed and no proof-of-possession information for the device identity
-        is included). The AuthorityKeyIdentifier value from the certificate is
-        included to ensure a statistically unique identity. The Pledge's
-        serial number is extracted from the IEEE 802.1AR subject name
-        id-at-serialNumber or it is the base64 encoded RFC4108
-        hardwareModuleName hwSerialNum:</t>
+        value (as obtained from the bootstrap request) and the X.509 IDevID
+        extracted serial number (the full certificate is not needed and no
+        proof-of-possession information for the device identity is included).
+        The AuthorityKeyIdentifier value from the certificate is included to
+        ensure a statistically unique identity. The Pledge's serial number is
+        extracted from the X.509 IDevID subject name id-at-serialNumber or it
+        is the base64 encoded RFC4108 hardwareModuleName hwSerialNum:</t>
 
         <figure>
           <artwork><![CDATA[{
@@ -1532,8 +1562,11 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>The Audit Voucher response is encapsulated in a <xref
         target="RFC5652"></xref> Signed-data that is signed by the MASA
-        server. The Pledge verifies this signed message using the IEEE 802.1AR
-        manufacturer installed trust anchor.</t>
+        server. The Pledge verifies this signed message using the manufacturer
+        installed trust anchor assocaited with the X.509 IDevID. [[EDNOTE: As
+        detailed in netconf-zerotouch this might be a distinct trust anchor
+        rather than re-using the trust anchor for the IDevID. This concept
+        will need to be detailed in this document as well.]] </t>
 
         <t>[[EDNOTE: Using CMS is consistent with the alignment of this
         bootstrapping document with EST, a PKIX enrollment protocol that
@@ -1900,7 +1933,7 @@ Data        +----------------------nonce---->   (discard     |
             <t>A registrar MAY choose to accept devices that claim a unique
             identity without the benefit of authenticating that claimed
             identity. This could occur when the Pledge does not include an
-            IEEE 802.1AR factory installed credential. New Entities without an
+            X.509 IDevID factory installed credential. New Entities without an
             IDevID credential MAY form the <xref
             target="RequestAuditTokenFromRegistrar"></xref> request using the
             <xref target="RequestAuditToken"></xref> format to ensure the
