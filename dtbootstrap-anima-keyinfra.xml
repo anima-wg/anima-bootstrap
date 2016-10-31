@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY I-D.behringer-autonomic-network-framework PUBLIC "" "https://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.behringer-homenet-trust-bootstrap.xml">
+<!ENTITY I-D.draft-ietf-anima-autonomic-control-plane PUBLIC "" "https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.behringer-anima-autonomic-control-plane.xml">
+<!ENTITY I-D.draft-ietf-anima-grasp-08 PUBLIC "" "https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-anima-grasp-08.xml">
 <!ENTITY RFC2119 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC7030 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7030.xml">
 <!ENTITY RFC5280 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml">
@@ -107,7 +109,7 @@
       This document describes a zero-touch approach to bootstrapping an entity
       by securing the initial distribution of key material using third-party
       issued X.509 certificates and cryptographically signed "vouchers" issued
-      by a new form of cloud service. </t>
+      by a new form of cloud service.</t>
 
       <t>The two sides of an association being bootstrapped authenticate each
       other and then determine appropriate authorization. This process is
@@ -211,7 +213,7 @@
             <t hangText="Audit Voucher:">A voucher from the MASA service that
             indicates that the bootstrapping event has been successfully
             logged. The Registrar is primarily responsible for verifying the
-            logs and ensuring domain network security. </t>
+            logs and ensuring domain network security.</t>
 
             <t hangText="Ownership Voucher:">A voucher from the MASA service
             that indicates the explicit owner identity. The MASA is primarily
@@ -265,7 +267,7 @@
             list operations and in order to extract it for inclusion in
             messages to the MASA service. The subject field&rsquo;s DN
             encoding MUST include the &ldquo;serialNumber&rdquo; attribute
-            with the device&rsquo;s unique serial number. </t>
+            with the device&rsquo;s unique serial number.</t>
           </list></t>
       </section>
 
@@ -322,7 +324,7 @@
         access control has either already occured, is not required, or is
         integrated by the proxy and registrar in such a way that the device
         itself does not need to be aware of the details. Further integration
-        is not in scope. </t>
+        is not in scope.</t>
 
         <t>Some aspects are in scope for constrained devices on challenged
         networks: the certificate contents, and the process by which the four
@@ -578,7 +580,7 @@
               Link-Local Addresses. The Plege MAY obtain an IP address via
               DHCP [RFC2131]. The DHCP provided parameters for the Domain Name
               System can be used to perform step (d) DNS operations if all
-              local discovery attempts fail (see below). </t>
+              local discovery attempts fail (see below).</t>
 
               <t>MUST: Performs DNS-based Service Discovery <xref
               target="RFC6763"></xref> over Multicast DNS <xref
@@ -745,7 +747,7 @@
           bootstrapping process as follows:</t>
 
           <t><list style="symbols">
-              <t>Initially the Pledge does not know the current time. </t>
+              <t>Initially the Pledge does not know the current time.</t>
 
               <t>During Pledge authentiation by the Registrar a realtime clock
               can be used by the Registrar. This bullet expands on a closely
@@ -754,7 +756,7 @@
               GeneralizedTime value of 99991231235959Z" [RFC5280] so the
               Registrar MUST support such lifetimes and SHOULD support
               ignoring Pledge lifetimes if they did not follow the RFC5280
-              recommendations. </t>
+              recommendations.</t>
 
               <t>Once the Audit Voucher is accepted the validity period of the
               domainCAcert in the voucher (see <xref
@@ -779,7 +781,7 @@
           mechanism for the Pledge to ensure Audit Voucher responses are
           associated with a particular bootstrapping attempt. Nonceless Audit
           Vouchers from the MASA server are always valid and thus time is not
-          needed. </t>
+          needed.</t>
 
           <t>Ownership Vouchers include time information and MUST be validated
           using a realtime clock.</t>
@@ -833,7 +835,19 @@
         forwards packets between the Pledge and a Registrar that has been
         configured on the Proxy. The Proxy does not terminate the TLS
         handshake. A Proxy is always assumed even if directly integrated into
-        a Registrar. </t>
+        a Registrar.</t>
+
+        <t>As a result of the Proxy Discovery process in section <xref
+        target="ProxyDiscovery"></xref>, the port number exposed by the proxy
+        does not need to be well known, or require an IANA allocation.</t>
+
+        <t>If the Proxy joins an Autonomic Control Plane (<xref
+        target="I-D.behringer-anima-autonomic-control-plane"></xref>) it
+        SHOULD use Autonomic Control Plane secured GRASP (<xref
+        target="I-D.ietf-anima-grasp"></xref>) to discovery the Registrar
+        address and port. For the IPIP encapsulation methods, the port
+        announced by the Proxy MUST be the same as on the registrar in order
+        for the proxy to remain stateless.</t>
 
         <t>In order to permit the proxy functionality to be implemented on the
         maximum variety of devices the chosen mechanism SHOULD use the minimum
@@ -858,17 +872,6 @@
           'HTTPS proxy' method the mandatory to implement and provide a less
           friendly environment for the smallest of devices. This is a decision
           we'll have to see addressed by the broader team.]]</t>
-
-          <t>As a result of the Proxy Discovery process in section <xref
-          target="ProxyDiscovery"></xref>, the port number exposed by the
-          proxy does not need to be well known, or require an IANA
-          allocation.</t>
-
-          <t>The address and port of the Registrar to which the packets will
-          be forwarded will be discovered by the GRASP protocol inside the
-          ACP. For the IPIP encapsulation methods, the port announced by the
-          Proxy MUST be the same as on the registrar in order for the proxy to
-          remain stateless.</t>
 
           <t>The IPIP encapsulation allows the proxy to forward traffic which
           is otherwise not to be forwarded, as the traffic between New Node
@@ -909,9 +912,14 @@
         <t>A Registrar listens for Pledges and determines if they can join the
         domain. A Registrar obtains a Voucher from the MASA service and
         delivers them to the Pledge as well as facilitating enrollment with
-        the domain PKI. </t>
+        the domain PKI.</t>
 
-        <t>A Registrar is typically configured manually.</t>
+        <t>A Registrar is typically configured manually. If the Registrar
+        joins an Autonomic Control Plane (<xref
+        target="I-D.behringer-anima-autonomic-control-plane"></xref>) it MUST
+        use Autonomic Control Plane secured GRASP (<xref
+        target="I-D.ietf-anima-grasp"></xref>) to broadcast the Registrar's
+        address and port to potential Proxies.</t>
 
         <t>Registrar behavior is as follows:</t>
 
@@ -989,7 +997,7 @@
               <t>allow a specific device from a vendor (as determined by the
               X.509 IDevID) against a domain white list. (The mechanism for
               checking a shared white list potentiatlly used by multiple
-              Registrars is out of scope). </t>
+              Registrars is out of scope).</t>
             </list></t>
 
           <t>To look the Pledge up in a domain white list a consistent method
@@ -1002,7 +1010,7 @@
           can be included in a certificate and therefore that can also be used
           for matching purposes. The SERIALNUM-ID whitelist is collated
           according to vendor trust anchor since serial numbers are not
-          globally unique. </t>
+          globally unique.</t>
 
           <t>Since all Pledges accept Audit Vouchers a Registrar MUST use the
           vendor provided MASA service to verify that the device's history log
@@ -1057,7 +1065,7 @@
           that a device is owned by a specific domain. The method used to
           "claim" this are out-of-scope. A MASA ignores or reports failures
           when an attempt is made to claim a device that has a an Ownership
-          Voucher. </t>
+          Voucher.</t>
         </section>
 
         <section title="Log Verification">
@@ -1105,7 +1113,7 @@
           with the Audit Voucher. For the simple log format defined in this
           document using the DomainID is considered sufficient privacy. Future
           work to improve the logging mechanism could include additional
-          privacy protections. </t>
+          privacy protections.</t>
 
           <t>If a nonce is not provided then the MASA service MUST
           authenticate the Registrar as a valid customer. This prevents denial
@@ -1529,7 +1537,7 @@ Data        +----------------------nonce---->   (discard     |
         <t>The root certificate is extracted and used to populate the Audit
         Voucher. The domain ID (e.g. hash of the public key of the domain) is
         extracted from the root certificate and is used to update the audit
-        log. </t>
+        log.</t>
       </section>
 
       <section anchor="AuditTokenResponse" title="Audit Voucher Response">
@@ -1566,7 +1574,7 @@ Data        +----------------------nonce---->   (discard     |
         installed trust anchor assocaited with the X.509 IDevID. [[EDNOTE: As
         detailed in netconf-zerotouch this might be a distinct trust anchor
         rather than re-using the trust anchor for the IDevID. This concept
-        will need to be detailed in this document as well.]] </t>
+        will need to be detailed in this document as well.]]</t>
 
         <t>[[EDNOTE: Using CMS is consistent with the alignment of this
         bootstrapping document with EST, a PKIX enrollment protocol that
@@ -1907,7 +1915,7 @@ Data        +----------------------nonce---->   (discard     |
         <t>The Pledge MAY support "trust on first use" on physical interfaces
         but MUST NOT support "trust on first use" on network interfaces. This
         is because "trust on first use" permanently degrades the security for
-        all other use cases. </t>
+        all other use cases.</t>
 
         <t>The Pledge MAY have an operational mode where it skips Voucher
         validation one time. For example if a physical button is depressed
@@ -2117,7 +2125,11 @@ Data        +----------------------nonce---->   (discard     |
     </references>
 
     <references title="Informative References">
+      &I-D.draft-ietf-anima-autonomic-control-plane;
+
       &I-D.behringer-autonomic-network-framework;
+
+      &I-D.draft-ietf-anima-grasp-08;
 
       &RFC7575;
 
