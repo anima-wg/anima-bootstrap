@@ -97,59 +97,45 @@
     <section title="Introduction">
       <t>To literally "pull yourself up by the bootstraps" is an impossible
       action. Similarly the secure establishment of a key infrastructure
-      without external help is also an impossibility. Today it is accepted
-      that the initial connections between nodes are insecure, until key
-      distribution is complete, or that domain-specific keying material is
+      without external help is also an impossibility. Today it is commonly
+      accepted that the initial connections between nodes are insecure, until
+      key distribution is complete, or that domain-specific keying material is
       pre-provisioned on each new device in a costly and non-scalable manner.
-      This document describes a zero-touch approach to bootstrapping an entity
-      by securing the initial distribution of key material using third-party
-      issued X.509 certificates and cryptographically signed "vouchers" issued
-      by a new form of cloud service.</t>
+      These existing mechanisms are known as non-secured 'Trust on First Use',
+      'resurrecting duckling' or 'pre-staging'. </t>
 
-      <t>The two sides of an association being bootstrapped authenticate each
-      other and then determine appropriate authorization. This process is
-      described as four distinct steps between the existing domain and the
-      device, or "pledge", being added:</t>
+      <t>This document describes a zero-touch approach to bootstrapping that
+      secures the initial distribution of key material between an unconfigured
+      and untouched device called a "Pledge" and the "Registrar" device that
+      is a member of an established network domain. The bootstrapping process
+      provides a foundation to securely answer the following questions:</t>
 
       <t><list style="symbols">
-          <t>Pledge authentication: "Who is this? What is its identity?"</t>
+          <t>Registrar authenticating the Pledge: "Who is this device? What is
+          its identity?"</t>
 
-          <t>Pledge authorization: "Is it mine? Do I want it? What are the
-          chances it has been compromised?"</t>
+          <t>Registrar authorization the Pledge: "Is it mine? Do I want it?
+          What are the chances it has been compromised?"</t>
 
-          <t>Domain authentication: "What is this domain's claimed
-          identity?"</t>
+          <t>Pledge authenticating the Registrar/Domain: "What is this
+          domain's identity?"</t>
 
-          <t>Domain authorization: "Should I join it?"</t>
+          <t>Pledge authorization the Registrar: "Should I join it?"</t>
         </list></t>
 
-      <t>A precise answer to these questions can not be obtained without
-      leveraging an established key infrastructure(s). The pledge's decisions
-      are made according to verified communication with a trusted third-party.
-      The domain's decisions are made by comparing the pledge's authenticated
-      identity against domain information such as a configured list of
-      purchased devices supplimented by information provided by a trusted
-      third-party. The third-party is not required to provide sales channel
-      ownership tracking nor is it required to authenticate the domain.</t>
+      <t>This document details protocols and messages to the endpoints to
+      answer the questions. The Registrar actions derive from Pledge identity,
+      third party cloud service communications, and local access control
+      lists. The Pledge actions derive from a cryptographically protected
+      "voucher" message delivered throug the Registrar. Multiple forms of
+      "vouchers" are described to support a variety of use cases. </t>
 
-      <t>Optimal security is achieved with X.509 certificates on each Pledge,
-      accompanied by a third-party (e.g., vendor, manufacturer or integrator)
-      Internet based service for verification. Bootstrapping concepts run to
-      completion with less requirements, but are then less secure. A domain
-      can choose to accept lower levels of security when a trusted third-party
-      is not available so that bootstrapping proceeds even at the risk of
-      reduced security. Only the domain can make these decisions based on
-      administrative input and known behavior of the pledge.</t>
-
-      <t>The result of bootstrapping is that a domain specific key
-      infrastructure is deployed. Since X.509 PKI certificates are used for
-      identifying the pledge, and the public key of the domain identity is
-      leveraged during communications with an Internet based service, which is
-      itself authenticated using HTTPS, bootstrapping of a domain specific
-      Public Key Infrastructure (PKI) is described. Sufficient agility to
-      support bootstrapping alternative key infrastructures (such as symmetric
-      key solutions) is considered although no such alternate key
-      infrastructure is described.</t>
+      <t>The result of bootstrapping is that a security association between
+      the Pledge and the Registrar is established. A method of leveragine this
+      association to optimize PKI enrollment is described. Agility to support
+      bootstrapping alternative key infrastructures (such as symmetric key
+      solutions) is considered although no such alternate key infrastructure
+      is described.</t>
 
       <section title="Terminology">
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -263,6 +249,11 @@
             messages to the MASA service. The subject field&rsquo;s DN
             encoding MUST include the &ldquo;serialNumber&rdquo; attribute
             with the device&rsquo;s unique serial number.</t>
+
+            <t hangText="TOFU">Trust on First Use. This is where a Pledge
+            device makes no security decisions but rather simply trusts the
+            first Registrar it is contacted by. This is also known as the
+            "resurrecting duckling" model. </t>
           </list></t>
       </section>
 
@@ -272,11 +263,11 @@
         capabilities of the devices in question. The terminology of <xref
         target="RFC7228"></xref> is best used to describe the boundaries.</t>
 
-        <t>The entire solution described in this document is aimed in general
-        at non-constrained (i.e. class 2+) devices operating on a
-        non-Challenged network. The entire solution described here is not
-        intended to be useable as-is by constrained devices operating on
-        challenged networks (such as 802.15.4 LLNs).</t>
+        <t>The solution described in this document is aimed in general at
+        non-constrained (i.e. class 2+) devices operating on a non-Challenged
+        network. The entire solution described here is not intended to be
+        useable as-is by constrained devices operating on challenged networks
+        (such as 802.15.4 LLNs).</t>
 
         <t>In many target applications, the systems involved are large router
         platforms with multi-gigabit inter-connections, mounted in controlled
@@ -362,11 +353,11 @@
 |       |     .                                           |  .
 |       |     .  +------------+       +-----------+       |  .
 |       |     .  |            |       |           |       |  .
-|       |     .  |            |       |           <-------+  .
+|Pledge |     .  |   Circuit  |       | Domain    <-------+  .
 |       |     .  |   Proxy    |       | Registrar |          .
 |       <-------->            <------->           |          .
-| New   |     .  |            |       |           |          .
-| Entity|     .  +------------+       +-----+-----+          .
+|       |     .  |            |       |           |          .
+|       |     .  +------------+       +-----+-----+          .
 |       |     .                             |                .
 |       |     .           +-----------------+----------+     .
 |       |     .           | Domain Certification       |     .
@@ -383,17 +374,183 @@
       </figure>
 
       <t>We assume a multi-vendor network. In such an environment there could
-      be a MASA or Ownership Tracker for each vendor that supports devices
-      following this document's specification, or an integrator could provide
-      a MASA service for all devices. It is unlikely that an integrator could
-      provide Ownership Tracking services for multiple vendors.</t>
+      be a Vendor Service for each vendor that supports devices following this
+      document's specification, or an integrator could provide a generic
+      service authorized by multiple vendors. It is unlikely that an
+      integrator could provide Ownership Tracking services for multiple
+      vendors due to the required sales channel integrations necessary to
+      track ownership.</t>
+
+      <t>The domain is the managed network infrastructure the Pledge is
+      managed by. The a domain provides initial device connectivity minimally
+      sufficient for bootstrapping through the Circuit Proxy. The Domain
+      registrar makes authorization decisions and handles connectivity to the
+      vendor services and authenticates the Pledge. Optional cryptographic
+      credential and configuration management systems are expected.</t>
 
       <t>This document describes a secure zero-touch approach to bootstrapping
-      a key infrastructure; if certain devices in a network do not support
-      this approach, they can still be bootstrapped manually. Although manual
-      deployment is not scalable and is not a focus of this document the
-      necessary mechanisms are called out in this document to ensure such edge
-      conditions are covered by the architectural and protocol models.</t>
+      a remote key infrastructure. Secure bootstrapping requires mitigating
+      the threat of an attacker domain establishing a management role over the
+      pledge device. In a "trust on first use" model, where this threat is
+      ignored, the attacker has an opportunity to install a persistent malware
+      component. This document uses Vouchers to address the threat while
+      maintaining a significant level of flexibility.</t>
+
+      <section title="Secure Imprinting without Vouchers">
+        <t>There are pre-existing methods available for establishing initial
+        trust. For example the enrollment protocol EST <xref
+        target="RFC7030"></xref> details a set of non-autonomic bootstrapping
+        methods such as:</t>
+
+        <t><list style="symbols">
+            <t>using the Implicit Trust Anchor database (not an autonomic
+            solution because the URL must be securely distributed),</t>
+
+            <t>engaging a human user to authorize the CA certificate using
+            out-of-band data (not an autonomic solution because the human user
+            is involved),</t>
+
+            <t>using a configured Explicit TA database (not an autonomic
+            solution because the distribution of an explicit TA database is
+            not autonomic),</t>
+
+            <t>and using a Certificate-Less TLS mutual authentication method
+            (not an autonomic solution because the distribution of symmetric
+            key material is not autonomic).</t>
+          </list>These "touch" methods do not meet the requirements for
+        zero-touch.</t>
+
+        <t>There are "call home" technologies where the Pledge first
+        establishes a connection to a well known vendor service using a common
+        client-server authentication model. After mutual authentication
+        appropriate credentials to authenticate the target domain are
+        transfered to the Pledge. This creates serveral problems and
+        limitations:</t>
+
+        <t><list style="symbols">
+            <t>the pledge requires realtime connectivity to the vendor
+            service,</t>
+
+            <t>the domain identity is exposed to the vendor service (this is a
+            privacy concern),</t>
+
+            <t>the vendor is responsible for making the authorization
+            decisions (this is a liability concern),</t>
+          </list></t>
+
+        <t>BRSKI addresses these issues by introducting an authorization layer
+        via "vouchers". The additional complexity provides for significant
+        flexibility.</t>
+      </section>
+
+      <section title="Secure Imprinting using Vouchers">
+        <t>A voucher is a cryptographically protected statement to the Pledge
+        device indicating authorizing a zero-touch imprint on the Registrar
+        domain. Generically the voucher imparts the following information to
+        the Pledge:</t>
+
+        <t><list style="hanging">
+            <t hangText="Assertion Basis">Indicates the method that protects
+            the imprint. This might include discrete ownership verification,
+            assured logging operation or reliance on Pledge endpoint behavior
+            such as secure root of trust of measurement. Only some methods are
+            normatively defined in this document. Other methods are left for
+            future work. </t>
+
+            <t hangText="Registrar Authentication">Indicates how the Pledge
+            can authenticate the Registrar. This might include an indication
+            of the PKIX trust anchor used by the Registrar, or an indication
+            of shared PKIX trust anchor and additional CN-ID or DNS-ID
+            information to complete authentication. Symetric key or other
+            methods are left for future work. </t>
+
+            <t hangText="Anti-Replay Protections">Time or nonce based
+            information constrain vouchers to time periods or bootstrap
+            attempts. </t>
+          </list></t>
+
+        <t>A number of boostrapping scenarios can be met using differing
+        combinations of this information. All scenarios address the primary
+        threat of a MiTM Registrar gaining control over the Pledge device. The
+        primary voucher combinations are referred to within this document by
+        name:</t>
+
+        <figure>
+          <artwork><![CDATA[
+             |Assertion   |Registrar ID    |Pledge ID | Validity    |
+             |Log-|Veri-  |Trust  |CN-ID or|serial    | RTC | Nonce |
+             | ged|  fied |Anchor |DNS-ID  |number    |     |       |
+--------------------------------------------------------------------|
+Audit        |  X |       | X     |        | X        |     | X     |
+-------------|----|-------|-------|--------|----------|-----|-------|
+Nonceless    |  X |       | X     |        | X        |     |       |
+Audit        |    |       |       |        |          |     |       |
+-------------|----|-------|-------|--------|----------|-----|-------|
+Owner Audit  |  X |   X   | X     |        | X        |     | X     |
+-------------|----|-------|-------|--------|----------|-----|-------|
+Owner ID     |    |   X   | ?     |  X     | X        | X   |       |
+-------------|----|-------|----------------|----------|-------------|
+BearerVoucher|  X |       |   wildcard     | X        | ?           |
+-------------|----|-------|----------------|----------|-------------|
+MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
+-------------|------------|----------------|----------|-----|-------|
+
+]]></artwork>
+        </figure>
+
+        <t><list style="hanging">
+            <t hangText="Audit Voucher">An Audit Voucher is named after the
+            logging assertion mechanisms that the Registrar then "audits" to
+            enforce local policy. The Registrar mitigates a MiTM Registrar by
+            auditing that an unknown MiTM registrar does not appear in the log
+            entries. This does not direct prevent the MiTM but provides a
+            response mechanism that ensures the MiTM is unsuccessful. This
+            advantage is that actual ownership knowledge is not required on
+            the MASA service.</t>
+
+            <t hangText="Nonceless Audit Voucher">An Audit Voucher without a
+            validity period statement. Fundamentally the same as an Audit
+            Voucher except that it can be issued in advance to support network
+            partions or to provide a permanent voucher for remote deployments.
+            </t>
+
+            <t hangText="Ownership Audit Voucher">An Audit Voucher where the
+            MASA service has verified the Registrar as the authorized owner.
+            The MASA service mitigates a MiTM Registrar by refusing to
+            generate Audit Voucher's for unauthorized Registrars. The
+            Registrar uses audit techniques to suppliment the MASA. This
+            provides an ideal sharing of policy decisions and enforcement
+            between the vendor and the owner. </t>
+
+            <t hangText="Ownership ID Voucher">An Ownership ID Voucher is
+            named after inclusion of the Pledge's CN-ID or DNS-ID within the
+            voucher. An example Ownership Voucher is defined in <xref
+            target="I-D.ietf-netconf-zerotouch"></xref>. The MASA service
+            mitigates a MiTM Registrar by identifying the specific Registrar
+            authorized to own the Pledge.</t>
+
+            <t hangText="Bearer Voucher">A Bearer Voucher is named after the
+            inclusion of a Registrar ID wildcard. Because the Registrar is not
+            specifically identified this voucher type must be treated as a
+            secret and protected from exposure as any 'bearer' of the voucher
+            can claim the Pledge device. Theoretically "nonced" and
+            "nonceless" bearer vouches can exist. Publishing a nonceless
+            bearer voucher effectively turns the specified Pledge into a
+            "TOFU" device with minimal mitigation against MiTM Registrars.
+            </t>
+
+            <t hangText="Master Voucher">A Master Voucher is named after the
+            inclusion of a Pledge ID wildcard. Because the Pledge is not
+            specifically identified publishing a nonceless Master Voucher
+            would turn all Pledges that trust the MASA into TOFU devices. This
+            would be a significant security consideration as it puts too much
+            power in the hands of the vendor MASA service. Wildcard Pledge IDs
+            MUST NOT be accepted. </t>
+          </list>[[EDNOTE: Exact definitions of Assertion, ID and Validity
+        methods come from the voucher document. Included are normative
+        statements on how Registrar and Pledge operate on these informations
+        after verifying the voucher]]</t>
+      </section>
     </section>
 
     <section title="Functional Overview">
@@ -673,58 +830,9 @@
         </section>
 
         <section anchor="AcceptDomain" title="Imprint">
-          <t>The domain trust anchor is received by the Pledge during the
-          bootstrapping protocol methods in the form of a voucher. The goal of
-          the imprint state is to securely obtain a copy of this trust anchor
-          without involving human interaction.</t>
-
-          <t>The enrollment protocol EST <xref target="RFC7030"></xref>
-          details a set of non-autonomic bootstrapping methods such as:</t>
-
-          <t><list style="symbols">
-              <t>using the Implicit Trust Anchor database (not an autonomic
-              solution because the URL must be securely distributed),</t>
-
-              <t>engaging a human user to authorize the CA certificate using
-              out-of-band data (not an autonomic solution because the human
-              user is involved),</t>
-
-              <t>using a configured Explicit TA database (not an autonomic
-              solution because the distribution of an explicit TA database is
-              not autonomic),</t>
-
-              <t>and using a Certificate-Less TLS mutual authentication method
-              (not an autonomic solution because the distribution of symmetric
-              key material is not autonomic).</t>
-            </list>This document describes autonomic methods that MUST be
-          supported by the Pledge:</t>
-
-          <t><list style="hanging">
-              <t hangText="Audit Voucher">Audit Vouchers are obtained by a
-              Registrar from the MASA service and presented to the Pledge for
-              validation. These indicate to the Pledge that joining the domain
-              has been logged by a logging service.</t>
-
-              <t hangText="Ownership Voucher">Ownership Vouchers are obtained
-              by a Registrar from the MASA service and explicitly indicate the
-              owner of the Pledge. The Ownership Voucher is defined in <xref
-              target="I-D.ietf-netconf-zerotouch"></xref>.</t>
-            </list></t>
-
-          <t>Since client authentication occurs during the TLS handshake the
-          bootstrapping server has sufficient information to apply appropriate
-          policy concerning which method to use.</t>
-
-          <t>The Audit Voucher contains the domain's public key material as
-          provided to the MASA service by a Registrar. This provides
-          sufficient information to the client to complete automated
-          bootstrapping with the local key infrastructure. The Ownership
-          Voucher contains the Owner Certificate which the Pledge uses to
-          authenticate the TLS connection.</t>
-
-          <t>If the autonomic methods fail the Pledge returns to discovery
-          state and attempts bootstrapping with the next available discovered
-          Registrar.</t>
+          <t>The Pledge validates the voucher and accepts the Registrar ID.
+          The provisional TLS connection is validated using the Registrar ID
+          from the voucher.</t>
         </section>
 
         <section anchor="timeunknown" title="Lack of realtime clock">
