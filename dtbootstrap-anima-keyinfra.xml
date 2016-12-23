@@ -102,7 +102,7 @@
       key distribution is complete, or that domain-specific keying material is
       pre-provisioned on each new device in a costly and non-scalable manner.
       These existing mechanisms are known as non-secured 'Trust on First Use',
-      'resurrecting duckling' or 'pre-staging'. </t>
+      'resurrecting duckling' or 'pre-staging'.</t>
 
       <t>This document describes a zero-touch approach to bootstrapping that
       secures the initial distribution of key material between an unconfigured
@@ -128,7 +128,7 @@
       third party cloud service communications, and local access control
       lists. The Pledge actions derive from a cryptographically protected
       "voucher" message delivered throug the Registrar. Multiple forms of
-      "vouchers" are described to support a variety of use cases. </t>
+      "vouchers" are described to support a variety of use cases.</t>
 
       <t>The result of bootstrapping is that a security association between
       the Pledge and the Registrar is established. A method of leveragine this
@@ -253,7 +253,7 @@
             <t hangText="TOFU">Trust on First Use. This is where a Pledge
             device makes no security decisions but rather simply trusts the
             first Registrar it is contacted by. This is also known as the
-            "resurrecting duckling" model. </t>
+            "resurrecting duckling" model.</t>
           </list></t>
       </section>
 
@@ -455,18 +455,18 @@
             assured logging operation or reliance on Pledge endpoint behavior
             such as secure root of trust of measurement. Only some methods are
             normatively defined in this document. Other methods are left for
-            future work. </t>
+            future work.</t>
 
             <t hangText="Registrar Authentication">Indicates how the Pledge
             can authenticate the Registrar. This might include an indication
             of the PKIX trust anchor used by the Registrar, or an indication
             of shared PKIX trust anchor and additional CN-ID or DNS-ID
             information to complete authentication. Symetric key or other
-            methods are left for future work. </t>
+            methods are left for future work.</t>
 
             <t hangText="Anti-Replay Protections">Time or nonce based
             information constrain vouchers to time periods or bootstrap
-            attempts. </t>
+            attempts.</t>
           </list></t>
 
         <t>A number of boostrapping scenarios can be met using differing
@@ -476,24 +476,25 @@
         name:</t>
 
         <figure>
-          <artwork><![CDATA[
-             |Assertion   |Registrar ID    |Pledge ID | Validity    |
-             |Log-|Veri-  |Trust  |CN-ID or|serial    | RTC | Nonce |
-             | ged|  fied |Anchor |DNS-ID  |number    |     |       |
---------------------------------------------------------------------|
-Audit        |  X |       | X     |        | X        |     | X     |
--------------|----|-------|-------|--------|----------|-----|-------|
-Nonceless    |  X |       | X     |        | X        |     |       |
-Audit        |    |       |       |        |          |     |       |
--------------|----|-------|-------|--------|----------|-----|-------|
-Owner Audit  |  X |   X   | X     |        | X        |     | X     |
--------------|----|-------|-------|--------|----------|-----|-------|
-Owner ID     |    |   X   | ?     |  X     | X        | X   |       |
--------------|----|-------|----------------|----------|-------------|
-BearerVoucher|  X |       |   wildcard     | X        | ?           |
--------------|----|-------|----------------|----------|-------------|
-MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
--------------|------------|----------------|----------|-----|-------|
+          <artwork><![CDATA[             |Assertion   |Registrar ID    | Validity    |
+Voucher      |Log-|Veri-  |Trust  |CN-ID or| RTC | Nonce |
+Name         | ged|  fied |Anchor |DNS-ID  |     |       |
+---------------------------------------------------------|
+Audit        |  X |       | X     |        |     | X     |
+-------------|----|-------|-------|--------|-----|-------|
+Nonceless    |  X |       | X     |        | X   |       |
+Audit        |    |       |       |        |     |       |
+-------------|----|-------|-------|--------|-----|-------|
+Owner Audit  |  X |   X   | X     |        | X   | X     |
+-------------|----|-------|-------|--------|-----|-------|
+Owner ID     |    |   X   | X     |  X     | X   |       |
+-------------|----|-------|----------------|-----|-------|
+Bearer       |  X |       |   wildcard     | optional    |
+-------------|----|-------|----------------|-------------|
+
+NOTE: All voucher types include a 'Pledge ID serial number'.
+      (Not shown for space reasons).
+
 
 ]]></artwork>
         </figure>
@@ -511,8 +512,8 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
             <t hangText="Nonceless Audit Voucher">An Audit Voucher without a
             validity period statement. Fundamentally the same as an Audit
             Voucher except that it can be issued in advance to support network
-            partions or to provide a permanent voucher for remote deployments.
-            </t>
+            partions or to provide a permanent voucher for remote
+            deployments.</t>
 
             <t hangText="Ownership Audit Voucher">An Audit Voucher where the
             MASA service has verified the Registrar as the authorized owner.
@@ -520,7 +521,7 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
             generate Audit Voucher's for unauthorized Registrars. The
             Registrar uses audit techniques to suppliment the MASA. This
             provides an ideal sharing of policy decisions and enforcement
-            between the vendor and the owner. </t>
+            between the vendor and the owner.</t>
 
             <t hangText="Ownership ID Voucher">An Ownership ID Voucher is
             named after inclusion of the Pledge's CN-ID or DNS-ID within the
@@ -536,8 +537,7 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
             can claim the Pledge device. Theoretically "nonced" and
             "nonceless" bearer vouches can exist. Publishing a nonceless
             bearer voucher effectively turns the specified Pledge into a
-            "TOFU" device with minimal mitigation against MiTM Registrars.
-            </t>
+            "TOFU" device with minimal mitigation against MiTM Registrars.</t>
 
             <t hangText="Master Voucher">A Master Voucher is named after the
             inclusion of a Pledge ID wildcard. Because the Pledge is not
@@ -545,7 +545,7 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
             would turn all Pledges that trust the MASA into TOFU devices. This
             would be a significant security consideration as it puts too much
             power in the hands of the vendor MASA service. Wildcard Pledge IDs
-            MUST NOT be accepted. </t>
+            MUST NOT be accepted.</t>
           </list>[[EDNOTE: Exact definitions of Assertion, ID and Validity
         methods come from the voucher document. Included are normative
         statements on how Registrar and Pledge operate on these informations
