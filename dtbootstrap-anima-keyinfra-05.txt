@@ -55,7 +55,7 @@ Status of This Memo
 
 Pritikin, et al.          Expires July 11, 2017                 [Page 1]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
 Copyright Notice
@@ -76,78 +76,85 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
-     1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   4
-     1.2.  Scope of solution . . . . . . . . . . . . . . . . . . . .   7
-     1.3.  Trust bootstrap . . . . . . . . . . . . . . . . . . . . .   8
-   2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   8
-     2.1.  Secure Imprinting without Vouchers  . . . . . . . . . . .  10
-     2.2.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  11
-   3.  Functional Overview . . . . . . . . . . . . . . . . . . . . .  13
-     3.1.  Behavior of a Pledge  . . . . . . . . . . . . . . . . . .  15
-       3.1.1.  Discovery . . . . . . . . . . . . . . . . . . . . . .  17
-       3.1.2.  Identity  . . . . . . . . . . . . . . . . . . . . . .  18
-       3.1.3.  Request Join  . . . . . . . . . . . . . . . . . . . .  19
-       3.1.4.  Imprint . . . . . . . . . . . . . . . . . . . . . . .  19
-       3.1.5.  Lack of realtime clock  . . . . . . . . . . . . . . .  19
-       3.1.6.  Enrollment  . . . . . . . . . . . . . . . . . . . . .  20
-       3.1.7.  Being Managed . . . . . . . . . . . . . . . . . . . .  21
-     3.2.  Behavior of a Proxy . . . . . . . . . . . . . . . . . . .  21
-       3.2.1.  CoAP connection to Registrar  . . . . . . . . . . . .  22
-       3.2.2.  HTTPS proxy connection to Registrar . . . . . . . . .  22
-     3.3.  Behavior of the Registrar . . . . . . . . . . . . . . . .  23
-       3.3.1.  Pledge Authentication . . . . . . . . . . . . . . . .  24
-       3.3.2.  Pledge Authorization  . . . . . . . . . . . . . . . .  25
-       3.3.3.  Claiming the New Entity . . . . . . . . . . . . . . .  26
-       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  26
-     3.4.  Behavior of the MASA Service  . . . . . . . . . . . . . .  27
-       3.4.1.  Issue Audit Voucher and Log the event . . . . . . . .  27
-       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  27
-     3.5.  Leveraging the new key infrastructure / next steps  . . .  28
-       3.5.1.  Network boundaries  . . . . . . . . . . . . . . . . .  28
-     3.6.  Interactions with Network Access Control  . . . . . . . .  28
-   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  28
+     1.1.  Secure Imprinting without Vouchers  . . . . . . . . . . .   4
+     1.2.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   5
+     1.3.  Scope of solution . . . . . . . . . . . . . . . . . . . .   8
+     1.4.  Trust bootstrap . . . . . . . . . . . . . . . . . . . . .   9
+   2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   9
+     2.1.  Secure Imprinting without Vouchers  . . . . . . . . . . .  11
+     2.2.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  12
+   3.  Functional Overview . . . . . . . . . . . . . . . . . . . . .  14
+     3.1.  Behavior of a Pledge  . . . . . . . . . . . . . . . . . .  16
+       3.1.1.  Discovery . . . . . . . . . . . . . . . . . . . . . .  18
+       3.1.2.  Identity  . . . . . . . . . . . . . . . . . . . . . .  19
+       3.1.3.  Request Join  . . . . . . . . . . . . . . . . . . . .  20
+       3.1.4.  Imprint . . . . . . . . . . . . . . . . . . . . . . .  20
+       3.1.5.  Lack of realtime clock  . . . . . . . . . . . . . . .  20
+       3.1.6.  Enrollment  . . . . . . . . . . . . . . . . . . . . .  21
+       3.1.7.  Being Managed . . . . . . . . . . . . . . . . . . . .  22
+     3.2.  Behavior of a Proxy . . . . . . . . . . . . . . . . . . .  22
+       3.2.1.  CoAP connection to Registrar  . . . . . . . . . . . .  23
+       3.2.2.  HTTPS proxy connection to Registrar . . . . . . . . .  23
+     3.3.  Behavior of the Registrar . . . . . . . . . . . . . . . .  24
+       3.3.1.  Pledge Authentication . . . . . . . . . . . . . . . .  25
+       3.3.2.  Pledge Authorization  . . . . . . . . . . . . . . . .  26
+       3.3.3.  Claiming the New Entity . . . . . . . . . . . . . . .  27
+       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  27
+     3.4.  Behavior of the MASA Service  . . . . . . . . . . . . . .  28
+       3.4.1.  Issue Audit Voucher and Log the event . . . . . . . .  28
+       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  28
+     3.5.  Leveraging the new key infrastructure / next steps  . . .  29
+       3.5.1.  Network boundaries  . . . . . . . . . . . . . . . . .  29
+     3.6.  Interactions with Network Access Control  . . . . . . . .  29
 
 
 
 Pritikin, et al.          Expires July 11, 2017                 [Page 2]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
-     4.1.  Instantiating the Domain Certification Authority  . . . .  29
-     4.2.  Instantiating the Registrar . . . . . . . . . . . . . . .  29
-     4.3.  Accepting New Entities  . . . . . . . . . . . . . . . . .  29
-     4.4.  Automatic Enrollment of Devices . . . . . . . . . . . . .  30
-     4.5.  Secure Network Operations . . . . . . . . . . . . . . . .  30
-   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  31
-     5.1.  Request Voucher from the Registrar  . . . . . . . . . . .  33
-     5.2.  Request Voucher from MASA . . . . . . . . . . . . . . . .  35
-     5.3.  Audit Voucher Response  . . . . . . . . . . . . . . . . .  36
+   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  29
+     4.1.  Instantiating the Domain Certification Authority  . . . .  30
+     4.2.  Instantiating the Registrar . . . . . . . . . . . . . . .  30
+     4.3.  Accepting New Entities  . . . . . . . . . . . . . . . . .  30
+     4.4.  Automatic Enrollment of Devices . . . . . . . . . . . . .  31
+     4.5.  Secure Network Operations . . . . . . . . . . . . . . . .  31
+   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  32
+     5.1.  Request Voucher from the Registrar  . . . . . . . . . . .  34
+     5.2.  Request Voucher from MASA . . . . . . . . . . . . . . . .  36
+     5.3.  Audit Voucher Response  . . . . . . . . . . . . . . . . .  37
        5.3.1.  Completing authentication of Provisional TLS
-               connection  . . . . . . . . . . . . . . . . . . . . .  37
-     5.4.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  38
-     5.5.  MASA authorization log Request  . . . . . . . . . . . . .  39
-     5.6.  MASA authorization log Response . . . . . . . . . . . . .  39
-     5.7.  EST Integration for PKI bootstrapping . . . . . . . . . .  40
-       5.7.1.  EST Distribution of CA Certificates . . . . . . . . .  40
-       5.7.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  40
-       5.7.3.  EST Client Certificate Request  . . . . . . . . . . .  41
-       5.7.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  41
-       5.7.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  42
-   6.  Reduced security operational modes  . . . . . . . . . . . . .  42
-     6.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  43
-     6.2.  New Entity security reductions  . . . . . . . . . . . . .  43
-     6.3.  Registrar security reductions . . . . . . . . . . . . . .  44
-     6.4.  MASA security reductions  . . . . . . . . . . . . . . . .  45
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  45
-     7.1.  Security concerns with discovery process  . . . . . . . .  47
-       7.1.1.  Discovery of Registrar by Proxy . . . . . . . . . . .  47
-       7.1.2.  Discovery of Proxy by New Entity  . . . . . . . . . .  47
-   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  47
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  47
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  47
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .  49
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  50
+               connection  . . . . . . . . . . . . . . . . . . . . .  38
+     5.4.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  39
+     5.5.  MASA authorization log Request  . . . . . . . . . . . . .  40
+     5.6.  MASA authorization log Response . . . . . . . . . . . . .  40
+     5.7.  EST Integration for PKI bootstrapping . . . . . . . . . .  41
+       5.7.1.  EST Distribution of CA Certificates . . . . . . . . .  41
+       5.7.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  41
+       5.7.3.  EST Client Certificate Request  . . . . . . . . . . .  42
+       5.7.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  42
+       5.7.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  43
+   6.  Reduced security operational modes  . . . . . . . . . . . . .  43
+     6.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  44
+     6.2.  New Entity security reductions  . . . . . . . . . . . . .  44
+     6.3.  Registrar security reductions . . . . . . . . . . . . . .  45
+     6.4.  MASA security reductions  . . . . . . . . . . . . . . . .  46
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  46
+     7.1.  Pledge Privacy Considerations . . . . . . . . . . . . . .  46
+     7.2.  Network Privacy Considerations  . . . . . . . . . . . . .  47
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  47
+     8.1.  Security concerns with discovery process  . . . . . . . .  48
+       8.1.1.  Discovery of Registrar by Proxy . . . . . . . . . . .  48
+       8.1.2.  Discovery of Proxy by New Entity  . . . . . . . . . .  48
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  48
+   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  49
+     10.1.  Normative References . . . . . . . . . . . . . . . . . .  49
+     10.2.  Informative References . . . . . . . . . . . . . . . . .  50
+   Appendix A.  IPv4 operations  . . . . . . . . . . . . . . . . . .  52
+     A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  52
+     A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  52
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  52
 
 1.  Introduction
 
@@ -155,20 +162,19 @@ Internet-Draft                   BRewSKI                    January 2017
    action.  Similarly the secure establishment of a key infrastructure
    without external help is also an impossibility.  Today it is commonly
    accepted that the initial connections between nodes are insecure,
-   until key distribution is complete, or that domain-specific keying
-   material is pre-provisioned on each new device in a costly and non-
-   scalable manner.  These existing mechanisms are known as non-secured
-   'Trust on First Use' (TOFU) [RFC7435], 'resurrecting duckling'
-   [Stajano99theresurrecting] or 'pre-staging'.
-
-
 
 
 
 Pritikin, et al.          Expires July 11, 2017                 [Page 3]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
+
+   until key distribution is complete, or that domain-specific keying
+   material is pre-provisioned on each new device in a costly and non-
+   scalable manner.  These existing mechanisms are known as non-secured
+   'Trust on First Use' (TOFU) [RFC7435], 'resurrecting duckling'
+   [Stajano99theresurrecting] or 'pre-staging'.
 
    This document describes a zero-touch approach to bootstrapping that
    secures the initial distribution of key material between an
@@ -207,7 +213,55 @@ Internet-Draft                   BRewSKI                    January 2017
    alternative key infrastructures, such as a symmetric key solutions,
    but no such system is described.
 
-1.1.  Terminology
+1.1.  Secure Imprinting without Vouchers
+
+   There are pre-existing methods available for establishing initial
+   trust.  For example the enrollment protocol EST [RFC7030] details a
+   set of non-autonomic bootstrapping methods such as:
+
+
+
+Pritikin, et al.          Expires July 11, 2017                 [Page 4]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
+   o  using the Implicit Trust Anchor database (not an autonomic
+      solution because the URL must be securely distributed),
+
+   o  engaging a human user to authorize the CA certificate using out-
+      of-band data (not an autonomic solution because the human user is
+      involved),
+
+   o  using a configured Explicit TA database (not an autonomic solution
+      because the distribution of an explicit TA database is not
+      autonomic),
+
+   o  and using a Certificate-Less TLS mutual authentication method (not
+      an autonomic solution because the distribution of symmetric key
+      material is not autonomic).
+
+   These "touch" methods do not meet the requirements for zero-touch.
+
+   There are "call home" technologies where the Pledge first establishes
+   a connection to a well known vendor service using a common client-
+   server authentication model.  After mutual authentication appropriate
+   credentials to authenticate the target domain are transfered to the
+   Pledge.  This creates serveral problems and limitations:
+
+   o  the pledge requires realtime connectivity to the vendor service,
+
+   o  the domain identity is exposed to the vendor service (this is a
+      privacy concern),
+
+   o  the vendor is responsible for making the authorization decisions
+      (this is a liability concern),
+
+   BRSKI addresses these issues by introducting an authorization layer
+   via "vouchers".  The additional complexity provides for significant
+   flexibility.
+
+1.2.  Terminology
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
@@ -218,16 +272,16 @@ Internet-Draft                   BRewSKI                    January 2017
 
    DomainID:  The domain identity is the 160-bit SHA-1 hash of the BIT
       STRING of the subjectPublicKey of the domain trust anchor that is
-
-
-
-Pritikin, et al.          Expires July 11, 2017                 [Page 4]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
       stored by the Domain CA.  This is consistent with the
       Certification Authority subject key identifier (Section 4.2.1.2
+
+
+
+Pritikin, et al.          Expires July 11, 2017                 [Page 5]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
       [RFC5280]) of the Domain CA's self signed root certificate.  (A
       string value bound to the Domain CA's self signed root certificate
       subject and issuer fields is often colloquially used as a
@@ -277,9 +331,11 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                 [Page 5]
+
+
+Pritikin, et al.          Expires July 11, 2017                 [Page 6]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    Domain:  The set of entities that trust a common key infrastructure
@@ -333,15 +389,15 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                 [Page 6]
+Pritikin, et al.          Expires July 11, 2017                 [Page 7]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
       trusts the first Registrar it is contacted by.  This is also known
       as the "resurrecting duckling" model.
 
-1.2.  Scope of solution
+1.3.  Scope of solution
 
    Questions have been posed as to whether this solution is suitable in
    general for Internet of Things (IoT) networks.  This depends on the
@@ -389,9 +445,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                 [Page 7]
+Pritikin, et al.          Expires July 11, 2017                 [Page 8]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    authentication.  Defining symmetric key techniques that meet the
@@ -418,7 +474,7 @@ Internet-Draft                   BRewSKI                    January 2017
    questions above are resolved is in scope.  It is simply the actual
    on-the-wire imprint protocol which is likely inappropriate.
 
-1.3.  Trust bootstrap
+1.4.  Trust bootstrap
 
    The imprint protocol results in a secure relationship between a
    domain Registrar and the Pledge.  If the new device is sufficiently
@@ -445,9 +501,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                 [Page 8]
+Pritikin, et al.          Expires July 11, 2017                 [Page 9]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
                                              .
@@ -501,9 +557,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                 [Page 9]
+Pritikin, et al.          Expires July 11, 2017                [Page 10]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    This document describes a secure zero-touch approach to bootstrapping
@@ -557,9 +613,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 10]
+Pritikin, et al.          Expires July 11, 2017                [Page 11]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
 2.2.  Secure Imprinting using Vouchers
@@ -613,9 +669,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 11]
+Pritikin, et al.          Expires July 11, 2017                [Page 12]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
                 |Assertion   |Registrar ID    |Pledge ID | Validity    |
@@ -669,9 +725,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 12]
+Pritikin, et al.          Expires July 11, 2017                [Page 13]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
       example Ownership Voucher is defined in
@@ -719,19 +775,19 @@ Internet-Draft                   BRewSKI                    January 2017
      |        |         |         |    |            |     | (Internet  |
      +--------+         +---------+    +------------+     +------------+
       |                     |                   |                    |
-      |<-RFC3927 IPv4 adr   |                   |                    |
+      |<-RFC3927 IPv4 adr   | Appendix A        |                    |
     or|<-RFC4862 IPv6 adr   |                   |                    |
       |                     |                   |                    |
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 13]
+Pritikin, et al.          Expires July 11, 2017                [Page 14]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
       |-------------------->|                   |                    |
-      | optional: mDNS query|                   |                    |
+      | optional: mDNS query| Appendix B        |                    |
       | RFC6763/RFC6762     |                   |                    |
       |                     |                   |                    |
       |<--------------------|                   |                    |
@@ -781,9 +837,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 14]
+Pritikin, et al.          Expires July 11, 2017                [Page 15]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    Figure 2
@@ -837,9 +893,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 15]
+Pritikin, et al.          Expires July 11, 2017                [Page 16]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
                 +--------------+
@@ -864,7 +920,7 @@ Internet-Draft                   BRewSKI                    January 2017
    |                   |
    |            +------v-------+
    |            |  Imprint     |   Optional
-   ^------------+              <--+Manual input
+   ^------------+              <--+Manual input (Appendix C)
    | Bad Vendor +------+-------+
    | response          |
    |            +------v-------+
@@ -893,9 +949,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 16]
+Pritikin, et al.          Expires July 11, 2017                [Page 17]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    3.  Requests to Join the discovered Registrar.  A unique nonce is
@@ -927,13 +983,10 @@ Internet-Draft                   BRewSKI                    January 2017
 
    To discover the Registrar the Pledge performs the following actions:
 
-   a.  MUST: Obtains a local address using either IPv4 or IPv6 methods
-       as described in [RFC4862] IPv6 Stateless Address
-       AutoConfiguration or [RFC3927] Dynamic Configuration of IPv4
-       Link-Local Addresses.  The Plege MAY obtain an IP address via
-       DHCP [RFC2131].  The DHCP provided parameters for the Domain Name
-       System can be used to perform step (d) DNS operations if all
-       local discovery attempts fail (see below).
+   a.  MUST: Obtains a local address using IPv6 methods as described in
+       [RFC4862] IPv6 Stateless Address AutoConfiguration.  [RFC7217] is
+       encouraged, but see Section 7.  IPv4 methods are described in
+       Appendix A
 
    b.  MUST: Performs DNS-based Service Discovery [RFC6763] over
        Multicast DNS [RFC6762] searching for the service
@@ -945,19 +998,17 @@ Internet-Draft                   BRewSKI                    January 2017
        broadcasts and instead silently join a network by watching for
        periodic unsolicited broadcast responses.
 
-
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 17]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    c.  MAY: Performs DNS-based Service Discovery [RFC6763] over normal
        DNS operations.  The service searched for is
        "_bootstrapks._tcp.example.com".  In this case the domain
        "example.com" is discovered as described in [RFC6763] section 11.
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 18]
+
+Internet-Draft                    BRSKI                     January 2017
+
 
    d.  MAY: If no local bootstrapks service is located using the DNS-
        based Service Discovery methods the Pledge contacts a well known
@@ -1002,17 +1053,18 @@ Internet-Draft                   BRewSKI                    January 2017
    Thus the connection is provisional and all data received is untrusted
    until sufficiently validated even though it is over a TLS connection.
    This is aligned with the existing provisional mode of EST [RFC7030]
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 18]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    during s4.1.1 "Bootstrap Distribution of CA Certificates".  See
    Section 5.3 for more information about when the TLS connection
    authenticated is completed.
+
+
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 19]
+
+Internet-Draft                    BRSKI                     January 2017
+
 
    All security associations established are between the new device and
    the Bootstrapping server regardless of proxy operations.
@@ -1059,14 +1111,16 @@ Internet-Draft                   BRewSKI                    January 2017
    of presumed time validity that is continually refined throughout the
    bootstrapping process as follows:
 
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 19]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    o  Initially the Pledge does not know the current time.
+
+
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 20]
+
+Internet-Draft                    BRSKI                     January 2017
+
 
    o  During Pledge authentiation by the Registrar a realtime clock can
       be used by the Registrar.  This bullet expands on a closely
@@ -1113,18 +1167,17 @@ Internet-Draft                   BRewSKI                    January 2017
    EST server is done using the Voucher rather than the methods defined
    in EST.
 
-
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 20]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    Once the Audit or Ownership Voucher is received, as specified in this
    document, the client has sufficient information to leverage the
    existing communication channel with a Registrar to continue an EST
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 21]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
    RFC7030 enrollment.  Enrollment picks up at RFC7030 section 4.1.1.
    bootstrapping where the Audit Voucher provides the "out-of-band" CA
    certificate fingerprint (in this case the full CA certificate) such
@@ -1171,15 +1224,16 @@ Internet-Draft                   BRewSKI                    January 2017
    port announced by the Proxy MUST be the same as on the registrar in
    order for the proxy to remain stateless.
 
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 21]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    In order to permit the proxy functionality to be implemented on the
    maximum variety of devices the chosen mechanism SHOULD use the
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 22]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
    minimum amount of state on the proxy device.  While many devices in
    the ANIMA target space will be rather large routers, the proxy
    function is likely to be implemented in the control plane CPU such a
@@ -1229,9 +1283,11 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 22]
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 23]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    Being able to connect a TCP (HTTP) or UDP (CoAP) socket to a link-
@@ -1285,9 +1341,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 23]
+Pritikin, et al.          Expires July 11, 2017                [Page 24]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    Contacted by Pledge
@@ -1341,9 +1397,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 24]
+Pritikin, et al.          Expires July 11, 2017                [Page 25]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
 3.3.2.  Pledge Authorization
@@ -1397,9 +1453,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 25]
+Pritikin, et al.          Expires July 11, 2017                [Page 26]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
 3.3.3.  Claiming the New Entity
@@ -1453,9 +1509,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 26]
+Pritikin, et al.          Expires July 11, 2017                [Page 27]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    o  Any nonce'd entries are older than when the domain is known to
@@ -1509,9 +1565,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 27]
+Pritikin, et al.          Expires July 11, 2017                [Page 28]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    previously claimed the device.  Included in the list is an indication
@@ -1565,9 +1621,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 28]
+Pritikin, et al.          Expires July 11, 2017                [Page 29]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
 4.1.  Instantiating the Domain Certification Authority
@@ -1621,9 +1677,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 29]
+Pritikin, et al.          Expires July 11, 2017                [Page 30]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
        that is not on the list of known devices, it can still be
@@ -1677,9 +1733,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 30]
+Pritikin, et al.          Expires July 11, 2017                [Page 31]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
 5.  Protocol Details
@@ -1733,9 +1789,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 31]
+Pritikin, et al.          Expires July 11, 2017                [Page 32]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
               +-----------+ +----------+ +-----------+ +----------+
@@ -1789,9 +1845,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 32]
+Pritikin, et al.          Expires July 11, 2017                [Page 33]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
               +-----------+ +----------+ +-----------+ +----------+
@@ -1845,9 +1901,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 33]
+Pritikin, et al.          Expires July 11, 2017                [Page 34]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    The request format is JSON object containing a 64bit nonce generated
@@ -1901,9 +1957,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 34]
+Pritikin, et al.          Expires July 11, 2017                [Page 35]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    delay of five seconds before declaring the Registrar a failure and
@@ -1957,9 +2013,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 35]
+Pritikin, et al.          Expires July 11, 2017                [Page 36]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    successful the Registrar obtains an Voucher from the MASA service
@@ -2013,9 +2069,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 36]
+Pritikin, et al.          Expires July 11, 2017                [Page 37]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    The Audit Voucher response is encapsulated in a [RFC5652] Signed-data
@@ -2069,9 +2125,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 37]
+Pritikin, et al.          Expires July 11, 2017                [Page 38]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    o  The EST server MUST use a certificate that chains to the
@@ -2125,9 +2181,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 38]
+Pritikin, et al.          Expires July 11, 2017                [Page 39]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    The server SHOULD respond with an HTTP 200 but MAY simply fail with
@@ -2181,9 +2237,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 39]
+Pritikin, et al.          Expires July 11, 2017                [Page 40]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    problematic imprints by the Pledge.  If the log includes nonce-less
@@ -2237,9 +2293,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 40]
+Pritikin, et al.          Expires July 11, 2017                [Page 41]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    is operationally difficult with the current status of PKI certificate
@@ -2293,9 +2349,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 41]
+Pritikin, et al.          Expires July 11, 2017                [Page 42]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    TLS connection.  The client MAY simply close the old TLS session and
@@ -2349,9 +2405,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 42]
+Pritikin, et al.          Expires July 11, 2017                [Page 43]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    sections detail specific ways that the Pledge, Registrar and MASA can
@@ -2405,9 +2461,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 43]
+Pritikin, et al.          Expires July 11, 2017                [Page 44]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    service is unavailable.  This behavior SHOULD be available via local
@@ -2461,9 +2517,9 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 44]
+Pritikin, et al.          Expires July 11, 2017                [Page 45]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
        history being deployed in air gap networks that required
@@ -2508,20 +2564,33 @@ Internet-Draft                   BRewSKI                    January 2017
 
 7.  Security Considerations
 
+7.1.  Pledge Privacy Considerations
+
+   This section discusses disclosures that a pledge may make that will
+   make it easier for a third party to track the identity of the pledge.
+
+
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 46]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
+7.2.  Network Privacy Considerations
+
+   This section discusses disclosures that a network may make to an
+   active attacker through the bootstrap process.
+
+8.  Security Considerations
+
    In order to support a wide variety of use cases, devices can be
    claimed by a registrar without proving possession of the device in
    question.  This would result in a nonceless, and thus always valid,
    claim.  Or would result in an invalid nonce being associated with a
    claim.  The MASA service is required to authenticate such Registrars
    but no programmatic method is provided to ensure good behavior by the
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 45]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    MASA service.  Nonceless entries into the audit log therefore
    permanently reduce the value of a device because future Registrars,
    during future bootstrap attempts, would now have to be configured
@@ -2556,6 +2625,15 @@ Internet-Draft                   BRewSKI                    January 2017
    benefits of an informed administrator in cases where the failure is
    indicative of a problem.
 
+
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 47]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
    As indicated in EST [RFC7030] the connection is provisional and
    untrusted until the server is successfully authorized.  If the server
    provides a redirect response the client MUST follow the redirect but
@@ -2571,13 +2649,6 @@ Internet-Draft                   BRewSKI                    January 2017
    "SHOULD" support such a model.  This reflects current (not great)
    practices but is NOT RECOMMENDED.
 
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 46]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    The MASA service could lock a claim and refuse to issue a new voucher
    or the MASA service could go offline (for example if a vendor went
    out of business).  This functionality provides benefits such as theft
@@ -2586,9 +2657,9 @@ Internet-Draft                   BRewSKI                    January 2017
    by the Domain.  This can be mitigated by Registrars that request
    nonce-less Audit Vouchers.
 
-7.1.  Security concerns with discovery process
+8.1.  Security concerns with discovery process
 
-7.1.1.  Discovery of Registrar by Proxy
+8.1.1.  Discovery of Registrar by Proxy
 
    As described in section Section 3.2, the RECOMMENDED mechanism is for
    the proxy to discover the address of the registrar via GRASP
@@ -2600,19 +2671,28 @@ Internet-Draft                   BRewSKI                    January 2017
    already registered Proxy.  There are no GRASP security issues with
    this part, as both entities will have already joined the secured ACP.
 
-7.1.2.  Discovery of Proxy by New Entity
+8.1.2.  Discovery of Proxy by New Entity
 
    [[EDNOTE: To be discussed]]
 
-8.  Acknowledgements
+9.  Acknowledgements
 
    We would like to thank the various reviewers for their input, in
    particular Brian Carpenter, Toerless Eckert, Fuyu Eleven, Eliot Lear,
    Sergey Kasatkin, Markus Stenberg, and Peter van der Stok
 
-9.  References
 
-9.1.  Normative References
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 48]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
+10.  References
+
+10.1.  Normative References
 
    [I-D.ietf-anima-voucher]
               Watsen, K., Richardson, M., Pritikin, M., and T. Eckert,
@@ -2623,16 +2703,6 @@ Internet-Draft                   BRewSKI                    January 2017
    [IDevID]   IEEE Standard, , "IEEE 802.1AR Secure Device Identifier",
               December 2009, <http://standards.ieee.org/findstds/
               standard/802.1AR-2009.html>.
-
-
-
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 47]
-
-Internet-Draft                   BRewSKI                    January 2017
-
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -2669,6 +2739,13 @@ Internet-Draft                   BRewSKI                    January 2017
               RFC 5652, DOI 10.17487/RFC5652, September 2009,
               <http://www.rfc-editor.org/info/rfc5652>.
 
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 49]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
    [RFC5660]  Williams, N., "IPsec Channels: Connection Latching",
               RFC 5660, DOI 10.17487/RFC5660, October 2009,
               <http://www.rfc-editor.org/info/rfc5660>.
@@ -2681,15 +2758,6 @@ Internet-Draft                   BRewSKI                    January 2017
               Discovery", RFC 6763, DOI 10.17487/RFC6763, February 2013,
               <http://www.rfc-editor.org/info/rfc6763>.
 
-
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 48]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    [RFC7030]  Pritikin, M., Ed., Yee, P., Ed., and D. Harkins, Ed.,
               "Enrollment over Secure Transport", RFC 7030,
               DOI 10.17487/RFC7030, October 2013,
@@ -2700,7 +2768,7 @@ Internet-Draft                   BRewSKI                    January 2017
               DOI 10.17487/RFC7228, May 2014,
               <http://www.rfc-editor.org/info/rfc7228>.
 
-9.2.  Informative References
+10.2.  Informative References
 
    [I-D.behringer-homenet-trust-bootstrap]
               Behringer, M., Pritikin, M., and S. Bjarnason,
@@ -2724,6 +2792,16 @@ Internet-Draft                   BRewSKI                    January 2017
               Autonomic Signaling Protocol (GRASP)", draft-ietf-anima-
               grasp-09 (work in progress), December 2016.
 
+
+
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 50]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
    [I-D.ietf-netconf-zerotouch]
               Watsen, K. and M. Abrahamsson, "Zero Touch Provisioning
               for NETCONF or RESTCONF based Management", draft-ietf-
@@ -2739,19 +2817,18 @@ Internet-Draft                   BRewSKI                    January 2017
               join router in ANIMA bootstrap", draft-richardson-anima-
               state-for-joinrouter-01 (work in progress), July 2016.
 
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 49]
-
-Internet-Draft                   BRewSKI                    January 2017
-
-
    [imprinting]
               Wikipedia, , "Wikipedia article: Imprinting", July 2015,
               <https://en.wikipedia.org/wiki/Imprinting_(psychology)>.
 
    [pledge]   Dictionary.com, , "Dictionary.com Unabridged", July 2015,
               <http://dictionary.reference.com/browse/pledge>.
+
+   [RFC7217]  Gont, F., "A Method for Generating Semantically Opaque
+              Interface Identifiers with IPv6 Stateless Address
+              Autoconfiguration (SLAAC)", RFC 7217,
+              DOI 10.17487/RFC7217, April 2014,
+              <http://www.rfc-editor.org/info/rfc7217>.
 
    [RFC7435]  Dukhovni, V., "Opportunistic Security: Some Protection
               Most of the Time", RFC 7435, DOI 10.17487/RFC7435,
@@ -2768,6 +2845,36 @@ Internet-Draft                   BRewSKI                    January 2017
               security issues for ad-hoc wireless networks", 1999,
               <https://www.cl.cam.ac.uk/~fms27/papers/1999-StajanoAnd-
               duckling.pdf>.
+
+
+
+
+
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 51]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
+Appendix A.  IPv4 operations
+
+A.1.  IPv4 Link Local addresses
+
+   Instead of an IPv6 link-local address, an IPv4 address may be
+   generated using [RFC3927]  Dynamic Configuration of IPv4 Link-Local
+   Addresses.
+
+   In the case that an IPv4 Local-Local address is formed, then the
+   bootstrap process would continue as in the IPv6 case by looking for a
+   (circuit) proxy.
+
+A.2.  Use of DHCPv4
+
+   The Plege MAY obtain an IP address via DHCP [RFC2131].  The DHCP
+   provided parameters for the Domain Name System can be used to perform
+   DNS operations if all local discovery attempts fail.
 
 Authors' Addresses
 
@@ -2797,9 +2904,14 @@ Authors' Addresses
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 50]
+
+
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 52]
 
-Internet-Draft                   BRewSKI                    January 2017
+Internet-Draft                    BRSKI                     January 2017
 
 
    Kent Watsen
@@ -2853,4 +2965,4 @@ Internet-Draft                   BRewSKI                    January 2017
 
 
 
-Pritikin, et al.          Expires July 11, 2017                [Page 51]
+Pritikin, et al.          Expires July 11, 2017                [Page 53]
