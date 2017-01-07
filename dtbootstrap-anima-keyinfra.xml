@@ -130,6 +130,10 @@
       "voucher" message delivered throug the Registrar. Multiple forms of
       "vouchers" are described to support a variety of use cases.</t>
 
+      <t>The syntactic details of vouchers are described in detail in <xref
+      target="I-D.ietf-anima-voucher" />, but relevant semantics of
+      voucher creation for use in ANIMA are described in this document.</t>
+
       <t>The result of bootstrapping is that a security association between
       the Pledge and the Registrar is established. A method of leveragine this
       association to optimize PKI enrollment is described. Agility to support
@@ -443,6 +447,168 @@
       component. This document uses Vouchers to address the threat while
       maintaining a significant level of flexibility.</t>
 
+      <section title="Secure Imprinting without Vouchers">
+        <t>There are pre-existing methods available for establishing initial
+        trust. For example the enrollment protocol EST <xref
+        target="RFC7030"></xref> details a set of non-autonomic bootstrapping
+        methods such as:</t>
+
+        <t><list style="symbols">
+            <t>using the Implicit Trust Anchor database (not an autonomic
+            solution because the URL must be securely distributed),</t>
+
+            <t>engaging a human user to authorize the CA certificate using
+            out-of-band data (not an autonomic solution because the human user
+            is involved),</t>
+
+            <t>using a configured Explicit TA database (not an autonomic
+            solution because the distribution of an explicit TA database is
+            not autonomic),</t>
+
+            <t>and using a Certificate-Less TLS mutual authentication method
+            (not an autonomic solution because the distribution of symmetric
+            key material is not autonomic).</t>
+          </list>These "touch" methods do not meet the requirements for
+        zero-touch.</t>
+
+        <t>There are "call home" technologies where the Pledge first
+        establishes a connection to a well known vendor service using a common
+        client-server authentication model. After mutual authentication
+        appropriate credentials to authenticate the target domain are
+        transfered to the Pledge. This creates serveral problems and
+        limitations:</t>
+
+        <t><list style="symbols">
+            <t>the pledge requires realtime connectivity to the vendor
+            service,</t>
+
+            <t>the domain identity is exposed to the vendor service (this is a
+            privacy concern),</t>
+
+            <t>the vendor is responsible for making the authorization
+            decisions (this is a liability concern),</t>
+          </list></t>
+
+        <t>BRSKI addresses these issues by introducting an authorization layer
+        via "vouchers". The additional complexity provides for significant
+        flexibility.</t>
+      </section>
+
+      <section title="Secure Imprinting using Vouchers">
+        <t>A voucher is a cryptographically protected statement to the Pledge
+        device indicating authorizing a zero-touch imprint on the Registrar
+        domain. </t>
+
+        <t>The format and cryptographic mechanism of vouchers is described in
+        detail in <xref target="I-D.ietf-anima-voucher" />. [[EDNOTE: more of this
+        will move]].  This section details the semantics as they apply to
+        the ANIMA focused BRSKI protocol.</t>
+
+        <t>Generically the voucher imparts the following information to
+        the Pledge:</t>
+
+        <t><list style="hanging">
+            <t hangText="Assertion Basis">Indicates the method that protects
+            the imprint. This might include discrete ownership verification,
+            assured logging operation or reliance on Pledge endpoint behavior
+            such as secure root of trust of measurement. Only some methods are
+            normatively defined in this document. Other methods are left for
+            future work. </t>
+
+            <t hangText="Registrar Authentication">Indicates how the Pledge
+            can authenticate the Registrar. This might include an indication
+            of the PKIX trust anchor used by the Registrar, or an indication
+            of shared PKIX trust anchor and additional CN-ID or DNS-ID
+            information to complete authentication. Symetric key or other
+            methods are left for future work. </t>
+
+            <t hangText="Anti-Replay Protections">Time or nonce based
+            information constrain vouchers to time periods or bootstrap
+            attempts. </t>
+          </list></t>
+
+        <t>A number of boostrapping scenarios can be met using differing
+        combinations of this information. All scenarios address the primary
+        threat of a MiTM Registrar gaining control over the Pledge device. The
+        primary voucher combinations are referred to within this document by
+        name:</t>
+
+        <figure>
+          <artwork><![CDATA[
+             |Assertion   |Registrar ID    |Pledge ID | Validity    |
+             |Log-|Veri-  |Trust  |CN-ID or|serial    | RTC | Nonce |
+             | ged|  fied |Anchor |DNS-ID  |number    |     |       |
+--------------------------------------------------------------------|
+Audit        |  X |       | X     |        | X        |     | X     |
+-------------|----|-------|-------|--------|----------|-----|-------|
+Nonceless    |  X |       | X     |        | X        |     |       |
+Audit        |    |       |       |        |          |     |       |
+-------------|----|-------|-------|--------|----------|-----|-------|
+Owner Audit  |  X |   X   | X     |        | X        |     | X     |
+-------------|----|-------|-------|--------|----------|-----|-------|
+Owner ID     |    |   X   | ?     |  X     | X        | X   |       |
+-------------|----|-------|----------------|----------|-------------|
+BearerVoucher|  X |       |   wildcard     | X        | ?           |
+-------------|----|-------|----------------|----------|-------------|
+MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
+-------------|------------|----------------|----------|-----|-------|
+
+]]></artwork>
+        </figure>
+
+        <t><list style="hanging">
+            <t hangText="Audit Voucher">An Audit Voucher is named after the
+            logging assertion mechanisms that the Registrar then "audits" to
+            enforce local policy. The Registrar mitigates a MiTM Registrar by
+            auditing that an unknown MiTM registrar does not appear in the log
+            entries. This does not direct prevent the MiTM but provides a
+            response mechanism that ensures the MiTM is unsuccessful. This
+            advantage is that actual ownership knowledge is not required on
+            the MASA service.</t>
+
+            <t hangText="Nonceless Audit Voucher">An Audit Voucher without a
+            validity period statement. Fundamentally the same as an Audit
+            Voucher except that it can be issued in advance to support network
+            partions or to provide a permanent voucher for remote deployments.
+            </t>
+
+            <t hangText="Ownership Audit Voucher">An Audit Voucher where the
+            MASA service has verified the Registrar as the authorized owner.
+            The MASA service mitigates a MiTM Registrar by refusing to
+            generate Audit Voucher's for unauthorized Registrars. The
+            Registrar uses audit techniques to suppliment the MASA. This
+            provides an ideal sharing of policy decisions and enforcement
+            between the vendor and the owner. </t>
+
+            <t hangText="Ownership ID Voucher">An Ownership ID Voucher is
+            named after inclusion of the Pledge's CN-ID or DNS-ID within the
+            voucher. An example Ownership Voucher is defined in <xref
+            target="I-D.ietf-netconf-zerotouch"></xref>. The MASA service
+            mitigates a MiTM Registrar by identifying the specific Registrar
+            authorized to own the Pledge.</t>
+
+            <t hangText="Bearer Voucher">A Bearer Voucher is named after the
+            inclusion of a Registrar ID wildcard. Because the Registrar is not
+            specifically identified this voucher type must be treated as a
+            secret and protected from exposure as any 'bearer' of the voucher
+            can claim the Pledge device. Theoretically "nonced" and
+            "nonceless" bearer vouches can exist. Publishing a nonceless
+            bearer voucher effectively turns the specified Pledge into a
+            "TOFU" device with minimal mitigation against MiTM Registrars.
+            </t>
+
+            <t hangText="Master Voucher">A Master Voucher is named after the
+            inclusion of a Pledge ID wildcard. Because the Pledge is not
+            specifically identified publishing a nonceless Master Voucher
+            would turn all Pledges that trust the MASA into TOFU devices. This
+            would be a significant security consideration as it puts too much
+            power in the hands of the vendor MASA service. Wildcard Pledge IDs
+            MUST NOT be accepted. </t>
+          </list>[[EDNOTE: Exact definitions of Assertion, ID and Validity
+        methods come from the voucher document. Included are normative
+        statements on how Registrar and Pledge operate on these informations
+        after verifying the voucher]]</t>
+      </section>
     </section>
 
     <section title="Functional Overview">
@@ -2127,6 +2293,8 @@ Data        +----------------------nonce---->   (discard     |
       <?rfc include="reference.RFC.3927" ?>
 
       <?rfc include="reference.RFC.4862" ?>
+
+      <?rfc include="reference.I-D.ietf-anima-voucher" ?>
 
       <reference anchor="IDevID"
                  target="http://standards.ieee.org/findstds/standard/802.1AR-2009.html">
