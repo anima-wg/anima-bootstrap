@@ -839,17 +839,21 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
           target="RequestAuditTokenFromRegistrar"></xref>.</t>
 
           <t>Once all discovered services are attempted the device SHOULD
-          return to Multicast DNS. It should periodically retry the vendor
-          specific mechanisms. The Pledge may prioritize selection order as
+          return to listening for GRASP M_FLOOD.
+          It should periodically retry the vendor specific mechanisms.
+          The Pledge MAY prioritize selection order as 
           appropriate for the anticipated environment.</t>
         </section>
 
         <section anchor="identity" title="Identity">
-          <t>The Pledge identifies itself during the communication protocol
-          handshake. If the client identity is rejected the Pledge repeats the
-          Discovery process using the next proxy or discovery method
-          available.</t>
-
+          <t>
+          The Pledge identifies itself during the communication protocol
+          handshake. If the client identity is rejected (that is, the TLS
+          handshake does not complete) the Pledge repeats the
+          Identity process using the next proxy or discovery method
+          available.
+          </t>
+          
           <t>The bootstrapping protocol server is not initially authenticated.
           Thus the connection is provisional and all data received is
           untrusted until sufficiently validated even though it is over a TLS
@@ -861,6 +865,16 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
 
           <t>All security associations established are between the new device
           and the Bootstrapping server regardless of proxy operations.</t>
+          
+          <t>
+            The Pledge MAY attempt multiple mechanisms concurrently, but
+            if it does so, it MUST wait in the provisional state until all
+            mechanisms have either succeeded or failed, and then MUST proceed
+            with the highest priority mechanism which has succeed.
+            To proceed beyond this point, specifically, to provide a nonce,
+            could result in the MASA gratuitously auditing a connection.
+          </t>
+
         </section>
 
         <section title="Request Join">
@@ -869,21 +883,21 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
           and informs the Bootstrapping server which imprint methods the
           Pledge will accept.</t>
 
-          <t>As indicated in EST [RFC7030] the bootstrapping server MAY
-          redirect the client to an alternate server. This is most useful in
-          the case where the Pledge has resorted to a well known vendor URI
-          and is communicating with the vendor's Registrar directly. In this
-          case the Pledge has authenticated the Registrar using the local
-          Implicit Trust Anchor database and can therefore treat the redirect
-          URI as a trusted URI which can also be validated using the Implicit
-          Trust Anchor database. Since client authentication occurs during the
-          TLS handshake the bootstrapping server has sufficient information to
-          apply appropriate policy concerning which server to redirect to.</t>
-
           <t>The nonce ensures the Pledge can verify that responses are
           specific to this bootstrapping attempt. This minimizes the use of
           global time and provides a substantial benefit for devices without a
           valid clock.</t>
+          
+          <section title="Redirects during the Join Process">
+            <t>EST [RFC7030] describes situations where the bootstrapping
+            server MAY redirect the client to an alternate server via a 3xx
+            status code.   Such redirects MAY be accepted if the pledge
+            has used the methods described in <xref target="mdnsmethods" />,
+            in combination with an implicit trust anchor.  Redirects during the
+            provisional period are otherwise unstrusted, and MUST cause a
+            failure.
+            </t>
+          </section>
         </section>
 
         <section anchor="AcceptDomain" title="Imprint">
@@ -2463,8 +2477,9 @@ Data        +----------------------nonce---->   (discard     |
       </t>
 
       <t>
-        If no local bootstrapks service is located using the
-        DNS-based Service Discovery methods the Pledge MAY contact a well
+        If no local bootstrapks service is located using the GRASP
+        mechanisms, or the above mentioned DNS-based Service Discovery
+        methods the Pledge MAY contact a well 
         known vendor provided bootstrapping server by performing a DNS
         lookup using a well known URI such as
         "bootstrapks.vendor-example.com". The details of the URI are
