@@ -815,43 +815,19 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
               is encouraged, but see <xref target="privacyconsiderations" />.
               IPv4 methods are described in <xref target="IPv4operations" /></t>
 
-              <t>MUST: Performs DNS-based Service Discovery <xref
-              target="RFC6763"></xref> over Multicast DNS <xref
-              target="RFC6762"></xref> searching for the service
-              "_bootstrapks._tcp.local.". To prevent unaccceptable levels of
-              network traffic the congestion avoidance mechanisms specified in
-              <xref target="RFC6762"></xref> section 7 MUST be followed. The
-              Pledge SHOULD listen for an unsolicited broadcast response as
-              described in <xref target="RFC6762"></xref>. This allows devices
-              to avoid announcing their presence via mDNS broadcasts and
-              instead silently join a network by watching for periodic
-              unsolicited broadcast responses.</t>
+              <t>MUST: Listen for GRASP M_FLOOD
+              (<xref target="I-D.ietf-anima-grasp" />)
+              announcements of the objective: "ACP+Proxy".
+              See section <xref target="brskigrasp" /> for the details of the
+              the objective.  The Pledge may listen concurrently for
+              other sources of information, see <xref target="mdnsmethods" />.
+            </t>
+            </list>
 
-              <t>MAY: Performs DNS-based Service Discovery [RFC6763] over
-              normal DNS operations. The service searched for is
-              "_bootstrapks._tcp.example.com". In this case the domain
-              "example.com" is discovered as described in <xref
-              target="RFC6763"></xref> section 11.</t>
-
-              <t>MAY: If no local bootstrapks service is located using the
-              DNS-based Service Discovery methods the Pledge contacts a well
-              known vendor provided bootstrapping server by performing a DNS
-              lookup using a well known URI such as
-              "bootstrapks.vendor-example.com". The details of the URI are
-              vendor specific. Vendors that leverage this method on the Pledge
-              are responsible for providing the bootstrapks service.</t>
-            </list>DNS-based service discovery communicates the local proxy
-          IPv4 or IPv6 address and port to the Pledge. Once a proxy is
+            Once a proxy is
           discovered the Pledge communicates with a Registrar through the
           proxy using the bootstrapping protocol defined in <xref
-          target="ProtocolDetails"></xref>. The current DNS services returned
-          during each query is maintained until bootstrapping is completed. If
-          bootstrapping fails and the Pledge returns to the Discovery state it
-          picks up where it left off and continues attempting bootstrapping.
-          For example if the first Multicast DNS _bootstrapks._tcp.local
-          response doesn't work then the second and third responses are tried.
-          If these fail the Pledge moves on to normal DNS-based Service
-          Discovery.</t>
+          target="ProtocolDetails"></xref>. </t>
 
           <t>Each discovery method attempted SHOULD exponentially back-off
           attempts (to a maximum of one hour) to avoid overloading the network
@@ -1453,6 +1429,25 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
         The usage of the domain certificates is outside scope for this
         document.</t>
       </section>
+    </section>
+
+    <section anchor="brskigrasp" title="Proxy Discovery Protocol Details">
+      <t>
+        The proxy uses the GRASP M_FLOOD mechanism to announce itself.
+        This announcement is done with the same message as the ACP
+        announcement detailed in 
+        <xref target="I-D.ietf-anima-autonomic-control-plane" />.
+        <figure>
+          <artwork><![CDATA[
+  proxy-objective = ["Proxy", [ O_IPv6_LOCATOR, ipv6-address,
+                                transport-proto, port-number ] ]
+          
+  ipv6-address       - the v6 LL of the proxy
+  transport-proto    - 6, for TCP 17 for UDP
+  port-number        - the TCP or UDP port number to find the proxy]]></artwork>
+             <postamble>Figure 5</postamble>
+        </figure>
+      </t>
     </section>
 
     <section anchor="ProtocolDetails" title="Protocol Details">
@@ -2339,6 +2334,7 @@ Data        +----------------------nonce---->   (discard     |
 
       <?rfc include="reference.RFC.4862" ?>
 
+      <?rfc include="reference.I-D.ietf-anima-autonomic-control-plane" ?>	
       <?rfc include="reference.I-D.ietf-anima-voucher" ?>
 
       <reference anchor="IDevID"
@@ -2359,8 +2355,6 @@ Data        +----------------------nonce---->   (discard     |
       <?rfc include="reference.RFC.7435" ?>
       <?rfc include="reference.RFC.7217" ?>
       &RFC7575;
-
-      <?rfc include="reference.I-D.ietf-anima-autonomic-control-plane" ?>
 
       <?rfc include="reference.I-D.ietf-ace-actors" ?>
 
@@ -2438,6 +2432,56 @@ Data        +----------------------nonce---->   (discard     |
         local discovery attempts fail.
       </t>
       </section>
+    </section>
+
+    <section anchor="mdnsmethods" title="mDNS / DNSSD proxy discovery options">
+      <t>The Pledge MAY perform DNS-based Service Discovery <xref
+      target="RFC6763"></xref> over Multicast DNS <xref
+      target="RFC6762"></xref> searching for the service
+      "_bootstrapks._tcp.local.". </t>
+      
+      <t>
+        To prevent unaccceptable levels of
+        network traffic the congestion avoidance mechanisms specified in
+        <xref target="RFC6762"></xref> section 7 MUST be followed. The
+        Pledge SHOULD listen for an unsolicited broadcast response as
+        described in <xref target="RFC6762"></xref>. This allows devices
+        to avoid announcing their presence via mDNS broadcasts and
+        instead silently join a network by watching for periodic
+        unsolicited broadcast responses.
+      </t>
+
+      <t>
+        Performs DNS-based Service Discovery [RFC6763] over
+        normal DNS operations. The service searched for is
+        "_bootstrapks._tcp.example.com". In this case the domain
+        "example.com" is discovered as described in <xref
+        target="RFC6763"></xref> section 11.
+        This method is only available if the host has received a useable
+        IPv4 address via DHCPv4 as suggested in 
+        <xref target="IPv4operations" />.
+      </t>
+
+      <t>
+        If no local bootstrapks service is located using the
+        DNS-based Service Discovery methods the Pledge MAY contact a well
+        known vendor provided bootstrapping server by performing a DNS
+        lookup using a well known URI such as
+        "bootstrapks.vendor-example.com". The details of the URI are
+        vendor specific. Vendors that leverage this method on the Pledge
+        are responsible for providing the bootstrapks service.
+      </t>
+      
+      <t>
+        The current DNS services returned
+          during each query is maintained until bootstrapping is completed. If
+          bootstrapping fails and the Pledge returns to the Discovery state it
+          picks up where it left off and continues attempting bootstrapping.
+          For example if the first Multicast DNS _bootstrapks._tcp.local
+          response doesn't work then the second and third responses are tried.
+          If these fail the Pledge moves on to normal DNS-based Service
+          Discovery.
+      </t>
     </section>
 
   </back>
