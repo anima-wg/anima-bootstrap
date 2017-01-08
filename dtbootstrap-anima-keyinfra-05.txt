@@ -99,10 +99,10 @@ Table of Contents
        3.3.1.  Pledge Authentication . . . . . . . . . . . . . . . .  24
        3.3.2.  Pledge Authorization  . . . . . . . . . . . . . . . .  25
        3.3.3.  Claiming the New Entity . . . . . . . . . . . . . . .  26
-       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  26
+       3.3.4.  Log Verification  . . . . . . . . . . . . . . . . . .  27
      3.4.  Behavior of the MASA Service  . . . . . . . . . . . . . .  27
        3.4.1.  Issue Audit Voucher and Log the event . . . . . . . .  27
-       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  27
+       3.4.2.  Retrieve Audit Entries from Log . . . . . . . . . . .  28
      3.5.  Leveraging the new key infrastructure / next steps  . . .  28
        3.5.1.  Network boundaries  . . . . . . . . . . . . . . . . .  28
      3.6.  Interactions with Network Access Control  . . . . . . . .  28
@@ -114,7 +114,7 @@ Pritikin, et al.          Expires July 11, 2017                 [Page 2]
 Internet-Draft                    BRSKI                     January 2017
 
 
-   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  28
+   4.  Domain Operator Activities  . . . . . . . . . . . . . . . . .  29
      4.1.  Instantiating the Domain Certification Authority  . . . .  29
      4.2.  Instantiating the Registrar . . . . . . . . . . . . . . .  29
      4.3.  Accepting New Entities  . . . . . . . . . . . . . . . . .  29
@@ -1015,15 +1015,16 @@ Internet-Draft                    BRSKI                     January 2017
    there are expectations of more timely responses, see Section 6.1.
 
    Once all discovered services are attempted the device SHOULD return
-   to Multicast DNS.  It should periodically retry the vendor specific
-   mechanisms.  The Pledge may prioritize selection order as appropriate
-   for the anticipated environment.
+   to listening for GRASP M_FLOOD.  It should periodically retry the
+   vendor specific mechanisms.  The Pledge MAY prioritize selection
+   order as appropriate for the anticipated environment.
 
 3.1.2.  Identity
 
    The Pledge identifies itself during the communication protocol
-   handshake.  If the client identity is rejected the Pledge repeats the
-   Discovery process using the next proxy or discovery method available.
+   handshake.  If the client identity is rejected (that is, the TLS
+   handshake does not complete) the Pledge repeats the Identity process
+   using the next proxy or discovery method available.
 
    The bootstrapping protocol server is not initially authenticated.
    Thus the connection is provisional and all data received is untrusted
@@ -1036,23 +1037,21 @@ Internet-Draft                    BRSKI                     January 2017
    All security associations established are between the new device and
    the Bootstrapping server regardless of proxy operations.
 
+3.1.2.1.  Concurrent attempts to join
+
+   The Pledge MAY attempt multiple mechanisms concurrently, but if it
+   does so, it MUST wait in the provisional state until all mechanisms
+   have either succeeded or failed, and then MUST proceed with the
+   highest priority mechanism which has succeed.  To proceed beyond this
+   point, specifically, to provide a nonce, could result in the MASA
+   gratuitously auditing a connection.
+
 3.1.3.  Request Join
 
    The Pledge POSTs a request to join the domain to the Bootstrapping
    server.  This request contains a Pledge generated nonce and informs
    the Bootstrapping server which imprint methods the Pledge will
    accept.
-
-   As indicated in EST [RFC7030] the bootstrapping server MAY redirect
-   the client to an alternate server.  This is most useful in the case
-   where the Pledge has resorted to a well known vendor URI and is
-   communicating with the vendor's Registrar directly.  In this case the
-   Pledge has authenticated the Registrar using the local Implicit Trust
-   Anchor database and can therefore treat the redirect URI as a trusted
-   URI which can also be validated using the Implicit Trust Anchor
-   database.  Since client authentication occurs during the TLS
-   handshake the bootstrapping server has sufficient information to
-   apply appropriate policy concerning which server to redirect to.
 
    The nonce ensures the Pledge can verify that responses are specific
    to this bootstrapping attempt.  This minimizes the use of global time
@@ -1061,10 +1060,20 @@ Internet-Draft                    BRSKI                     January 2017
 
 
 
+
 Pritikin, et al.          Expires July 11, 2017                [Page 19]
 
 Internet-Draft                    BRSKI                     January 2017
 
+
+3.1.3.1.  Redirects during the Join Process
+
+   EST [RFC7030] describes situations where the bootstrapping server MAY
+   redirect the client to an alternate server via a 3xx status code.
+   Such redirects MAY be accepted if the pledge has used the methods
+   described in Appendix B, in combination with an implicit trust
+   anchor.  Redirects during the provisional period are otherwise
+   unstrusted, and MUST cause a failure.
 
 3.1.4.  Imprint
 
@@ -1105,15 +1114,6 @@ Internet-Draft                    BRSKI                     January 2017
 
    o  When accepting an enrollment certificate the validity period
       within the new certificate is assumed to be valid by the Pledge.
-      The Pledge is now willing to use this credential for client
-      authentication.
-
-   Once in this state the Pledge has a valid trust anchor with the local
-   domain and has a locally issued credential.  These MAY be used to
-   secure distribution of more accurate time information although
-   specification of such a protocol is out-of-scope of this document.
-
-
 
 
 
@@ -1121,6 +1121,14 @@ Pritikin, et al.          Expires July 11, 2017                [Page 20]
 
 Internet-Draft                    BRSKI                     January 2017
 
+
+      The Pledge is now willing to use this credential for client
+      authentication.
+
+   Once in this state the Pledge has a valid trust anchor with the local
+   domain and has a locally issued credential.  These MAY be used to
+   secure distribution of more accurate time information although
+   specification of such a protocol is out-of-scope of this document.
 
    The nonce included in join attempts provides an alternate mechanism
    for the Pledge to ensure Audit Voucher responses are associated with
@@ -1161,14 +1169,6 @@ Internet-Draft                    BRSKI                     January 2017
    out of scope but is expected to occur after bootstrapping enrollment
    is complete.  This ensures that all communications with management
    systems which can divulge local security information (e.g. network
-   topology or raw key material) is secured using the local credentials
-   issued during enrollment.
-
-   The Pledge uses bootstrapping to join only one domain.  Management by
-   multiple domains is out-of-scope of bootstrapping.  After the device
-   has successfully joined a domain and is being managed it is plausible
-   that the domain can insert credentials for other domains depending on
-   the device capabilities.
 
 
 
@@ -1177,6 +1177,15 @@ Pritikin, et al.          Expires July 11, 2017                [Page 21]
 
 Internet-Draft                    BRSKI                     January 2017
 
+
+   topology or raw key material) is secured using the local credentials
+   issued during enrollment.
+
+   The Pledge uses bootstrapping to join only one domain.  Management by
+   multiple domains is out-of-scope of bootstrapping.  After the device
+   has successfully joined a domain and is being managed it is plausible
+   that the domain can insert credentials for other domains depending on
+   the device capabilities.
 
    See Section 3.5.
 
@@ -1217,6 +1226,14 @@ Internet-Draft                    BRSKI                     January 2017
    proxy does not terminate the CoAP DTLS connection.  [[EDNOTE: The
    choice of CoAP as the mandatory to implement protocol rather than
    HTTP maximizes code reuse on the smallest of devices.  Unfortunately
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 22]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
    this means this document will have to include the EST over CoAP
    details as additional sections.  The alternative is to make 'HTTPS
    proxy' method the mandatory to implement and provide a less friendly
@@ -1226,13 +1243,6 @@ Internet-Draft                    BRSKI                     January 2017
    The IPIP encapsulation allows the proxy to forward traffic which is
    otherwise not to be forwarded, as the traffic between New Node and
    Proxy use IPv6 Link Local addresses.
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 22]
-
-Internet-Draft                    BRSKI                     January 2017
-
 
    If the Proxy device has more than one interface on which it offers
    the proxy function, then it must select a unique (ACP) IP address per
@@ -1272,16 +1282,6 @@ Internet-Draft                    BRSKI                     January 2017
    A Registrar is typically configured manually.  If the Registrar joins
    an Autonomic Control Plane ([I-D.ietf-anima-autonomic-control-plane])
    it MUST use Autonomic Control Plane secured GRASP
-   ([I-D.ietf-anima-grasp]) to broadcast the Registrar's address and
-   port to potential Proxies.
-
-   Registrar behavior is as follows:
-
-
-
-
-
-
 
 
 
@@ -1289,6 +1289,11 @@ Pritikin, et al.          Expires July 11, 2017                [Page 23]
 
 Internet-Draft                    BRSKI                     January 2017
 
+
+   ([I-D.ietf-anima-grasp]) to broadcast the Registrar's address and
+   port to potential Proxies.
+
+   Registrar behavior is as follows:
 
    Contacted by Pledge
            +
@@ -1332,12 +1337,7 @@ Internet-Draft                    BRSKI                     January 2017
    o  or the use of a secret that is transmitted out of band between the
       Pledge and a Registrar (this use case is not autonomic).
 
-   In order to validate the IDevID X.509 credential a Registrar
-   maintains a database of vendor trust anchors (e.g. vendor root
-   certificates or keyIdentifiers for vendor root public keys).  For
-   user interface purposes this database can be mapped to colloquial
-   vendor names.  Registrars can be shipped with the trust anchors of a
-   significant number of third-party vendors within the target market.
+
 
 
 
@@ -1345,6 +1345,13 @@ Pritikin, et al.          Expires July 11, 2017                [Page 24]
 
 Internet-Draft                    BRSKI                     January 2017
 
+
+   In order to validate the IDevID X.509 credential a Registrar
+   maintains a database of vendor trust anchors (e.g. vendor root
+   certificates or keyIdentifiers for vendor root public keys).  For
+   user interface purposes this database can be mapped to colloquial
+   vendor names.  Registrars can be shipped with the trust anchors of a
+   significant number of third-party vendors within the target market.
 
 3.3.2.  Pledge Authorization
 
@@ -1387,13 +1394,6 @@ Internet-Draft                    BRSKI                     January 2017
    domain certificate through a certificate enrollment process.  The
    result is a common trust anchor and device certificates for all
    autonomic devices in a domain (these certificates can be used for
-   other methods, for example boundary detection, auto-securing
-   protocols, etc.).  The authorization performed during this phase is
-   used for EST enrollment requests.
-
-
-
-
 
 
 
@@ -1401,6 +1401,10 @@ Pritikin, et al.          Expires July 11, 2017                [Page 25]
 
 Internet-Draft                    BRSKI                     January 2017
 
+
+   other methods, for example boundary detection, auto-securing
+   protocols, etc.).  The authorization performed during this phase is
+   used for EST enrollment requests.
 
 3.3.3.  Claiming the New Entity
 
@@ -1442,6 +1446,18 @@ Internet-Draft                    BRSKI                     January 2017
    this are out-of-scope.  A MASA ignores or reports failures when an
    attempt is made to claim a device that has a an Ownership Voucher.
 
+
+
+
+
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 26]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
 3.3.4.  Log Verification
 
    A Registrar requests the log information for the Pledge from the MASA
@@ -1450,13 +1466,6 @@ Internet-Draft                    BRSKI                     January 2017
 
    o  Any nonceless entries in the log are associated with domainIDs
       recognized by the registrar.
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 26]
-
-Internet-Draft                    BRSKI                     January 2017
-
 
    o  Any nonce'd entries are older than when the domain is known to
       have physical possession of the Pledge or that the domainIDs are
@@ -1497,6 +1506,14 @@ Internet-Draft                    BRSKI                     January 2017
    work to improve the logging mechanism could include additional
    privacy protections.
 
+
+
+
+Pritikin, et al.          Expires July 11, 2017                [Page 27]
+
+Internet-Draft                    BRSKI                     January 2017
+
+
    If a nonce is not provided then the MASA service MUST authenticate
    the Registrar as a valid customer.  This prevents denial of service
    attacks.
@@ -1506,14 +1523,6 @@ Internet-Draft                    BRSKI                     January 2017
    When determining if a Pledge should be accepted into a domain the
    Registrar retrieves a copy of the audit log from the MASA service.
    This contains a list of privacy protected domain identities that have
-
-
-
-Pritikin, et al.          Expires July 11, 2017                [Page 27]
-
-Internet-Draft                    BRSKI                     January 2017
-
-
    previously claimed the device.  Included in the list is an indication
    of the time the entry was made and if the nonce was included.
 
@@ -1553,15 +1562,6 @@ Internet-Draft                    BRSKI                     January 2017
    This achieves the goal of a bootstrap architecture that can integrate
    with NAC but does not require NAC within the network where it wasn't
    previously required.  Future optimizations can be achieved by
-   integrating the bootstrapping protocol directly into an initial EAP
-   exchange.
-
-4.  Domain Operator Activities
-
-   This section describes how an operator interacts with a domain that
-   supports the bootstrapping as described in this document.
-
-
 
 
 
@@ -1569,6 +1569,14 @@ Pritikin, et al.          Expires July 11, 2017                [Page 28]
 
 Internet-Draft                    BRSKI                     January 2017
 
+
+   integrating the bootstrapping protocol directly into an initial EAP
+   exchange.
+
+4.  Domain Operator Activities
+
+   This section describes how an operator interacts with a domain that
+   supports the bootstrapping as described in this document.
 
 4.1.  Instantiating the Domain Certification Authority
 
@@ -1611,14 +1619,6 @@ Internet-Draft                    BRSKI                     January 2017
        of pairing.  See also [I-D.behringer-homenet-trust-bootstrap] for
        how the approach could work in a homenet.
 
-   3.  Whitelist acceptance: In larger networks, neither of the previous
-       approaches is acceptable.  Default acceptance is not secure, and
-       a manual per device methods do not scale.  Here, the registrar is
-       provided a priori with a list of identifiers of devices that
-       belong to the network.  This list can be extracted from an
-       inventory database, or sales records.  If a device is detected
-
-
 
 
 Pritikin, et al.          Expires July 11, 2017                [Page 29]
@@ -1626,6 +1626,12 @@ Pritikin, et al.          Expires July 11, 2017                [Page 29]
 Internet-Draft                    BRSKI                     January 2017
 
 
+   3.  Whitelist acceptance: In larger networks, neither of the previous
+       approaches is acceptable.  Default acceptance is not secure, and
+       a manual per device methods do not scale.  Here, the registrar is
+       provided a priori with a list of identifiers of devices that
+       belong to the network.  This list can be extracted from an
+       inventory database, or sales records.  If a device is detected
        that is not on the list of known devices, it can still be
        manually accepted using the per device acceptance methods.
 
@@ -1667,12 +1673,6 @@ Internet-Draft                    BRSKI                     January 2017
    to securely establish a connection between devices and central
    control functions.  Also autonomic transactions can use the domain
    certificates to authenticate and/or encrypt direct interactions
-   between devices.  The usage of the domain certificates is outside
-   scope for this document.
-
-
-
-
 
 
 
@@ -1681,6 +1681,9 @@ Pritikin, et al.          Expires July 11, 2017                [Page 30]
 
 Internet-Draft                    BRSKI                     January 2017
 
+
+   between devices.  The usage of the domain certificates is outside
+   scope for this document.
 
 5.  Proxy Discovery Protocol Details
 
@@ -1727,9 +1730,6 @@ Internet-Draft                    BRSKI                     January 2017
 
    o  The Pledge provisionally accept the EST server certificate during
       the TLS handshake as detailed in Section 6.3.1.
-
-
-
 
 
 
@@ -2871,12 +2871,13 @@ Internet-Draft                    BRSKI                     January 2017
    This method is only available if the host has received a useable IPv4
    address via DHCPv4 as suggested in Appendix A.
 
-   If no local bootstrapks service is located using the DNS-based
-   Service Discovery methods the Pledge MAY contact a well known vendor
-   provided bootstrapping server by performing a DNS lookup using a well
-   known URI such as "bootstrapks.vendor-example.com".  The details of
-   the URI are vendor specific.  Vendors that leverage this method on
-   the Pledge are responsible for providing the bootstrapks service.
+   If no local bootstrapks service is located using the GRASP
+   mechanisms, or the above mentioned DNS-based Service Discovery
+   methods the Pledge MAY contact a well known vendor provided
+   bootstrapping server by performing a DNS lookup using a well known
+   URI such as "bootstrapks.vendor-example.com".  The details of the URI
+   are vendor specific.  Vendors that leverage this method on the Pledge
+   are responsible for providing the bootstrapks service.
 
    The current DNS services returned during each query is maintained
    until bootstrapping is completed.  If bootstrapping fails and the
@@ -2905,7 +2906,6 @@ Authors' Addresses
    Cisco
 
    Email: mbehring@cisco.com
-
 
 
 
