@@ -984,6 +984,17 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
           this point the client continues with EST enrollment operations
           including "CA Certificates Request", "CSR Attributes" and "Client
           Certificate Request" or "Server-Side Key Generation".</t>
+
+          <t>
+            For the purposes of creating the ANIMA Autonomic Control Plane,
+            the contents of the new certificate MUST be carefully specified.
+            <xref target="I-D.ietf-anima-autonomic-control-plane" /> section
+            5.1.1 contains details.  The Registrar MUST provide the
+            the correct ACP information to populate the subjectAltName /
+            rfc822Name field in the "CSR Attributes" step, which is therefore
+            mandatory.
+          </t>
+           
         </section>
 
         <section title="Being Managed">
@@ -1010,8 +1021,12 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
         <t>The role of the Proxy is to facilitate communications. The Proxy
         forwards packets between the Pledge and a Registrar that has been
         configured on the Proxy. The Proxy does not terminate the TLS
-        handshake. A Proxy is always assumed even if directly integrated into
-        a Registrar.</t>
+        handshake. A Proxy is always assumed even if it is directly
+        integrated into a Registrar.
+          (In a completely autonomic network, the Registrar MUST provide
+          proxy functionality so that it can be discovered, and the network
+          can grow concentrically around the Registrar)
+        </t>
 
         <t>As a result of the Proxy Discovery process in section <xref
         target="ProxyDiscovery"></xref>, the port number exposed by the proxy
@@ -1053,10 +1068,15 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
           is otherwise not to be forwarded, as the traffic between New Node
           and Proxy use IPv6 Link Local addresses.</t>
 
-          <t>If the Proxy device has more than one interface on which it
-          offers the proxy function, then it must select a unique (ACP) IP
-          address per interface in order so that the proxy can stateless
-          return the (link-local) reply packets to the correct link.</t>
+          <t>
+            If the Proxy device has more than one interface on which it
+            offers the proxy function, then it must select a unique (ACP) IP
+            address per interface in order so that the proxy can stateless
+            return the (link-local) reply packets to the correct link.
+            The IPIP tunnel between the Proxy and the Registrar essentially
+            extend the connectivity of the Registar such that it appears to
+            be directly connected on the link.
+          </t>
         </section>
 
         <section title="HTTPS proxy connection to Registrar">
@@ -1090,13 +1110,14 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
         delivers them to the Pledge as well as facilitating enrollment with
         the domain PKI.</t>
 
-        <t>A Registrar is typically configured manually. If the Registrar
-        joins an Autonomic Control Plane (<xref
-        target="I-D.ietf-anima-autonomic-control-plane"></xref>) it MUST use
-        Autonomic Control Plane secured GRASP (<xref
-        target="I-D.ietf-anima-grasp"></xref>) to broadcast the Registrar's
-        address and port to potential Proxies.</t>
-
+        <t>
+          A Registrar is typically configured manually.
+          When the Registrar joins an Autonomic Control Plane 
+          (<xref target="I-D.ietf-anima-autonomic-control-plane"></xref>)
+          it MUST respond to GRASP (<xref target="I-D.ietf-anima-grasp"></xref>)
+          M_DISCOVERY message. See <xref target="discovery" />
+        </t>
+          
         <t>Registrar behavior is as follows:</t>
 
         <t></t>
@@ -1466,6 +1487,35 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
       </t>
     </section>
 
+    <section anchor="discovery" title="Registrar Discovery Protocol Details">
+      <t>
+        The registrar responds to discovery messages from the proxy
+        (or GRASP caches between them) as follows:
+        <figure>
+          <artwork><![CDATA[
+objective         = ["AN_registrar", F_DISC, 255 ]
+discovery-message = [M_DISCOVERY, session-id, initiator, objective]]]></artwork>
+
+          <postamble>Figure 6: Registrar Discovery</postamble>
+        </figure>
+      </t>
+
+      <t>
+        The response from the registrar (or cache) will be a M_RESPONSE with the
+        following parameters:<figure>
+        <artwork><![CDATA[
+response-message = [M_RESPONSE, session-id, initiator, ttl,
+                   (+locator-option // divert-option), ?objective)]
+initiator = ACP address of Registrar
+locator1  = [O_IPv6_LOCATOR, fe80::1234, 6,  443]
+locator2  = [O_IPv6_LOCATOR, fe80::1234, 17, 5683]
+locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
+
+        <postamble>Figure 7: Registrar Response</postamble>
+      </figure>        
+      </t>
+    </section>
+
     <section anchor="ProtocolDetails" title="Protocol Details">
       <t>A bootstrapping protocol could be implemented as an independent
       protocol from EST, but for simplicity and to reduce the number of TLS
@@ -1543,7 +1593,7 @@ Data        +--------------------nonce------>                |
             |               .               |                |
             |               .               |                |]]></artwork>
 
-        <postamble>Figure 5</postamble>
+        <postamble>Figure 8</postamble>
       </figure>
 
       <t>In some use cases the Registrar may need to contact the Vendor in
@@ -1581,7 +1631,7 @@ Data        +----------------------nonce---->   (discard     |
             |               .               |                |
             |               .               |                |]]></artwork>
 
-        <postamble>Figure 6</postamble>
+        <postamble>Figure 9</postamble>
       </figure>
 
       <t></t>
@@ -2074,7 +2124,7 @@ Data        +----------------------nonce---->   (discard     |
 +--------+         +---------+    +------------+     +------------+
               ]]></artwork>
 
-          <postamble>Figure 7</postamble>
+          <postamble>Figure 10</postamble>
         </figure>
 
         <t><list style="hanging">
