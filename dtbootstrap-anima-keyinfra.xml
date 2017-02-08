@@ -1647,7 +1647,7 @@ Data        +----------------------nonce---->   (discard     |
         the Audit Voucher response is associated with this bootstrapping
         attempt and is not a replay.</t>
 
-        <t>Request media type: application/auditnonce</t>
+        <t>Request media type: application/voucherrequest</t>
 
         <t>Request format: a JSON file with the following:</t>
 
@@ -1712,6 +1712,8 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>This is done with an HTTP POST using the operation path value of
         "/requestvoucher".</t>
+        
+        <t>Request media type: application/voucherrequest+cms</t>
 
         <t>The request format is a JSON object optionally containing the nonce
         value (as obtained from the bootstrap request) and the X.509 IDevID
@@ -1774,12 +1776,13 @@ Data        +----------------------nonce---->   (discard     |
         policy.</t>
 
         <t>If the the join operation is successful, the server response MUST
-        contain an HTTP 200 response code with a content-type of
-        "application/authorizationvoucher". The server MUST answer with a
+        contain an HTTP 200 response code. The server MUST answer with a
         suitable 4xx or 5xx HTTP [RFC2616] error code when a problem occurs.
         The response data from the MASA server MUST be a plaintext
         human-readable error message containing explanatory information
         describing why the request was rejected.</t>
+        
+        <t>Response media type: application/voucher+cms</t>
 
         <t>The Audit Voucher consists of the nonce, if supplied, the serial
         number information identifying the device and the domain CA
@@ -1795,7 +1798,7 @@ Data        +----------------------nonce---->   (discard     |
 }]]></artwork>
         </figure>
 
-        <t>The Audit Voucher response is encapsulated in a <xref
+        <t>The Voucher response is encapsulated in a <xref
         target="RFC5652"></xref> Signed-data that is signed by the MASA
         server. The Pledge verifies this signed message using the manufacturer
         installed trust anchor associated with the X.509 IDevID. [[EDNOTE: As
@@ -1822,11 +1825,10 @@ Data        +----------------------nonce---->   (discard     |
         an Audit Voucher response that does not contain a 'domainCAcert' field
         at all.</t>
 
-        <t>To minimize the size of the Audit Voucher response message the
+        <t>To minimize the size of the Voucher response message the
         domainCAcert is not a complete distribution of the EST section 4.1.3
-        CA Certificate Response.</t>
-
-        <t>The Pledge installs the domainCAcert trust anchor. As indicated in
+        CA Certificate Response. The Pledge installs the domainCAcert 
+        trust anchor. As indicated in
         <xref target="identity"></xref> the newly installed trust anchor is
         used as an EST RFC7030 Explicit Trust Anchor. The Pledge MUST use the
         domainCAcert trust anchor to immediately validate the currently
@@ -1877,6 +1879,8 @@ Data        +----------------------nonce---->   (discard     |
 
         <t>To indicate Pledge status regarding the Audit Voucher the client
         SHOULD post a status message.</t>
+        
+        <t>The posted data media type: application/json</t>
 
         <t>The client HTTP POSTs the following to the server at the EST well
         known URI /voucher_status. The Status field indicates if the Voucher
@@ -1908,11 +1912,18 @@ Data        +----------------------nonce---->   (discard     |
         <t>This is done with an HTTP GET using the operation path value of
         "/requestauditlog".</t>
 
-        <t>The client HTTP POSTs the same Voucher Request as for requesting an
-        audit token but now posts it to the /requestauditlog URI instead. The
+        <t>The client MUST HTTP POSTs the same Voucher Request as for requesting a
+        Voucher. It is posted to the /requestauditlog URI instead. The
         IDevIDAuthorityKeyIdentifier and DevIDSerialNumber informs the MASA
         server which log is requested so the appropriate log can be prepared
-        for the response.</t>
+        for the response. Using the same media type and message minimizes
+        cryptographic and message operations although it results in additional
+        network traffic. The relying MASA server implementation MAY leverage
+        internal state to associate this request with the original, and by now 
+        already validated, voucher request so as to avoid an extra crypto
+        validation.</t>
+        
+        <t>Request media type: application/voucherrequest+cms</t>
       </section>
 
       <section title="MASA authorization log Response">
@@ -2050,7 +2061,11 @@ Data        +----------------------nonce---->   (discard     |
           known to the client. If EST /serverkeygen was used and failed then
           the field is ommited from the status telemetry.</t>
           
-          <t>In the case of a SUCCESS the Reason string is ommitted. The SubjectKeyIdentifier is included so that the server can record the successful certificate distribution.</t> 
+          <t>In the case of a SUCCESS the Reason string is ommitted. The 
+          SubjectKeyIdentifier is included so that the server can record 
+          the successful certificate distribution.</t> 
+          
+          <t>Status media type: application/json</t>
 
           <t>The client HTTP POSTs the following to the server at the new EST
           well known URI /enrollstatus.</t>
