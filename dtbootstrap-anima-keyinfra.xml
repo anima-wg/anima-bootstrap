@@ -794,7 +794,7 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
             <t>MUST: Obtains a local address using IPv6
               methods as described in <xref target="RFC4862"></xref> IPv6
               Stateless Address AutoConfiguration. <xref target="RFC7217" />
-              is encouraged, but see <xref target="privacyconsiderations" />.
+              is encouraged.
               IPv4 methods are described in <xref target="IPv4operations" /></t>
 
               <t>MUST: Listen for GRASP M_FLOOD
@@ -1507,22 +1507,27 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       tree as the existing EST URIs as described in EST <xref target="RFC7030"/> section
       3.2.2.</t>
 
+        <t>Establishment of the TLS connection for bootstrapping is as 
+        specified for EST <xref target="RFC7030"/>. In particular server 
+        identity and client identity are as described in EST <xref 
+        target="RFC7030"/> section 3.3. In EST <xref target="RFC7030"/> 
+        provisional server authentication for bootstrapping is described in 
+        section 4.1.1 wherein EST clients can "engage a human user to authorize 
+        the CA certificate using out-of-band data such as a CA certificate" or 
+        wherein a human user configures the URI of the EST server for Implicit 
+        TA based authentication. This documented establishes automated
+        methods of authorizing the CA certificate using in-band vouchers.</t>
+        
+        <t>If the Pledge uses a well known URI for contacting a well known 
+        Registrar the EST Implicit Trust Anchor database is used to 
+        authenticate the well known URI. In this case the connection is not 
+        provisional and RFC6125 methods can be used to authenticate the 
+        Registrar</t> 
+
       <t>The Pledge establishes a TLS connection with the Registrar through
       the circuit proxy (see <xref target="proxybehaviour"></xref>) but the
       TLS connection is with the Registar; so for this section the "Pledge" is
       the TLS client and the "Registrar" is the TLS server.</t>
-
-      <t>Establishment of the TLS connection for bootstrapping is as specified
-      for EST <xref target="RFC7030"/>. In particular server identity and client identity are
-      as described in EST <xref target="RFC7030"/> section 3.3. In EST <xref target="RFC7030"/> provisional
-      server authentication for bootstrapping is described in section 4.1.1
-      wherein EST clients can "engage a human user to authorize the CA
-      certificate using out-of-band data such as a CA certificate" or wherein
-      a human user configures the URI of the EST server for Implicit TA based
-      authentication. As described in this document, <xref
-      target="CompletingAuthenticationBootstrapping"></xref>, a new method of
-      bootstrapping now provides a completely automating method of
-      bootstrapping PKI.</t>
 
       <t>The extensions for the Pledge client are as follows:</t>
 
@@ -1631,6 +1636,32 @@ Data        +----------------------nonce---->   (discard     |
           authorization checks before accepting the Pledge device.</t>
         </list></t>
 
+        <t>The provisional TLS connection introduces security 
+            risks that are addressed as follows:</t>
+        
+        <t>If the Registrar provides a redirect response the Pledge MUST follow 
+        the redirect but the connection remains provisional. The Pledge MUST 
+        only follow a single redirection.</t>
+            
+         <t>The Registar MAY respond with an HTTP 202 ("the request has been 
+        accepted for processing, but the processing has not been completed") as 
+        described in EST <xref target="RFC7030"/> section 4.2.3 wherein the 
+        client "MUST wait at least the specified 'retry-after' time before 
+        repeating the same request". The Pledge is RECOMMENDED to provide local 
+        feed (blinked LED etc) during this wait cycle if mechanisms for this 
+        are available. To prevent an attacker Registrar from significantly 
+        delaying bootstrapping the Pledge MUST limit the 'retry-after' time to 
+        60 seconds. To avoid waiting on a single erroneous Registrar the Pledge 
+        MUST drop the connection after 5 seconds and proceed to other 
+        discovered Registrars. Ideally the Pledge could keep track of the 
+        appropriate retry-after value for any number of outstanding Registrars 
+        but this would involve a large state table on the Pledge. Instead the 
+        Pledge MAY ignore the exact retry-after value in favor of a single hard 
+        coded value that takes effect between discovery (<xref 
+        target="ProxyDiscovery"></xref>) attempts. A Registrar that is unable 
+        to complete the transaction the first time due to timing reasons will 
+        have future chances.</t> 
+
       <section anchor="RequestAuditTokenFromRegistrar"
                title="Request Voucher from the Registrar">
         <t>When the Pledge bootstraps it makes a request for a Voucher from a
@@ -1675,29 +1706,6 @@ Data        +----------------------nonce---->   (discard     |
         5.2).</t>
 
         <t>The received Voucher is forwarded to the Pledge.</t>
-
-        <t>As indicated in EST <xref target="RFC7030"/> the bootstrapping server can redirect
-        the client to an alternate server. If the Pledge authenticated a
-        Registrar using the well known URI method then the Pledge MUST follow
-        the redirect automatically and authenticate the new Registrar against
-        the redirect URI provided. If the Pledge had not yet authenticated a
-        Registrar because it was discovered and was not a known-to-be-valid
-        URI then the new Registrar must be authenticated using one of the two
-        autonomic methods described in this document. Similarly the Registar
-        MAY respond with an HTTP 202 ("the request has been accepted for
-        processing, but the processing has not been completed") as described
-        in EST <xref target="RFC7030"/> section 4.2.3.</t>
-
-        <t>Recall that during this communication with the Registar the TLS
-        authentication is only provisional. The Pledge client MUST handle all
-        data from the Registrar with upmost care. In particular the Pledge
-        MUST only allow a single redirection and MUST only support a delay of
-        five seconds before declaring the Registrar a failure and moving on to
-        the next discovered Registrar. As detailed in <xref
-        target="ProxyDiscovery"></xref> if no suitable Registrar is found the
-        Pledge restarts the state machine and tries again. So a Registrar that
-        is unable to complete the transaction the first time will have future
-        chances.</t>
       </section>
 
       <section anchor="RequestAuditToken" title="Request Voucher from MASA">
@@ -2255,57 +2263,58 @@ Data        +----------------------nonce---->   (discard     |
           </list></t>
       </section>
     </section>
-
-    <section anchor="privacyconsiderations" title="Security Considerations">
-      <section title="Pledge Privacy Considerations">
-      <t>
-        This section discusses disclosures that a pledge may make that
-        will make it easier for a third party to track the identity of
-        the pledge.
-      </t>
-      </section>
-      <section title="Network Privacy Considerations">
-      <t>
-        This section discusses disclosures that a network may make to
-        an active attacker through the bootstrap process.
-      </t>
-      </section>
-    </section>
     
     <section title="Security Considerations">
-      <t>In order to support a wide variety of use cases, devices can be
-      claimed by a registrar without proving possession of the device in
-      question. This would result in a nonceless, and thus always valid,
-      claim. Or would result in an invalid nonce being associated with a
-      claim. The MASA service is required to authenticate such Registrars but
-      no programmatic method is provided to ensure good behavior by the MASA
-      service. Nonceless entries into the audit log therefore permanently
-      reduce the value of a device because future Registrars, during future
-      bootstrap attempts, would now have to be configured with policy to
-      ignore previously (and potentially unknown) domains.</t>
+        <t>There are uses cases where the MASA could be unavailable or 
+        uncooperative to the Registrar. They include planned and unplanned 
+        network partitions, changes to MASA policy, or other instances where 
+        MASA policy rejects a claim. These introduce an operational risk to the 
+        Registrar owner that MASA/vendor behavior might limit the ability to 
+        re-boostrap a Pledge device. For example this might be an issue during 
+        disaster recovery. This risk can be mitigated by Registrars that request and 
+        maintain long term copies of "nonceless" Audit Vouchers. In that way 
+        they are guaranteed to be able to repeat bootstrapping for their 
+        devices.</t>
+              
+        <t>The issuance of nonceless vouchers themselves create a security 
+        concern. If the Registrar of a previous domain can intercept protocol 
+        communications then it can use a previously issued nonceless voucher to 
+        establish management control of a pledge device even after having sold 
+        it. This risk is mitigated by recording the issuance of such vouchers 
+        in the MASA audit log that is verified by the subsequent Registrar. 
+        This reduces the resale value of the equipment because future owners 
+        will detect the lowered security inherent in the existence of a 
+        nonceless voucher that would be trusted by their Pledge. This 
+        accurately reflects a balance between partition resistant recovery and 
+        security of future bootstrapping. Registrars take the Pledge's audit 
+        history into account when applying policy to new devices.</t>
+        
+        <t>The MASA server is exposed to DoS attacks wherein attackers claim 
+        an unbounded number of devices. Ensuring a Registrar is 
+        representative of a valid vendor customer, even without validating 
+        ownership of specific Pledge devices, helps to mitigate this. Inserting a cryptographic 
+        proof-of-possession step to the protocol operations is a possible 
+        area of future work. One method that would not introduce 
+        additional round-trips would be for the Registrar to share the 
+        Plege-Registrar TLS handshake with the MASA service when requesting 
+        a voucher. Doing so would allow the MASA service to verify that 
+        the Registrar's Server Certificate was signed by the Pledge's 
+        Certificate Verify message (which covers the entire handshake).</t>
 
-      <t>Future registrars are recommended to take the audit history of a
-      device into account when deciding to join such devices into their
-      network. If the MASA server were to have allowed a significantly large
-      number of claims this might become onerous to the MASA server which must
-      maintain all the extra log entries. Ensuring a Registrar is
-      representative of a valid customer domain even without validating
-      ownership helps to mitigate this.</t>
-
-      <t>It is possible for an attacker to send an authorization request to
-      the MASA service directly after the real Registrar obtains an
-      authorization log. If the attacker could also force the bootstrapping
-      protocol to reset there is a theoretical opportunity for the attacker to
-      use the Audit Voucher to take control of the Pledge but then proceed to
-      enroll with the target domain. Possible prevention mechanisms
-      include:</t>
+        <t>It is possible for an attacker to request a voucher from 
+        the MASA service directly after the real Registrar obtains an
+        audit log. If the attacker could also force the bootstrapping
+        protocol to reset there is a theoretical opportunity for the attacker to
+        use their voucher to take control of the Pledge but then proceed to
+        enroll with the target domain. Possible prevention mechanisms
+        include:</t>
 
       <t><list style="symbols">
           <t>Per device rate limits on the MASA service ensure such timing
           attacks are difficult.</t>
 
-          <t>In the advent of an unexpectedly lost bootstrapping connection
-          the Registrar repeats the request for audit log information.</t>
+          <t>The Registrar can repeat the request for audit log information 
+              at some time after bootstrapping is complete.</t>
         </list></t>
 
       <t>To facilitate logging and administrative oversight the Pledge reports
@@ -2315,49 +2324,15 @@ Data        +----------------------nonce---->   (discard     |
       benefits of an informed administrator in cases where the failure is
       indicative of a problem.</t>
 
-      <t>As indicated in EST <xref target="RFC7030"/> the connection is provisional and
-      untrusted until the server is successfully authorized. If the server
-      provides a redirect response the client MUST follow the redirect but the
-      connection remains provisional. If the client uses a well known URI for
-      contacting a well known Registrar the EST Implicit Trust Anchor database
-      is used as is described in RFC6125 to authenticate the well known URI.
-      In this case the connection is not provisional and RFC6125 methods can
-      be used for each subsequent redirection.</t>
-
       <t>To facilitate truely limited clients EST RFC7030 section 3.3.2
       requirements that the client MUST support a client authentication model
       have been reduced in <xref target="reducedsecuritymodes"></xref> to a
       statement that clients only "SHOULD" support such a model. This reflects
-      current (not great) practices but is NOT RECOMMENDED.</t>
+      current (poor) practices that are NOT RECOMMENDED.</t>
 
-      <t>The MASA service could lock a claim and refuse to issue a new voucher
-      or the MASA service could go offline (for example if a vendor went out
-      of business). This functionality provides benefits such as theft
-      resistance, but it also implies an operational risk to the Domain that
-      Vendor behavior could limit future bootstrapping of the device by the
-      Domain. This can be mitigated by Registrars that request nonce-less
-      Audit Vouchers.</t>
-
-      <section title="Security concerns with discovery process">
-        <section title="Discovery of Registrar by Proxy">
-          <t>As described in section <xref target="proxybehaviour"></xref>,
-          the RECOMMENDED mechanism is for the proxy to discover the address
-          of the registrar via GRASP <xref
-          target="I-D.ietf-anima-grasp"></xref></t>
-
-          <t>GRASP is intended to run over a secured, and private Autonomic
-          Control Plan <xref
-          target="I-D.ietf-anima-autonomic-control-plane"></xref>. This
-          discovery is between the already registered Registrar, and the
-          already registered Proxy. There are no GRASP security issues with
-          this part, as both entities will have already joined the secured
-          ACP.</t>
-        </section>
-
-        <section title="Discovery of Proxy by New Entity">
-          <t>[[EDNOTE: To be discussed]]</t>
-        </section>
-      </section>
+        <t>During the provisional period of the connection all HTTP header and 
+        content data MUST treated as untrusted data. HTTP libraries are 
+        regularly exposed to non-secured HTTP traffic.</t> 
     </section>
 
     <section title="Acknowledgements">
