@@ -2412,6 +2412,7 @@ Data        +----------------------nonce---->   (discard     |
       <?rfc include="reference.RFC.7217" ?>
       &RFC7575;
 
+      <?rfc include="reference.RFC.2473" ?>
       <?rfc include="reference.I-D.ietf-anima-grasp" ?>
 
       <?rfc include="reference.I-D.richardson-anima-state-for-joinrouter" ?>
@@ -2517,6 +2518,156 @@ Data        +----------------------nonce---->   (discard     |
           If these fail the Pledge moves on to normal DNS-based Service
           Discovery.
       </t>
+    </section>
+
+    <section anchor="IPIPmechanism" title="IPIP Join Proxy mechanism">
+      <t>
+        The Circuit Proxy mechanism suffers from requiring a state on the
+        Join Proxy for each connection that is relayed.  The Circuit Proxy
+        can be considered a kind of Algorithm Gateway [FIND-good-REF].
+      </t>
+      <t>
+        An alternative to proxying at the TCP layer is to selectively forward
+        at the IP layer.  This moves all per-connection to the Join
+        Registrar.  The IPIP tunnel statelessly forwards packets.  This
+        section provides some explanation of some of the details of the
+        Registrar discovery procotol which are not important to Circuit
+        Proxy, and some implementation advice.
+      </t>
+      <t>
+        The IPIP tunnel is described in <xref target="RFC2473" />.  Each such tunnel is
+        considered a unidirectional construct, but two tunnels may be
+        associated to form a bidirectional mechanism.
+        An IPIP tunnel is setup as follows.
+        The outer addresses are an ACP address of the Join Proxy,
+        and the ACP address of the Join Registrar.  The inner addresses seen
+        in the tunnel are the link-local addresses of the network on which
+        the join activity is occuring.
+      </t>
+      <t>
+        One way to look at this construct is to consider that the Registrar
+        is extending attaching an interface to the network on which the Join
+        Proxy is physically present.  The Registrar then interacts as if it
+        were present on that network using link-local (fe80::) addresses.
+        The Join node is unaware that the traffic is being proxied through a
+        tunnel, and does not need any special routing.
+      </t>
+      <t>
+        There are a number of considerations with this mechanism which
+        require cause some minor amounts of complexity.  Note that due to the
+        tunnels, the Registrar sees multiple connections to a fe80::/10
+        network on not just physical interfaces, but on each of the virtual
+        interfaces represending the tunnels.
+      </t>
+      <section title="Multiple Join networks on the Join Proxy side">
+        <t>
+          The Join Proxy will in the general case be a routing device with
+          multiple interfaces.  Even a device as simple as a wifi access
+          point may have wired, and multiple frequencies of wireless
+          interfaces, potentially with multiple ESSIDs.
+        </t>
+        <t>
+          Each of these interfaces on the Join Proxy may be seperate L3
+          routing domains, and therefore will have a unique set of link-local
+          addresses.  An IPIP packet being returned by the Registrar needs to
+          be forwarded to the correct interface, so the Join Proxy needs an
+          additional key to distinguish which network the packet should be
+          returned to.
+        </t>
+        <t>
+          The simplest way to get this additional key is to allocate an
+          additional ACP address; one address for each network on which join
+          traffic is occuring.  The Join Proxy SHOULD do a GRASP M_NEG_SYN
+          for each interface which they wish to relay traffic, as this allows
+          the Registrar to do any static tunnel configuration that may be
+          required.
+        </t>
+      </section>
+      <section title="Automatic configuration of tunnels on Registrar">
+        <t>
+          The Join Proxy is expected to do a GRASP negotiation with the proxy
+          for each Join Interface that it needs to relay traffic from.  This
+          is to permit Registrars to configure the appropriate virtual
+          interfaces before join traffic arrives.
+        </t>
+        <t>
+          A Registrar serving a large number of interfaces may not wish to
+          allocate resources to every interface at all times, but can instead
+          dynamically allocate interfaces.  It can do this by monitoring IPIP
+          traffic that arrives on it's ACP interface, and when packets arrive
+          from new Join Proxys, it can dynamically configure virtual interfaces.
+        </t>
+        <t>
+          A more sophisticated Registrar willing to modify the
+          behaviour of it's TCP and UDP stack could note the IPIP traffic
+          origination in the socket control block and make information
+          available to the TCP layer (for HTTPS connections), or to the
+          the application (for CoAP connections) via a proprietary extension
+          to the socket API.
+        </t>
+      </section>
+      <section title="Proxy Neighbor Discovery by Join Proxy">
+        <t>
+          The Join Proxy MUST answer neighbor discovery messages for the
+          address given by the Registrar as being it's link-local
+          address.  The Join Proxy must also advertise this address as the
+          address to which to connect to when advertising it's existence.
+        </t>
+        <t>
+          This proxy neighbor discovery means that the pledge will create TCP
+          and UDP connections to the correct Registrar address.  This matters
+          as the TCP and UDP pseudo-header checksum includes the destination
+          address, and for the proxy to remain completely stateless, it must
+          not be necessary for the checksum to be updated.
+        </t>
+      </section>
+
+      <section title="Use of connected sockets; or IP_PKTINFO for CoAP on Registrar">
+        <t>
+          TCP connections on the registrar SHOULD properly capture the
+          ifindex of the incoming connection into the socket structure.  This
+          is normal IPv6 socket API processing.  The outgoing responses will
+          go out on the same (virtual) interface by ifindex.
+        </t>
+        <t>
+          When using UDP sockets with CoAP, the application will have to pay
+          attention to the incoming ifindex on the socket.  Access to this
+          information is available using the IP_PKTINFO auxiliary extension
+          which is a standard part of the IPv6 sockets API.
+        </t>
+        <t>
+          A registrar application could, after receipt of an initial CoAP
+          message from the Pledge, create a connected UDP socket (including
+          the ifindex information).  The kernel would then take care of
+          accurate demultiplexing upon receive, and subsequent transmission
+          to the correct interface.
+        </t>
+      </section>
+
+      <section title="Use of socket extension rather than virtual interface">
+        <t>
+          Some operating systems on which a Registrar need be implemented may
+          find need for a virtual interface per Join Proxy to be
+          problematic. There are other mechanism which can make be done.
+        </t>
+        <t>
+          If the IPIP decapsulator can mark the (SYN) packet inside the kernel
+          with the address of the Join Proxy sending the traffic, then an
+          interface per Join Proxy may not be needed.  The outgoing path need
+          just pay attention to this extra information and add an appropriate
+          IPIP header on outgoing.  A CoAP over UDP mechanism may need to
+          expose this extra information to the application as the UDP sockets
+          are often not connected, and the application will need to specify
+          the outgoing path on each packet send.
+        </t>
+        <t>
+          Such an additional socket mechanism has not been standardized.
+          Terminating L2TP connections over IPsec transport mode suffers from
+          the same challenges.
+        </t>
+      </section>
+
+
     </section>
 
   </back>
