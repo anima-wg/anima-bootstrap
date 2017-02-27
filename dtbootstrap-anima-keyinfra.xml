@@ -1461,11 +1461,11 @@ MasterVoucher|    |       |   wildcard     | wildcard | X   |       |
     <section anchor="discovery" title="Registrar Discovery Protocol Details">
       <t>
         The registrar responds to discovery messages from the proxy
-        (or GRASP caches between them) as follows:
+        (or GRASP caches between them) as follows: (XXX changed from M_DISCOVERY)
         <figure>
           <artwork><![CDATA[
 objective         = ["AN_registrar", F_DISC, 255 ]
-discovery-message = [M_DISCOVERY, session-id, initiator, objective]]]></artwork>
+discovery-message = [M_NEG_SYN, session-id, initiator, objective]]]></artwork>
 
           <postamble>Figure 6: Registrar Discovery</postamble>
         </figure>
@@ -1478,12 +1478,39 @@ discovery-message = [M_DISCOVERY, session-id, initiator, objective]]]></artwork>
 response-message = [M_RESPONSE, session-id, initiator, ttl,
                    (+locator-option // divert-option), ?objective)]
 initiator = ACP address of Registrar
-locator1  = [O_IPv6_LOCATOR, fe80::1234, 6,  443]
-locator2  = [O_IPv6_LOCATOR, fe80::1234, 17, 5683]
+locator1  = [O_IPv6_LOCATOR, fd45:1345::6789, 6,  443]
+locator2  = [O_IPv6_LOCATOR, fd45:1345::6789, 17, 5683]
 locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <postamble>Figure 7: Registrar Response</postamble>
-      </figure>        
+      </figure>
+      </t>
+      <t>
+        The set of locators is to be interpreted as follows.
+        A protocol of 6 indicates that TCP proxying on the
+        indicated port is desired.  A protocol of 17 indicates that UDP
+        proxying on the indicated port is desired.  In each case, the traffic
+        SHOULD be proxied to the same port at the ULA address provided.
+      </t>
+      <t>
+        A protocol of 41 indicates that packets may be IPIP proxy'ed.
+        The address in the locator
+        In the case of that IPIP proxying is used, then the provided
+        link-local address MUST be advertised on the local link using
+        proxy neighbour discovery.  The Join Proxy MAY limit forwarded
+        traffic to the protocol (6 and 17) and port numbers indicated by
+        locator1 and locator2.
+        The address to which the IPIP traffic should be sent is the initiator
+        address (an ACP address of the Registrar), not the address given in the locator.
+      </t>
+      <t>
+        All Registrar MUST accept TCP / UDP traffic on the ports given at
+        the ACP address of the Registrar.  If the Registrar supports IPIP
+        tunnelling, it MUST also accept traffic encapsulated with IPIP.
+      </t>
+      <t>
+        Registrars MUST accept HTTPS/EST traffic on the ports indicated.
+        Registrars MAY accept DTLS/CoAP/EST traffic in addition.
       </t>
     </section>
 
