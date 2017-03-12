@@ -30,7 +30,6 @@
 
     <author fullname="Max Pritikin" initials="M." surname="Pritikin">
       <organization>Cisco</organization>
-
       <address>
         <email>pritikin@cisco.com</email>
       </address>
@@ -134,8 +133,8 @@
       "vouchers" are described to support a variety of use cases.</t>
 
       <t>The syntactic details of vouchers are described in detail in <xref
-      target="I-D.ietf-anima-voucher" />, but relevant semantics of
-      voucher creation for use in ANIMA are described in this document.</t>
+      target="I-D.ietf-anima-voucher" />. This document details automated 
+      protocol mechanisms to obtain vouchers.</t>
 
       <t>The result of bootstrapping is that a security association between
       the Pledge and the Registrar is established. A method of leveraging this
@@ -1769,11 +1768,14 @@ Data        +----------------------nonce---->   (discard     |
         document). If a nonce is not provided the MASA server MUST
         authenticate the client as described in EST <xref target="RFC7030"/> section 3.3.2 to
         reduce the risk of DDoS attacks. A Registrar performs authorization as
-        detailed in <xref target="AcceptingTheEntity"></xref>. If
-        authorization is successful the Registrar obtains an Voucher from the
-        MASA service (see <xref target="RequestAuditToken"></xref>).</t>
+        detailed in <xref target="AcceptingTheEntity"></xref>. If the request
+        is for a previous (expired) voucher using the same Registrar (as determined
+        by domainID) and the MASA has not been informed that the claim is 
+        no longer valid - the request for a renewed voucher SHOULD be automatically
+        authorized. If authorization is successful the MASA responds with a <xref
+            target="I-D.ietf-anima-voucher"/> voucher.</t>
 
-        <t>The JSON message information is encapsulated in a <xref
+        <t>The voucher is encapsulated in a <xref
         target="RFC5652"></xref> Signed-data that is signed by the Registrar.
         The entire certificate chain, up to and including the Domain CA, MUST
         be included in the CertificateSet structure. The MASA service checks
