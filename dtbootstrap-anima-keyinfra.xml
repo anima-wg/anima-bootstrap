@@ -8,7 +8,7 @@
 <!ENTITY RFC5652 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5652.xml">
 <!ENTITY RFC7575 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7575.xml">
 ]>
-<rfc category="info" docName="draft-ietf-anima-bootstrapping-keyinfra-05-pre1"
+<rfc category="info" docName="draft-ietf-anima-bootstrapping-keyinfra-05"
      ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -1704,16 +1704,23 @@ hardwareModuleName hwSerialNum>",
         appropriate DevIDSerialNumber field from the physical device labeling
         or from the sales channel -- how this occurs is out-of-scope of this
         document). If a nonce is not provided the MASA server MUST
-        authenticate the client as described in EST <xref target="RFC7030"/> section 3.3.2 to
-        reduce the risk of DDoS attacks. A Registrar performs authorization as
-        detailed in <xref target="AcceptingTheEntity"></xref>. If the request
+        authenticate the Registrar as described in EST <xref target="RFC7030"/> section 3.3.2 to
+        reduce the risk of DDoS attacks. The MASA performs authorization as
+        detailed in <xref target="AcceptingTheEntity"></xref>.</t> 
+        
+        <t>As described in <xref target="I-D.ietf-anima-voucher"/> vouchers are normally
+            short lived to avoid revocation issues. If the request
         is for a previous (expired) voucher using the same Registrar (as determined
         by domainID) and the MASA has not been informed that the claim is 
         no longer valid - the request for a renewed voucher SHOULD be automatically
         authorized. If authorization is successful the MASA responds with a <xref
-            target="I-D.ietf-anima-voucher"/> voucher.</t>
+            target="I-D.ietf-anima-voucher"/> voucher. The MASA SHOULD check for revocation
+        of the Registrar certificate. The maximum lifetime of the voucher issued
+            SHOULD NOT exceed the lifetime of the Registrar's revocation validation (for
+            example if the Registrar revocation status is indicated in a CRL that is 
+            valid for two weeks then that is an appropriate lifetime for the voucher).</t>
 
-        <t>The voucher is encapsulated in a <xref
+        <t>The voucher request is encapsulated in a <xref
         target="RFC5652"></xref> Signed-data that is signed by the Registrar.
         The entire certificate chain, up to and including the Domain CA, MUST
         be included in the CertificateSet structure. The MASA service checks
@@ -1724,8 +1731,7 @@ hardwareModuleName hwSerialNum>",
         checking for the cmc-idRA field) that was issued by a the root
         certificate included in the CMS. This ensures that the Registrar
         making the claim is an authorized Registrar of the unauthenticated
-        domain. The EST style client authentication (TLS and HTTP) is used to
-        provide a DDoS prevention strategy.</t>
+        domain. </t>
 
         <t>The root certificate is extracted and used to populate the 
         Voucher. The domain ID (e.g. hash of the public key of the domain) is
@@ -1748,9 +1754,9 @@ hardwareModuleName hwSerialNum>",
 
         <t>Response media type: application/voucher+cms</t>
 
-        <t>The Voucher consists of the nonce, if supplied, the serial
-        number information identifying the device and the domain CA
-        certificate extracted from the request:</t>
+        <t>The syntactic details of vouchers are described in detail in <xref
+            target="I-D.ietf-anima-voucher"/>. For example, the voucher consists 
+            of:</t>
 
         <figure>
           <artwork><![CDATA[{
@@ -1769,16 +1775,6 @@ hardwareModuleName hwSerialNum>",
         detailed in netconf-zerotouch this might be a distinct trust anchor
         rather than re-using the trust anchor for the IDevID. This concept
         will need to be detailed in this document as well.]]</t>
-
-        <t>[[EDNOTE: Using CMS is consistent with the alignment of this
-        bootstrapping document with EST, a PKIX enrollment protocol that
-        includes Certificate Management over CMS. An alternative format would
-        be the RFC7515 JSON Web Signature (JWS), which would allow clients
-        that do not use fullCMC messages to avoid CMS entirely. Use of JWS
-        would likely include a discussion of CBOR in order ensure the base64
-        expansions of the certs and signatures within the JWS message are of
-        minimal size -- it is not yet clear to this author how that would work
-        out]]</t>
 
         <t>The 'domainCAcert' element of this message contains the domain CA's
         public key. This is specific to bootstrapping a public key
