@@ -287,14 +287,7 @@
             vouchers as described in <xref target="I-D.ietf-anima-voucher"/></t>
 
             <t hangText="IDevID:">An Initial Device Identity X.509 certificate
-            installed by the vendor on new equipment. The <xref
-            target="IDevID"></xref> certificate format is the primary example.
-            In particular the X.509 certificate needs to contain the device's
-            serial number in a well known location in order for the Join
-            Registrar to perform white list operations and in order to extract
-            it for inclusion in messages to the MASA service. The subject
-            field&rsquo;s DN encoding MUST include the &ldquo;serialNumber&rdquo; attribute
-            with the device&rsquo;s unique serial number.</t>
+            installed by the vendor on new equipment.</t>
 
             <t hangText="TOFU:">Trust on First Use. Used similarly to <xref
             target="RFC7435" />. This is where a Pledge
@@ -361,14 +354,14 @@
         802.11). It could also be used by non-constrained devices across a
         non-energy constrained, but challenged network (such as 802.15.4).</t>
 
-        <t>The use of an IDevID that is consistant with <xref
-        target="IDevID"></xref> allows for alignment with 802.1X network
-        access control methods which could need to complete before
-        bootstrapping can be initiated. This document presumes that network
-        access control has either already occurred, is not required, or is
-        integrated by the proxy and registrar in such a way that the device
-        itself does not need to be aware of the details. Further integration
-        is not in scope.</t>
+        <t>This document presumes that network access control has either 
+        already occurred, is not required, or is integrated by the proxy 
+        and registrar in such a way that the device itself does not need to 
+        be aware of the details. Although the use of an X.509 Initial 
+        Device Identity is consistant with IEEE 802.1AR <xref 
+        target="IDevID"></xref>, and allows for alignment with 802.1X 
+        network access control methods, its use here is for Pledge 
+        authentication rather than network access control.</t> 
 
         <t>Some aspects are in scope for constrained devices on challenged
         networks: the certificate contents, and the process by which the four
@@ -406,7 +399,7 @@
 |       <-------->            <------->           |          .
 |       |     .  |            |       |           |          .
 |       |     .  +------------+       +-----+-----+          .
-|       |     .                             |                .
+|IDevID |     .                             |                .
 |       |     .           +-----------------+----------+     .
 |       |     .           | Domain Certification       |     .
 |       |     .           | Authority                  |     .
@@ -499,7 +492,7 @@
         <t>The format and cryptographic mechanism of vouchers is described in
         detail in <xref target="I-D.ietf-anima-voucher" />.</t>
 
-<t>Vouchers provide a flexible mechanism to secure imprinting: the
+        <t>Vouchers provide a flexible mechanism to secure imprinting: the
             Pledge device only imprints when a voucher can be validated. At the
             lowest security levels the MASA server can indiscriminately
             issue vouchers. At the highest security levels issuance of 
@@ -510,6 +503,81 @@
             are to be widely deployed in the field. The MASA vendor services have
             the flexibility to leverage either the currently defined claim 
             mechanisms or to experiment with higher or lower security levels.</t>
+      </section>
+    
+      <section anchor="IDevIDextension" title="Initial Device Identifier">
+          <t>Pledge authentication is via an X.509 certificate installed 
+             during the manufacturing process. This Initial Device Identifier
+             provides a basis for authenticating the Pledge during subsequent
+             protocol exchanges and informing the Registrar of the MASA 
+             URI. There is no requirement for a common root PKI hierarchy. Each
+             device vendor can generate their own root certificate.</t>
+              
+              <t>The following previously defined fields are in the 
+                  X.509 IDevID certificate:</t>
+              
+              <t><list style="symbols">
+              <t>The subject field's DN encoding MUST include the "serialNumber" 
+                  attribute with the device's unique serial number.</t>
+              <t>The subject alt field's encoding SHOULD include the a non-critical
+                  version of the RFC4108 defined HardwareModuleName.</t> 
+              </list></t>
+              
+              <t>The following newly defined field SHOULD be in the X.509 IDevID 
+              certificate: An X.509 non-critical certificate extension that
+              contains a single Uniform Resource Identifier (URI) that points 
+              to an on-line Manufacturer Authorized Signing Authority. The URI is 
+              represented as described in Section 7.4 of [RFC5280].</t>
+              
+              <t>Any Internationalized Resource Identifiers (IRIs) MUST be mapped to
+              URIs as specified in Section 3.1 of [RFC3987] before they are placed
+              in the certificate extension.</t>
+              
+              <t>The semantics of the URI are defined in [TBD] of this 
+                  document. The new extension is identified as follows:</t>
+              
+              <figure>
+                  <artwork><![CDATA[
+<CODE BEGINS>
+
+MASAURLExtnModule-2016 { iso(1) identified-organization(3) dod(6)
+internet(1) security(5) mechanisms(5) pkix(7)
+id-mod(0) id-mod-MASAURLExtn2016(TBD) }
+
+DEFINITIONS IMPLICIT TAGS ::= BEGIN
+
+-- EXPORTS ALL --
+
+IMPORTS
+EXTENSION
+FROM PKIX-CommonTypes-2009
+{ iso(1) identified-organization(3) dod(6) internet(1)
+security(5) mechanisms(5) pkix(7) id-mod(0)
+id-mod-pkixCommon-02(57) }
+
+id-pe
+FROM PKIX1Explicit-2009
+{ iso(1) identified-organization(3) dod(6) internet(1)
+security(5) mechanisms(5) pkix(7) id-mod(0)
+id-mod-pkix1-explicit-02(51) } ;
+MASACertExtensions EXTENSION ::= { ext-MASAURL, ... }
+ext-MASAURL EXTENSION ::= { SYNTAX MASAURLSyntax
+IDENTIFIED BY id-pe-masa-url }
+
+id-pe-masa-url OBJECT IDENTIFIER ::= { id-pe TBD }
+
+MASAURLSyntax ::= IA5String
+
+END
+
+<CODE ENDS>
+                  ]]></artwork>
+              </figure>
+      <t></t>     
+      <t>The choice of id-pe is based on guidance found in Section 4.2.2 of
+          [RFC5280], "These extensions may be used to direct applications to on-line
+          information about the issuer or the subject". The MASA URL is precisely 
+          that: online information about the particular subject. </t>
       </section>
     </section>
 
@@ -650,7 +718,7 @@
         <t><list style="numbers">
             <t>Discover a communication channel to a Registrar.</t>
 
-            <t>Identify itself. This is done by presenting an IDevID X.509
+            <t>Identify itself. This is done by presenting an X.509 IDevID
             credential to the discovered Registrar (via the Proxy) in a TLS
             handshake. (The Registrar credentials are only provisionally
             accepted at this time).</t>
@@ -1014,13 +1082,13 @@
           are:</t>
 
           <t><list style="symbols">
-              <t>the use of an IDevID X.509 credential during the TLS client
+              <t>the use of an X.509 IDevID credential during the TLS client
               authentication,</t>
 
               <t>or the use of a secret that is transmitted out of band
               between the Pledge and a Registrar (this use case is not
               autonomic).</t>
-            </list>In order to validate the IDevID X.509 credential a
+            </list>In order to validate the X.509 IDevID credential a
           Registrar maintains a database of vendor trust anchors (e.g. vendor
           root certificates or keyIdentifiers for vendor root public keys).
           For user interface purposes this database can be mapped to
@@ -1086,12 +1154,9 @@
           claim has been logged. There is no requirement for the vendor to
           definitively know that the device is owned by the Registrar.</t>
 
-          <t>Registrar's obtain the Vendor URI via static configuration or by
-          extracting it from the X.509 IDevID credential. The imprint method
-          supported by the Pledge is known from the X.509 IDevID credential.
-          [[EDNOTE: An appropriate extension for indicating the Vendor URI and
-          imprint method could be defined using the methods described in <xref
-          target="I-D.lear-mud-framework"></xref>]].</t>
+          <t>The Registrar obtains the MASA URI via static configuration or by
+              extracting it from the X.509 IDevID credential. See <xref
+                  target="IDevIDextension"></xref>.</t>
 
           <t>During initial bootstrapping the Pledge provides a nonce specific
           to the particular bootstrapping attempt. The Registrar SHOULD
@@ -1613,20 +1678,18 @@ Data        +----------------------nonce---->   (discard     |
         proof-of-possession information for the device identity is included).
         The AuthorityKeyIdentifier value from the certificate is included to
         ensure a statistically unique identity. The Pledge's serial number is
-        extracted from the X.509 IDevID subject name id-at-serialNumber or it
-        is the base64 encoded RFC4108 hardwareModuleName hwSerialNum:</t>
-
-        <figure>
-          <artwork><![CDATA[{
- "version":"1",
- "nonce":"<64bit nonce value>",
- "IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier">,
- "DevIDSerialNumber":"<id-at-serialNumber or base64 encoded
-                       hardwareModuleName hwSerialNum>",
+        extracted from the X.509 IDevID. See <xref
+            target="IDevIDextension"></xref>.</t>
+        
+        <t><figure>
+            <artwork><![CDATA[{
+"version":"1",
+"nonce":"<64bit nonce value>",
+"IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier">,
+"DevIDSerialNumber":"<id-at-serialNumber or base64 encoded
+hardwareModuleName hwSerialNum>",
 }]]></artwork>
-        </figure>
-
-        <t></t>
+        </figure></t>
 
         <t>A Registrar MAY exclude the nonce from the request. Doing so allows
         the Registrar to request a Voucher when the Pledge is not online, or
@@ -1877,7 +1940,7 @@ Data        +----------------------nonce---->   (discard     |
         certificate enrollment and, if they do, MUST implement the EST options
         described in this section. The Pledge MAY perform alternative
         enrollment methods including discovering an alternate EST server, or
-        proceed to use its IDevID credential indefinitely.</t>
+        proceed to use its X.509 IDevID credential indefinitely.</t>
 
         <section title="EST Distribution of CA Certificates">
           <t>The Pledge MUST request the full EST Distribution of CA
@@ -1895,7 +1958,7 @@ Data        +----------------------nonce---->   (discard     |
           <t>Automated bootstrapping occurs without local administrative
           configuration of the Pledge. In some deployments its plausible that
           the Pledge generates a certificate request containing only identity
-          information known to the Pledge (essentially the IDevID information)
+          information known to the Pledge (essentially the X.509 IDevID information)
           and ultimately receives a certificate containing domain specific
           identity information. Conceptually the CA has complete control over
           all fields issued in the end entity certificate. Realistically this
@@ -1915,7 +1978,7 @@ Data        +----------------------nonce---->   (discard     |
           iPAddress field as specified in RFC5208 s4.2.1.6. ref ACP draft
           where certificate verification [TBD]. These should go into the
           subjectaltname in the [TBD] fields.]]. If the hardwareModuleName in
-          the IDevID is populated then it SHOULD by default be propagated to
+          the X.509 IDevID is populated then it SHOULD by default be propagated to
           the LDevID along with the hwSerialNum. The registar SHOULD support
           local policy concerning this functionality. [[EDNOTE: extensive use
           of EST CSR Attributes might need an new OID definition]].]]</t>
@@ -2082,7 +2145,7 @@ Data        +----------------------nonce---->   (discard     |
             identity without the benefit of authenticating that claimed
             identity. This could occur when the Pledge does not include an
             X.509 IDevID factory installed credential. New Entities without an
-            IDevID credential MAY form the <xref
+            X.509 IDevID credential MAY form the <xref
             target="RequestVoucherFromRegistrar"></xref> request using the
             <xref target="RequestVoucherFromMASA"></xref> format to ensure the
             Pledge's serial number information is provided to the Registar
