@@ -580,6 +580,53 @@ END
           information about the issuer or the subject". The MASA URL is precisely 
           that: online information about the particular subject. </t>
       </section>
+
+      <section anchor="timeunknown" title="Lack of realtime clock">
+          <t>Many devices when bootstrapping do not have knowledge of the
+              current time. Mechanisms like Network Time Protocols can not be
+              secured until bootstrapping is complete. Therefore bootstrapping is
+              defined in a method that does not require knowledge of the current
+              time.</t>
+          
+          <t>Unfortunately there are moments during bootstrapping when
+              certificates are verified, such as during the TLS handshake, where
+              validity periods are confirmed. This paradoxical "catch-22" is
+              resolved by the Pledge maintaining a concept of the current "window"
+              of presumed time validity that is continually refined throughout the
+              bootstrapping process as follows:</t>
+          
+          <t><list style="symbols">
+              <t>Initially the Pledge does not know the current time.</t>
+              
+              <t>During Pledge authentiation by the Registrar a realtime clock
+                  can be used by the Registrar. This bullet expands on a closely
+                  related issue regarding Pledge lifetimes. RFC5280 indicates that
+                  long lived Pledge certifiates "SHOULD be assigned the
+                  GeneralizedTime value of 99991231235959Z" <xref target="RFC7030"/> so the
+                  Registrar MUST support such lifetimes and SHOULD support
+                  ignoring Pledge lifetimes if they did not follow the RFC5280
+                  recommendations.</t>
+              
+              <t>The Pledge authenticates the voucher presented to it. During 
+                  this authentication the Pledge ignores certificate
+                  lifetimes (by necessity because it does not have a clock). 
+                  The voucher itself SHOULD contain the nonce
+                  included in the original request which proves the
+                  voucher is fresh.</t>
+              
+              <t>Once the voucher is accepted the validity period of the
+                  domainCAcert in the voucher (see <xref
+                      target="VoucherResponse"></xref>) now serves as a valid time
+                  window. Any subsequent certificate validity periods checked
+                  during RFC5280 path validation MUST occur within this
+                  window.</t>
+              
+              <t>When accepting an enrollment certificate the validity period
+                  within the new certificate is assumed to be valid by the Pledge.
+                  The Pledge is now willing to use this credential for client
+                  authentication.</t>
+          </list></t>
+      </section>
     </section>
     
     <section anchor="ProtocolDetails" title="Protocol Details">
@@ -604,6 +651,15 @@ END
         wherein a human user configures the URI of the EST server for Implicit
         TA based authentication. This documented establishes automated
         methods of authorizing the CA certificate using in-band vouchers.</t>
+        
+         <t> Client authentication is automated using Initial Device Identity. 
+        The subject field's DN encoding MUST include the "serialNumber" 
+        attribute with the device's unique serial number. In the language of 
+        RFC6125 this provides for a SERIALNUM-ID category of identifier that 
+        can be included in a certificate and therefore that can also be used 
+        for matching purposes. The SERIALNUM-ID whitelist is collated according 
+        to vendor trust anchor since serial numbers are not globally 
+        unique.</t> 
 
         <t>If the Pledge uses a well known URI for contacting a well known
         Registrar the EST Implicit Trust Anchor database is used to
@@ -611,10 +667,12 @@ END
         provisional and RFC6125 methods can be used to authenticate the
         Registrar</t>
 
-      <t>The Pledge establishes a TLS connection with the Registrar through
-      the circuit proxy (see <xref target="proxybehaviour"></xref>) but the
-      TLS connection is with the Registar; so for this section the "Pledge" is
-      the TLS client and the "Registrar" is the TLS server.</t>
+        <t>The Pledge establishes a TLS connection with the Registrar through 
+        the circuit proxy (see <xref target="proxybehaviour"></xref>) but the 
+        TLS connection is with the Registar; so for this section the "Pledge" 
+        is the TLS client and the "Registrar" is the TLS server. All security 
+        associations established are between the new device and the 
+        Registrar regardless of proxy operations.</t> 
 
       <t>The extensions for the Pledge client are as follows:</t>
 
@@ -814,6 +872,12 @@ Data        +----------------------nonce---->   (discard     |
              </t>
          </section>
          <section anchor="discovery" title="Registrar Discovery Protocol Details">
+             <t> A Registrar is typically configured manually.
+                 When the Registrar joins an Autonomic Control Plane
+                 (<xref target="I-D.ietf-anima-autonomic-control-plane"></xref>)
+                 it MUST respond to GRASP (<xref target="I-D.ietf-anima-grasp"></xref>)
+                 M_DISCOVERY message. See <xref target="discovery" />
+             </t>
              <t>
                  The registrar responds to discovery messages from the proxy
                  (or GRASP caches between them) as follows: (XXX changed from M_DISCOVERY)
@@ -876,13 +940,15 @@ Data        +----------------------nonce---->   (discard     |
         <t>This is done with an HTTPS POST using the operation path value of
         "/requestvoucher".</t>
 
-        <t>The request format is JSON object containing a 64bit nonce
-        generated by the client for each request. This nonce MUST be a
-        cryptographically strong random or pseudo-random number that can not
-        be easily predicted. The nonce MUST NOT be reused for multiple
-        attempts to join a network domain. The nonce assures the Pledge that
-        the Voucher response is associated with this bootstrapping
-        attempt and is not a replay.</t>
+         <t>The request is a voucher <xref target="I-D.ietf-anima-voucher"/> 
+        that MAY be signed by the pledge or left unsigned. The nonce MUST be 
+        populated thus minimizing the use of global time and providing a 
+        security benefit for devices without a RTC. This nonce MUST be a 
+        cryptographically strong random or pseudo-random number that can not be 
+        easily predicted. The nonce MUST NOT be reused for multiple attempts to 
+        join a network domain. The nonce assures the Pledge that the Voucher 
+        response is associated with this bootstrapping attempt and is not a 
+        replay.</t> 
 
         <t>Request media type: application/voucherrequest</t>
 
@@ -897,13 +963,11 @@ Data        +----------------------nonce---->   (discard     |
 
         <t></t>
 
-        <t>[[EDNOTE: Even if the nonce was signed it would provide no defense
-        against rogue registrars; although it would assure the MASA that a
-        certified Pledge exists. To protect against rogue registrars a nonce
-        component generated by the MASA (a new round trip) would be required).
-        Instead this is addressed by requiring MASA &amp; Registrar
-        authentications but it is worth exploring additional protections. This
-        to be explored more at IETF96.]]</t>
+        <t>[[EDNOTE: The move to JWT allows for relatively simple
+            signing operations. One possibility here is to carry the 
+            original signed JWT as an optional part of the payload
+            sent to the MASA (e.g. "original request"). this would
+            be a BRSKI addition to the voucher?]]</t>
 
         <t>The Registrar validates the client identity as described in EST
         <xref target="RFC7030"/> section 3.3.2. The registrar performs authorization as
@@ -1117,8 +1181,10 @@ hardwareModuleName hwSerialNum>",
       </section>
 
       <section title="MASA authorization log Request ">
-        <t>A registrar requests the MASA authorization log from the MASA
-        service using this EST extension.</t>
+         <t>A registrar requests the MASA authorization log from the MASA 
+        service using this EST extension. If a device had previously registered 
+        with another domain, a Registrar of that domain would show in the 
+        log.</t> 
 
         <t>This is done with an HTTP GET using the operation path value of
         "/requestauditlog".</t>
@@ -1165,17 +1231,28 @@ hardwareModuleName hwSerialNum>",
         be optimized as follows: All nonce-less entries for the same domainID
         MAY be condensed into the single most recent nonceless entry.</t>
 
-        <t>A Registrar uses this log information to make an informed decision
+        <t>A Registrar SHOULD use this log information to make an informed decision
         regarding the continued bootstrapping of the Pledge. For example if
         the log includes unexpected domainIDs this is indicative of
         problematic imprints by the Pledge. If the log includes nonce-less
         entries this is indicative of the permanent ability for the indicated
         domain to trigger a reset of the device and take over management of
         it. Equipment that is purchased pre-owned can be expected to have an
-        extensive history.</t>
+            extensive history. A Registrar MAY request logs at future times [[EDNOTE: we 
+            need to ensure MASA server is not slammed with too many requests]].
+            A Registrar MAY be configured to ignore the
+            history of the device but it is RECOMMENDED that this only be
+            configured if hardware assisted NEA [RFC5209] is supported.</t>
 
         <t>Log entries containing the Domain's ID can be compared against
         local history logs in search of discrepancies.</t>
+        
+        <t>This document specifies a simple log format as provided by the
+            MASA service to the registar. This format could be improved by
+            distributed consensus technologies that integrate vouchers
+            with a technologies such as block-chain or hash trees or the
+            like. Doing so is out of the scope of this document but are
+            anticipated improvements for future work.</t>
       </section>
 
       <section title="EST Integration for PKI bootstrapping">
@@ -1185,6 +1262,17 @@ hardwareModuleName hwSerialNum>",
         DevIDSerialNumber are specific to PKI bootstrapping these are the only
         PKI specific aspects of the extensions and future work might replace
         them with non-PKI structures.</t>
+        
+        <t>Once the Voucher is received, as specified in
+            this document, the client has sufficient information to leverage the
+            existing communication channel with a Registrar to continue an EST
+            RFC7030 enrollment. Enrollment picks up at RFC7030 section 4.1.1.
+            bootstrapping where the Voucher provides the "out-of-band" CA
+            certificate fingerprint (in this case the full CA certificate) such
+            that the client can now complete the TLS server authentication. At
+            this point the client continues with EST enrollment operations
+            including "CA Certificates Request", "CSR Attributes" and "Client
+            Certificate Request" or "Server-Side Key Generation".</t>
 
         <t>The prior sections provide functionality for the Pledge to obtain a
         trust anchor representative of the Domain. The following section
@@ -1194,6 +1282,14 @@ hardwareModuleName hwSerialNum>",
         described in this section. The Pledge MAY perform alternative
         enrollment methods including discovering an alternate EST server, or
         proceed to use its X.509 IDevID credential indefinitely.</t>
+
+        <t>[[EDNOTE:might be best to discuss in CSR attributes?]]For the purposes of creating the ANIMA Autonomic Control Plane,
+            the contents of the new certificate MUST be carefully specified.
+            <xref target="I-D.ietf-anima-autonomic-control-plane" /> section
+            5.1.1 contains details.  The Registrar MUST provide the
+            the correct ACP information to populate the subjectAltName /
+            rfc822Name field in the "CSR Attributes" step.
+        </t>
 
         <section title="EST Distribution of CA Certificates">
           <t>The Pledge MUST request the full EST Distribution of CA
@@ -1534,6 +1630,15 @@ hardwareModuleName hwSerialNum>",
         <t>During the provisional period of the connection all HTTP header and
         content data MUST treated as untrusted data. HTTP libraries are
         regularly exposed to non-secured HTTP traffic.</t>
+        
+      <t>Pledge's might chose to engage in protocol operations with 
+      multiple discovered Registrars in parallel. As noted above they
+      will only do so with distinct nonce values, but the end result 
+      could be multple voucher's issued from the MASA if all registrars
+      attempt to claim the device. This is not a failure and the Pledge
+      choses whichever voucher to accept based on internal logic. The 
+      Registrar's verifying log information will see multiple entries
+      and take this into account for their analytics purposes.</t>
     </section>
 
     <section title="Acknowledgements">
@@ -1931,7 +2036,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
     
     <section title="Behavior of a Pledge">
         <t>A pledge that has not yet been bootstrapped attempts to find a
-            local domain and join it. A pledge MUST NOT automatically initiate
+            local domain and join it. A pledge [[RESOLVED:MUST NOT]] automatically initiate
             bootstrapping if it has already been configured or is in the process
             of being configured.</t>
         
@@ -1994,7 +2099,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
                 handshake. (The Registrar credentials are only provisionally
                 accepted at this time).</t>
             
-            <t>Requests to Join the discovered Registrar. A unique nonce can be
+            <t>Requests to Join the discovered Registrar. A unique nonce [[RESOLVED:can be]]
                 included ensuring that any responses can be associated with this
                 particular bootstrapping attempt.</t>
             
@@ -2016,7 +2121,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         detail.</t>
         
         <section anchor="ProxyDiscovery" title="Discovery">
-            <t>[[EDNOTE:TEXT moved up into above]]</t>
+            <t>[[RESOLVED:TEXT moved up into above]]</t>
         </section>
         
         <section anchor="identity" title="Identity">
@@ -2028,7 +2133,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
                 available.
             </t>
             
-            <t>The bootstrapping protocol server is not initially authenticated.
+            <t>[[UNRESOLVED: need normative statement in protocol section]] The bootstrapping protocol server is not initially authenticated.
                 Thus the connection is provisional and all data received is
                 untrusted until sufficiently validated even though it is over a TLS
                 connection. This is aligned with the existing provisional mode of
@@ -2037,11 +2142,16 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
                 more information about when the TLS connection authentication is
                 completed.</t>
             
-            <t>All security associations established are between the new device
+            <t>[[RESOLVED:]]All security associations established are between the new device
                 and the Bootstrapping server regardless of proxy operations.</t>
             
             <section title="Concurrent attempts to join">
-                <t>
+                <t>[[RESOLVED: by dropping this text. the "priority mechanism" is unspecified
+                    thus any discussion is unclear. Not only that once an initial request is
+                    sent to the registrar the question of multiple MASA interactions has 
+                    already occurred. Nothing breaks if implementations do this. I've added
+                    text to the security considerations indicating the end result (MASA entries
+                    that might be ignored by the device but which confuse the end administrator)]]
                     The Pledge MAY attempt multiple mechanisms concurrently, but
                     if it does so, it MUST wait in the provisional state until all
                     mechanisms have either succeeded or failed, and then MUST proceed
@@ -2065,7 +2175,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
                 valid clock.</t>
             
             <section title="Redirects during the Join Process">
-                <t>EST <xref target="RFC7030"/> describes situations where the bootstrapping
+                <t>[[RESOVED via current root protocol discussion. reference to mdnsmethods is dropped]] EST <xref target="RFC7030"/> describes situations where the bootstrapping
                     server MAY redirect the client to an alternate server via a 3xx
                     status code.   Such redirects MAY be accepted if the pledge
                     has used the methods described in <xref target="mdnsmethods" />,
@@ -2082,7 +2192,8 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
                 from the voucher.</t>
         </section>
         
-        <section anchor="timeunknown" title="Lack of realtime clock">
+        <section anchor="timeunknownAPPENDIX" title="Lack of realtime clock APPENDIX">
+            <t>[[RESOVED: entire section promoted back into the main text]]</t> 
             <t>Many devices when bootstrapping do not have knowledge of the
                 current time. Mechanisms like Network Time Protocols can not be
                 secured until bootstrapping is complete. Therefore bootstrapping is
@@ -2140,7 +2251,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
                 target="RFC7030"></xref>. Authentication of the EST server is done
             using the Voucher rather than the methods defined in EST.</t>
             
-            <t>Once the Voucher is received, as specified in
+            <t>[[RESOLVED: moved to protocol discussion]]Once the Voucher is received, as specified in
                 this document, the client has sufficient information to leverage the
                 existing communication channel with a Registrar to continue an EST
                 RFC7030 enrollment. Enrollment picks up at RFC7030 section 4.1.1.
@@ -2151,7 +2262,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
                 including "CA Certificates Request", "CSR Attributes" and "Client
                 Certificate Request" or "Server-Side Key Generation".</t>
             
-            <t>For the purposes of creating the ANIMA Autonomic Control Plane,
+            <t>[[RESOLVED: included into EST discussion]]For the purposes of creating the ANIMA Autonomic Control Plane,
                 the contents of the new certificate MUST be carefully specified.
                 <xref target="I-D.ietf-anima-autonomic-control-plane" /> section
                 5.1.1 contains details.  The Registrar MUST provide the
@@ -2161,7 +2272,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         </section>
         
         <section title="Being Managed">
-            <t>Functionality to provide generic "configuration" information is
+            <t>[[UNRESOLVED: leaving out entirely. perhaps worth discussing generically about how the distributed keys can be used?]] Functionality to provide generic "configuration" information is
                 supported. The parsing of this data and any subsequent use of the
                 data, for example communications with a Network Management System is
                 out of scope but is expected to occur after bootstrapping enrollment
@@ -2186,9 +2297,11 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
             configured on the Proxy.
         </t>
         
-        <t>The Proxy does not terminate the TLS handshake.</t>
+        <t>[[UNRESOLVED: since proxy behavior is not visible we can limit ourselves
+            to discussion of what the protocol does to enable/faciliate a theoretical
+            proxy]]The Proxy does not terminate the TLS handshake.</t>
         
-        <t>
+        <t> [[UNRESOLVED: this is an anima architecture requirement to use BRSKI? move to there?]]
             A Proxy is always assumed even if it is directly
             integrated into a Registrar.
             (In a completely autonomic network, the Registrar MUST provide
@@ -2227,7 +2340,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         more extensive analysis of the alternative proxy methods.</t>
         
         <section anchor="coapconnection" title="CoAP connection to Registrar">
-            <t>The CoAP mechanism was depreciated.</t>
+            <t>[[RESOLVED:this section thus removed]]The CoAP mechanism was depreciated.</t>
         </section>
         
         <section title="HTTPS proxy connection to Registrar">
@@ -2261,7 +2374,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
             delivers them to the Pledge as well as facilitating enrollment with
             the domain PKI.</t>
         
-        <t>
+        <t> [[RESOLVED: moved to discovery discussion]]
             A Registrar is typically configured manually.
             When the Registrar joins an Autonomic Control Plane
             (<xref target="I-D.ietf-anima-autonomic-control-plane"></xref>)
@@ -2314,7 +2427,7 @@ Contacted by Pledge
                 are:</t>
             
             <t><list style="symbols">
-                <t>the use of an X.509 IDevID credential during the TLS client
+                <t>[[RESOLVED:pointed out in protocol details]]the use of an X.509 IDevID credential during the TLS client
                     authentication,</t>
                 
                 <t>or the use of a secret that is transmitted out of band
@@ -2350,7 +2463,7 @@ Contacted by Pledge
                     Registrars is out of scope).</t>
             </list></t>
             
-            <t>To look the Pledge up in a domain white list a consistent method
+            <t>[[RESOLVED: this looks like good text to include in above]]To look the Pledge up in a domain white list a consistent method
                 for extracting device identity from the X.509 certificate is
                 required. RFC6125 describes Domain-Based Application Service
                 identity but here we require Vendor Device-Based identity. The
@@ -2362,17 +2475,17 @@ Contacted by Pledge
                 according to vendor trust anchor since serial numbers are not
                 globally unique.</t>
             
-            <t>The Registrar MUST use the
+            <t>[[RESOLVED: into log request]]The Registrar MUST use the
                 vendor provided MASA service to verify that the device's history log
                 does not include unexpected Registrars. If a device had previously
                 registered with another domain, a Registrar of that domain would
                 show in the log.</t>
             
-            <t>The authorization performed during
+            <t>[[RESOLVED: est integration section used 'SHOULD']]The authorization performed during
                 BRSKI MAY be used for EST enrollment requests by proceeding with 
                 EST enrollment using the authenticated and authorized TLS 
                 connection. This minimizes the number of cryptographic and
-                protocol operations necessary to complete bootstraping of the 
+                protocol operations necessary to complete bootstrapping of the 
                 local key infrastructure.</t>
         </section>
         
@@ -2391,7 +2504,7 @@ Contacted by Pledge
                     target="IDevIDextension"></xref>.</t>
             
             <t>During initial bootstrapping the Pledge provides a nonce specific
-                to the particular bootstrapping attempt. The Registrar SHOULD
+                to the particular bootstrapping attempt. [[UNRESOLVED: currently ]]The Registrar SHOULD
                 include this nonce when claiming the Pledge from the MASA service.
                 Claims from an unauthenticated Registrar are only serviced by the
                 MASA resource if a nonce is provided.</t>
@@ -2427,11 +2540,11 @@ Contacted by Pledge
                     to have physical possession of the Pledge or that the domainIDs
                     are recognized by the registrar.</t>
             </list>If any of these criteria are unacceptable to a Registrar
-            the entity is rejected. A Registrar MAY be configured to ignore the
+            the entity is rejected. [[RESOLVED: moved to main body]] A Registrar MAY be configured to ignore the
             history of the device but it is RECOMMENDED that this only be
                 configured if hardware assisted NEA [RFC5209] is supported.</t>
             
-            <t>This document specifies a simple log format as provided by the
+            <t>[[RESOLVED: added to main text]]This document specifies a simple log format as provided by the
                 MASA service to the registar. This format could be improved by
                 distributed consensus technologies that integrate vouchers
                 with a technologies such as block-chain or hash trees or the
@@ -2441,6 +2554,10 @@ Contacted by Pledge
     </section>
     
     <section title="Behavior of the MASA Service">
+        <t>[[UNRESOLVED: primary value of keeping this discussion is
+            to distinguish between registrar and masa particularly
+            wrt to the protocol functions provided. perhaps add
+            statements in each protocol entry "provided by masa" etc?]]</t>
         <t>The Manufacturer Authorized Signing Authority service is directly 
             provided by the manufacturer, or can be provided by a third party 
             the manufacturer authorizes. It is a cloud resource. The MASA service 
@@ -2489,6 +2606,7 @@ Contacted by Pledge
     </section>
     
     <section title="Interactions with Network Access Control">
+        <t>[[UNRESOLVED: this might be important enough to promote to its own appendix entry?]]</t>
         <t>The assumption is that Network Access Control (NAC) completes using
             the Pledge 's X.509 IDevID credentials and results in the device
             having sufficient connectivity to discovery and communicate with the
