@@ -627,153 +627,72 @@ END
                   authentication.</t>
           </list></t>
       </section>
+      <section title="Cloud Registrar">
+          <t>The Pledge MAY contact a well known URI of a cloud Registrar if a 
+              local Registrar can not be discovered or if the Pledge's target use 
+              cases do not include a local Registrar.</t> 
+          <t>If the Pledge uses a well known URI for contacting a cloud Registrar 
+              an Implicit Trust Anchor database (see <xref target="RFC7030"/>) MUST 
+              be used to authenticate service as described in RFC6125. This is 
+              consistent with the human user configuration of an EST server URI in 
+              <xref target="RFC7030"/> which also depends on RFC6125.</t> 
+      </section>
     </section>
     
     <section anchor="ProtocolDetails" title="Protocol Details">
-        <t>BRSKI is described as extensions to EST <xref target="RFC7030"/> to 
-            reduce the number of TLS connections and crypto operations required on 
-            the Pledge. The Registrar implements the BRSKI REST interface within 
-            the same .well-known URI tree as the existing EST URIs as described in 
-            EST <xref target="RFC7030"/> section 3.2.2. A MASA URI is therefore 
-            "https:// authority "./well-known/est".</t> 
+        <t>The Pledge MUST initiate BRSKI after boot if it is unconfigured. 
+        The Pledge MUST NOT automatically initiate BRSKI if it has been 
+        configured or is in the process of being configured.</t> 
 
-        <t>The pledge initiates BRSKI. The pledge MUST NOT automatically initiate
-        bootstrapping if it has already been configured or is in the process
-        of being configured.</t>
-
-        <t>Establishment of the TLS connection for bootstrapping is as
-        specified for EST <xref target="RFC7030"/>. In particular server
-        identity and client identity are as described in EST <xref
-        target="RFC7030"/> section 3.3. In EST <xref target="RFC7030"/>
-        provisional server authentication for bootstrapping is described in
-        section 4.1.1 wherein EST clients can "engage a human user to authorize
-        the CA certificate using out-of-band data such as a CA certificate" or
-        wherein a human user configures the URI of the EST server for Implicit
-        TA based authentication. This documented establishes automated
-        methods of authorizing the CA certificate using in-band vouchers.</t>
-        
-         <t> Client authentication is automated using Initial Device Identity. 
-        The subject field's DN encoding MUST include the "serialNumber" 
-        attribute with the device's unique serial number. In the language of 
-        RFC6125 this provides for a SERIALNUM-ID category of identifier that 
-        can be included in a certificate and therefore that can also be used 
-        for matching purposes. The SERIALNUM-ID whitelist is collated according 
-        to vendor trust anchor since serial numbers are not globally 
-        unique.</t> 
-
-        <t>If the Pledge uses a well known URI for contacting a well known
-        Registrar the EST Implicit Trust Anchor database is used to
-        authenticate the well known URI. In this case the connection is not
-        provisional and RFC6125 methods can be used to authenticate the
-        Registrar</t>
-
-        <t>The Pledge establishes a TLS connection with the Registrar through 
+        <t>[[EDNOTE: move below?]]The Pledge establishes a TLS connection with the Registrar through 
         the circuit proxy (see <xref target="proxybehaviour"></xref>) but the 
         TLS connection is with the Registar; so for this section the "Pledge" 
         is the TLS client and the "Registrar" is the TLS server. All security 
         associations established are between the new device and the 
         Registrar regardless of proxy operations.</t> 
+        
+        <t>BRSKI is described as extensions to EST <xref target="RFC7030"/> to 
+        reduce the number of TLS connections and crypto operations required on 
+        the Pledge. The Registrar implements the BRSKI REST interface within 
+        the same .well-known URI tree as the existing EST URIs as described in 
+        EST <xref target="RFC7030"/> section 3.2.2. A MASA URI is therefore 
+        "https:// authority "./well-known/est".</t> 
 
-      <t>The extensions for the Pledge client are as follows:</t>
+        <t>Establishment of the TLS connection for bootstrapping is as 
+        specified for EST <xref target="RFC7030"/>. In particular server 
+        identity and client identity are as described in EST <xref 
+        target="RFC7030"/> section 3.3 "TLS Layer" with automation 
+        extensions as follows.</t> 
 
-      <t><list style="symbols">
-          <t>The Pledge provisionally accept the EST server certificate during
-          the TLS handshake as detailed in <xref
-          target="CompletingAuthenticationBootstrapping"></xref>.</t>
+        <t>The extensions for the Pledge client are:</t>
 
-          <t>The Pledge requests and validates the Voucher as described
-          below. At this point the Pledge has sufficient information to
-          validate domain credentials.</t>
+        <t><list style="symbols">
+            <t>The Pledge provisionally accept the EST server certificate during 
+            the TLS handshake as detailed in EST section 4.1.1 "Bootstrap 
+            Distribution of CA Certificates" <xref target="RFC7030"/>.</t> 
 
-          <t>The Pledge calls the EST defined /cacerts method to obtain the
-          current CA certificate. These are validated using the Voucher.</t>
+            <t>The Pledge requests and validates a voucher using the new REST calls
+            described below.</t>
 
-          <t>The Pledge completes bootstrapping as detailed in EST section
-          4.1.1.</t>
+            <t>If necessary the Pledge calls the EST defined /cacerts method to obtain the
+            current CA certificate. These are validated using the Voucher.</t>
+
+            <t>The Pledge completes bootstrapping as detailed in <xref
+            target="CompletingAuthenticationBootstrapping"></xref>.</t>
         </list></t>
-
-      <t>In order to obtain a Voucher and associated logs a
-      Registrar contacts the MASA service Service using REST calls:</t>
-
-      <figure>
-        <artwork><![CDATA[
-           +-----------+ +----------+ +-----------+ +----------+
-           | New       | | Circuit  | |           | |          |
-           | Entity    | | Proxy    | | Registrar | | Vendor   |
-           |           | |          | |           | |          |
-           ++----------+ +--+-------+ +-----+-----+ +--------+-+
-            |               |               |                |
-            |               |               |                |
-            |   TLS hello   |  TLS hello    |                |
-Establish   +---------------C--------------->                |
-TLS         |               |               |                |
-connection  |               | Server Cert   |                |
-            <---------------C---------------+                |
-            | Client Cert   |               |                |
-            +---------------C--------------->                |
-            |               |               |                |
-HTTP REST   | POST /requestvoucher          |                |
-Data        +--------------------nonce------>                |
-            |               .               | /requestvoucher|
-            |               .               +---------------->
-            |                               <----------------+
-            |                               | /requestlog    |
-            |                               +---------------->
-            |            voucher            <----------------+
-            <-------------------------------+                |
-            | (optional config information) |                |
-            |               .               |                |
-            |               .               |                |
-]]></artwork>
-
-        <postamble>Figure 8</postamble>
-      </figure>
-
-      <t>In some use cases the Registrar may need to contact the Vendor in
-      advanced, for example when the target network is air-gapped. The
-      nonceless request format is provided for this and the resulting flow is
-      slightly different. The security differences associated with not knowing
-      the nonce are discussed below:</t>
-
-      <figure>
-        <artwork><![CDATA[
-           +-----------+ +----------+ +-----------+ +----------+
-           | New       | | Circuit  | |           | |          |
-           | Entity    | | Proxy    | | Registrar | | Vendor   |
-           |           | |          | |           | |          |
-           ++----------+ +--+-------+ +-----+-----+ +--------+-+
-            |               |               |                |
-            |               |               |                |
-            |               |               | /requestvoucher|
-            |               |  (nonce       +---------------->
-            |               |  unknown)     <----------------+
-            |               |               | /requestlog    |
-            |               |               +---------------->
-            |               |               <----------------+
-            |   TLS hello   |  TLS hello    |                |
-Establish   +---------------C--------------->                |
-TLS         |               |               |                |
-connection  |               | Server Cert   |                |
-            <---------------C---------------+                |
-            | Client Cert   |               |                |
-            |               |               |                |
-HTTP REST   | POST /requestvoucher          |                |
-Data        +----------------------nonce---->   (discard     |
-            |            voucher            |   nonce)       |
-            <-------------------------------+                |
-            | (optional config information) |                |
-            |               .               |                |
-            |               .               |                |
-]]></artwork>
-
-        <postamble>Figure 9</postamble>
-      </figure>
-
-      <t></t>
 
       <t>The extensions for a Registrar server are as follows:</t>
 
       <t><list style="symbols">
+          <t>Client authentication is automated using Initial Device Identity. 
+              The subject field's DN encoding MUST include the "serialNumber" 
+              attribute with the device's unique serial number. In the language of 
+              RFC6125 this provides for a SERIALNUM-ID category of identifier that 
+              can be included in a certificate and therefore that can also be used 
+              for matching purposes. The SERIALNUM-ID whitelist is collated according 
+              to vendor trust anchor since serial numbers are not globally 
+              unique.</t>
+          
           <t>The Registrar requests and validates the Voucher from the
           vendor authorized MASA service.</t>
 
@@ -2032,6 +1951,84 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         <postamble>Figure 2</postamble>
     </figure>
     
+    <t>[[UNRESOLVED:need to restore some functional overview section for all these diagrams]]In order to obtain a Voucher and associated logs a
+      Registrar contacts the MASA service Service using REST calls:</t>
+
+      <figure>
+        <artwork><![CDATA[
+           +-----------+ +----------+ +-----------+ +----------+
+           | New       | | Circuit  | |           | |          |
+           | Entity    | | Proxy    | | Registrar | | Vendor   |
+           |           | |          | |           | |          |
+           ++----------+ +--+-------+ +-----+-----+ +--------+-+
+            |               |               |                |
+            |               |               |                |
+            |   TLS hello   |  TLS hello    |                |
+Establish   +---------------C--------------->                |
+TLS         |               |               |                |
+connection  |               | Server Cert   |                |
+            <---------------C---------------+                |
+            | Client Cert   |               |                |
+            +---------------C--------------->                |
+            |               |               |                |
+HTTP REST   | POST /requestvoucher          |                |
+Data        +--------------------nonce------>                |
+            |               .               | /requestvoucher|
+            |               .               +---------------->
+            |                               <----------------+
+            |                               | /requestlog    |
+            |                               +---------------->
+            |            voucher            <----------------+
+            <-------------------------------+                |
+            | (optional config information) |                |
+            |               .               |                |
+            |               .               |                |
+]]></artwork>
+
+        <postamble>Figure 8</postamble>
+      </figure>
+
+      <t>In some use cases the Registrar may need to contact the Vendor in
+      advanced, for example when the target network is air-gapped. The
+      nonceless request format is provided for this and the resulting flow is
+      slightly different. The security differences associated with not knowing
+      the nonce are discussed below:</t>
+
+      <figure>
+        <artwork><![CDATA[
+           +-----------+ +----------+ +-----------+ +----------+
+           | New       | | Circuit  | |           | |          |
+           | Entity    | | Proxy    | | Registrar | | Vendor   |
+           |           | |          | |           | |          |
+           ++----------+ +--+-------+ +-----+-----+ +--------+-+
+            |               |               |                |
+            |               |               |                |
+            |               |               | /requestvoucher|
+            |               |  (nonce       +---------------->
+            |               |  unknown)     <----------------+
+            |               |               | /requestlog    |
+            |               |               +---------------->
+            |               |               <----------------+
+            |   TLS hello   |  TLS hello    |                |
+Establish   +---------------C--------------->                |
+TLS         |               |               |                |
+connection  |               | Server Cert   |                |
+            <---------------C---------------+                |
+            | Client Cert   |               |                |
+            |               |               |                |
+HTTP REST   | POST /requestvoucher          |                |
+Data        +----------------------nonce---->   (discard     |
+            |            voucher            |   nonce)       |
+            <-------------------------------+                |
+            | (optional config information) |                |
+            |               .               |                |
+            |               .               |                |
+]]></artwork>
+
+        <postamble>Figure 9</postamble>
+      </figure>
+
+      <t></t>    
     <t></t>
     
     <section title="Behavior of a Pledge">
