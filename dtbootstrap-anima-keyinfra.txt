@@ -125,7 +125,7 @@ Internet-Draft                    BRSKI                       April 2017
      A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  35
      A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  36
    Appendix B.  mDNS / DNSSD proxy discovery options . . . . . . . .  36
-   Appendix C.  IPIP Join Proxy mechanism  . . . . . . . . . . . . .  36
+   Appendix C.  IPIP Join Proxy mechanism  . . . . . . . . . . . . .  37
      C.1.  Multiple Join networks on the Join Proxy side . . . . . .  37
      C.2.  Automatic configuration of tunnels on Registrar . . . . .  38
      C.3.  Proxy Neighbor Discovery by Join Proxy  . . . . . . . . .  38
@@ -462,6 +462,9 @@ Internet-Draft                    BRSKI                       April 2017
    instance, smart light bulbs are usually mains powered, and speak
    802.11).  It could also be used by non-constrained devices across a
    non-energy constrained, but challenged network (such as 802.15.4).
+   The certificate contents, and the process by which the four questions
+   above are resolved do apply to constained devices.  It is simply the
+   actual on-the-wire imprint protocol which could be inappropriate.
 
    This document presumes that network access control has either already
    occurred, is not required, or is integrated by the proxy and
@@ -470,11 +473,9 @@ Internet-Draft                    BRSKI                       April 2017
    Identity is consistant with IEEE 802.1AR [IDevID], and allows for
    alignment with 802.1X network access control methods, its use here is
    for Pledge authentication rather than network access control.
-
-   Some aspects are in scope for constrained devices on challenged
-   networks: the certificate contents, and the process by which the four
-   questions above are resolved is in scope.  It is simply the actual
-   on-the-wire imprint protocol which is likely inappropriate.
+   Integrating this protocol with network access control, perhaps as an
+   Extensible Authentication Protocol (EAP) method (see [RFC3748]), is
+   out-of-scope.
 
 2.  Architectural Overview
 
@@ -482,7 +483,6 @@ Internet-Draft                    BRSKI                       April 2017
    this section.  Figure 1 provides a simplified overview of the
    components.  Each component is logical and may be combined with other
    components as necessary.
-
 
 
 
@@ -1822,6 +1822,11 @@ Internet-Draft                    BRSKI                       April 2017
               IPv6", RFC 3542, DOI 10.17487/RFC3542, May 2003,
               <http://www.rfc-editor.org/info/rfc3542>.
 
+   [RFC3748]  Aboba, B., Blunk, L., Vollbrecht, J., Carlson, J., and H.
+              Levkowetz, Ed., "Extensible Authentication Protocol
+              (EAP)", RFC 3748, DOI 10.17487/RFC3748, June 2004,
+              <http://www.rfc-editor.org/info/rfc3748>.
+
    [RFC3927]  Cheshire, S., Aboba, B., and E. Guttman, "Dynamic
               Configuration of IPv4 Link-Local Addresses", RFC 3927,
               DOI 10.17487/RFC3927, May 2005,
@@ -1838,17 +1843,17 @@ Internet-Draft                    BRSKI                       April 2017
               (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
               <http://www.rfc-editor.org/info/rfc5280>.
 
-   [RFC5386]  Williams, N. and M. Richardson, "Better-Than-Nothing
-              Security: An Unauthenticated Mode of IPsec", RFC 5386,
-              DOI 10.17487/RFC5386, November 2008,
-              <http://www.rfc-editor.org/info/rfc5386>.
-
 
 
 Pritikin, et al.        Expires October 19, 2017               [Page 33]
 
 Internet-Draft                    BRSKI                       April 2017
 
+
+   [RFC5386]  Williams, N. and M. Richardson, "Better-Than-Nothing
+              Security: An Unauthenticated Mode of IPsec", RFC 5386,
+              DOI 10.17487/RFC5386, November 2008,
+              <http://www.rfc-editor.org/info/rfc5386>.
 
    [RFC5652]  Housley, R., "Cryptographic Message Syntax (CMS)", STD 70,
               RFC 5652, DOI 10.17487/RFC5652, September 2009,
@@ -1894,17 +1899,17 @@ Internet-Draft                    BRSKI                       April 2017
               for NETCONF or RESTCONF based Management", draft-ietf-
               netconf-zerotouch-13 (work in progress), March 2017.
 
-   [I-D.lear-mud-framework]
-              Lear, E., "Manufacturer Usage Description Framework",
-              draft-lear-mud-framework-00 (work in progress), January
-              2016.
-
 
 
 Pritikin, et al.        Expires October 19, 2017               [Page 34]
 
 Internet-Draft                    BRSKI                       April 2017
 
+
+   [I-D.lear-mud-framework]
+              Lear, E., "Manufacturer Usage Description Framework",
+              draft-lear-mud-framework-00 (work in progress), January
+              2016.
 
    [I-D.richardson-anima-state-for-joinrouter]
               Richardson, M., "Considerations for stateful vs stateless
@@ -1949,11 +1954,6 @@ A.1.  IPv4 Link Local addresses
    generated using [RFC3927]  Dynamic Configuration of IPv4 Link-Local
    Addresses.
 
-   In the case that an IPv4 Local-Local address is formed, then the
-   bootstrap process would continue as in the IPv6 case by looking for a
-   (circuit) proxy.
-
-
 
 
 
@@ -1961,6 +1961,10 @@ Pritikin, et al.        Expires October 19, 2017               [Page 35]
 
 Internet-Draft                    BRSKI                       April 2017
 
+
+   In the case that an IPv4 Local-Local address is formed, then the
+   bootstrap process would continue as in the IPv6 case by looking for a
+   (circuit) proxy.
 
 A.2.  Use of DHCPv4
 
@@ -2005,11 +2009,7 @@ Appendix B.  mDNS / DNSSD proxy discovery options
    second and third responses are tried.  If these fail the Pledge moves
    on to normal DNS-based Service Discovery.
 
-Appendix C.  IPIP Join Proxy mechanism
 
-   The Circuit Proxy mechanism suffers from requiring a state on the
-   Join Proxy for each connection that is relayed.  The Circuit Proxy
-   can be considered a kind of Algorithm Gateway [FIND-good-REF].
 
 
 
@@ -2017,6 +2017,12 @@ Pritikin, et al.        Expires October 19, 2017               [Page 36]
 
 Internet-Draft                    BRSKI                       April 2017
 
+
+Appendix C.  IPIP Join Proxy mechanism
+
+   The Circuit Proxy mechanism suffers from requiring a state on the
+   Join Proxy for each connection that is relayed.  The Circuit Proxy
+   can be considered a kind of Algorithm Gateway [FIND-good-REF].
 
    An alternative to proxying at the TCP layer is to selectively forward
    at the IP layer.  This moves all per-connection to the Join
@@ -2060,12 +2066,6 @@ C.1.  Multiple Join networks on the Join Proxy side
    additional key to distinguish which network the packet should be
    returned to.
 
-   The simplest way to get this additional key is to allocate an
-   additional ACP address; one address for each network on which join
-   traffic is occuring.  The Join Proxy SHOULD do a GRASP M_NEG_SYN for
-   each interface which they wish to relay traffic, as this allows the
-   Registrar to do any static tunnel configuration that may be required.
-
 
 
 
@@ -2073,6 +2073,12 @@ Pritikin, et al.        Expires October 19, 2017               [Page 37]
 
 Internet-Draft                    BRSKI                       April 2017
 
+
+   The simplest way to get this additional key is to allocate an
+   additional ACP address; one address for each network on which join
+   traffic is occuring.  The Join Proxy SHOULD do a GRASP M_NEG_SYN for
+   each interface which they wish to relay traffic, as this allows the
+   Registrar to do any static tunnel configuration that may be required.
 
 C.2.  Automatic configuration of tunnels on Registrar
 
@@ -2116,12 +2122,6 @@ C.4.  Use of connected sockets; or IP_PKTINFO for CoAP on Registrar
 
    When using UDP sockets with CoAP, the application will have to pay
    attention to the incoming ifindex on the socket.  Access to this
-   information is available using the IP_PKTINFO auxiliary extension
-   which is a standard part of the IPv6 sockets API.
-
-   A registrar application could, after receipt of an initial CoAP
-   message from the Pledge, create a connected UDP socket (including the
-   ifindex information).  The kernel would then take care of accurate
 
 
 
@@ -2130,6 +2130,12 @@ Pritikin, et al.        Expires October 19, 2017               [Page 38]
 Internet-Draft                    BRSKI                       April 2017
 
 
+   information is available using the IP_PKTINFO auxiliary extension
+   which is a standard part of the IPv6 sockets API.
+
+   A registrar application could, after receipt of an initial CoAP
+   message from the Pledge, create a connected UDP socket (including the
+   ifindex information).  The kernel would then take care of accurate
    demultiplexing upon receive, and subsequent transmission to the
    correct interface.
 
@@ -2172,12 +2178,6 @@ Appendix D.  Functional Overview
      |                     |                   |                    |
      |<-RFC3927 IPv4 adr   | Appendix A        |                    |
    or|<-RFC4862 IPv6 adr   |                   |                    |
-     |                     |                   |                    |
-     |-------------------->|                   |                    |
-     | optional: mDNS query| Appendix B        |                    |
-     | RFC6763/RFC6762     |                   |                    |
-     |                     |                   |                    |
-     |<--------------------|                   |                    |
 
 
 
@@ -2186,6 +2186,12 @@ Pritikin, et al.        Expires October 19, 2017               [Page 39]
 Internet-Draft                    BRSKI                       April 2017
 
 
+     |                     |                   |                    |
+     |-------------------->|                   |                    |
+     | optional: mDNS query| Appendix B        |                    |
+     | RFC6763/RFC6762     |                   |                    |
+     |                     |                   |                    |
+     |<--------------------|                   |                    |
      | GRASP M_FLOOD       |                   |                    |
      |   periodic broadcast|                   |                    |
      |                     |                   |                    |
@@ -2229,18 +2235,18 @@ Internet-Draft                    BRSKI                       April 2017
      |                     |                   |                    |
      |                     |                   |                    |
 
-   Figure 2
-
-   [[UNRESOLVED:need to restore some functional overview section for all
-   these diagrams]]In order to obtain a Voucher and associated logs a
-   Registrar contacts the MASA service Service using REST calls:
-
 
 
 Pritikin, et al.        Expires October 19, 2017               [Page 40]
 
 Internet-Draft                    BRSKI                       April 2017
 
+
+   Figure 2
+
+   [[UNRESOLVED:need to restore some functional overview section for all
+   these diagrams]]In order to obtain a Voucher and associated logs a
+   Registrar contacts the MASA service Service using REST calls:
 
               +-----------+ +----------+ +-----------+ +----------+
               | New       | | Circuit  | |           | |          |
@@ -2277,12 +2283,6 @@ Internet-Draft                    BRSKI                       April 2017
    nonceless request format is provided for this and the resulting flow
    is slightly different.  The security differences associated with not
    knowing the nonce are discussed below:
-
-
-
-
-
-
 
 
 
@@ -2987,8 +2987,7 @@ D.5.1.  Network boundaries
 
 D.6.  Interactions with Network Access Control
 
-   [[UNRESOLVED: this might be important enough to promote to its own
-   appendix entry?]]
+   [[RESOLVED: via paragraph in 'scope of solution' discussion.]]
 
    The assumption is that Network Access Control (NAC) completes using
    the Pledge 's X.509 IDevID credentials and results in the device
@@ -3017,6 +3016,7 @@ E.1.  Instantiating the Domain Certification Authority
    3rd party certification authority services that do not provide
    support for delegation of certificate issuance decisions to a domain
    managed Registration Authority.
+
 
 
 
