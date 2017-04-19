@@ -77,11 +77,11 @@ Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   4
      1.1.  Secure Imprinting without Vouchers  . . . . . . . . . . .   5
-     1.2.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   6
-     1.3.  Scope of solution . . . . . . . . . . . . . . . . . . . .   8
+     1.2.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   5
+     1.3.  Scope of solution . . . . . . . . . . . . . . . . . . . .   7
    2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   9
      2.1.  Secure Imprinting without Vouchers  . . . . . . . . . . .  11
-     2.2.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  12
+     2.2.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  11
      2.3.  Initial Device Identifier . . . . . . . . . . . . . . . .  12
      2.4.  Lack of realtime clock  . . . . . . . . . . . . . . . . .  13
      2.5.  Cloud Registrar . . . . . . . . . . . . . . . . . . . . .  14
@@ -182,12 +182,10 @@ Internet-Draft                    BRSKI                       April 2017
    'Trust on First Use' (TOFU) [RFC7435], 'resurrecting duckling'
    [Stajano99theresurrecting] or 'pre-staging'.
 
-   This document describes a zero-touch approach to bootstrapping that
-   secures the initial distribution of key material between an
-   unconfigured and untouched device called a "Pledge" and the
-   "Registrar" device that is a member of an established network domain.
-   The bootstrapping process provides a foundation to securely answer
-   the following questions:
+   BRSKI provides a foundation to securely answer the following
+   questions between an element of the network domain called the
+   "Registrar" and an unconfigured and untouched device called a
+   "Pledge":
 
    o  Registrar authenticating the Pledge: "Who is this device?  What is
       its identity?"
@@ -205,18 +203,20 @@ Internet-Draft                    BRSKI                       April 2017
    identity, third party cloud service communications, and local access
    control lists.  The Pledge actions derive from a cryptographically
    protected "voucher" message delivered through the Registrar.
-   Multiple forms of "vouchers" are described to support a variety of
-   use cases.
 
    The syntactic details of vouchers are described in detail in
    [I-D.ietf-anima-voucher].  This document details automated protocol
    mechanisms to obtain vouchers.
 
-   The protocol results in the Pledge storing an X.509 root certificate
+   BRSKI results in the Pledge storing an X.509 root certificate
    sufficient for verifying the Registrar identity.  In the process a
    TLS connection is established which can be directly used for
    Enrollment over Secure Transport (EST).  The Pledge can use these
    credentials to secure additional protocol exchanges.
+
+   BRSKI is agile enough to support bootstrapping alternative key
+   infrastructures, such as a symmetric key solutions, but no such
+   method is described in this document.
 
 
 
@@ -225,10 +225,6 @@ Pritikin, et al.        Expires October 21, 2017                [Page 4]
 
 Internet-Draft                    BRSKI                       April 2017
 
-
-   The protocol is agile enough to support bootstrapping alternative key
-   infrastructures, such as a symmetric key solutions, but no such
-   method is described in this document.
 
 1.1.  Secure Imprinting without Vouchers
 
@@ -267,20 +263,8 @@ Internet-Draft                    BRSKI                       April 2017
    o  the vendor is responsible for making the authorization decisions
       (this is a liability concern),
 
-   BRSKI addresses these issues by introducting an authorization layer
-   via "vouchers".  The additional complexity provides for significant
-   flexibility.
-
-
-
-
-
-
-
-Pritikin, et al.        Expires October 21, 2017                [Page 5]
-
-Internet-Draft                    BRSKI                       April 2017
-
+   BRSKI addresses these issues by defining "voucher" and automation
+   extensions to the EST protocol.
 
 1.2.  Terminology
 
@@ -290,6 +274,13 @@ Internet-Draft                    BRSKI                       April 2017
    [RFC2119].
 
    The following terms are defined for clarity:
+
+
+
+Pritikin, et al.        Expires October 21, 2017                [Page 5]
+
+Internet-Draft                    BRSKI                       April 2017
+
 
    DomainID:  The domain identity is the 160-bit SHA-1 hash of the BIT
       STRING of the subjectPublicKey of the domain trust anchor that is
@@ -329,15 +320,6 @@ Internet-Draft                    BRSKI                       April 2017
    Voucher  A signed statement from the MASA service that indicates to a
       Pledge the cryptographic identity of the Registrar it should
       trust.  There are different types of vouchers depending on how
-
-
-
-
-Pritikin, et al.        Expires October 21, 2017                [Page 6]
-
-Internet-Draft                    BRSKI                       April 2017
-
-
       that trust asserted.  Multiple voucher types are defined in
       [I-D.ietf-anima-voucher]
 
@@ -348,6 +330,14 @@ Internet-Draft                    BRSKI                       April 2017
 
    Domain CA:  The domain Certification Authority (CA) provides
       certification functionalities to the domain.  At a minimum it
+
+
+
+Pritikin, et al.        Expires October 21, 2017                [Page 6]
+
+Internet-Draft                    BRSKI                       April 2017
+
+
       provides certification functionalities to a Registrar and stores
       the trust anchor that defines the domain.  Optionally, it
       certifies all elements.
@@ -386,14 +376,6 @@ Internet-Draft                    BRSKI                       April 2017
    IDevID:  An Initial Device Identity X.509 certificate installed by
       the vendor on new equipment.
 
-
-
-
-Pritikin, et al.        Expires October 21, 2017                [Page 7]
-
-Internet-Draft                    BRSKI                       April 2017
-
-
    TOFU:  Trust on First Use. Used similarly to [RFC7435].  This is
       where a Pledge device makes no security decisions but rather
       simply trusts the first Registrar it is contacted by.  This is
@@ -403,6 +385,15 @@ Internet-Draft                    BRSKI                       April 2017
 
    Questions have been posed as to whether this solution is suitable in
    general for Internet of Things (IoT) networks.  This depends on the
+
+
+
+
+Pritikin, et al.        Expires October 21, 2017                [Page 7]
+
+Internet-Draft                    BRSKI                       April 2017
+
+
    capabilities of the devices in question.  The terminology of
    [RFC7228] is best used to describe the boundaries.
 
@@ -411,13 +402,6 @@ Internet-Draft                    BRSKI                       April 2017
    network.  The entire solution as described here is not intended to be
    useable as-is by constrained devices operating on challenged networks
    (such as 802.15.4 LLNs).
-
-   There are a number of optional mechanisms in BRSKI.  These mechanisms
-   are not mandatory to implement for the core applicability to ANIMA.
-   These mechanisms have been moved out of the main flow of the document
-   to appendices to emphasis that they are not considered normative,
-   mandatory to implement, while making it easier for another document
-   to normatively reference them.
 
    In many target applications, the systems involved are large router
    platforms with multi-gigabit inter-connections, mounted in controlled
@@ -442,14 +426,6 @@ Internet-Draft                    BRSKI                       April 2017
    Specifically, there are protocol aspects described here which might
    result in congestion collapse or energy-exhaustion of intermediate
    battery powered routers in an LLN.  Those types of networks SHOULD
-
-
-
-Pritikin, et al.        Expires October 21, 2017                [Page 8]
-
-Internet-Draft                    BRSKI                       April 2017
-
-
    NOT use this solution.  These limitations are predominately related
    to the large credential and key sizes required for device
    authentication.  Defining symmetric key techniques that meet the
@@ -465,6 +441,14 @@ Internet-Draft                    BRSKI                       April 2017
    The certificate contents, and the process by which the four questions
    above are resolved do apply to constained devices.  It is simply the
    actual on-the-wire imprint protocol which could be inappropriate.
+
+
+
+
+Pritikin, et al.        Expires October 21, 2017                [Page 8]
+
+Internet-Draft                    BRSKI                       April 2017
+
 
    This document presumes that network access control has either already
    occurred, is not required, or is integrated by the proxy and
@@ -483,6 +467,22 @@ Internet-Draft                    BRSKI                       April 2017
    this section.  Figure 1 provides a simplified overview of the
    components.  Each component is logical and may be combined with other
    components as necessary.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -528,9 +528,9 @@ Internet-Draft                    BRSKI                       April 2017
    |       |     .  +------------+       +-----+-----+          .
    |IDevID |     .                             |                .
    |       |     .           +-----------------+----------+     .
-   |       |     .           | Domain Certification       |     .
-   |       |     .           | Authority                  |     .
-   +-------+     .           | Management and etc         |     .
+   |       |     .           | Key Infrastructure         |     .
+   |       |     .           | (e.g. PKI Certificate      |     .
+   +-------+     .           |       Authority)           |     .
                  .           +----------------------------+     .
                  .                                              .
                  ................................................
@@ -547,13 +547,13 @@ Internet-Draft                    BRSKI                       April 2017
    vendors due to the required sales channel integrations necessary to
    track ownership.
 
-   The domain is the managed network infrastructure the Pledge is
-   managed by.  The a domain provides initial device connectivity
-   minimally sufficient for bootstrapping through the Circuit Proxy.
-   The Domain registrar makes authorization decisions and handles
-   connectivity to the vendor services and authenticates the Pledge.
-   Optional cryptographic credential and configuration management
-   systems are expected.
+   The domain is the managed network infrastructure with a Key
+   Infrastructure the Pledge is joining.  The a domain provides initial
+   device connectivity sufficient for bootstrapping with a Circuit
+   Proxy.  The Domain registrar authenticates the Pledge, makes
+   authorization decisions, and distributes vouchers obtained from the
+   Vendor Service.  Optionally the Registrar also acts as a PKI
+   Registration Authority.
 
 
 
@@ -561,14 +561,6 @@ Pritikin, et al.        Expires October 21, 2017               [Page 10]
 
 Internet-Draft                    BRSKI                       April 2017
 
-
-   This document describes a secure zero-touch approach to bootstrapping
-   a remote key infrastructure.  Secure bootstrapping requires
-   mitigating the threat of an attacker domain establishing a management
-   role over the pledge device.  In a "trust on first use" model, where
-   this threat is ignored, the attacker has an opportunity to install a
-   persistent malware component.  This document uses Vouchers to address
-   the threat while maintaining a significant level of flexibility.
 
 2.1.  Secure Imprinting without Vouchers
 
@@ -611,13 +603,6 @@ Internet-Draft                    BRSKI                       April 2017
    via "vouchers".  The additional complexity provides for significant
    flexibility.
 
-
-
-Pritikin, et al.        Expires October 21, 2017               [Page 11]
-
-Internet-Draft                    BRSKI                       April 2017
-
-
 2.2.  Secure Imprinting using Vouchers
 
    A voucher is a cryptographically protected statement to the Pledge
@@ -625,6 +610,13 @@ Internet-Draft                    BRSKI                       April 2017
 
    The format and cryptographic mechanism of vouchers is described in
    detail in [I-D.ietf-anima-voucher].
+
+
+
+Pritikin, et al.        Expires October 21, 2017               [Page 11]
+
+Internet-Draft                    BRSKI                       April 2017
+
 
    Vouchers provide a flexible mechanism to secure imprinting: the
    Pledge device only imprints when a voucher can be validated.  At the
@@ -667,14 +659,20 @@ Internet-Draft                    BRSKI                       April 2017
    in the certificate extension.  The URI provides the authority
    information.  The BRSKI .well-known tree is described in Section 3
 
+   The new extension is identified as follows:
+
+
+
+
+
+
+
 
 
 Pritikin, et al.        Expires October 21, 2017               [Page 12]
 
 Internet-Draft                    BRSKI                       April 2017
 
-
-   The new extension is identified as follows:
 
    <CODE BEGINS>
 
@@ -722,6 +720,8 @@ Internet-Draft                    BRSKI                       April 2017
    until bootstrapping is complete.  Therefore bootstrapping is defined
    in a method that does not require knowledge of the current time.
 
+   Unfortunately there are moments during bootstrapping when
+   certificates are verified, such as during the TLS handshake, where
 
 
 
@@ -730,8 +730,6 @@ Pritikin, et al.        Expires October 21, 2017               [Page 13]
 Internet-Draft                    BRSKI                       April 2017
 
 
-   Unfortunately there are moments during bootstrapping when
-   certificates are verified, such as during the TLS handshake, where
    validity periods are confirmed.  This paradoxical "catch-22" is
    resolved by the Pledge maintaining a concept of the current "window"
    of presumed time validity that is continually refined throughout the
@@ -776,6 +774,8 @@ Internet-Draft                    BRSKI                       April 2017
    authenticate service as described in RFC6125.  This is consistent
    with the human user configuration of an EST server URI in [RFC7030]
    which also depends on RFC6125.
+
+
 
 
 

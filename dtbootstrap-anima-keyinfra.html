@@ -217,11 +217,11 @@ Table of Contents
 
    <a href="#section-1">1</a>.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
      <a href="#section-1.1">1.1</a>.  Secure Imprinting without Vouchers  . . . . . . . . . . .   <a href="#page-5">5</a>
-     <a href="#section-1.2">1.2</a>.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-6">6</a>
-     <a href="#section-1.3">1.3</a>.  Scope of solution . . . . . . . . . . . . . . . . . . . .   <a href="#page-8">8</a>
+     <a href="#section-1.2">1.2</a>.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-5">5</a>
+     <a href="#section-1.3">1.3</a>.  Scope of solution . . . . . . . . . . . . . . . . . . . .   <a href="#page-7">7</a>
    <a href="#section-2">2</a>.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   <a href="#page-9">9</a>
      <a href="#section-2.1">2.1</a>.  Secure Imprinting without Vouchers  . . . . . . . . . . .  <a href="#page-11">11</a>
-     <a href="#section-2.2">2.2</a>.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  <a href="#page-12">12</a>
+     <a href="#section-2.2">2.2</a>.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  <a href="#page-11">11</a>
      <a href="#section-2.3">2.3</a>.  Initial Device Identifier . . . . . . . . . . . . . . . .  <a href="#page-12">12</a>
      <a href="#section-2.4">2.4</a>.  Lack of realtime clock  . . . . . . . . . . . . . . . . .  <a href="#page-13">13</a>
      <a href="#section-2.5">2.5</a>.  Cloud Registrar . . . . . . . . . . . . . . . . . . . . .  <a href="#page-14">14</a>
@@ -322,12 +322,10 @@ Table of Contents
    'Trust on First Use' (TOFU) [<a href="./rfcmarkup.sh?rfc=7435" title='"Opportunistic Security: Some Protection Most of the Time"'>RFC7435</a>], 'resurrecting duckling'
    [<a href="#ref-Stajano99theresurrecting">Stajano99theresurrecting</a>] or 'pre-staging'.
 
-   This document describes a zero-touch approach to bootstrapping that
-   secures the initial distribution of key material between an
-   unconfigured and untouched device called a "Pledge" and the
-   "Registrar" device that is a member of an established network domain.
-   The bootstrapping process provides a foundation to securely answer
-   the following questions:
+   BRSKI provides a foundation to securely answer the following
+   questions between an element of the network domain called the
+   "Registrar" and an unconfigured and untouched device called a
+   "Pledge":
 
    o  Registrar authenticating the Pledge: "Who is this device?  What is
       its identity?"
@@ -345,18 +343,20 @@ Table of Contents
    identity, third party cloud service communications, and local access
    control lists.  The Pledge actions derive from a cryptographically
    protected "voucher" message delivered through the Registrar.
-   Multiple forms of "vouchers" are described to support a variety of
-   use cases.
 
    The syntactic details of vouchers are described in detail in
    [<a href="#ref-I-D.ietf-anima-voucher">I-D.ietf-anima-voucher</a>].  This document details automated protocol
    mechanisms to obtain vouchers.
 
-   The protocol results in the Pledge storing an X.509 root certificate
+   BRSKI results in the Pledge storing an X.509 root certificate
    sufficient for verifying the Registrar identity.  In the process a
    TLS connection is established which can be directly used for
    Enrollment over Secure Transport (EST).  The Pledge can use these
    credentials to secure additional protocol exchanges.
+
+   BRSKI is agile enough to support bootstrapping alternative key
+   infrastructures, such as a symmetric key solutions, but no such
+   method is described in this document.
 
 
 
@@ -365,10 +365,6 @@ Table of Contents
 </pre><pre class='newpage'><a name="page-5" id="page-5" href="#page-5" class="invisible"> </a>
 <span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
 
-
-   The protocol is agile enough to support bootstrapping alternative key
-   infrastructures, such as a symmetric key solutions, but no such
-   method is described in this document.
 
 <span class="h3"><a name="section-1.1">1.1</a>.  Secure Imprinting without Vouchers</span>
 
@@ -407,20 +403,8 @@ Table of Contents
    o  the vendor is responsible for making the authorization decisions
       (this is a liability concern),
 
-   BRSKI addresses these issues by introducting an authorization layer
-   via "vouchers".  The additional complexity provides for significant
-   flexibility.
-
-
-
-
-
-
-
-<span class="grey">Pritikin, et al.        Expires October 21, 2017                [Page 5]</span>
-</pre><pre class='newpage'><a name="page-6" id="page-6" href="#page-6" class="invisible"> </a>
-<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
-
+   BRSKI addresses these issues by defining "voucher" and automation
+   extensions to the EST protocol.
 
 <span class="h3"><a name="section-1.2">1.2</a>.  Terminology</span>
 
@@ -430,6 +414,13 @@ Table of Contents
    [<a href="./rfcmarkup.sh?rfc=2119" title='"Key words for use in RFCs to Indicate Requirement Levels"'>RFC2119</a>].
 
    The following terms are defined for clarity:
+
+
+
+<span class="grey">Pritikin, et al.        Expires October 21, 2017                [Page 5]</span>
+</pre><pre class='newpage'><a name="page-6" id="page-6" href="#page-6" class="invisible"> </a>
+<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
+
 
    DomainID:  The domain identity is the 160-bit SHA-1 hash of the BIT
       STRING of the subjectPublicKey of the domain trust anchor that is
@@ -469,15 +460,6 @@ Table of Contents
    Voucher  A signed statement from the MASA service that indicates to a
       Pledge the cryptographic identity of the Registrar it should
       trust.  There are different types of vouchers depending on how
-
-
-
-
-<span class="grey">Pritikin, et al.        Expires October 21, 2017                [Page 6]</span>
-</pre><pre class='newpage'><a name="page-7" id="page-7" href="#page-7" class="invisible"> </a>
-<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
-
-
       that trust asserted.  Multiple voucher types are defined in
       [<a href="#ref-I-D.ietf-anima-voucher">I-D.ietf-anima-voucher</a>]
 
@@ -488,6 +470,14 @@ Table of Contents
 
    Domain CA:  The domain Certification Authority (CA) provides
       certification functionalities to the domain.  At a minimum it
+
+
+
+<span class="grey">Pritikin, et al.        Expires October 21, 2017                [Page 6]</span>
+</pre><pre class='newpage'><a name="page-7" id="page-7" href="#page-7" class="invisible"> </a>
+<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
+
+
       provides certification functionalities to a Registrar and stores
       the trust anchor that defines the domain.  Optionally, it
       certifies all elements.
@@ -526,14 +516,6 @@ Table of Contents
    IDevID:  An Initial Device Identity X.509 certificate installed by
       the vendor on new equipment.
 
-
-
-
-<span class="grey">Pritikin, et al.        Expires October 21, 2017                [Page 7]</span>
-</pre><pre class='newpage'><a name="page-8" id="page-8" href="#page-8" class="invisible"> </a>
-<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
-
-
    TOFU:  Trust on First Use. Used similarly to [<a href="./rfcmarkup.sh?rfc=7435" title='"Opportunistic Security: Some Protection Most of the Time"'>RFC7435</a>].  This is
       where a Pledge device makes no security decisions but rather
       simply trusts the first Registrar it is contacted by.  This is
@@ -543,6 +525,15 @@ Table of Contents
 
    Questions have been posed as to whether this solution is suitable in
    general for Internet of Things (IoT) networks.  This depends on the
+
+
+
+
+<span class="grey">Pritikin, et al.        Expires October 21, 2017                [Page 7]</span>
+</pre><pre class='newpage'><a name="page-8" id="page-8" href="#page-8" class="invisible"> </a>
+<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
+
+
    capabilities of the devices in question.  The terminology of
    [<a href="./rfcmarkup.sh?rfc=7228" title='"Terminology for Constrained-Node Networks"'>RFC7228</a>] is best used to describe the boundaries.
 
@@ -551,13 +542,6 @@ Table of Contents
    network.  The entire solution as described here is not intended to be
    useable as-is by constrained devices operating on challenged networks
    (such as 802.15.4 LLNs).
-
-   There are a number of optional mechanisms in BRSKI.  These mechanisms
-   are not mandatory to implement for the core applicability to ANIMA.
-   These mechanisms have been moved out of the main flow of the document
-   to appendices to emphasis that they are not considered normative,
-   mandatory to implement, while making it easier for another document
-   to normatively reference them.
 
    In many target applications, the systems involved are large router
    platforms with multi-gigabit inter-connections, mounted in controlled
@@ -582,14 +566,6 @@ Table of Contents
    Specifically, there are protocol aspects described here which might
    result in congestion collapse or energy-exhaustion of intermediate
    battery powered routers in an LLN.  Those types of networks SHOULD
-
-
-
-<span class="grey">Pritikin, et al.        Expires October 21, 2017                [Page 8]</span>
-</pre><pre class='newpage'><a name="page-9" id="page-9" href="#page-9" class="invisible"> </a>
-<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
-
-
    NOT use this solution.  These limitations are predominately related
    to the large credential and key sizes required for device
    authentication.  Defining symmetric key techniques that meet the
@@ -605,6 +581,14 @@ Table of Contents
    The certificate contents, and the process by which the four questions
    above are resolved do apply to constained devices.  It is simply the
    actual on-the-wire imprint protocol which could be inappropriate.
+
+
+
+
+<span class="grey">Pritikin, et al.        Expires October 21, 2017                [Page 8]</span>
+</pre><pre class='newpage'><a name="page-9" id="page-9" href="#page-9" class="invisible"> </a>
+<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
+
 
    This document presumes that network access control has either already
    occurred, is not required, or is integrated by the proxy and
@@ -623,6 +607,22 @@ Table of Contents
    this section.  Figure 1 provides a simplified overview of the
    components.  Each component is logical and may be combined with other
    components as necessary.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -668,9 +668,9 @@ Table of Contents
    |       |     .  +------------+       +-----+-----+          .
    |IDevID |     .                             |                .
    |       |     .           +-----------------+----------+     .
-   |       |     .           | Domain Certification       |     .
-   |       |     .           | Authority                  |     .
-   +-------+     .           | Management and etc         |     .
+   |       |     .           | Key Infrastructure         |     .
+   |       |     .           | (e.g. PKI Certificate      |     .
+   +-------+     .           |       Authority)           |     .
                  .           +----------------------------+     .
                  .                                              .
                  ................................................
@@ -687,13 +687,13 @@ Table of Contents
    vendors due to the required sales channel integrations necessary to
    track ownership.
 
-   The domain is the managed network infrastructure the Pledge is
-   managed by.  The a domain provides initial device connectivity
-   minimally sufficient for bootstrapping through the Circuit Proxy.
-   The Domain registrar makes authorization decisions and handles
-   connectivity to the vendor services and authenticates the Pledge.
-   Optional cryptographic credential and configuration management
-   systems are expected.
+   The domain is the managed network infrastructure with a Key
+   Infrastructure the Pledge is joining.  The a domain provides initial
+   device connectivity sufficient for bootstrapping with a Circuit
+   Proxy.  The Domain registrar authenticates the Pledge, makes
+   authorization decisions, and distributes vouchers obtained from the
+   Vendor Service.  Optionally the Registrar also acts as a PKI
+   Registration Authority.
 
 
 
@@ -701,14 +701,6 @@ Table of Contents
 </pre><pre class='newpage'><a name="page-11" id="page-11" href="#page-11" class="invisible"> </a>
 <span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
 
-
-   This document describes a secure zero-touch approach to bootstrapping
-   a remote key infrastructure.  Secure bootstrapping requires
-   mitigating the threat of an attacker domain establishing a management
-   role over the pledge device.  In a "trust on first use" model, where
-   this threat is ignored, the attacker has an opportunity to install a
-   persistent malware component.  This document uses Vouchers to address
-   the threat while maintaining a significant level of flexibility.
 
 <span class="h3"><a name="section-2.1">2.1</a>.  Secure Imprinting without Vouchers</span>
 
@@ -751,13 +743,6 @@ Table of Contents
    via "vouchers".  The additional complexity provides for significant
    flexibility.
 
-
-
-<span class="grey">Pritikin, et al.        Expires October 21, 2017               [Page 11]</span>
-</pre><pre class='newpage'><a name="page-12" id="page-12" href="#page-12" class="invisible"> </a>
-<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
-
-
 <span class="h3"><a name="section-2.2">2.2</a>.  Secure Imprinting using Vouchers</span>
 
    A voucher is a cryptographically protected statement to the Pledge
@@ -765,6 +750,13 @@ Table of Contents
 
    The format and cryptographic mechanism of vouchers is described in
    detail in [<a href="#ref-I-D.ietf-anima-voucher">I-D.ietf-anima-voucher</a>].
+
+
+
+<span class="grey">Pritikin, et al.        Expires October 21, 2017               [Page 11]</span>
+</pre><pre class='newpage'><a name="page-12" id="page-12" href="#page-12" class="invisible"> </a>
+<span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
+
 
    Vouchers provide a flexible mechanism to secure imprinting: the
    Pledge device only imprints when a voucher can be validated.  At the
@@ -807,14 +799,20 @@ Table of Contents
    in the certificate extension.  The URI provides the authority
    information.  The BRSKI .well-known tree is described in <a href="#section-3">Section 3</a>
 
+   The new extension is identified as follows:
+
+
+
+
+
+
+
 
 
 <span class="grey">Pritikin, et al.        Expires October 21, 2017               [Page 12]</span>
 </pre><pre class='newpage'><a name="page-13" id="page-13" href="#page-13" class="invisible"> </a>
 <span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
 
-
-   The new extension is identified as follows:
 
    &lt;CODE BEGINS&gt;
 
@@ -862,6 +860,8 @@ Table of Contents
    until bootstrapping is complete.  Therefore bootstrapping is defined
    in a method that does not require knowledge of the current time.
 
+   Unfortunately there are moments during bootstrapping when
+   certificates are verified, such as during the TLS handshake, where
 
 
 
@@ -870,8 +870,6 @@ Table of Contents
 <span class="grey">Internet-Draft                    BRSKI                       April 2017</span>
 
 
-   Unfortunately there are moments during bootstrapping when
-   certificates are verified, such as during the TLS handshake, where
    validity periods are confirmed.  This paradoxical "catch-22" is
    resolved by the Pledge maintaining a concept of the current "window"
    of presumed time validity that is continually refined throughout the
@@ -916,6 +914,8 @@ Table of Contents
    authenticate service as described in <a href="./rfcmarkup.sh?rfc=6125">RFC6125</a>.  This is consistent
    with the human user configuration of an EST server URI in [<a href="./rfcmarkup.sh?rfc=7030" title='"Enrollment over Secure Transport"'>RFC7030</a>]
    which also depends on <a href="./rfcmarkup.sh?rfc=6125">RFC6125</a>.
+
+
 
 
 
