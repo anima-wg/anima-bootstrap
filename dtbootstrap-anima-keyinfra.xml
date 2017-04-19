@@ -662,17 +662,38 @@ END
         "https:// authority "./well-known/est".</t> 
 
         <t>Establishment of the TLS connection for bootstrapping is as 
-        specified for EST <xref target="RFC7030"/>. In particular server 
-        identity and client identity are as described in EST <xref 
-        target="RFC7030"/> section 3.3 "TLS Layer" with automation 
-        extensions as follows.</t> 
+            specified in EST <xref target="RFC7030"/> section 4.1.1 "Bootstrap 
+            Distribution of CA Certificates" <xref target="RFC7030"/> with the following 
+            extensions for automation:</t> 
 
-        <t>The extensions for the Pledge client are:</t>
+        <t>Automation extensions for the Pledge (equivalent to EST client) are:</t>
 
         <t><list style="symbols">
-            <t>The Pledge provisionally accept the EST server certificate during 
-            the TLS handshake as detailed in EST section 4.1.1 "Bootstrap 
-            Distribution of CA Certificates" <xref target="RFC7030"/>.</t> 
+            <t>The Pledge provisionally accept the Registrar certificate during 
+            the TLS handshake as detailed in EST.</t> 
+
+            <t>If the Registrar responds with a redirection to other web origins the Pledge MUST follow 
+            only a single redirection. (EST supports redirection but does 
+            not allow redirections to other web origins without user input).</t>
+            
+            <t>The Registar MAY respond with an HTTP 202 ("the request has been
+                accepted for processing, but the processing has not been completed") as
+                described in EST <xref target="RFC7030"/> section 4.2.3 wherein the
+                client "MUST wait at least the specified 'retry-after' time before
+                repeating the same request". The Pledge is RECOMMENDED to provide local
+                feed (blinked LED etc) during this wait cycle if mechanisms for this
+                are available. To prevent an attacker Registrar from significantly
+                delaying bootstrapping the Pledge MUST limit the 'retry-after' time to
+                60 seconds. To avoid waiting on a single erroneous Registrar the Pledge
+                MUST drop the connection after 5 seconds and proceed to other
+                discovered Registrars. Ideally the Pledge could keep track of the
+                appropriate retry-after value for any number of outstanding Registrars
+                but this would involve a large state table on the Pledge. Instead the
+                Pledge MAY ignore the exact retry-after value in favor of a single hard
+                coded value that takes effect between discovery (<xref
+                    target="ProxyDiscovery"></xref>) attempts. A Registrar that is unable
+                to complete the transaction the first time due to timing reasons will
+                have future chances.</t>
 
             <t>The Pledge requests and validates a voucher using the new REST calls
             described below.</t>
@@ -680,11 +701,13 @@ END
             <t>If necessary the Pledge calls the EST defined /cacerts method to obtain the
             current CA certificate. These are validated using the Voucher.</t>
 
-            <t>The Pledge completes bootstrapping as detailed in <xref
-            target="CompletingAuthenticationBootstrapping"></xref>.</t>
+            <t>The Pledge completes authentication of the server certificate as detailed in <xref
+            target="CompletingAuthenticationBootstrapping"></xref>. This moves the TLS
+            connection out of the provisional state. Optionally the TLS connection can 
+            now be used for EST enrollment.</t>
         </list></t>
 
-      <t>The extensions for a Registrar server are as follows:</t>
+      <t>The extensions for a Registrar (equivalent to EST server) are:</t>
 
       <t><list style="symbols">
           <t>Client authentication is automated using Initial Device Identity. 
@@ -703,34 +726,9 @@ END
           requested.</t>
 
           <t>The Registar performs log verifications in addition to local
-          authorization checks before accepting the Pledge device.</t>
+          authorization checks before accepting optional Pledge device enrollment requests.</t>
         </list></t>
 
-        <t>The provisional TLS connection introduces security
-            risks that are addressed as follows:</t>
-
-        <t>If the Registrar provides a redirect response the Pledge MUST follow
-        the redirect but the connection remains provisional. The Pledge MUST
-        only follow a single redirection.</t>
-
-         <t>The Registar MAY respond with an HTTP 202 ("the request has been
-        accepted for processing, but the processing has not been completed") as
-        described in EST <xref target="RFC7030"/> section 4.2.3 wherein the
-        client "MUST wait at least the specified 'retry-after' time before
-        repeating the same request". The Pledge is RECOMMENDED to provide local
-        feed (blinked LED etc) during this wait cycle if mechanisms for this
-        are available. To prevent an attacker Registrar from significantly
-        delaying bootstrapping the Pledge MUST limit the 'retry-after' time to
-        60 seconds. To avoid waiting on a single erroneous Registrar the Pledge
-        MUST drop the connection after 5 seconds and proceed to other
-        discovered Registrars. Ideally the Pledge could keep track of the
-        appropriate retry-after value for any number of outstanding Registrars
-        but this would involve a large state table on the Pledge. Instead the
-        Pledge MAY ignore the exact retry-after value in favor of a single hard
-        coded value that takes effect between discovery (<xref
-        target="ProxyDiscovery"></xref>) attempts. A Registrar that is unable
-        to complete the transaction the first time due to timing reasons will
-        have future chances.</t>
         <section title="Discovery">
             <t>The result of discovery is a logical communication with a
                 Registrar, through a Proxy. The Proxy is transparent to the Pledge
@@ -1033,37 +1031,26 @@ hardwareModuleName hwSerialNum>",
 
         <section anchor="CompletingAuthenticationBootstrapping"
                  title="Completing authentication of Provisional TLS connection">
-          <t>If a Registrar's credential can not be verified using the
-          domainCAcert trust anchor the TLS connection is immediately
+          <t>If a Registrar's credentials can not be verified using the
+          domainCAcert trust anchor from the voucher then the TLS connection is immediately
           discarded and the Pledge abandons attempts to bootstrap with this
-          discovered registrar.</t>
+          discovered registrar. To ensure this the Registrar MUST use a certificate
+          that chains to the domainCAcert.</t>
 
-          <t>The following behaviors on a Registrar and Pledge are in addition
-          to normal PKIX operations:</t>
-
-          <t><list style="symbols">
-              <t>The EST server MUST use a certificate that chains to the
-              domainCAcert. This means that when the EST server obtains
-              renewed credentials the credentials included in the <xref
-              target="RequestVoucherFromMASA"></xref> request match the chain used
-              in the current provisional TLS connection.</t>
-
-              <t>The Pledge PKIX path validation of a Registrar validity
-              period information is as described in <xref
-              target="timeunknown"></xref>.</t>
-            </list>Because the domainCAcert trust anchor is installed as an
-          Explicit Trust Anchor it can be used to authenticate any dynamically
+          <t>The Pledge's PKIX path validation of a Registrar certificate's validity
+              period information is as described in <xref target="timeunknown"></xref>.
+          Beyond that once PKIX path validation is successful the TLS connection is
+          no longer provisional.</t>
+          
+          <t>The domainCAcert trust anchor is installed as an
+          Explicit Trust Anchor for future operations. It can therefore 
+          can be used to authenticate any dynamically
           discovered EST server that contain the id-kp-cmcRA extended key
           usage extension as detailed in EST RFC7030 section 3.6.1; but to
           reduce system complexity the Pledge SHOULD avoid additional
           discovery operations. Instead the Pledge SHOULD communicate directly
-          with the Registrar as the EST server to complete PKI local
-          certificate enrollment. Additionally the Pledge SHOULD use the
-          existing TLS connection to proceed with EST enrollment, thus
-          reducing the total amount of cryptographic and round trip operations
-          required during bootstrapping. [[EDNOTE: It is reasonable to mandate
-          that the existing TLS connection be re-used? e.g. MUST &gt;&gt;
-          SHOULD?]]</t>
+          with the Registrar as the EST server for future key management
+          operations.</t> 
         </section>
       </section>
 
@@ -1178,32 +1165,27 @@ hardwareModuleName hwSerialNum>",
       </section>
 
       <section title="EST Integration for PKI bootstrapping">
-        <t>The prior sections describe EST extensions necessary to enable
+        <t>This section describes EST extensions necessary to enable
         fully automated bootstrapping. Although the Voucher
         request/response structure members IDevIDAuthorityKeyIdentifier and
         DevIDSerialNumber are specific to PKI bootstrapping these are the only
         PKI specific aspects of the extensions and future work might replace
         them with non-PKI structures.</t>
         
-        <t>Once the Voucher is received, as specified in
-            this document, the client has sufficient information to leverage the
-            existing communication channel with a Registrar to continue an EST
-            RFC7030 enrollment. Enrollment picks up at RFC7030 section 4.1.1.
-            bootstrapping where the Voucher provides the "out-of-band" CA
-            certificate fingerprint (in this case the full CA certificate) such
-            that the client can now complete the TLS server authentication. At
-            this point the client continues with EST enrollment operations
-            including "CA Certificates Request", "CSR Attributes" and "Client
-            Certificate Request" or "Server-Side Key Generation".</t>
+        <t>Once the Voucher is received, as specified in this document, the 
+        client has sufficient information to leverage the existing 
+        communication channel with a Registrar to continue an EST RFC7030 
+        enrollment. The Pledge SHOULD use the existing current TLS connection 
+        to proceed with EST enrollment, thus reducing the total amount of 
+        cryptographic and round trip operations required during 
+        bootstrapping (enrollment picks up after EST RFC7030 "Bootstrap Distribution of CA 
+        Certificates" and the client continues with EST enrollment operations 
+        including "CA Certificates Request", "CSR Attributes" and "Client 
+        Certificate Request" or "Server-Side Key Generation").</t> 
 
-        <t>The prior sections provide functionality for the Pledge to obtain a
-        trust anchor representative of the Domain. The following section
-        describe using EST to obtain a locally issued PKI certificate. The
-        Pledge SHOULD leverage the discovered Registrar to proceed with
-        certificate enrollment and, if they do, MUST implement the EST options
-        described in this section. The Pledge MAY perform alternative
-        enrollment methods including discovering an alternate EST server, or
-        proceed to use its X.509 IDevID credential indefinitely.</t>
+        <t>The Pledge is RECOMMENDED to implement the following EST automation extensions. They
+        suppliment the RFC7030 EST to better support automated devices that do not
+        have an end user.</t>
 
         <t>[[EDNOTE:might be best to discuss in CSR attributes?]]For the purposes of creating the ANIMA Autonomic Control Plane,
             the contents of the new certificate MUST be carefully specified.
@@ -2135,7 +2117,7 @@ Data        +----------------------nonce---->   (discard     |
                 available.
             </t>
             
-            <t>[[UNRESOLVED: need normative statement in protocol section]] The bootstrapping protocol server is not initially authenticated.
+            <t>[[RESOLVED: need normative statement in protocol section]] The bootstrapping protocol server is not initially authenticated.
                 Thus the connection is provisional and all data received is
                 untrusted until sufficiently validated even though it is over a TLS
                 connection. This is aligned with the existing provisional mode of
