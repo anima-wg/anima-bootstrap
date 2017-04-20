@@ -521,6 +521,74 @@ END
           that: online information about the particular subject. </t>
       </section>
 
+    <section anchor="flow" title="Protocol Flow">
+        <t>A representative flow is shown in Figure 2:</t>
+        
+        <figure>
+        <artwork><![CDATA[
++--------+         +---------+    +------------+     +------------+
+| Pledge |         | Circuit |    | Domain     |     | Vendor     |
+|        |         | Proxy   |    | Registrar  |     | Service    |
+|        |         |         |    |            |     | (Internet  |
++--------+         +---------+    +------------+     +------------+
+  |                     |                   |                    |
+  |<-RFC3927 IPv4 adr   | Appendix A        |                    |
+or|<-RFC4862 IPv6 adr   |                   |                    |
+  |                     |                   |                    |
+  |-------------------->|                   |                    |
+  | optional: mDNS query| Appendix B        |                    |
+  | RFC6763/RFC6762     |                   |                    |
+  |                     |                   |                    |
+  |<--------------------|                   |                    |
+  | GRASP M_FLOOD       |                   |                    |
+  |   periodic broadcast|                   |                    |
+  |                     |                   |                    |
+  |<------------------->C<----------------->|                    |
+  |              TLS via the Circuit Proxy  |                    |
+  |<--Registrar TLS server authentication---|                    |
+[PROVISIONAL accept of server cert]         |                    |
+  P---X.509 client authentication---------->|                    |
+  P                     |                   |                    |
+  P---Request Voucher (include nonce)------>|                    |
+  P                     |                   |                    |
+  P                     |       /--->       |                    |
+  P                     |       |      [accept device?]          |
+  P                     |       |      [contact Vendor]          |
+  P                     |       |           |--Pledge ID-------->|
+  P                     |       |           |--Domain ID-------->|
+  P                     |       |           |--optional:nonce--->|
+  P                     |       |           |     [extract DomainID]
+  P                     |       |           |                    |
+  P                     |    optional:      |     [update audit log]
+  P                     |       |can        |                    |
+  P                     |       |occur      |                    |
+  P                     |       |in         |                    |
+  P                     |       |advance    |                    |
+  P                     |       |           |                    |
+  P                     |       |           |<-device audit log--|
+  P                     |       |           |<- voucher ---------|
+  P                     |       \---->      |                    |
+  P                     |                   |                    |
+  P                     |       [verify audit log and voucher]   |
+  P                     |                   |                    |
+  P<------voucher---------------------------|                    |
+[verify voucher ]       |                   |                    |
+[verify provisional cert|                   |                    |
+  |                     |                   |                    |
+  |<--------------------------------------->|                    |
+  | Continue with RFC7030 enrollment        |                    |
+  | using now bidirectionally authenticated |                    |
+  | TLS session.        |                   |                    |
+  |                     |                   |                    |
+  |                     |                   |                    |
+  |                     |                   |                    |
+]]></artwork>
+        
+        <postamble>Figure 2</postamble>
+    </figure>
+
+    </section>
+   
       <section anchor="timeunknown" title="Lack of realtime clock">
           <t>Many devices when bootstrapping do not have knowledge of the
               current time. Mechanisms like Network Time Protocols can not be
@@ -1097,8 +1165,7 @@ END
         entries this is indicative of the permanent ability for the indicated
         domain to trigger a reset of the device and take over management of
         it. Equipment that is purchased pre-owned can be expected to have an
-            extensive history. A Registrar MAY request logs at future times [[EDNOTE: we 
-            need to ensure MASA server is not slammed with too many requests]].
+            extensive history. A Registrar MAY request logs at future times.
             A Registrar MAY be configured to ignore the
             history of the device but it is RECOMMENDED that this only be
             configured if hardware assisted NEA [RFC5209] is supported.</t>
