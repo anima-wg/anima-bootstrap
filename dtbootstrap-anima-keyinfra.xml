@@ -549,10 +549,11 @@ END
               
               <t>The Pledge authenticates the voucher presented to it. During 
                   this authentication the Pledge ignores certificate
-                  lifetimes (by necessity because it does not have a clock). 
-                  The voucher itself SHOULD contain the nonce
-                  included in the original request which proves the
-                  voucher is fresh.</t>
+                  lifetimes (by necessity because it does not have a realtime clock).</t>
+              
+             <t>If the voucher contains a nonce 
+            then the Pledge MUST confirm the nonce matches the original voucher request. This ensures the 
+            voucher is fresh. See <xref target="RequestVoucherFromRegistrar">/</xref>.</t> 
               
               <t>Once the voucher is accepted the validity period of the
                   domainCAcert in the voucher (see <xref
@@ -797,25 +798,35 @@ END
         <t>This is done with an HTTPS POST using the operation path value of
         "/requestvoucher".</t>
 
-         <t>The request is a voucher <xref target="I-D.ietf-anima-voucher"/> 
-        that MAY be signed by the pledge or left unsigned. The nonce MUST be 
-        populated thus minimizing the use of global time and providing a 
-        security benefit for devices without a RTC. This nonce MUST be a 
-        cryptographically strong random or pseudo-random number that can not be 
-        easily predicted. The nonce MUST NOT be reused for multiple attempts to 
-        join a network domain. The nonce assures the Pledge that the Voucher 
-        response is associated with this bootstrapping attempt and is not a 
-        replay.</t> 
+        <t>The request is itself a voucher <xref 
+        target="I-D.ietf-anima-voucher"/>. The Pledge populates the voucher 
+        fields as follows:</t>   
+        
+        <t><list style="hanging">
+            <t hangText="assertion:">The voucher request MUST contain an assertion of "proximity". [[EDNOTE: this is a placeholder as this commit is not the correct place to expand this list. Using proximity and channel binding: if both the Pledge and the Registrar sign the channel binding statement then these provide vital proximity information to the MASA. To be expanded on in a future commit.]]</t>
+            <t hangText="created-on:">Pledges that have a realtime clock are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
+            <t hangText="nonce:">The voucher request MUST contain a cryptographically strong random or pseudo-random number nonce. Doing so ensures <xref target="timeunknown"/> functionality. The nonce MUST NOT be reused for multiple bootstrapping attempts.</t>
+         </list></t>
+        <t>All other fields MAY be ommitted in a voucher request. [[EDNOTE: An issue has been created for the voucher document to ensure normative language supports this]]</t>
+         <t>Signing the request is RECOMMENDED if the Pledge has sufficient 
+        processing to perform the crypto operations. Doing so allows the 
+        Registrar and MASA to confirm the "proximity" assertion of the 
+        Pledge.</t> 
 
         <t>Request media type: application/voucherrequest</t>
 
-        <t>Request format: a JSON file with the following:</t>
+        <t>An example JWS payload of the voucher request:</t>
 
         <figure>
-          <artwork><![CDATA[{
- "version":"1",
- "nonce":"<64bit nonce value>",
-}]]></artwork>
+          <artwork><![CDATA[
+{
+  "ietf-voucher:voucher": {
+    "nonce": "62a2e7693d82fcda2624de58fb6722e5",
+    "created-on": "2017-01-01T00:00:00.000Z",
+    "assertion": "proximity"
+  }
+}
+]]></artwork>
         </figure>
 
         <t></t>
@@ -829,10 +840,9 @@ END
         <t>The Registrar validates the client identity as described in EST
         <xref target="RFC7030"/> section 3.3.2. The registrar performs authorization as
         detailed in Section 3.3.2. If authorization is successful the
-        Registrar obtains an Voucher from the MASA service (see Section
-        5.2).</t>
+        Registrar obtains an Voucher from the MASA service (see <xref target="RequestVoucherFromMASA"/>).</t>
 
-        <t>The received Voucher is forwarded to the Pledge.</t>
+        <t>The received voucher request is forwarded to the Pledge.</t>
       </section>
 
       <section anchor="RequestVoucherFromMASA" title="Request Voucher from MASA">
@@ -860,13 +870,21 @@ END
             target="IDevIDextension"></xref>.</t>
         
         <t><figure>
-            <artwork><![CDATA[{
-"version":"1",
-"nonce":"<64bit nonce value>",
-"IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier">,
-"DevIDSerialNumber":"<id-at-serialNumber or base64 encoded
-hardwareModuleName hwSerialNum>",
-}]]></artwork>
+            <artwork><![CDATA[
+{
+  "ietf-voucher:voucher": {
+    "nonce": "62a2e7693d82fcda2624de58fb6722e5",
+    "created-on": "2017-01-01T00:00:00.000Z",
+    "assertion": "proximity"
+    "device-identifier-aki": "[[EDNOTE:authority key identifier field 
+    from the IDevID. Voucher draft text that device-identifier is "A 
+    unique identifier (e.g., serial number) within the scope of the 
+    MASA" is insufficient because it prevents vendors from sharing 
+    a MASA]]" 
+    "device-identifier": "JADA123456789"
+  }
+}
+]]></artwork>
         </figure></t>
 
         <t>A Registrar MAY exclude the nonce from the request. Doing so allows
@@ -883,8 +901,8 @@ hardwareModuleName hwSerialNum>",
         <t>As described in <xref target="I-D.ietf-anima-voucher"/> vouchers are normally
             short lived to avoid revocation issues. If the request
         is for a previous (expired) voucher using the same Registrar (as determined
-        by domainID) and the MASA has not been informed that the claim is 
-        no longer valid - the request for a renewed voucher SHOULD be automatically
+        by Registrar's' domainID) and the MASA has not been informed that the claim is 
+        invalid - the request for a renewed voucher SHOULD be automatically
         authorized. If authorization is successful the MASA responds with a <xref
             target="I-D.ietf-anima-voucher"/> voucher. The MASA SHOULD check for revocation
         of the Registrar certificate. The maximum lifetime of the voucher issued
@@ -892,16 +910,17 @@ hardwareModuleName hwSerialNum>",
             example if the Registrar revocation status is indicated in a CRL that is 
             valid for two weeks then that is an appropriate lifetime for the voucher).</t>
 
-        <t>The voucher request is encapsulated in a <xref
-        target="RFC5652"></xref> Signed-data that is signed by the Registrar.
+        <t>The voucher request is signed by the Registrar as indicated in 
+            <xref
+            target="I-D.ietf-anima-voucher"/> voucher.
         The entire certificate chain, up to and including the Domain CA, MUST
-        be included in the CertificateSet structure. The MASA service checks
-        the internal consistency of the CMS but does not authenticate the
-        domain identity information. The domain is not know to the MASA server
-        in advance and a shared trust anchor is not implied. The MASA server
-        MUST verify that the CMS is signed by a Registrar certificate (by
-        checking for the cmc-idRA field) that was issued by a the root
-        certificate included in the CMS. This ensures that the Registrar
+        be included. The MASA service checks
+        the internal consistency of the voucher request but does not authenticate the
+        domain identity information since the domain is not know to the MASA server
+        in advance. The MASA server
+        MUST verify that the voucher request is signed by a Registrar certificate (by
+        checking for the cmc-idRA field) that was issued by a the self signed
+        root certificate included in the request. This ensures that the Registrar
         making the claim is an authorized Registrar of the unauthenticated
         domain. </t>
 
@@ -931,55 +950,47 @@ hardwareModuleName hwSerialNum>",
             of:</t>
 
         <figure>
-          <artwork><![CDATA[{
- "version":"1",
- "nonce":"<64bit nonce value>",
- "IDevIDAuthorityKeyIdentifier":"<base64 encoded keyIdentifier>",
- "DevIDSerialNumber":"<id-at-serialNumber>",
- "domainCAcert":"<the base64 encoded domain CA's certificate>"
-}]]></artwork>
+          <artwork><![CDATA[
+{
+  "ietf-voucher:voucher": {
+    "nonce": "62a2e7693d82fcda2624de58fb6722e5",
+    "assertion": "logging"
+    "trusted-ca-certificate": "<base64 encoded certificate>"
+    "device-identifier": "JADA123456789"
+  }
+}              
+]]></artwork>
         </figure>
 
-        <t>The Voucher response is encapsulated in a <xref
-        target="RFC5652"></xref> Signed-data that is signed by the MASA
-        server. The Pledge verifies this signed message using the manufacturer
-        installed trust anchor associated with the X.509 IDevID. [[EDNOTE: As
-        detailed in netconf-zerotouch this might be a distinct trust anchor
-        rather than re-using the trust anchor for the IDevID. This concept
-        will need to be detailed in this document as well.]]</t>
+        <t>The Pledge verifies the signed voucher using the manufacturer
+        installed trust anchor associated with the vendor's selected Manufacturer
+        Authorized Signing Authority.</t>
 
-        <t>The 'domainCAcert' element of this message contains the domain CA's
-        public key. This is specific to bootstrapping a public key
-        infrastructure. To support bootstrapping other key infrastructures
+        <t>The 'trusted-ca-certificate' element of the voucher contains the domain CA's
+        public key. This is useful for bootstrapping a public key
+        infrastructure but to support bootstrapping other key infrastructures
         additional domain identity types might be defined in the future.
         Clients MUST be prepared to ignore additional fields they do not
         recognize. Clients MUST be prepared to parse and fail gracefully from
-        an Voucher response that does not contain a 'domainCAcert' field
-        at all.</t>
-
-        <t>To minimize the size of the Voucher response message the
-        domainCAcert is not a complete distribution of the EST section 4.1.3
-        CA Certificate Response. The Pledge installs the domainCAcert
-        trust anchor. As indicated in
-        <xref target="identity"></xref> the newly installed trust anchor is
-        used as an EST RFC7030 Explicit Trust Anchor. The Pledge MUST use the
-        domainCAcert trust anchor to immediately validate the currently
-        provisional TLS connection to a Registrar.</t>
+        an Voucher response that does not contain a 'trusted-ca-certificate' field
+        at all. The Pledge MUST use the
+        'trusted-ca-certificate' trust anchor to immediately complete authentication
+            of the provisional TLS connection.</t>
 
         <section anchor="CompletingAuthenticationBootstrapping"
                  title="Completing authentication of Provisional TLS connection">
           <t>If a Registrar's credentials can not be verified using the
-          domainCAcert trust anchor from the voucher then the TLS connection is immediately
+          trusted-ca-certificate trust anchor from the voucher then the TLS connection is immediately
           discarded and the Pledge abandons attempts to bootstrap with this
           discovered registrar. To ensure this the Registrar MUST use a certificate
-          that chains to the domainCAcert.</t>
+          that chains to the trusted-ca-certificate.</t>
 
           <t>The Pledge's PKIX path validation of a Registrar certificate's validity
               period information is as described in <xref target="timeunknown"></xref>.
           Beyond that once PKIX path validation is successful the TLS connection is
           no longer provisional.</t>
           
-          <t>The domainCAcert trust anchor is installed as an
+          <t>The trusted-ca-certificate is installed as an
           Explicit Trust Anchor for future operations. It can therefore 
           can be used to authenticate any dynamically
           discovered EST server that contain the id-kp-cmcRA extended key
@@ -987,15 +998,17 @@ hardwareModuleName hwSerialNum>",
           reduce system complexity the Pledge SHOULD avoid additional
           discovery operations. Instead the Pledge SHOULD communicate directly
           with the Registrar as the EST server for future key management
-          operations.</t> 
+          operations. The 'trusted-ca-certificate' is not a complete 
+          distribution of the EST section 4.1.3 CA Certificate Response which is 
+          an additional justification for the recommendation to proceed with EST 
+          key management operations.</t> 
         </section>
       </section>
 
       <section title="Voucher Status Telemetry ">
-        <t>For automated bootstrapping of devices the adminstrative elements
-        providing bootstrapping also provide indications to the system
+        <t>The domain is expected to provide indications to the system
         administrators concerning device lifecycle status. To facilitate this
-        those elements need telemetry information concerning the device's
+        it needs telemetry information concerning the device's
         status.</t>
 
         <t>To indicate Pledge status regarding the Voucher the client
@@ -2364,6 +2377,7 @@ Contacted by Pledge
         </section>
         
         <section anchor="AcceptingTheEntity" title="Pledge Authorization">
+            <t>[[UNRESOLVED: this is referenced above as how the MASA does authorization. That is incorrect]]</t>
             <t>In a fully automated network all devices must be securely
                 identified and authorized to join the domain.</t>
             
@@ -2425,7 +2439,8 @@ Contacted by Pledge
                     target="IDevIDextension"></xref>.</t>
             
             <t>During initial bootstrapping the Pledge provides a nonce specific
-                to the particular bootstrapping attempt. [[UNRESOLVED: currently ]]The Registrar SHOULD
+                to the particular bootstrapping attempt. [[RESOLVED: to resolve this I 
+                updated many points where vouchers are referenced]]The Registrar SHOULD
                 include this nonce when claiming the Pledge from the MASA service.
                 Claims from an unauthenticated Registrar are only serviced by the
                 MASA resource if a nonce is provided.</t>
