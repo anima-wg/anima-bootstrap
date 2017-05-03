@@ -1014,10 +1014,25 @@ END
         <section anchor="CompletingAuthenticationBootstrapping"
                  title="Completing authentication of Provisional TLS connection">
           <t>If a Registrar's credentials can not be verified using the
-          trusted-ca-certificate trust anchor from the voucher then the TLS connection is immediately
+          trusted-ca-certificate trust anchor from the voucher then the TLS
+          connection is immediately
           discarded and the Pledge abandons attempts to bootstrap with this
-          discovered registrar. To ensure this the Registrar MUST use a certificate
-          that chains to the trusted-ca-certificate.</t>
+          discovered registrar. [[EDNOTE: should pledge disconnect with any
+          message to Registrar?]]
+          The pledge MUST attempt to enroll using any other proxies
+          it has found.  It SHOULD return to the same proxy again after
+          attempting with other proxies.  Attempts should be attempted in
+          the exponential backoff described earlier.
+          Attempts SHOULD be repeated as failure may be the result of a
+          temporary inconsistently (an inconsistently rolled Registrar key,
+          or some other mis-configuration).  The inconsistently could also
+          be the result an active MITM attack on the EST connection.
+          </t>
+          <t>
+            To ensure that the trusted-ca-certificate provide chain is
+            able to verify, the Registrar MUST use a certificate
+            that chains to the trusted-ca-certificate.
+          </t>
 
           <t>The Pledge's PKIX path validation of a Registrar certificate's validity
               period information is as described in <xref target="timeunknown"></xref>.
