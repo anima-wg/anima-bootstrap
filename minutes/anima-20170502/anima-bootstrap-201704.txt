@@ -1,0 +1,337 @@
+   ***************************************
+   2017-03-25: kent
+     *
+     *
+     * Hackathon Notes / Issues
+     *
+     * 1) Tag "authority key identifier" values with the which entity it refers to. For example does it refer to the MASA or the Registrar 'authority'
+     *
+     * 2) example in BRSKI doesn't match Yang of voucher doc. (NOTE: it does include authority info)
+     *
+     * 3) if we indirectly link the owner via the 'domain-certificate-identifier' then audit logs don't work?
+
+     * CONCLUSION: add to the audit log (and audit log response) the registrarID
+     * in this way we can distinguish between distinct registrars at a common public CA
+     *
+
+     4) Enumeration attack against the MASA audit log is not protected against
+     * The DoS attack protection doesn't prevent this. A 'slow loris' attack would be possible.
+     * - MASA can prevent using sales channel integration (to the currently defined BRSKI interface)
+
+     * for example: a symetric key on a 2d barcode that is submitted to a REST interface
+     * this is equivalent to the ACME model that where "domain validation" is "out of band" of the main protocol exchange
+
+     - Proof-of-90ownership: interesting extensions to nonce's could provide some protections (but wouldn't prevent replay attacks? MASA server would have to watch for repeat nonces?)
+
+     - there can be a time of purchase sales/channel integration (record that you purchased it)
+
+     - add "proof-of-device-posession" would solve this at the cost of additional crypto operations and handshakes
+     * (possible optimization: registrar inserts a "MASAnonce" into the handshake and then shares the handshake with the MASA server. Ideally w/o changes to the pledge behavior. Perhaps prepare for this by defining the TLS handshake extension that the Pledge MUST support but MAY ignore.)
+
+
+     5) Pledge and Registrar (really all) SHOULD be tolerant (ignore) PEM headers around base64 encoded certificates?
+     * Base64 decoding SHOULD be tolerant (ignore) line breaks and white space.
+     * Is there a normative reference for this that we can point to to ensure this works?
+
+     * 6) The Pledge voucher response validation needs to explicitely state that the nonce MAY be empty (removed by the Registrar).
+
+     * 7) In the nonce-less voucher request clarify that the MASA must:
+
+     * * authenticate the client using authentication (using "explicit or implicit (via RFC6125 reference identifiers that is certified by a well known, installed by default, trust anchor such as a CA browser forum)" validation, see EST).
+     *  and
+     * * SHOULD add the entire certificate chain to the audit database (this does not include a requirement to add
+     * the full chain to the audit log).
+     *
+
+     8) strip all example vouchers from BRSKI - it is all done by reference to the voucher draft
+     * 9) why IDevIDAuthorityKeyIdentifier is included is not specified in the BRSKI text
+     *
+     * 10) the CMS must be created with attributes
+     *
+     * 11) MASA processing instructions on how to determine the maximum voucher validity period (namely not longer than any of the revocation or ocsp validity periods that it verified when authenticating the domain registrar; assuming registrar authentication of course)
+
+     *
+
+     12) Clarify that the voucher request is just anything that is parsable as a voucher
+     according to the voucher document. every single field in it is a *request* by the registrar
+     and the server MUST NOT simply sign the request and return it. The MASA MAY read the values
+     in the request to inform the MASA of policy requests by the client.
+
+
+     13) Lucky 13! This is actually from discussion as per Michael B's presentation: He asks that the BRSKI state machine discussion is
+     consistent with his anima-reference-model-03 slides as presented
+     and asked here.
+     *
+
+   How to delete extraneous text:
+       - dramatically
+       - maybe by creating a design consideration into the appendix and moving lots of text to there
+       - first pass: move (most) everything except protocol details and security considerations to an appendix. Move all normative statements to the protocol details section.
+
+     *
+     *
+     * HERE is a voucher from mcr: [30]http://www.sandelman.ca/tmp/almec_voucher.smime
+     * NOtes on this voucher:
+
+     * signed by the CA cert. needs to be an RA (issued with a cmcRA key usage)
+     * it has \n all through the owner cert.
+
+
+   Notes on next step for hackathon:
+   BRSKIEtherpad
+   Sneakernet-BRSKI:
+           [here is a voucher request]
+   BRSKI: voucher request includes:
+           - trusted-ca-certificate (eq TLS root cert)
+                   included in voucher request; not in handshake because TLS excludes it
+           - provide the Registrar CA cert and cmc-RA cert (eq TLS client cert)
+                   (can be included in TLS hanshake)
+                   but we don't do client-auth because it is required for smime anyway
+                   meaning it is in the request
+           - serial number (eq protocol data)
+   Registrar:
+           - offline insert of voucher from MASA
+           - verify voucher signature
+           - properly extract/report on devid serial number
+           - verify that *my* ca cert is in the voucher
+                   (it will result in the pledge trusting me!!)
+           - set the MASA "MASAServerCert"
+   Voucher Response:
+           - trusted-ca-certificate (eq TLS root cert)
+                   this provides the pledge with the CA cert so it can authenticate
+                   the registrar (which till now was only provisionally authenticated)
+           (other fields)
+
+   2017-04-18:
+     *     present: mcr
+
+     * URL for connection: [31]https://appear.in/anima-boostrap
+     * max will be there in a moment.
+     *
+
+   issues I have with concise document:
+          DomainID:  The domain identity is the 160-bit SHA-1 hash of the BIT
+         STRING of the subjectPublicKey of the domain trust anchor that is
+         stored by the Domain CA.  This is consistent with the
+         Certification Authority subject key identifier (Section 4.2.1.2
+         [RFC5280]) of the Domain CA's self signed root certificate.  (A
+         string value bound to the Domain CA's self signed root certificate
+         subject and issuer fields is often colloquially used as a
+         humanized identity value but during protocol discussions the more
+         exact term as defined here is used).
+
+       ^^^ I think the terminology section shouldn't say this, because we should it later.  MCR will edit/provide text.
+
+       Discussion of what the concise rework in original document is.
+
+       Onwards to vouchers:
+   1. discussion about move to JWT...   [32]https://www.ietf.org/mail-archive/web/anima-bootstrap/current/msg00486.html
+   To experiment I used "libjwt" from github as referenced by [33]https://jwt.io
+   I built a "voucher-jwt" executable which produces:
+
+   DUMP but not encoded:
+   {
+      "typ": "JWT",
+      "alg": "ES256",
+      "x5c":
+   ["MIIBdjCCAR2gAwIBAgIBATAKBggqhkjOPQQDAjArMRYwFAYDVQQKDA1DaXNjbyBTeXN0ZW1zMREwDwYDVQQDDAhWZW5kb3JDQTAeFw0xNzA0MDMxNTE1NDVaFw0xODA0MDMxNTE1NDVaMC0xFjAUBgNVBAoMDUNpc2NvIFN5c3RlbXMxEzARBgNVBAMMClZlbmRvck1BU0EwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAT9GTrDd0GWgwcuSy8LCn0waMeknpLznajZzqWlLhrPwshgIPIPv
+   byY6IyCo4uBYU/e4OO6TQD9UVLlyU5R6cA6ozAwLjALBgNVHQ8EBAMCBaAwHwYDVR0jBBgwFoAUR4oEpb4YFuelkMrQjlnKtM01ovEwCgYIKoZIzj0EAwIDRwAwRAIgAQ8YR2IdLodEE8k+JxpBOIAGuzCeT9BmFOVhFUb8eJMCIC23Goss6manRjNSmh6+2oB9tsRbjmnnwuMlDXR8fzug",
+   "MIIBnTCCAUOgAwIBAgIJAK9Pd5G+/r0UMAoGCCqGSM49BAMCMCsxFjAUBgNVBAoMDUNpc2NvIFN5c3RlbXMxETAPBgNVBAMMCFZlbmRvckNBMB4XDTE3MDQwMzE0MTAwNVoXDTE4MDQwMzE0MTAwNVowKzEWMBQGA1UECgwNQ2lzY28gU3lzdGVtczERMA8GA1UEAwwIVmVuZG9yQ0EwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASunsQL2PVOSFWWp0oCjlqF8iVPPpEgJct931CZQ6assp
+   07otmfgZqXsk1JYRTlKCGjROxrAiVRQsB54ioA0yu0o1AwTjAdBgNVHQ4EFgQUR4oEpb4YFuelkMrQjlnKtM01ovEwHwYDVR0jBBgwFoAUR4oEpb4YFuelkMrQjlnKtM01ovEwDAYDVR0TBAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiEA+SSOhiNQ23RWA76kZ/2u70FCpU8OsU7X9IRiWGDgIAgCIFLu8FnJuqPx10sgHvIzqI5BgOcwCa5vFQZdCDBHIx18"]
+   }
+   .  "compact serialization" [34]https://tools.ietf.org/html/rfc7515#section-7.1
+   {
+      "ietf-voucher:voucher": {
+          "assertion": "logging",
+          "domain-cert-trusted-ca": "-----BEGIN
+   CERTIFICATE-----\nMIIBUjCB+qADAgECAgkAwP4qKsGyQlYwCgYIKoZIzj0EAwIwFzEVMBMGA1UEAwwM\nZXN0RXhhbXBsZUNBMB4XDTE3MDMyNTIyMTc1MFoXDTE4MDMyNTIyMTc1MFowFzEV\nMBMGA1UEAwwMZXN0RXhhbXBsZUNBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\nRVrNlEN2ocYscAILBU7NggABo0JgA1rEGdYdCQj1nHKL6xKONJIUfBibe6iMVYd3\nRUmPwaPiH
+   NZJ98kRwHIwnKMvMC0wDAYDVR0TBAUwAwEB/zAdBgNVHQ4EFgQU+dVX\naXoucU1godNF0bycS1U5W54wCgYIKoZIzj0EAwIDRwAwRAIgNsCGjpEjuvz6OKJ/\n3rOvMc2ZfDhD02K+0PCVFJGCQGwCIAzf3BS6x9kKSROJJvxDSpg0QK9+b9LSFkbZ\nM1PW98AN\n-----END CERTIFICATE-----\n",
+          "nonce": "ea7102e8e88f119e",
+          "serial-number": "PID:1 SN:widget1",
+          "serial-number-issuer": "36097E3DEA39316EA4CE5C695BE905E78AF2FB5A",
+          "version": "1"
+      }
+   }
+   ENCODED:
+   eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsICAgICJ4NWMiOlsiTUlJQmRqQ0NBUjJnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBck1SWXdGQVlEVlFRS0RBMURhWE5qYnlCVGVYTjBaVzF6TVJFd0R3WURWUVFEREFoV1pXNWtiM0pEUVRBZUZ3MHhOekEwTURNeE5URTFORFZhRncweE9EQTBNRE14TlRFMU5EVmFNQzB4RmpBVUJnTlZCQW9NRFVOcGMyTnZJRk41YzNSbGJYTXhFekF
+   SQmdOVkJBTU1DbFpsYm1SdmNrMUJVMEV3V1RBVEJnY3Foa2pPUFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVQ5R1RyRGQwR1dnd2N1U3k4TENuMHdhTWVrbnBMem5halp6cVdsTGhyUHdzaGdJUElQdmJ5WTZJeUNvNHVCWVUvZTRPTzZUUUQ5VVZMbHlVNVI2Y0E2b3pBd0xqQUxCZ05WSFE4RUJBTUNCYUF3SHdZRFZSMGpCQmd3Rm9BVVI0b0VwYjRZRnVlbGtNclFqbG5LdE0wMW92RXdDZ1lJS2
+   9aSXpqMEVBd0lEUndBd1JBSWdBUThZUjJJZExvZEVFOGsrSnhwQk9JQUd1ekNlVDlCbUZPVmhGVWI4ZUpNQ0lDMjNHb3NzNm1hblJqTlNtaDYrMm9COXRzUmJqbW5ud3VNbERYUjhmenVnIiwiTUlJQm5UQ0NBVU9nQXdJQkFnSUpBSzlQZDVHKy9yMFVNQW9HQ0NxR1NNNDlCQU1DTUNzeEZqQVVCZ05WQkFvTURVTnBjMk52SUZONWMzUmxiWE14RVRBUEJnTlZCQU1NQ0ZabGJtUnZja05CT
+   UI0WERURTNNRFF3TXpFME1UQXdOVm9YRFRFNE1EUXdNekUwTVRBd05Wb3dLekVXTUJRR0ExVUVDZ3dOUTJselkyOGdVM2x6ZEdWdGN6RVJNQThHQTFVRUF3d0lWbVZ1Wkc5eVEwRXdXVEFUQmdjcWhrak9QUUlCQmdncWhrak9QUU1CQndOQ0FBU3Vuc1FMMlBWT1NGV1dwMG9DamxxRjhpVlBQcEVnSmN0OTMxQ1pRNmFzc3AwN290bWZnWnFYc2sxSllSVGxLQ0dqUk94ckFpVlJRc0I1NGlv
+   QTB5dTBvMUF3VGpBZEJnTlZIUTRFRmdRVVI0b0VwYjRZRnVlbGtNclFqbG5LdE0wMW92RXdId1lEVlIwakJCZ3dGb0FVUjRvRXBiNFlGdWVsa01yUWpsbkt0TTAxb3ZFd0RBWURWUjBUQkFVd0F3RUIvekFLQmdncWhrak9QUVFEQWdOSUFEQkZBaUVBK1NTT2hpTlEyM1JXQTc2a1ovMnU3MEZDcFU4T3NVN1g5SVJpV0dEZ0lBZ0NJRkx1OEZuSnVxUHgxMHNnSHZJenFJNUJnT2N3Q2E1dkZ
+   RWmRDREJISXgxOCJdfQ.eyJpZXRmLXZvdWNoZXI6dm91Y2hlciI6eyJhc3NlcnRpb24iOiJsb2dnaW5nIiwiZG9tYWluLWNlcnQtdHJ1c3RlZC1jYSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJQlVqQ0IrcUFEQWdFQ0Fna0F3UDRxS3NHeVFsWXdDZ1lJS29aSXpqMEVBd0l3RnpFVk1CTUdBMVVFQXd3TVxuWlhOMFJYaGhiWEJzWlVOQk1CNFhEVEUzTURNeU5USXlNVGM
+   xTUZvWERURTRNRE15TlRJeU1UYzFNRm93RnpFVlxuTUJNR0ExVUVBd3dNWlhOMFJYaGhiWEJzWlVOQk1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVxuUlZyTmxFTjJvY1lzY0FJTEJVN05nZ0FCbzBKZ0ExckVHZFlkQ1FqMW5IS0w2eEtPTkpJVWZCaWJlNmlNVllkM1xuUlVtUHdhUGlITlpKOThrUndISXduS012TUMwd
+   0RBWURWUjBUQkFVd0F3RUIvekFkQmdOVkhRNEVGZ1FVK2RWWFxuYVhvdWNVMWdvZE5GMGJ5Y1MxVTVXNTR3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdSQUlnTnNDR2pwRWp1dno2T0tKL1xuM3JPdk1jMlpmRGhEMDJLKzBQQ1ZGSkdDUUd3Q0lBemYzQlM2eDlrS1NST0pKdnhEU3BnMFFLOStiOUxTRmtiWlxuTTFQVzk4QU5cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm5vbmNlIjoi
+   ZWE3MTAyZThlODhmMTE5ZSIsInNlcmlhbC1udW1iZXIiOiJQSUQ6MSBTTjp3aWRnZXQxIiwic2VyaWFsLW51bWJlci1pc3N1ZXIiOiIzNjA5N0UzREVBMzkzMTZFQTRDRTVDNjk1QkU5MDVFNzhBRjJGQjVBIiwidmVyc2lvbiI6IjEifX0.QkTUpcxv6Ng6ylyWYnlqun-5SFhD1XwLIW1kD7Y9dNwioheNMcVnowkELl_EMClyOWuLvvWuoCHAcWz_UA0IGw
+   A "general JWS JSON Serialization" would look like:
+
+       {
+         "payload":"<payload contents>",
+         "signatures":[
+          {"protected":"<integrity-protected header 1 contents>",
+           "header":<non-integrity-protected header 1 contents>,
+           "signature":"<signature 1 contents>"},
+          ...
+          {"protected":"<integrity-protected header N contents>",
+           "header":<non-integrity-protected header N contents>,
+           "signature":"<signature N contents>"}]
+        }
+   a "flattened" form:
+       {
+         "payload":"<payload contents>",
+         "protected":"<integrity-protected header contents>",
+         "header":<non-integrity-protected header contents>,
+         "signature":"<signature contents>"
+        }
+
+
+   Voucher Request Discussion:
+   The BRSKI doc assumes a form of voucher request which could be summarized as a "not signed voucher template". Containing only the information known by the client.
+   The Registrar then signs this and sends it to the MASA to be turned into a voucher.
+   see [35]https://tools.ietf.org/html/draft-ietf-anima-bootstrapping-keyinfra-05#section-7.1
+   A voucher request is a voucher that is not signed by the MASA.
+   A voucher request MUST be signed by the Registrar. This is equivalent to the current pkcs7 signing mandate.
+   A new thing: A voucher request MAY be signed by the Pledge.
+     * con: additional crypto operation by the pledge
+     * pro: proof to the masa of physical possession
+     * An option to be discussed.
+
+   Another new thing: A voucher MAY include a "previous form of the voucher request" sub-field. e.g. a JSON of the full previously signed voucher. e.g. we add to the YANG model a field that could be a full JSON etc voucher; which itself might have been signed. Thus:
+   Pledge optionally signs the voucher request with a nonce in it.
+   Registrar signs a voucher that includes the previous voucher.
+     * {header/signature}.Pledge_voucher{nonce, etc}
+     * {header/signature}.Registrar_voucher{copy some fields, added some fields, {header/signature}.Pledge_voucher{nonce, etc}}
+     * this would be the JSON Compact Serialization URL-safe string. something like a string value.
+
+   MASA recieves and creates a voucher (dropping all previous requests).
+   Need to define: what does the Registrar do with this? Can't always include it because it could include fields the Registrar doesn't know. MAY/SHOUDL include it for the MASA to make policy decisions.
+   SIDE NOTE: verification of the TLS client cert as being the same as the voucher request might be(!?) assumed in the current 7.2 text. Two reasons for this:
+     * - we avoid having to deal with replay attacks
+     * - and the domain CA cert isn't sent in the TLS handshake but is sent in the signature header ("pkcs7" or "x5c").
+
+   This is an issue regardless of the format discussion.
+   Perhaps all that matters is that the root is the same but not that they are the same certificate?
+   2017-04-25:
+     *     present: mcr, peter, mbehringer, kent looking for correct webex...  Didn't work for me.
+     * webex is dead to me:  [36]https://appear.in/anima-boostrap I'm in.
+     * Michael Behringer... you joining? trying hard. I'm in the appear in room, I THINK. But can't see anyone else?  You mistyped the URL. no 't' my gosh....
+     *
+     * {mcr still way behind; was ill last week}
+     *
+
+   brief recap by mcr, about what we did last week.
+   Max: recap of list is that we need a definitive form for the voucher request.... "it's just a voucher" ,
+   Kent: related, but slightly different format.
+   Max: signed certificate requests mean that the registrar can not change it, and this has caused a mess.
+   mcr asks for details... max: lack of interoperation.
+   To fix the syntax from 1357:
+
+   voucher request
+   {
+       "header": "foo"
+   }
+   .
+   {
+     *     payload" : "bar"
+
+   }
+   .signature
+   {
+       "header": "foo"
+   }
+   .
+   {
+     * payload" : "bar",
+     * prior_jwt : "{h}.{p,prior_jwt:"<base64>"}.s"
+
+   }
+   .signature
+   Max's proposed algorithm for signing vouchers is:
+     * The relying party validates and signs the "first" voucher in the list
+     * The relying party MAY recurse into the list to verify, for example, that the inner jwt was signed by the pledge
+
+     * Processing is effectively this:
+     * recurse to the bottom of the list. Built a json from the payload. As you return up the list re-apply each JSON payload.
+
+     * Has the disadvantage of making it difficult to remove something.
+
+     each node copies what it want to maintain. the optional history list is purely informative. <----- BEST
+     *
+
+   DIAGRAM OF ACTORS:
+                                      CMS
+       [MASA] <--A--> [ REGISTRAR ] <--C--> [ CERTAUTHORITY ]
+               voucher  \
+               proto      \B  [BRSKI/EST]
+                            \
+                              [PLEDGE]
+   handling criticality:
+       [37]https://tools.ietf.org/html/rfc7515#section-4.1.11
+        {"alg":"ES256",
+         "crit":["exp"],
+         "exp":1363284000
+        }
+   [38]https://tools.ietf.org/html/rfc7951 (yang-json)
+   [39]https://datatracker.ietf.org/doc/draft-ietf-core-yang-cbor/ (yang to cbor)
+   [40]https://tools.ietf.org/html/rfc7950#section-11 (updating a yang module)
+      o  A "mandatory" statement may be removed or changed from "true" to
+         "false".
+
+   ACTION:
+     * 1) add version field to the voucher
+     * 2) define voucher request in BRSKI (as a voucher)
+     * 3) define any additional fields in BRSKI:
+
+     *
+
+
+   module ietf-voucher-req {
+     import ietf-vouher {
+       prefix v;
+     }
+
+     augment "v:voucher/" {
+         leaf prior_signedvoucher {
+             type binary;
+             description
+                "...";
+         }
+   }
+     *
+
+   2017-05-02
+     * present: mcr, Michael Behringer
+     *
+     * suggest we go through EDNOTEs in document.
+     *
+     *    [[EDNOTE: move below?]]The Pledge establishes a TLS connection with
+     *     ---> agreed
+     * [41]https://github.com/anima-wg/anima-bootstrap/blob/concise/dtbootstrap-anima-keyinfra.txt
+     *
+     * Is there a relationship between the TLS Server Certificate of the MASA, and the Issuer Certificate from the IDevID.
+     * Cases:
+     *  - pledge contains URL of MASA
+     *  - step 1: registrar follows URL (default)
+     *  - option 1: redirect: should it be allowed? (if not, cannot deploy anti-DDOS re-direct)
+     *  - option 2: manual override of URL: should it be allowed?
+     * Tentatively: Neither option 1 or 2 have an impact on security ("stealing" a device).
+     * HTTP/2, TLS upgrade.
+     * Can/should the registrar connect to MASA, online to the TLS connection to the Pledge, to get the certificate chain to validate the pledge?
+     * {is there an attack on the Registrar by the pledge,
+     * MB suggests that[DEL: IDevID and :DEL] MASA Server Certificate would be verifiable via the WebPKI, and there would not necessarily be any common root of trust between the two.
+     *
+     * There are two security associations:
+     * - between pledge and MASA
+     * - between Registrar and MASA
+     * Observations:
+     * - those two SAs are independent
+     * - the first (BRSKI/EST) is anchored on a trust anchor that may be private (ie not part of the public PKI)
+     * - the second (MASA<->Registrar) is normally anchored on the public WebPKI for the ServerCertificate.
+     * - the URL in the certificate of the IDevID of the pledge may be used to point the registrar to the MASA. (or, redirect, or override, see line 1477-1478)
+     *   --> In that URL, the vendor defines the type of security association to be used between registrar and MASA.
+     *   --> The vendor choooses the type of SA. MUST define a minimum protocol set that MUST be supported on the registrar, including a minimum level of security.
+     *
+     *
+     *
+     *
+     *
+
