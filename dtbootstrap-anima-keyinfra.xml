@@ -246,74 +246,6 @@
           </list></t>
       </section>
 
-      <section title="Scope of solution">
-        <t>Questions have been posed as to whether this solution is suitable
-        in general for Internet of Things (IoT) networks. This depends on the
-        capabilities of the devices in question. The terminology of <xref
-        target="RFC7228"></xref> is best used to describe the boundaries.</t>
-
-        <t>The solution described in this document is aimed in general at
-        non-constrained (i.e. class 2+) devices operating on a non-Challenged
-        network. The entire solution as described here is not intended to be
-        useable as-is by constrained devices operating on challenged networks
-        (such as 802.15.4 LLNs).</t>
-
-        <t>In many target applications, the systems involved are large router
-        platforms with multi-gigabit inter-connections, mounted in controlled
-        access data centers. But this solution is not exclusive to the large,
-        it is intended to scale to thousands of devices located in hostile
-        environments, such as ISP provided CPE devices which are drop-shipped
-        to the end user. The situation where an order is fulfilled from
-        distributed warehouse from a common stock and shipped directly to the
-        target location at the request of the domain owner is explicitly
-        supported. That stock ("SKU") could be provided to a number of
-        potential domain owners, and the eventual domain owner will not know
-        a-priori which device will go to which location.</t>
-
-        <t>The bootstrapping process can take minutes to complete depending on
-        the network infrastructure and device processing speed. The network
-        communication itself is not optimized for speed; for privacy reasons,
-        the discovery process allows for the Pledge to avoid announcing it's
-        presence through broadcasting.
-        </t>
-        <t>
-          This
-          protocol is not intended for low latency handoffs. In networks
-          requiring such things, the pledge SHOULD already have been
-          enrolled.
-        </t>
-
-        <t>Specifically, there are protocol aspects described here which might
-        result in congestion collapse or energy-exhaustion of intermediate
-        battery powered routers in an LLN. Those types of networks SHOULD NOT
-        use this solution. These limitations are predominately related to the
-        large credential and key sizes required for device authentication.
-        Defining symmetric key techniques that meet the operational
-        requirements is out-of-scope but the underlying protocol operations
-        (TLS handshake and signing structures) have sufficient algorithm
-        agility to support such techniques when defined.</t>
-
-        <t>The imprint protocol described here could, however, be used by
-        non-energy constrained devices joining a non-constrained network (for
-        instance, smart light bulbs are usually mains powered, and speak
-        802.11). It could also be used by non-constrained devices across a
-        non-energy constrained, but challenged network (such as 802.15.4). The
-        certificate contents, and the process by which the four
-        questions above are resolved do apply to constained devices. It is
-        simply the actual on-the-wire imprint protocol which could be inappropriate.</t>
-
-        <t>This document presumes that network access control has either
-        already occurred, is not required, or is integrated by the proxy
-        and registrar in such a way that the device itself does not need to
-        be aware of the details. Although the use of an X.509 Initial
-        Device Identity is consistant with IEEE 802.1AR <xref
-        target="IDevID"></xref>, and allows for alignment with 802.1X
-        network access control methods, its use here is for Pledge
-        authentication rather than network access control. Integrating
-        this protocol with network access control, perhaps as an
-        Extensible Authentication Protocol (EAP) method
-        (see <xref target="RFC3748"></xref>), is out-of-scope.</t>
-      </section>
     </section>
 
     <section title="Architectural Overview">
@@ -483,12 +415,7 @@ END
 |        |         |         |    |            |     | (Internet  |
 +--------+         +---------+    +------------+     +------------+
   |                     |                   |                    |
-  |<-RFC3927 IPv4 adr   | Appendix A        |                    |
-or|<-RFC4862 IPv6 adr   |                   |                    |
-  |                     |                   |                    |
-  |-------------------->|                   |                    |
-  | optional: mDNS query| Appendix B        |                    |
-  | RFC6763/RFC6762     |                   |                    |
+  |<-RFC4862 IPv6 adr   |                   |                    |
   |                     |                   |                    |
   |<--------------------|                   |                    |
   | GRASP M_FLOOD       |                   |                    |
@@ -1617,6 +1544,10 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       <?rfc include="reference.RFC.6762" ?>
 
       <?rfc include="reference.RFC.6763" ?>
+
+      <?rfc include="reference.RFC.2131" ?>
+
+      <?rfc include="reference.RFC.3315" ?>
 
       <?rfc include="reference.RFC.3927" ?>
 
@@ -2821,6 +2752,58 @@ Contacted by Pledge
       </t>
     </section>
 
+    <section anchor="SKUmgmt" title="Flexible SKU management">
+
+      <t>Through the concept of vouchers and MASA, BRKSI enables solutions to reduce
+      opex for large scale device rollout such as thousands of ISP provided CPEs or tens
+      of thousands of IoT gateways that are drop-shipped to end-users
+      directly from the manufacturer.
+      </t>
+      <t>In classical sales and provisioning processes, the customer wants to know directly
+      after ordering for every target drop-ship end-user location the serial
+      number of the device assigned to that location/shipment. This does not
+      allow manufacturers or their vendors/resellers to keep distributed,
+      cross-customer shared stock and use units from such stock in a
+      lightweight fashion.</t>
+
+      <t>For the customers, this upfront tracking was necessary because
+      pre-existing bootstrap mechanisms have one or more limitations: They
+      can not learn the actual location of a device itself after deployed but
+      have to assume it based on the upfront ordering process. Or they can
+      not dynamically craft a location dependent configuration on first
+      sight. Or the location dependent configuration is necessary to
+      establish first sight. Or there are security issues
+      in trusting the location information of where a device is connected.
+      </t>
+
+      <t>
+        With BRSKI, these problems do not exist. The manufacturer can drop
+        ship devices from a cross-customer shared and distributed inventory
+        directly to the end-user location, and the customer does not have to
+        track serial numbers on a per-location basis: Once the device
+        connects in the end-user location and becomes a BRSKI Pledge, the
+        MASA can simply consider this serial number SKU to be assigned to the
+        open order of the customer, and that customers Registrar could do the
+        same. This relaxed assignment is only possible because of the air-gap
+        free cryptographic security employed by BRSKI between Pledge,
+        Registrar and MASA.
+      </t>
+
+      <t>
+        The attachment location of the Pledge can be derived by the Registar
+        or other customer backend management tools (that would create
+        configuration for the pledge after its enrolment) from the address of
+        the Proxy through which the Pledge connects.
+        If the Proxy is for example an ISP PE and the interface through which
+        the plege connects is relevant to determine its location, then this
+        can be learned by the customers backend management tools through
+        other means, such as a future topology service of the ACP.
+      </t>
+
+    </section>
+
+
+
   </section>
 </section>
   </back>
@@ -2830,3 +2813,4 @@ Contacted by Pledge
     mode: xml
     End:
 -->
+
