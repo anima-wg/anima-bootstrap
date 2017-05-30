@@ -1597,11 +1597,12 @@ END
     </references>
 
     <references title="Informative References">
+      &RFC7575;
+      <?rfc include="reference.I-D.ietf-anima-reference-model" ?>
       &I-D.behringer-autonomic-network-framework;
 
       <?rfc include="reference.RFC.7435" ?>
       <?rfc include="reference.RFC.7217" ?>
-      &RFC7575;
 
       <?rfc include="reference.RFC.2473" ?>
       <?rfc include="reference.I-D.ietf-anima-grasp" ?>
@@ -2828,6 +2829,67 @@ Contacted by Pledge
 
     </section>
 
+      <section anchor="IoT" title="Applicability to constrained environments">
+
+        <t>Questions have been posed as to whether this solution is suitable
+        in general for Internet of Things (IoT) environment. This depends on the
+        capabilities (constraints) of the devices in question. The terminology of <xref
+        target="RFC7228"></xref> is best used to describe the boundaries. It also
+        depends on the (bandwidth) constraints of the networks used.</t>
+
+        <t>The solution described in this document is aimed in general at
+        non-constrained (i.e. class 2+) devices operating on a non-Challenged
+        network. The entire solution as described here is not intended to be
+        useable as-is by constrained devices operating on challenged networks
+        (such as 802.15.4 LLNs).</t>
+
+        <t>The bootstrapping process can take minutes to complete depending on
+        the network infrastructure and device processing speed.</t>
+        <t><list style="symbols">
+           <t>The network communication itself is not optimized for speed (eg: no optimization for the number of round-trips).</t>
+           <t>For privacy reasons, the discovery process allows for the Pledge to
+              avoid announcing it's presence through broadcasting. This can delay
+              bootstrap by the periodicity interval of the GRASP M_FLOOD announcements
+              (eg: 30 seconds).</t>
+           <t>Public key generation can take a minute or more on low CPU powered pledges.</t>
+           </list>
+        </t>
+
+        <t>
+          This
+          protocol is not intended for low latency handoffs. In networks
+          requiring such things, the pledge SHOULD already have been
+          enrolled.
+        </t>
+
+        <t>The protocol is not optimized for LLN. Those type of networks SHOULD NOT
+           use BRSKI unmodified.</t>
+        <t><list style="symbols">
+            <t>The per-pledge signaling is verbose due to the large credential and
+               key sizes required for device authentiation.</t>
+            <t>The protocol does not provide easy mechanisms to serialize parallel
+               bootstrap requests from multiple pledges.</t>
+           </list>
+        </t>
+
+        <t>Reducing verbosity through eg: symmetric key techniques that meet the
+        operational requirements is out-of-scope for this document, but the underlying
+        protocol operations (TLS handshake and signing structures) have sufficient algorithm
+        agility to support such techniques when defined.</t>
+        <t>Serializing bootstrap requests is most easily achieved by changing the
+        initiator/responder relationship between registrar and pledges but is also
+        out-of-scope for this document</t>
+
+        <t>The imprint protocol described here could, however, be used by
+        non-energy constrained devices joining a non-constrained network (for
+        instance, smart light bulbs are usually mains powered, and speak
+        802.11). It could also be used by non-constrained devices across a
+        non-energy constrained, but challenged network (such as 802.15.4). The
+        certificate contents, and the process by which the four
+        questions above are resolved do apply to constained devices. It is
+        simply the actual on-the-wire imprint protocol which could be inappropriate.</t>
+
+      </section>
 
 
   </section>
