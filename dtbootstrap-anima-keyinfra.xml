@@ -2721,240 +2721,239 @@ Contacted by Pledge
             The usage of the domain certificates is outside scope for this
             document.</t>
     </section>
-
-    <section anchor="Other" title="Other bootstrapping approaches">
-      <t>this section motivates the BRSKI bootstrap approaches components
-      by reviewing existing bootstrapping approaches</t>
-
-      <t>To literally "pull yourself up by the bootstraps" is an impossible
-        action. Similarly the secure establishment of a key infrastructure
-        without external help is also an impossibility. Today it is commonly
-        accepted that the initial connections between nodes are insecure, until
-        key distribution is complete, or that domain-specific keying material
-        is pre-provisioned on each new device in a costly and non-scalable
-        manner. Existing mechanisms are known as non-secured 'Trust on
-        First Use' (TOFU) <xref target="RFC7435" />, 'resurrecting duckling'
-        <xref target="Stajano99theresurrecting" /> or 'pre-staging'.
-      </t>
-
-      <t>
-        Another approach is to try and minimize user actions during
-        bootstrapping. The enrollment protocol EST <xref
-        target="RFC7030"></xref> details a set of non-autonomic bootstrapping
-        methods in this vein:
-      </t>
-
-      <t><list style="symbols">
-        <t>using the Implicit Trust Anchor database (not an autonomic
-        solution because the URL must be securely distributed),</t>
-
-        <t>engaging a human user to authorize the CA certificate using
-        out-of-band data (not an autonomic solution because the human user
-        is involved),</t>
-
-        <t>using a configured Explicit TA database (not an autonomic
-        solution because the distribution of an explicit TA database is
-        not autonomic),</t>
-
-        <t>and using a Certificate-Less TLS mutual authentication method
-        (not an autonomic solution because the distribution of symmetric
-        key material is not autonomic).</t>
-        </list>These "touch" methods do not meet the requirements for
-      zero-touch.
-      </t>
-
-      <t>
-        There are "call home" technologies where the Pledge first
-        establishes a connection to a well known vendor service using a common
-        client-server authentication model. After mutual authentication
-        appropriate credentials to authenticate the target domain are
-        transfered to the Pledge. This creates serveral problems and
-      limitations:</t>
-
-      <t><list style="symbols">
-        <t>the pledge requires realtime connectivity to the vendor
-        service,</t>
-
-        <t>the domain identity is exposed to the vendor service (this is a
-        privacy concern),</t>
-
-        <t>the vendor is responsible for making the authorization
-        decisions (this is a liability concern),</t>
-      </list>
-      </t>
-
-      <t>
-        BRSKI addresses these issues by defining "voucher" and automation
-        extensions to the EST protocol.
-      </t>
-    </section>
-
-    <section anchor="SKUmgmt" title="Flexible SKU management">
-
-      <t>Through the concept of vouchers and MASA, BRKSI enables solutions to reduce
-      opex for large scale device rollout such as thousands of ISP provided CPEs or tens
-      of thousands of IoT gateways that are drop-shipped to end-users
-      directly from the manufacturer.
-      </t>
-      <t>In classical sales and provisioning processes, the customer wants to know directly
-      after ordering for every target drop-ship end-user location the serial
-      number of the device assigned to that location/shipment. This does not
-      allow manufacturers or their vendors/resellers to keep distributed,
-      cross-customer shared stock and use units from such stock in a
-      lightweight fashion.</t>
-
-      <t>For the customers, this upfront tracking was necessary because
-      pre-existing bootstrap mechanisms have one or more limitations: They
-      can not learn the actual location of a device itself after deployed but
-      have to assume it based on the upfront ordering process. Or they can
-      not dynamically craft a location dependent configuration on first
-      sight. Or the location dependent configuration is necessary to
-      establish first sight. Or there are security issues
-      in trusting the location information of where a device is connected.
-      </t>
-
-      <t>
-        With BRSKI, these problems do not exist. The manufacturer can drop
-        ship devices from a cross-customer shared and distributed inventory
-        directly to the end-user location, and the customer does not have to
-        track serial numbers on a per-location basis: Once the device
-        connects in the end-user location and becomes a BRSKI Pledge, the
-        MASA can simply consider this serial number SKU to be assigned to the
-        open order of the customer, and that customers Registrar could do the
-        same. This relaxed assignment is only possible because of the air-gap
-        free cryptographic security employed by BRSKI between Pledge,
-        Registrar and MASA.
-      </t>
-
-      <t>
-        The attachment location of the Pledge can be derived by the Registar
-        or other customer backend management tools (that would create
-        configuration for the pledge after its enrolment) from the address of
-        the Proxy through which the Pledge connects.
-        If the Proxy is for example an ISP PE and the interface through which
-        the plege connects is relevant to determine its location, then this
-        can be learned by the customers backend management tools through
-        other means, such as a future topology service of the ACP.
-      </t>
-
-    </section>
-
-      <section anchor="IoT" title="Applicability to constrained environments">
-
-        <t>Questions have been posed as to whether this solution is suitable
-        in general for Internet of Things (IoT) environment. This depends on the
-        capabilities (constraints) of the devices in question. The terminology of <xref
-        target="RFC7228"></xref> is best used to describe the boundaries. It also
-        depends on the (bandwidth) constraints of the networks used.</t>
-
-        <t>The solution described in this document is aimed in general at
-        non-constrained (i.e. class 2+) devices operating on a non-Challenged
-        network. The entire solution as described here is not intended to be
-        useable as-is by constrained devices operating on challenged networks
-        (such as 802.15.4 LLNs).</t>
-
-        <t>The bootstrapping process can take minutes to complete depending on
-        the network infrastructure and device processing speed. Some of the
-        reasons for this include:</t>
-        <t><list style="symbols">
-           <t>The network communication itself is not optimized for speed
-           (eg: no optimization for the number of round-trips).</t>
-           <t>For privacy reasons, the discovery process allows for the Pledge to
-              avoid announcing it's presence through broadcasting. This can delay
-              bootstrap by the periodicity interval of the GRASP M_FLOOD announcements
-              (eg: 30 seconds).</t>
-           <t>Cryptographic operations (such as key generation and
-           exponentiation) can take a minute or more on lower-end CPU powered pledges.</t>
-           </list>
-        </t>
-
-        <t>
-          This
-          protocol is not intended for low latency handoffs. In networks
-          requiring such things, the pledge SHOULD already have been
-          enrolled.
-        </t>
-
-        <t>The protocol is not optimized for LLN. Those type of networks SHOULD NOT
-           use BRSKI unmodified.</t>
-        <t><list style="symbols">
-            <t>The per-pledge signaling is verbose due to the large credential and
-               key sizes required for device authentiation.</t>
-            <t>The protocol does not provide easy mechanisms to serialize parallel
-               bootstrap requests from multiple pledges.</t>
-           </list>
-        </t>
-
-        <t>Reducing verbosity through eg: symmetric key techniques that meet the
-        operational requirements is out-of-scope for this document, but the underlying
-        protocol operations (TLS handshake and signing structures) have sufficient algorithm
-        agility to support such techniques when defined.</t>
-
-        <t>Serializing bootstrap requests is most easily achieved by changing the
-        initiator/responder relationship between registrar and pledges but is also
-        out-of-scope for this document</t>
-
-        <t>The imprint protocol described here could, however, be used by
-        non-energy constrained devices joining a non-constrained network (for
-        instance, smart light bulbs that are mains powered, and speak
-        802.11). It could also be used by non-constrained devices across a
-        non-energy constrained, but challenged network (such as 802.15.4). The
-        certificate contents, and the process by which the four
-        questions above are resolved do apply to constained devices. It is
-        simply the actual on-the-wire imprint protocol which could be inappropriate.</t>
-
-      </section>
-
-      <section anchor="NACinterop" title="Network Access Control interop">
-        <t>
-          This document presumes that network access control (NAC) is normally not required
-          between pledge and proxy because BRSKI is primarily intended for
-          secure zero touch bootstrap of multi-hop network infrastructure and
-          not primarily user devices.
-        </t>
-
-        <t>
-          NAC may be present in some cases, for example when using BRSKI for WiFi access
-          points as pledges connecting to user ports of access switches
-          acting as proxies on which also NAC is enabled.
-        </t>
-
-        <t>
-          These cases require a solution where NAC is integrated with BRSKI
-          in proxy and/or registrar such that the pledge can be unaware of
-          the details or where NAC occurs before BRSKI.
-        </t>
-
-        <t>
-          To keep pledges unaware, NAC could be set up to place pleges
-          initially into a quarantine context in which only the proxy
-          functions are accessible to the plege: GRASP M_FLOOD from the proxy
-          and TCP connections to the proxy (aka: the device performing
-          NAC). After succesful enrolment, the registrar could inform NAC to
-          upgrade the pledge to a context in which also the ACP can be
-          set up between pledge and proxy.
-        </t>
-
-        <t>
-          To run NAC in before BRSKI, pledges could run 802.1X NAC with their
-          X.509 IDevID if they fail to receive GRASP M_FLOOD messages and
-          retry GRASP after NAC succeeds.
-        </t>
-
-        <t>
-          Note that BRSKI is well aligned with 802.1X NAC because it also
-          relies on the pledges X.5009 IDevID / IEEE 802.1AR <xref
-          target="IDevID"></xref> for authentication to the registrar/MASA,
-          and BRSKI proxy and NAC authenticator will be on the same system,
-          but NAC authentication server and BRSKI registrar are independent
-          entities.
-        </t>
-    </section>
-
-
   </section>
 </section>
-  </back>
+
+<section anchor="Other" title="Other bootstrapping approaches">
+  <t>this section motivates the BRSKI bootstrap approaches components
+  by reviewing existing bootstrapping approaches</t>
+
+  <t>To literally "pull yourself up by the bootstraps" is an impossible
+  action. Similarly the secure establishment of a key infrastructure
+  without external help is also an impossibility. Today it is commonly
+  accepted that the initial connections between nodes are insecure, until
+  key distribution is complete, or that domain-specific keying material
+  is pre-provisioned on each new device in a costly and non-scalable
+  manner. Existing mechanisms are known as non-secured 'Trust on
+  First Use' (TOFU) <xref target="RFC7435" />, 'resurrecting duckling'
+  <xref target="Stajano99theresurrecting" /> or 'pre-staging'.
+  </t>
+
+  <t>
+    Another approach is to try and minimize user actions during
+    bootstrapping. The enrollment protocol EST <xref
+    target="RFC7030"></xref> details a set of non-autonomic bootstrapping
+    methods in this vein:
+  </t>
+
+  <t><list style="symbols">
+    <t>using the Implicit Trust Anchor database (not an autonomic
+    solution because the URL must be securely distributed),</t>
+
+    <t>engaging a human user to authorize the CA certificate using
+    out-of-band data (not an autonomic solution because the human user
+    is involved),</t>
+
+    <t>using a configured Explicit TA database (not an autonomic
+    solution because the distribution of an explicit TA database is
+    not autonomic),</t>
+
+    <t>and using a Certificate-Less TLS mutual authentication method
+    (not an autonomic solution because the distribution of symmetric
+    key material is not autonomic).</t>
+    </list>These "touch" methods do not meet the requirements for
+    zero-touch.
+  </t>
+
+  <t>
+    There are "call home" technologies where the Pledge first
+    establishes a connection to a well known vendor service using a common
+    client-server authentication model. After mutual authentication
+    appropriate credentials to authenticate the target domain are
+    transfered to the Pledge. This creates serveral problems and
+  limitations:</t>
+
+  <t><list style="symbols">
+    <t>the pledge requires realtime connectivity to the vendor
+    service,</t>
+
+    <t>the domain identity is exposed to the vendor service (this is a
+    privacy concern),</t>
+
+    <t>the vendor is responsible for making the authorization
+    decisions (this is a liability concern),</t>
+  </list>
+  </t>
+
+  <t>
+    BRSKI addresses these issues by defining "voucher" and automation
+    extensions to the EST protocol.
+  </t>
+</section>
+
+<section anchor="SKUmgmt" title="Flexible SKU management">
+
+  <t>Through the concept of vouchers and MASA, BRKSI enables solutions to reduce
+  opex for large scale device rollout such as thousands of ISP provided CPEs or tens
+  of thousands of IoT gateways that are drop-shipped to end-users
+  directly from the manufacturer.
+  </t>
+  <t>In classical sales and provisioning processes, the customer wants to know directly
+  after ordering for every target drop-ship end-user location the serial
+  number of the device assigned to that location/shipment. This does not
+  allow manufacturers or their vendors/resellers to keep distributed,
+  cross-customer shared stock and use units from such stock in a
+  lightweight fashion.</t>
+
+  <t>For the customers, this upfront tracking was necessary because
+  pre-existing bootstrap mechanisms have one or more limitations: They
+  can not learn the actual location of a device itself after deployed but
+  have to assume it based on the upfront ordering process. Or they can
+  not dynamically craft a location dependent configuration on first
+  sight. Or the location dependent configuration is necessary to
+  establish first sight. Or there are security issues
+  in trusting the location information of where a device is connected.
+  </t>
+
+  <t>
+    With BRSKI, these problems do not exist. The manufacturer can drop
+    ship devices from a cross-customer shared and distributed inventory
+    directly to the end-user location, and the customer does not have to
+    track serial numbers on a per-location basis: Once the device
+    connects in the end-user location and becomes a BRSKI Pledge, the
+    MASA can simply consider this serial number SKU to be assigned to the
+    open order of the customer, and that customers Registrar could do the
+    same. This relaxed assignment is only possible because of the air-gap
+    free cryptographic security employed by BRSKI between Pledge,
+    Registrar and MASA.
+  </t>
+
+  <t>
+    The attachment location of the Pledge can be derived by the Registar
+    or other customer backend management tools (that would create
+    configuration for the pledge after its enrolment) from the address of
+    the Proxy through which the Pledge connects.
+    If the Proxy is for example an ISP PE and the interface through which
+    the plege connects is relevant to determine its location, then this
+    can be learned by the customers backend management tools through
+    other means, such as a future topology service of the ACP.
+  </t>
+
+</section>
+
+<section anchor="IoT" title="Applicability to constrained environments">
+
+  <t>Questions have been posed as to whether this solution is suitable
+  in general for Internet of Things (IoT) environment. This depends on the
+  capabilities (constraints) of the devices in question. The terminology of <xref
+  target="RFC7228"></xref> is best used to describe the boundaries. It also
+  depends on the (bandwidth) constraints of the networks used.</t>
+
+  <t>The solution described in this document is aimed in general at
+  non-constrained (i.e. class 2+) devices operating on a non-Challenged
+  network. The entire solution as described here is not intended to be
+  useable as-is by constrained devices operating on challenged networks
+  (such as 802.15.4 LLNs).</t>
+
+  <t>The bootstrapping process can take minutes to complete depending on
+  the network infrastructure and device processing speed. Some of the
+  reasons for this include:</t>
+  <t><list style="symbols">
+    <t>The network communication itself is not optimized for speed
+    (eg: no optimization for the number of round-trips).</t>
+    <t>For privacy reasons, the discovery process allows for the Pledge to
+    avoid announcing it's presence through broadcasting. This can delay
+    bootstrap by the periodicity interval of the GRASP M_FLOOD announcements
+    (eg: 30 seconds).</t>
+    <t>Cryptographic operations (such as key generation and
+    exponentiation) can take a minute or more on lower-end CPU powered pledges.</t>
+  </list>
+  </t>
+
+  <t>
+    This
+    protocol is not intended for low latency handoffs. In networks
+    requiring such things, the pledge SHOULD already have been
+    enrolled.
+  </t>
+
+  <t>The protocol is not optimized for LLN. Those type of networks SHOULD NOT
+  use BRSKI unmodified.</t>
+  <t><list style="symbols">
+    <t>The per-pledge signaling is verbose due to the large credential and
+    key sizes required for device authentiation.</t>
+    <t>The protocol does not provide easy mechanisms to serialize parallel
+    bootstrap requests from multiple pledges.</t>
+  </list>
+  </t>
+
+  <t>Reducing verbosity through eg: symmetric key techniques that meet the
+  operational requirements is out-of-scope for this document, but the underlying
+  protocol operations (TLS handshake and signing structures) have sufficient algorithm
+  agility to support such techniques when defined.</t>
+
+  <t>Serializing bootstrap requests is most easily achieved by changing the
+  initiator/responder relationship between registrar and pledges but is also
+  out-of-scope for this document</t>
+
+  <t>The imprint protocol described here could, however, be used by
+  non-energy constrained devices joining a non-constrained network (for
+  instance, smart light bulbs that are mains powered, and speak
+  802.11). It could also be used by non-constrained devices across a
+  non-energy constrained, but challenged network (such as 802.15.4). The
+  certificate contents, and the process by which the four
+  questions above are resolved do apply to constained devices. It is
+  simply the actual on-the-wire imprint protocol which could be inappropriate.</t>
+
+</section>
+
+<section anchor="NACinterop" title="Network Access Control interop">
+  <t>
+    This document presumes that Network Access Control (NAC, such as 802.1X) is
+    normally not required
+    between pledge and proxy because BRSKI is primarily intended for
+    secure zero touch bootstrap of multi-hop network infrastructure and
+    not primarily user devices.
+  </t>
+
+  <t>
+    NAC may be present in some cases, for example when using BRSKI for WiFi access
+    points as pledges connecting to user ports of access switches
+    acting as proxies on which also NAC is enabled.
+  </t>
+
+  <t>
+    These cases require a solution where NAC is integrated with BRSKI
+    in proxy and/or registrar such that the pledge can be unaware of
+    the details or where NAC occurs before BRSKI.
+  </t>
+
+  <t>
+    To keep pledges unaware, NAC could be set up to place pleges
+    initially into a quarantine context in which only the proxy
+    functions are accessible to the plege: GRASP M_FLOOD from the proxy
+    and TCP connections to the proxy (aka: the device performing
+    NAC). After succesful enrolment, the registrar could inform NAC to
+    upgrade the pledge to a context in which also the ACP can be
+    set up between pledge and proxy.
+  </t>
+
+  <t>
+    For pledges aware of NAC, pledges could run 802.1X NAC with their
+    X.509 IDevID if they fail to receive GRASP M_FLOOD messages and
+    retry GRASP after NAC succeeds.
+  </t>
+
+  <t>
+    Note that BRSKI is well aligned with 802.1X NAC because it also
+    relies on the pledges X.509 IDevID / IEEE 802.1AR <xref
+    target="IDevID"></xref> for authentication to the registrar/MASA,
+    and BRSKI proxy and NAC authenticator will be on the same system,
+    but NAC authentication server and BRSKI registrar are independent
+    entities.
+  </t>
+</section>
+</back>
 </rfc>
 <!--
     Local Variables:
