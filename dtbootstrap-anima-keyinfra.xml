@@ -576,6 +576,132 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
     </section>
 
     <section anchor="ProtocolDetails" title="Protocol Details">
+      <section title="Overall">
+
+        <t>BRSKI is always initiated by the Pledge. It MUST
+        initiate BRSKI after boot if it is unconfigured.
+        The Pledge MUST NOT automatically initiate BRSKI if it has been
+        configured.  Resolving conflicting non-BRSKI configuration attempts
+        (such as via a craft terminal) are a local design decision.
+        </t>
+
+        <t>When the Pledge initiates BRSKI, it uses the Discovery mechanism
+        to discover on all its interfaces one or more Circuit Proxies. It
+        then initiates BRSKI/EST connections via those discovered Circuit Proxies.</t>
+
+        <t>BRSKI/EST finishes successfully after the Pledge has installed its
+        Domain Certificate received via BRSKI.  In an ANIMA context
+        (<xref target="I-D.ietf-anima-reference-model" />), the
+        Pledge has now become an ANI device. It proceeds building the ACP,
+        most likely to the device that runs the Circuit Proxy. This is described in
+        <xref target="I-D.ietf-anima-autonomic-control-plane" />.
+        </t>
+      </section>
+
+      <section title="Circuit Proxy">
+        <t>The Circuit Proxy is an Autonomic Service Agent (ASA) started on every ANI
+        device to support bootstrap of Pledges.</t>
+
+        <t> A Registrar is typically configured manually.
+        When the Registrar joins an Autonomic Control Plane
+        (<xref target="I-D.ietf-anima-autonomic-control-plane"></xref>)
+        it MUST respond to GRASP (<xref target="I-D.ietf-anima-grasp"></xref>)
+        M_NEG_SYN message.
+        </t>
+
+        <t>
+          The Circuit Proxy implements a simple TCP Circuit Proxy function that listens
+          on a random dynamic TCP port for connections from Pledges. Whenever a Pledge
+          connects, the Circuit Proxy builds a TCP connection to a Registrars BRSKI/EST port
+          as learned from the Registrars GRASP M_FLOOD announcement and passes TCP data
+          between the two TCP connections. The randomnly choosen listen port is announced
+          in the Circuit Proxies GRASP Objective so Pledges can learn it.
+        </t>
+
+        <t>
+          If a Circuit Proxy is aware of more than one Registrars, it must pick for every
+          incoming Pledge connection a randomn Registrar. The randomization
+          should be persistent so that the same Pledge trying to connect
+          multiple times will get always connected to the same Registrar. This
+          helps to simplify troubleshooting. The random selection of Registrar
+          for the same Pledge on different Circuit Proxies should lead to
+          different Registrars (ak: the random function should include a unique
+          element for the Circuit Proxy itself).
+        </t>
+
+        <t>
+          The registrar responds to discovery messages from the proxy
+          (or GRASP caches between them) as follows: (XXX changed from M_DISCOVERY)
+          <figure>
+            <artwork><![CDATA[
+ objective         = ["AN_registrar", F_DISC, 255 ]
+ discovery-message = [M_NEG_SYN, session-id, initiator, objective]]]></artwork>
+
+                     <postamble>Figure 6: Registrar Discovery</postamble>
+          </figure>
+        </t>
+
+        <t>
+          The response from the registrar (or cache) will be a M_RESPONSE with the
+          following parameters:<figure>
+          <artwork><![CDATA[
+ response-message = [M_RESPONSE, session-id, initiator, ttl,
+ (+locator-option // divert-option), ?objective)]
+ initiator = ACP address of Registrar
+ locator1  = [O_IPv6_LOCATOR, fd45:1345::6789, 6,  443]
+ locator2  = [O_IPv6_LOCATOR, fd45:1345::6789, 17, 5683]
+ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
+                     <postamble>Figure 7: Registrar Response</postamble>
+                   </figure>
+        </t>
+        <t>
+          The set of locators is to be interpreted as follows.
+          A protocol of 6 indicates that TCP proxying on the
+          indicated port is desired.  A protocol of 17 indicates that UDP
+          proxying on the indicated port is desired.  In each case, the traffic
+          SHOULD be proxied to the same port at the ULA address provided.
+        </t>
+        <t>
+          A protocol of 41 indicates that packets may be IPIP proxy'ed.
+          In the case of that IPIP proxying is used, then the provided
+          link-local address MUST be advertised on the local link using
+          proxy neighbour discovery.  The Join Proxy MAY limit forwarded
+          traffic to the protocol (6 and 17) and port numbers
+          indicated by locator1 and locator2.
+          The address to which the IPIP traffic should be sent is the
+          initiator address (an ACP address of the Registrar), not the
+          address given in the locator.
+        </t>
+        <t>
+          Registrars MUST accept TCP / UDP traffic on the ports given at
+          the ACP address of the Registrar.  If the Registrar supports IPIP
+          tunnelling, it MUST also accept traffic encapsulated with IPIP.
+        </t>
+        <t>
+          Registrars MUST accept HTTPS/EST traffic on the TCP ports
+          indicated.
+          Registrars MAY accept DTLS/CoAP/EST traffic on the UDP in
+          addition to TCP traffic.
+        </t>
+
+
+        <t>
+          To protect itself and Registrars against malicious Pledges,
+          Circuit Proxies must limit the rate with which they process TCP
+          connections from Pledges. To the extend feasible, these rate limiters
+          should be per-interface and per Pledge-IP-address.
+        </t>
+
+        <t>
+          Registrars must implement Circuit Proxies to allow complete zero-touch bootstrap
+          of all devices - except Registrars. A Circuit Proxy co-located in a
+          Registrar does
+          not need to perform any TCP Circuit Proxy operations, instead it only needs to
+          announce the AN_join_registrar objective whenever the Registrar is
+          running.
+        </t>
+      </section>
+
         <t>The Pledge MUST initiate BRSKI after boot if it is unconfigured.
         The Pledge MUST NOT automatically initiate BRSKI if it has been
         configured or is in the process of being configured.</t>
@@ -740,68 +866,6 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
  port-number        - the TCP or UDP port number to find the proxy]]></artwork>
                      <postamble>Figure 5</postamble>
                  </figure>
-             </t>
-         </section>
-         <section anchor="discovery" title="Registrar Discovery Protocol Details">
-             <t> A Registrar is typically configured manually.
-                 When the Registrar joins an Autonomic Control Plane
-                 (<xref target="I-D.ietf-anima-autonomic-control-plane"></xref>)
-                 it MUST respond to GRASP (<xref target="I-D.ietf-anima-grasp"></xref>)
-                 M_NEG_SYN message.
-             </t>
-             <t>
-                 The registrar responds to discovery messages from the proxy
-                 (or GRASP caches between them) as follows: (XXX changed from M_DISCOVERY)
-                 <figure>
-                     <artwork><![CDATA[
- objective         = ["AN_registrar", F_DISC, 255 ]
- discovery-message = [M_NEG_SYN, session-id, initiator, objective]]]></artwork>
-
-                     <postamble>Figure 6: Registrar Discovery</postamble>
-                 </figure>
-             </t>
-
-             <t>
-                 The response from the registrar (or cache) will be a M_RESPONSE with the
-                 following parameters:<figure>
-                     <artwork><![CDATA[
- response-message = [M_RESPONSE, session-id, initiator, ttl,
- (+locator-option // divert-option), ?objective)]
- initiator = ACP address of Registrar
- locator1  = [O_IPv6_LOCATOR, fd45:1345::6789, 6,  443]
- locator2  = [O_IPv6_LOCATOR, fd45:1345::6789, 17, 5683]
- locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
-                     <postamble>Figure 7: Registrar Response</postamble>
-                 </figure>
-             </t>
-             <t>
-                 The set of locators is to be interpreted as follows.
-                 A protocol of 6 indicates that TCP proxying on the
-                 indicated port is desired.  A protocol of 17 indicates that UDP
-                 proxying on the indicated port is desired.  In each case, the traffic
-                 SHOULD be proxied to the same port at the ULA address provided.
-             </t>
-             <t>
-                 A protocol of 41 indicates that packets may be IPIP proxy'ed.
-                 In the case of that IPIP proxying is used, then the provided
-                 link-local address MUST be advertised on the local link using
-                 proxy neighbour discovery.  The Join Proxy MAY limit forwarded
-                 traffic to the protocol (6 and 17) and port numbers
-                 indicated by locator1 and locator2.
-                 The address to which the IPIP traffic should be sent is the
-                 initiator address (an ACP address of the Registrar), not the
-                 address given in the locator.
-             </t>
-             <t>
-                 Registrars MUST accept TCP / UDP traffic on the ports given at
-                 the ACP address of the Registrar.  If the Registrar supports IPIP
-                 tunnelling, it MUST also accept traffic encapsulated with IPIP.
-             </t>
-             <t>
-                 Registrars MUST accept HTTPS/EST traffic on the TCP ports
-                 indicated.
-                 Registrars MAY accept DTLS/CoAP/EST traffic on the UDP in
-                 addition to TCP traffic.
              </t>
          </section>
         </section>
