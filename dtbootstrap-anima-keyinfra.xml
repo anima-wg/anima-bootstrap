@@ -4,13 +4,14 @@
 <!ENTITY I-D.draft-ietf-anima-autonomic-control-plane PUBLIC "" "https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.behringer-anima-autonomic-control-plane.xml">
 <!ENTITY RFC2119 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC7030 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7030.xml">
+<!ENTITY RFC5246 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
 <!ENTITY RFC5280 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml">
 <!ENTITY RFC5652 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5652.xml">
 <!ENTITY RFC7575 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7575.xml">
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 
 ]>
-<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-06"
+<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-07"
      ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -188,8 +189,9 @@
                   decisions (this is a liability concern),</t>
           </list></t>
 
-         <t>BRSKI addresses these issues by defining "voucher" and automation
-        extensions to the EST protocol.</t>
+         <t>BRSKI addresses these issues by defining extensions to the EST protocol
+             for the automated distribution of vouchers.
+         </t>
       </section>
 
       <section title="Terminology">
@@ -895,15 +897,12 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         fields as follows:</t>
 
         <t><list style="hanging">
-            <t hangText="assertion:">The voucher request MUST contain an assertion of "proximity". [[EDNOTE: this is a placeholder as this commit is not the correct place to expand this list. Using proximity and channel binding: if both the Pledge and the Registrar sign the channel binding statement then these provide vital proximity information to the MASA. To be expanded on in a future commit.]]</t>
             <t hangText="created-on:">Pledges that have a realtime clock are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
             <t hangText="nonce:">The voucher request MUST contain a cryptographically strong random or pseudo-random number nonce. Doing so ensures <xref target="timeunknown"/> functionality. The nonce MUST NOT be reused for multiple bootstrapping attempts.</t>
+            <t hangText="assertion:">The voucher request MAY contain an assertion of "proximity".</t>
+            <t hangText="pinned-domain-cert:">In a Pledge voucher request this is the Registrar certificate as extracted from the TLS handshake (for example the first certificate in the TLS 'certificate_list' sequence (see <xref target="RFC5246" />). This MUST be populated in a Pledge's voucher request if the "proximity" assertion is populated.</t>
          </list></t>
-        <t>All other fields MAY be ommitted in a voucher request. [[EDNOTE: An issue has been created for the voucher document to ensure normative language supports this]]</t>
-         <t>Signing the request is RECOMMENDED if the Pledge has sufficient
-        processing to perform the crypto operations. Doing so allows the
-        Registrar and MASA to confirm the "proximity" assertion of the
-        Pledge.</t>
+        <t>All other fields MAY be ommitted in a voucher request.</t>
 
         <t>Request media type: application/voucherrequest</t>
 
@@ -915,7 +914,8 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
   "ietf-voucher:voucher": {
     "nonce": "62a2e7693d82fcda2624de58fb6722e5",
     "created-on": "2017-01-01T00:00:00.000Z",
-    "assertion": "proximity"
+    "assertion": "proximity",
+    "pinned-domain-cert": "<base64 encoded certificate>"
   }
 }
 ]]></artwork>
@@ -928,13 +928,19 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
             original signed JWT as an optional part of the payload
             sent to the MASA (e.g. "original request"). this would
             be a BRSKI addition to the voucher?]]</t>
-
+        <t>Signing the request is RECOMMENDED if the Pledge has sufficient
+            processing to perform the crypto operations. Doing so allows the
+            Registrar and MASA to confirm the 'proximity' assertion of the
+            Pledge. If the request is signed the Registrar MAY confirm the 
+            'proximity' asserion and associated 'pinned-domain-cert' are correct.
+            If these fields are not correct the Registrar SHOULD terminate the 
+            bootstrapping attempt.</t>
         <t>The Registrar validates the client identity as described in EST
         <xref target="RFC7030"/> section 3.3.2. The registrar performs authorization as
         detailed in Section 3.3.2. If authorization is successful the
-        Registrar obtains an Voucher from the MASA service (see <xref target="RequestVoucherFromMASA"/>).</t>
-
-        <t>The received voucher request is forwarded to the Pledge.</t>
+        Registrar obtains an Voucher from the MASA service (see <xref target="RequestVoucherFromMASA"/>) and returns that MASA signed
+        voucher to the pledge as described in <xref target="VoucherResponse"/>.
+        </t>
       </section>
 
       <section anchor="RequestVoucherFromMASA" title="Request Voucher from MASA">
@@ -953,13 +959,15 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         <t>Request media type: application/voucherrequest+cms</t>
 
         <t>The request format is a JSON object optionally containing the nonce
-        value (as obtained from the bootstrap request) and the X.509 IDevID
+        value (as obtained from the Pledge voucher request) and the X.509 IDevID
         extracted serial number (the full certificate is not needed and no
         proof-of-possession information for the device identity is included).
-        The AuthorityKeyIdentifier value from the certificate is included to
+        The idevid-issuer value from the pledge certificate is included to
         ensure a statistically unique identity. The Pledge's serial number is
         extracted from the X.509 IDevID. See <xref
-            target="IDevIDextension"></xref>.</t>
+            target="IDevIDextension"></xref>. If the pledge provided a signed 
+        voucher request then this SHOULD be included in the prior-signed-voucher 
+        field of the Registrar's voucher request.</t>
 
         <t><figure>
             <artwork><![CDATA[
@@ -968,12 +976,9 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
     "nonce": "62a2e7693d82fcda2624de58fb6722e5",
     "created-on": "2017-01-01T00:00:00.000Z",
     "assertion": "proximity"
-    "device-identifier-aki": "[[EDNOTE:authority key identifier field
-    from the IDevID. Voucher draft text that device-identifier is "A
-    unique identifier (e.g., serial number) within the scope of the
-    MASA" is insufficient because it prevents vendors from sharing
-    a MASA]]"
-    "device-identifier": "JADA123456789"
+    "idevid-issuer": "<base64 encoded Authority Key Identifier>"
+    "serial-number": "JADA123456789"
+    "prior-signed-voucher": "<base64 encode prior voucher request>"
   }
 }
 ]]></artwork>
@@ -986,9 +991,10 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         appropriate DevIDSerialNumber field from the physical device labeling
         or from the sales channel -- how this occurs is out-of-scope of this
         document). If a nonce is not provided the MASA server MUST
-        authenticate the Registrar as described in EST <xref target="RFC7030"/> section 3.3.2 to
-        reduce the risk of DDoS attacks. The MASA performs authorization as
-        detailed in <xref target="AcceptingTheEntity"></xref>.</t>
+        authenticate the Registrar as described in EST <xref target="RFC7030"/> 
+        section 3.3.2 to reduce the risk of DDoS attacks and provide an
+        authenticated identity as an input to sales channel integration and
+        authorizations (out-of-scope of this document).</t>
 
         <t>As described in <xref target="I-D.ietf-anima-voucher"/> vouchers are normally
             short lived to avoid revocation issues. If the request
@@ -1016,7 +1022,14 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         [[ EDNOTE: can we simplify the above sentence? ]]
         This ensures that the Registrar
         making the claim is an authorized Registrar of the unauthenticated
-        domain. </t>
+        domain. 
+        The MASA server MAY verify that the Registrar's signed voucher includes
+        the 'prior-signed-voucher' field populated
+        with a voucher, signed by the Pledge, that includes a pinned-domain-cert
+        that is consistent with the Registrar certificate chain. The MASA 
+        server is aware of which Pledge's support signing of their voucher
+        requests and can use this information to confirm proximity of 
+        the Pledge with the Registrar.</t>
 
         <t>The root certificate is extracted and used to populate the
         Voucher. The domain ID (e.g. hash of the public key of the domain) is
@@ -1025,7 +1038,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       </section>
 
       <section anchor="VoucherResponse" title="Voucher Response">
-        <t>The voucher response to requests from the device and requests from
+        <t>The voucher response to requests from the Pledge and requests from
         a Registrar are in the same format. A Registrar either caches prior
         MASA responses or dynamically requests a new Voucher based on local
         policy.</t>
@@ -1049,8 +1062,8 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
   "ietf-voucher:voucher": {
     "nonce": "62a2e7693d82fcda2624de58fb6722e5",
     "assertion": "logging"
-    "trusted-ca-certificate": "<base64 encoded certificate>"
-    "device-identifier": "JADA123456789"
+    "pinned-domain-cert": "<base64 encoded certificate>"
+    "serial-number": "JADA123456789"
   }
 }
 ]]></artwork>
@@ -1060,29 +1073,19 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         installed trust anchor associated with the vendor's selected Manufacturer
         Authorized Signing Authority.</t>
 
-        <t>The 'trusted-ca-certificate' element of the voucher contains the domain CA's
-        public key. This is useful for bootstrapping a public key
-        infrastructure but to support bootstrapping other key infrastructures
-        additional domain identity types might be defined in the future.
-        </t>
-        <t>
-        The pledge's EST clients MUST be prepared to ignore additional fields
-        they do not
-        recognize.
-        </t>
-        <t>the pledge MUST be prepared to parse and fail gracefully from
-        an Voucher response that does not contain a 'trusted-ca-certificate' field
-        at all.
-        </t>
-        <t>The Pledge MUST use the
-        'trusted-ca-certificate' trust anchor to immediately complete
-        authentication of the provisional TLS connection.
+        <t>The 'pinned-domain-cert' element of the voucher contains the domain 
+            CA's public key. The Pledge MUST use the 'pinned-domain-cert' trust 
+            anchor to immediately complete authentication of the provisional TLS 
+            connection.</t> 
+        <t>The Pledge MUST be prepared to parse and fail gracefully from
+        an Voucher response that does not contain a 'pinned-domain-cert' field. The 
+        Pledge MUST be prepared to ignore additional fields it does not recognize.
         </t>
 
         <section anchor="CompletingAuthenticationBootstrapping"
                  title="Completing authentication of Provisional TLS connection">
           <t>If a Registrar's credentials can not be verified using the
-          trusted-ca-certificate trust anchor from the voucher then the TLS
+          pinned-domain-cert trust anchor from the voucher then the TLS
           connection is immediately
           discarded and the Pledge abandons attempts to bootstrap with this
           discovered registrar. The pledge SHOULD send voucher status
@@ -1096,29 +1099,28 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
           or some other mis-configuration).  The inconsistently could also
           be the result an active MITM attack on the EST connection.
           </t>
-          <t>
-            To ensure that the trusted-ca-certificate provide chain is
-            able to verify, the Registrar MUST use a certificate
-            that chains to the trusted-ca-certificate.
+          <t> The Registrar MUST use a certificate that chains to the pinned-domain-cert 
+              as its TLS server certificate.
           </t>
 
           <t>The Pledge's PKIX path validation of a Registrar certificate's validity
               period information is as described in <xref target="timeunknown"></xref>.
-          Beyond that once PKIX path validation is successful the TLS connection is
+          Once the PKIX path validation is successful the TLS connection is
           no longer provisional.</t>
 
-          <t>The trusted-ca-certificate is installed as an
+          <t>The pinned-domain-cert is installed as an
           Explicit Trust Anchor for future operations. It can therefore
           can be used to authenticate any dynamically
           discovered EST server that contain the id-kp-cmcRA extended key
           usage extension as detailed in EST RFC7030 section 3.6.1; but to
           reduce system complexity the Pledge SHOULD avoid additional
           discovery operations. Instead the Pledge SHOULD communicate directly
-          with the Registrar as the EST server for future key management
-          operations. The 'trusted-ca-certificate' is not a complete
+          with the Registrar as the EST server. The ' pinned-domain-cert' is not a complete
           distribution of the EST section 4.1.3 CA Certificate Response which is
           an additional justification for the recommendation to proceed with EST
-          key management operations.</t>
+          key management operations. Once a full CA Certificate Response is 
+          obtained it is more authoritative for the domain than the limited
+          'pinned-domain-cert' response.'</t>
         </section>
       </section>
 
@@ -1536,7 +1538,10 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
             log information as a defense in depth strategy to ensure that this
             does not occur unexpectedly (for example when purchasing new
             equipment the Registrar would throw an error if any audit log
-            information is reported).</t>
+            information is reported). The MASA should verify the
+            'prior-signed-voucher' information for Pledge's that support
+            that functionality. This provides a proof-of-proximity 
+            check that reduces the need for ownership verification.</t>
           </list></t>
       </section>
     </section>
@@ -1579,17 +1584,12 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         <t>The MASA server is exposed to DoS attacks wherein attackers claim
         an unbounded number of devices. Ensuring a Registrar is
         representative of a valid vendor customer, even without validating
-        ownership of specific Pledge devices, helps to mitigate this. Inserting a cryptographic
-        proof-of-possession step to the protocol operations is a possible
-        area of future work. One method that would not introduce
-        additional round-trips would be for the Registrar to share the
-        Pledge-Registrar TLS handshake with the MASA service when requesting
-        a voucher. Doing so would allow the MASA service to verify that
-        the Registrar's Server Certificate was signed by the Pledge's
-        Certificate Verify message (which covers the entire handshake).
-        [[EDNOTE: Security Considerations should not offer up new protocol
-        ideas without a reason for having not done it...]]
-        </t>
+        ownership of specific Pledge devices, helps to mitigate this. Pledge
+        signatures on the initial voucher request, as forwarded by the
+        Registrar in the prior-signed-voucher field, significantly 
+        reduce this risk by ensuring the MASA can confirm proximity
+        between the Pledge and the Registrar making the request. This
+        mechanism is optional to allow for constrained devices.</t>
 
         <t>It is possible for an attacker to request a voucher from
         the MASA service directly after the real Registrar obtains an
@@ -1656,6 +1656,8 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       &RFC7030;
 
       &RFC5652;
+      
+      &RFC5246;
 
       &RFC5280;
 
