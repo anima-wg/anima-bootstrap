@@ -448,6 +448,11 @@
             are to be widely deployed in the field. The MASA vendor services have
             the flexibility to leverage either the currently defined claim
             mechanisms or to experiment with higher or lower security levels.</t>
+        
+        <t>Vouchers provide a signed but non-encrypted communication channel between
+            the Pledge, the MASA, and the Registrar. The Registrar maintains
+            control over the transport and policy decisions allowing the 
+            local security policy of the domain network to be enforced.</t>
       </section>
 
       <section anchor="IDevIDextension" title="Initial Device Identifier">
@@ -983,17 +988,18 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
 ]]></artwork>
         </figure></t>
 
-        <t>A Registrar MAY exclude the nonce from the request. Doing so allows
+        <t>A Registrar MAY exclude the nonce from the voucher request
+            it submits to the MASA. Doing so allows
         the Registrar to request a Voucher when the Pledge is offline, or
-        when the target bootstrapping environment is not on the same network
-        as the MASA server (this requires the Registrar to learn the
+        when the Registrar is expected to be offline when the Pledge is
+        being deployed. These use cases require the Registrar to learn the
         appropriate DevIDSerialNumber field from the physical device labeling
-        or from the sales channel -- how this occurs is out-of-scope of this
+        or from the sales channel (out-of-scope of this
         document). If a nonce is not provided the MASA server MUST
         authenticate the Registrar as described in EST <xref target="RFC7030"/> 
-        section 3.3.2 to reduce the risk of DDoS attacks and provide an
+        section 3.3.2 to reduce the risk of DDoS attacks and to provide an
         authenticated identity as an input to sales channel integration and
-        authorizations (out-of-scope of this document).</t>
+        authorizations (also out-of-scope of this document).</t>
 
         <t>As described in <xref target="I-D.ietf-anima-voucher"/> vouchers are normally
             short lived to avoid revocation issues. If the request
@@ -1444,21 +1450,31 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       </section>
 
       <section title="Pledge security reductions">
-        <t>The Pledge MAY support "trust on first use" on physical interfaces
-        but MUST NOT support "trust on first use" on network interfaces. This
+        <t>The Pledge can choose to accept vouchers using less 
+            secure methods. These methods enable offline and emergency 
+            (touch based) deployment use cases:
+            <list style="numbers">
+        <t>The Pledge MUST accept nonceless vouchers. This allows for offline 
+        use cases. Logging and validity periods address the inherent
+        security considerations of supporting these use cases.</t>
+        <t>The Pledge MAY support "trust on first use" for physical interfaces
+        such as a local console port or physical user interface but MUST NOT 
+        support "trust on first use" on network interfaces. This
         is because "trust on first use" permanently degrades the security for
-        all other use cases.</t>
-
+        all use cases.</t>
         <t>The Pledge MAY have an operational mode where it skips Voucher
         validation one time. For example if a physical button is depressed
         during the bootstrapping operation. This can be useful if the vendor
         service is unavailable. This behavior SHOULD be available via local
         configuration or physical presence methods to ensure new entities can
         always be deployed even when autonomic methods fail. This allows for
-        unsecured imprint.</t>
+        unsecured imprint.</t></list></t>
 
-        <t>It is RECOMMENDED that this only be available if hardware assisted
-        NEA [RFC5209] is supported.</t>
+        <t>It is RECOMMENDED that "trust on first use" or skipping voucher validation
+        only be available if hardware assisted Network Endpoint Assessment [RFC5209] 
+        is supported. This recommendation ensures that domain network monitoring
+        can detect innappropriate use of offline or emergency
+        deployment procedures.</t>
       </section>
 
       <section title="Registrar security reductions">
@@ -1576,7 +1592,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         This reduces the resale value of the equipment because future owners
         will detect the lowered security inherent in the existence of a
         nonceless voucher that would be trusted by their Pledge. This
-        accurately reflects a balance between partition resistant recovery and
+        reflects a balance between partition resistant recovery and
         security of future bootstrapping. Registrars take the Pledge's audit
         history into account when applying policy to new devices.</t>
 
@@ -1616,8 +1632,10 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       <t>To facilitate truely limited clients EST RFC7030 section 3.3.2
       requirements that the client MUST support a client authentication model
       have been reduced in <xref target="reducedsecuritymodes"></xref> to a
-      statement that clients only "SHOULD" support such a model. This reflects
-      current (poor) practices that are NOT RECOMMENDED.</t>
+      statement that the Registrar "MAY" choose to accept devices 
+      that fail cryptographic authentication. This reflects
+      current (poor) practices in shipping devices without a cryptographic
+      identity that are NOT RECOMMENDED.</t>
 
         <t>During the provisional period of the connection all HTTP header and
         content data MUST treated as untrusted data. HTTP libraries are
