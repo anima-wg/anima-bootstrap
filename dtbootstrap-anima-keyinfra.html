@@ -696,7 +696,7 @@
 |       |     .  |   Proxy    |       | Registrar |          .
 |       &lt;--------&gt;            &lt;-------&gt;           |          .
 |       |     .  |            |       |           |          .
-|       |     .  +------------+       +-----+-----+          .
+|X.509  |     .  +------------+       +-----+-----+          .
 |IDevID |     .                             |                .
 |       |     .           +-----------------+----------+     .
 |       |     .           | Key Infrastructure         |     .
@@ -918,7 +918,7 @@ or|&lt;-RFC4862 IPv6 adr   |                   |                    |
 <h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#RequestVoucherFromRegistrar" id="RequestVoucherFromRegistrar">Request Voucher from the Registrar</a></h1>
 <p id="rfc.section.3.2.p.1">When the Pledge bootstraps it makes a request for a Voucher from a Registrar.</p>
 <p id="rfc.section.3.2.p.2">This is done with an HTTPS POST using the operation path value of "/requestvoucher".</p>
-<p id="rfc.section.3.2.p.3">The request is itself a voucher <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a>. The Pledge populates the voucher fields as follows:</p>
+<p id="rfc.section.3.2.p.3">The request is a JSON encoded voucher, see <a href="#RFC7951">[RFC7951]</a> and <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a>. This is referred to as a 'voucher request'.  The Pledge populates the voucher request fields as follows:</p>
 <p/>
 
 <dl>
@@ -931,9 +931,9 @@ or|&lt;-RFC4862 IPv6 adr   |                   |                    |
   <dt>pinned-domain-cert:</dt>
   <dd style="margin-left: 8">In a Pledge voucher request this is the Registrar certificate as extracted from the TLS handshake (for example the first certificate in the TLS 'certificate_list' sequence (see <a href="#RFC5246">[RFC5246]</a>). This MUST be populated in a Pledge's voucher request if the "proximity" assertion is populated.</dd>
 </dl>
-<p id="rfc.section.3.2.p.5">All other fields MAY be ommitted in a voucher request.</p>
-<p id="rfc.section.3.2.p.6">Request media type: application/voucherrequest</p>
-<p id="rfc.section.3.2.p.7">An example JWS payload of the voucher request:</p>
+<p id="rfc.section.3.2.p.5">All other fields MAY be ommitted in the voucher request.</p>
+<p id="rfc.section.3.2.p.6">Request media type: application/voucherrequest+cms</p>
+<p id="rfc.section.3.2.p.7">An example JSON payload of a voucher request from a Pledge:</p>
 <pre>
 {
   "ietf-voucher:voucher": {
@@ -951,8 +951,24 @@ or|&lt;-RFC4862 IPv6 adr   |                   |                    |
 <h1 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a> <a href="#RequestVoucherFromMASA" id="RequestVoucherFromMASA">Request Voucher from MASA</a></h1>
 <p id="rfc.section.3.3.p.1">A Registrar requests a Voucher from the MASA service using a REST interface. For simplicity this is defined as an optional EST message between a Registrar and an EST server running on the MASA service although the Registrar is not required to make use of any other EST functionality when communicating with the MASA service. (The MASA service MUST properly reject any EST functionality requests it does not wish to service; a requirement that holds for any REST interface).</p>
 <p id="rfc.section.3.3.p.2">This is done with an HTTP POST using the operation path value of "/requestvoucher".</p>
-<p id="rfc.section.3.3.p.3">Request media type: application/voucherrequest+cms</p>
-<p id="rfc.section.3.3.p.4">The request format is a JSON object optionally containing the nonce value (as obtained from the Pledge voucher request) and the X.509 IDevID extracted serial number (the full certificate is not needed and no proof-of-possession information for the device identity is included).  The idevid-issuer value from the pledge certificate is included to ensure a statistically unique identity. The Pledge's serial number is extracted from the X.509 IDevID. See <a href="#IDevIDextension">Section 2.2</a>. If the pledge provided a signed voucher request then this SHOULD be included in the prior-signed-voucher field of the Registrar's voucher request.</p>
+<p id="rfc.section.3.3.p.3">The request is a JSON encoded voucher, see <a href="#RFC7951">[RFC7951]</a> and <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a>. This is referred to as a 'voucher request'.  The Registrar populates the voucher request fields as follows:</p>
+<p/>
+
+<dl>
+  <dt>created-on:</dt>
+  <dd style="margin-left: 8">Registrars are RECOMMENDED to populate this field. This provides additional information to the MASA.</dd>
+  <dt>nonce:</dt>
+  <dd style="margin-left: 8">The optional nonce value from the Pledge request if desired (see below).</dd>
+  <dt>serial-number:</dt>
+  <dd style="margin-left: 8">The serial number of the Pledge the Registrar would like a voucher for.</dd>
+  <dt>idevid-issuer:</dt>
+  <dd style="margin-left: 8">The idevid-issuer value from the pledge certificate is included to ensure a statistically unique identity. The Pledge's serial number is extracted from the X.509 IDevID. See <a href="#IDevIDextension">Section 2.2</a>.</dd>
+  <dt>prior-signed-voucher:</dt>
+  <dd style="margin-left: 8">If the Pledge provided a signed voucher request then it SHOULD be included in the voucher request built by the Registrar.</dd>
+</dl>
+<p id="rfc.section.3.3.p.5">All other fields MAY be ommitted in the voucher request.</p>
+<p id="rfc.section.3.3.p.6">Request media type: application/voucherrequest+cms</p>
+<p id="rfc.section.3.3.p.7">An example JSON payload of a voucher request from a Registrar:</p>
 <pre>
 {
   "ietf-voucher:voucher": {
@@ -966,10 +982,10 @@ or|&lt;-RFC4862 IPv6 adr   |                   |                    |
 }
 </pre>
 <p/>
-<p id="rfc.section.3.3.p.6">A Registrar MAY exclude the nonce from the voucher request it submits to the MASA. Doing so allows the Registrar to request a Voucher when the Pledge is offline, or when the Registrar is expected to be offline when the Pledge is being deployed. These use cases require the Registrar to learn the appropriate DevIDSerialNumber field from the physical device labeling or from the sales channel (out-of-scope of this document). If a nonce is not provided the MASA server MUST authenticate the Registrar as described in EST <a href="#RFC7030">[RFC7030]</a> section 3.3.2 to reduce the risk of DDoS attacks and to provide an authenticated identity as an input to sales channel integration and authorizations (also out-of-scope of this document).</p>
-<p id="rfc.section.3.3.p.7">As described in <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a> vouchers are normally short lived to avoid revocation issues. If the request is for a previous (expired) voucher using the same Registrar (as determined by Registrar's' domainID) and the MASA has not been informed that the claim is invalid - the request for a renewed voucher SHOULD be automatically authorized. If authorization is successful the MASA responds with a <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a> voucher. The MASA SHOULD check for revocation of the Registrar certificate. The maximum lifetime of the voucher issued SHOULD NOT exceed the lifetime of the Registrar's revocation validation (for example if the Registrar revocation status is indicated in a CRL that is valid for two weeks then that is an appropriate lifetime for the voucher).</p>
-<p id="rfc.section.3.3.p.8">The voucher request is signed by the Registrar as indicated in <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a> voucher.  The entire certificate chain, up to and including the Domain CA, MUST be included. The MASA service checks the internal consistency of the voucher request but does not authenticate the domain identity information since the domain is not know to the MASA server in advance. The MASA server MUST verify that the voucher request is signed by a Registrar certificate (by checking for the cmc-idRA field) that was issued by the self signed root certificate included in the request.  [[ EDNOTE: can we simplify the above sentence? ]] This ensures that the Registrar making the claim is an authorized Registrar of the unauthenticated domain.  The MASA server MAY verify that the Registrar's signed voucher includes the 'prior-signed-voucher' field populated with a voucher, signed by the Pledge, that includes a pinned-domain-cert that is consistent with the Registrar certificate chain. The MASA server is aware of which Pledge's support signing of their voucher requests and can use this information to confirm proximity of the Pledge with the Registrar.</p>
-<p id="rfc.section.3.3.p.9">The root certificate is extracted and used to populate the Voucher. The domain ID (e.g. hash of the public key of the domain) is extracted from the root certificate and is used to update the audit log.</p>
+<p id="rfc.section.3.3.p.9">A Registrar MAY exclude the nonce from the voucher request it submits to the MASA. Doing so allows the Registrar to request a Voucher when the Pledge is offline, or when the Registrar is expected to be offline when the Pledge is being deployed. These use cases require the Registrar to learn the appropriate DevIDSerialNumber field from the physical device labeling or from the sales channel (out-of-scope of this document). If a nonce is not provided the MASA server MUST authenticate the Registrar as described in EST <a href="#RFC7030">[RFC7030]</a> section 3.3.2 to reduce the risk of DDoS attacks and to provide an authenticated identity as an input to sales channel integration and authorizations (also out-of-scope of this document).</p>
+<p id="rfc.section.3.3.p.10">As described in <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a> vouchers are normally short lived to avoid revocation issues. If the request is for a previous (expired) voucher using the same Registrar (as determined by Registrar's' domainID) and the MASA has not been informed that the claim is invalid - the request for a renewed voucher SHOULD be automatically authorized. If authorization is successful the MASA responds with a <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a> voucher. The MASA SHOULD check for revocation of the Registrar certificate. The maximum lifetime of the voucher issued SHOULD NOT exceed the lifetime of the Registrar's revocation validation (for example if the Registrar revocation status is indicated in a CRL that is valid for two weeks then that is an appropriate lifetime for the voucher).</p>
+<p id="rfc.section.3.3.p.11">The voucher request MUST be signed by the Registrar as indicated in <a href="#I-D.ietf-anima-voucher">[I-D.ietf-anima-voucher]</a> voucher.  The entire certificate chain, up to and including the Domain CA, MUST be included. The MASA service checks the internal consistency of the voucher request but does not authenticate the domain identity information since the domain is not know to the MASA server in advance. The MASA server MUST verify that the voucher request is signed by a Registrar certificate (by checking for the cmc-idRA field) that was issued by the self signed root certificate included in the request.  [[ EDNOTE: can we simplify the above sentence? ]] This ensures that the Registrar making the claim is an authorized Registrar of the unauthenticated domain.  The MASA server MAY verify that the Registrar's signed voucher includes the 'prior-signed-voucher' field populated with a voucher, signed by the Pledge, that includes a pinned-domain-cert that is consistent with the Registrar certificate chain. The MASA server is aware of which Pledge's support signing of their voucher requests and can use this information to confirm proximity of the Pledge with the Registrar.</p>
+<p id="rfc.section.3.3.p.12">The root certificate is extracted and used to populate the Voucher. The domain ID (e.g. hash of the public key of the domain) is extracted from the root certificate and is used to update the audit log.</p>
 <h1 id="rfc.section.3.4"><a href="#rfc.section.3.4">3.4.</a> <a href="#VoucherResponse" id="VoucherResponse">Voucher Response</a></h1>
 <p id="rfc.section.3.4.p.1">The voucher response to requests from the Pledge and requests from a Registrar are in the same format. A Registrar either caches prior MASA responses or dynamically requests a new Voucher based on local policy.</p>
 <p id="rfc.section.3.4.p.2">If the the join operation is successful, the server response MUST contain an HTTP 200 response code. The server MUST answer with a suitable 4xx or 5xx HTTP [RFC2616] error code when a problem occurs.  The response data from the MASA server MUST be a plaintext human-readable (ASCII, english) error message containing explanatory information describing why the request was rejected.</p>
@@ -1245,6 +1261,12 @@ or|&lt;-RFC4862 IPv6 adr   |                   |                    |
         <b id="RFC7228">[RFC7228]</b>
       </td>
       <td class="top"><a>Bormann, C.</a>, <a>Ersue, M.</a> and <a>A. Keranen</a>, "<a href="http://tools.ietf.org/html/rfc7228">Terminology for Constrained-Node Networks</a>", RFC 7228, DOI 10.17487/RFC7228, May 2014.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC7951">[RFC7951]</b>
+      </td>
+      <td class="top"><a>Lhotka, L.</a>, "<a href="http://tools.ietf.org/html/rfc7951">JSON Encoding of Data Modeled with YANG</a>", RFC 7951, DOI 10.17487/RFC7951, August 2016.</td>
     </tr>
   </tbody>
 </table>

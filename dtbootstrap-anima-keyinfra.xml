@@ -8,6 +8,7 @@
 <!ENTITY RFC5280 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml">
 <!ENTITY RFC5652 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5652.xml">
 <!ENTITY RFC7575 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7575.xml">
+<!ENTITY RFC7951 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7951.xml">
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 ]>
 
@@ -398,7 +399,7 @@
 |       |     .  |   Proxy    |       | Registrar |          .
 |       <-------->            <------->           |          .
 |       |     .  |            |       |           |          .
-|       |     .  +------------+       +-----+-----+          .
+|X.509  |     .  +------------+       +-----+-----+          .
 |IDevID |     .                             |                .
 |       |     .           +-----------------+----------+     .
 |       |     .           | Key Infrastructure         |     .
@@ -896,9 +897,9 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         <t>This is done with an HTTPS POST using the operation path value of
         "/requestvoucher".</t>
 
-        <t>The request is itself a voucher <xref
-        target="I-D.ietf-anima-voucher"/>. The Pledge populates the voucher
-        fields as follows:</t>
+        <t>The request is a JSON encoded voucher, see <xref target="RFC7951"/> and <xref
+        target="I-D.ietf-anima-voucher"/>. This is referred to as a 'voucher request'. 
+        The Pledge populates the voucher request fields as follows:</t>
 
         <t><list style="hanging">
             <t hangText="created-on:">Pledges that have a realtime clock are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
@@ -906,11 +907,11 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
             <t hangText="assertion:">The voucher request MAY contain an assertion of "proximity".</t>
             <t hangText="pinned-domain-cert:">In a Pledge voucher request this is the Registrar certificate as extracted from the TLS handshake (for example the first certificate in the TLS 'certificate_list' sequence (see <xref target="RFC5246" />). This MUST be populated in a Pledge's voucher request if the "proximity" assertion is populated.</t>
          </list></t>
-        <t>All other fields MAY be ommitted in a voucher request.</t>
+        <t>All other fields MAY be ommitted in the voucher request.</t>
 
-        <t>Request media type: application/voucherrequest</t>
+        <t>Request media type: application/voucherrequest+cms</t>
 
-        <t>An example JWS payload of the voucher request:</t>
+        <t>An example JSON payload of a voucher request from a Pledge:</t>
 
         <figure>
           <artwork><![CDATA[
@@ -960,18 +961,26 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         <t>This is done with an HTTP POST using the operation path value of
         "/requestvoucher".</t>
 
+        <t>The request is a JSON encoded voucher, see <xref target="RFC7951"/> and <xref
+        target="I-D.ietf-anima-voucher"/>. This is referred to as a 'voucher request'. 
+        The Registrar populates the voucher request fields as follows:</t> 
+        
+        <t><list style="hanging">
+        <t hangText="created-on:">Registrars are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
+        <t hangText="nonce:">The optional nonce value from the Pledge request if desired (see below).</t>
+        <t hangText="serial-number:">The serial number of the Pledge the Registrar would like a voucher for.</t>
+        <t hangText="idevid-issuer:">The idevid-issuer value from the pledge certificate 
+        is included to ensure a statistically unique identity. The Pledge's serial number is
+        extracted from the X.509 IDevID. See <xref target="IDevIDextension"></xref>.</t>
+        <t hangText="prior-signed-voucher:">If the Pledge provided a signed voucher request 
+        then it SHOULD be included in the voucher request built by the Registrar.</t>
+        </list></t>
+        <t>All other fields MAY be ommitted in the voucher request.</t>
+
         <t>Request media type: application/voucherrequest+cms</t>
 
-        <t>The request format is a JSON object optionally containing the nonce
-        value (as obtained from the Pledge voucher request) and the X.509 IDevID
-        extracted serial number (the full certificate is not needed and no
-        proof-of-possession information for the device identity is included).
-        The idevid-issuer value from the pledge certificate is included to
-        ensure a statistically unique identity. The Pledge's serial number is
-        extracted from the X.509 IDevID. See <xref
-            target="IDevIDextension"></xref>. If the pledge provided a signed 
-        voucher request then this SHOULD be included in the prior-signed-voucher 
-        field of the Registrar's voucher request.</t>
+        <t>An example JSON payload of a voucher request from a Registrar:</t>
+
 
         <t><figure>
             <artwork><![CDATA[
@@ -1013,7 +1022,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
             example if the Registrar revocation status is indicated in a CRL that is
             valid for two weeks then that is an appropriate lifetime for the voucher).</t>
 
-        <t>The voucher request is signed by the Registrar as indicated in
+        <t>The voucher request MUST be signed by the Registrar as indicated in
             <xref
             target="I-D.ietf-anima-voucher"/> voucher.
         The entire certificate chain, up to and including the Domain CA, MUST
@@ -1677,6 +1686,8 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       &RFC5246;
 
       &RFC5280;
+
+      &RFC7951;
 
       <?rfc include="reference.RFC.3542" ?>
 
