@@ -1020,41 +1020,52 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         authenticated identity as an input to sales channel integration and
         authorizations (also out-of-scope of this document).</t>
 
-        <t>As described in <xref target="I-D.ietf-anima-voucher"/> vouchers are normally
-            short lived to avoid revocation issues. If the request
-        is for a previous (expired) voucher using the same Registrar (as determined
-        by Registrar's' domainID) and the MASA has not been informed that the claim is
-        invalid - the request for a renewed voucher SHOULD be automatically
-        authorized. If authorization is successful the MASA responds with a <xref
-            target="I-D.ietf-anima-voucher"/> voucher. The MASA SHOULD check for revocation
-        of the Registrar certificate. The maximum lifetime of the voucher issued
-            SHOULD NOT exceed the lifetime of the Registrar's revocation validation (for
-            example if the Registrar revocation status is indicated in a CRL that is
-            valid for two weeks then that is an appropriate lifetime for the voucher).</t>
+        <t>The MASA verifies that the voucher request is internally consistent 
+        but does not authenticate the domain identity information since the 
+        domain is not know to the MASA server in advance. The MASA validation 
+        checks before issuing a voucher are as follows:</t> 
+        <t><list style="hanging">
+            <t hangText="Renew for expired voucher:">As described in 
+                <xref target="I-D.ietf-anima-voucher"/> vouchers 
+                are normally short lived to avoid revocation issues. If the request
+                is for a previous (expired) voucher using the same Registrar (as determined
+                by the Registrar pinned-domain-cert) and the MASA has not been informed that the claim is
+                invalid then the request for a renewed voucher SHOULD be automatically
+                authorized.</t>
+            <t hangText="Voucher signature consistency:">The MASA MUST verify that the voucher 
+                request is signed by a Registrar. This is confirmed by 
+                verifying that the id-kp-cmcRA extended key
+                usage extension field (as detailed in EST RFC7030 section 3.6.1) exists in the certificate 
+                of the entity that signed the voucher request. This verification
+                is only a consistency check that the unauthenticated domain CA intended this
+                to be a Registrar. Performing this check provides value to domain PKI by assuring the
+                domain administrator that the MASA service will only respect claims from 
+                authorized Registration Authorities of the domain. (The requirement for the Registrar to 
+                include the Domain CA certificate in the signature structure was stated above).</t>
+            <t hangText="Registrar revocation consistency:">The MASA SHOULD check for revocation
+                of the Registrar certificate. The maximum lifetime of the voucher issued
+                SHOULD NOT exceed the lifetime of the Registrar's revocation validation (for
+                example if the Registrar revocation status is indicated in a CRL that is
+                valid for two weeks then that is an appropriate lifetime for the voucher).
+                Because the Registar certificate authority is unknown to the MASA in 
+                advance this is only an extended consistency check and is not required. 
+                The maximum lifetime of the voucher issued
+                SHOULD NOT exceed the lifetime of the Registrar's revocation validation (for
+                example if the Registrar revocation status is indicated in a CRL that is
+                valid for two weeks then that is an appropriate lifetime for the voucher).</t>
+            <t hangText="Pledge proximity assertion:">
+                The MASA server MAY verify that the Registrar signed voucher includes
+                the 'prior-signed-voucher' field populated
+                with a Pledge signed voucher that includes a pinned-domain-cert
+                that is consistent with the Registrar certificate chain. The MASA 
+                server is aware of which Pledge's support signing of their voucher
+                requests and can use this information to confirm proximity of 
+                the Pledge with the Registrar.</t>
+        </list></t>
 
-        <t>TThe MASA service checks
-        the internal consistency of the voucher request but does not authenticate the
-        domain identity information since the domain is not know to the MASA server
-        in advance. The MASA server
-        MUST verify that the voucher request is signed by a Registrar certificate (by
-        checking for the cmc-idRA field) that was issued by the self signed
-        root certificate included in the request.
-        [[ EDNOTE: can we simplify the above sentence? ]]
-        This ensures that the Registrar
-        making the claim is an authorized Registrar of the unauthenticated
-        domain. 
-        The MASA server MAY verify that the Registrar's signed voucher includes
-        the 'prior-signed-voucher' field populated
-        with a voucher, signed by the Pledge, that includes a pinned-domain-cert
-        that is consistent with the Registrar certificate chain. The MASA 
-        server is aware of which Pledge's support signing of their voucher
-        requests and can use this information to confirm proximity of 
-        the Pledge with the Registrar.</t>
-
-        <t>The root certificate is extracted and used to populate the
-        Voucher being issued. The domain ID (e.g. hash of the public key of the domain) is
-        extracted from the root certificate and is used to update the audit
-        log.</t>
+        <t>The root certificate is extracted from the signature method and used to populate the
+        "pinned-domain-cert" of the Voucher being issued. The domain ID (e.g. hash of the public key of the domain) is
+        extracted from the root certificate and is used to update the audit log.</t>
       </section>
 
       <section anchor="VoucherResponse" title="Voucher Response">
