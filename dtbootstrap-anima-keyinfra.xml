@@ -2,6 +2,7 @@
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY I-D.behringer-autonomic-network-framework PUBLIC "" "https://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.behringer-homenet-trust-bootstrap.xml">
 <!ENTITY I-D.draft-ietf-anima-autonomic-control-plane PUBLIC "" "https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.behringer-anima-autonomic-control-plane.xml">
+<!ENTITY I-D.vanderstok-ace-coap-est PUBLIC "" "https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.vanderstok-ace-coap-est.xml">
 <!ENTITY RFC2119 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC7030 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7030.xml">
 <!ENTITY RFC5246 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
@@ -1275,25 +1276,23 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         <t>Once the Voucher is received, as specified in this document, the
         client has sufficient information to leverage the existing
         communication channel with a Registrar to continue an EST RFC7030
-        enrollment. The Pledge SHOULD use the existing current TLS connection
+        enrollment. The voucher provides an automated mechanism for the "Bootstrap
+        Distribution of CA Certificates" described in <xref target="RFC7030"></xref> 
+        section 4.1.1 wherein the Pledge "MUST [...]. engage a human user 
+        to authorize the CA certificate using
+        out-of-band" information". Instead the Pledge now can automate this 
+        process using vouchers.</t> 
+            
+        <t>The Pledge SHOULD use the existing current TLS connection
         to proceed with EST enrollment, thus reducing the total amount of
         cryptographic and round trip operations required during
-        bootstrapping (enrollment picks up after EST RFC7030 "Bootstrap Distribution of CA
-        Certificates" and the client continues with EST enrollment operations
-        including "CA Certificates Request", "CSR Attributes" and "Client
-        Certificate Request" or "Server-Side Key Generation").</t>
+        bootstrapping. After voucher verification the Pledge continues with 
+        EST enrollment operations including "CA Certificates Request", 
+        "CSR Attributes" and "Client Certificate Request" or "Server-Side Key Generation" etc.</t>
 
         <t>The Pledge is RECOMMENDED to implement the following EST automation extensions. They
         supplement the RFC7030 EST to better support automated devices that do not
         have an end user.</t>
-
-        <t>[[EDNOTE:might be best to discuss in CSR attributes?]]For the purposes of creating the ANIMA Autonomic Control Plane,
-            the contents of the new certificate MUST be carefully specified.
-            <xref target="I-D.ietf-anima-autonomic-control-plane" /> section
-            5.1.1 contains details.  The Registrar MUST provide the
-            the correct ACP information to populate the subjectAltName /
-            rfc822Name field in the "CSR Attributes" step.
-        </t>
 
         <section title="EST Distribution of CA Certificates">
           <t>The Pledge MUST request the full EST Distribution of CA
@@ -1403,16 +1402,16 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         </section>
 
         <section title="EST over CoAP">
-          <t>[[EDNOTE: In order to support smaller devices the above section
-          on Proxy behavior introduces mandatory to implement support for CoAP
-          support by the Proxy. This implies similar support by the Pledge and
-          Registrar and means that the EST protocol operation encapsulation
-          into CoAP needs to be described. EST is HTTP based and "CoaP is
-          designed to easily interface with HTTP for integration" [RFC7252].
-          Use of CoAP implies Datagram TLS (DTLS) wherever this document
-          describes TLS handshake specifics. A complexity is that the large
-          message sizes necessary for bootstrapping will require support for
-          [draft-ietf-core-block].]]</t>
+          <t>This document describes extensions to EST for the purposes
+              of bootstrapping of remote key infrastructures.
+              Bootstrapping is relevant for CoAP enrollment
+              discussions as well. The defintion of EST and BRSKI over CoAP is not 
+              discussed within this document beyond ensuring proxy support for 
+              CoAP operations. Instead it is anticipated that a definition of 
+              CoAP mappings will occur in subsequent documents such as 
+              <xref target="I-D.vanderstok-ace-coap-est"></xref> and that
+              CoAP mappings for BRSKI will be discussed either there or
+              in future work.</t>
         </section>
       </section>
     </section>
@@ -1717,6 +1716,7 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
 
       <?rfc include="reference.I-D.ietf-anima-autonomic-control-plane" ?>
       <?rfc include="reference.I-D.ietf-anima-voucher" ?>
+      <?rfc include="reference.I-D.vanderstok-ace-coap-est" ?>
 
       <reference anchor="IDevID"
                  target="http://standards.ieee.org/findstds/standard/802.1AR-2009.html">
