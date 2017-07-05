@@ -1,7 +1,7 @@
 This directory contains shepherd review suggestions and proposed text
 changes that were written against a pre-version of draft-ietf-anima-bootstrapping-keyinfra-06.
 
-Diff:
+Diff as originally proposed:
 
 http://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/master/1706-shepherd-review/dtbootstrap-anima-keyinfra-06-pre.txt&url2=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/master/1706-shepherd-review/dtbootstrap-anima-keyinfra-06-pre.reviewed.txt
 
@@ -13,6 +13,10 @@ https://github.com/anima-wg/anima-bootstrap/tree/toerless_review_section3_201606
 
 Unfortunately, this branch did not get merged into the keyinfa-07 version of the draft
 which was primarily focussed on aligning bootstrap with the voucher draft in last call.
+
+Latest version in github:
+
+https://raw.githubusercontent.com/anima-wg/anima-bootstrap/toerless_review_section3_20160606/dtbootstrap-anima-keyinfra.txt
 
 Etherpad notes see: etherpad.txt
 
