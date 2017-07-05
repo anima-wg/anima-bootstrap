@@ -1,0 +1,699 @@
+
+This is a txt export of the etherpad section where the shepherd review input was
+discussed. Unfortunately, it is impossible to see the color coding, who contributed/commented
+what in the txt or html format, and i do not know how to import the etherpad exported
+format. As long as the original etherpad is not deleted, this is better read at:
+
+http://etherpad.tools.ietf.org:9000/p/anima-boostrapping?useMonospaceFont=true
+
+Lines 538 - 1223
+
+Toerless Eckert 07/05/2017
+
+===============================================================================
+---------------
+2017-05-30: max, Michael Behringer, Toerless Eckert
+https://appear.in/anima-boostrap                        
+(actually, that isn't loading. moving off my vpn)
+
+I'm going here: 
+https://cisco.webex.com/join/pritikin
+i don't see toerless joining yet
+
+https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht
+
+
+
+TODO:
+3.1.1 Discovery: Check if "ACP+Proxy" is the correct GRASP defintion.
+
+This is a note for Toerless. We will table until we see his suggested diff. Concern is that Brian indicates something in his draft and we want alignment. Toerless will check. 
+
+--------------------------------
+Q1: Is there any statement that the MASA can be optional, eg: is it clear what would
+    need to be implemented on pledge and registrar for pledges that do not require a MASA ?
+    
+" A Registrar MAY be configured to
+   ignore the history of the device but it is RECOMMENDED that this only
+   be configured if hardware assisted NEA [RFC5209] is supported."
+and 
+4.2.  New Entity security reductions
+"   The Pledge MAY have an operational mode where it skips Voucher
+   validation one time.  For example if a physical button is depressed
+   during the bootstrapping operation.  This can be useful if the vendor
+   service is unavailable.  This behavior SHOULD be available via local
+   configuration or physical presence methods to ensure new entities can
+   always be deployed even when autonomic methods fail.  This allows for
+   unsecured imprint.
+
+   It is RECOMMENDED that this only be available if hardware assisted
+   NEA [RFC5209] is supported."
+
+Q2: Is there any statement how a device without an IDevID could be used, pledge/registrar ?
+
+4.3.  Registrar security reductions
+   2.  A registrar MAY choose to accept devices that claim a unique
+       identity without the benefit of authenticating that claimed
+       identity.  This could occur when the Pledge does not include an
+       X.509 IDevID factory installed credential.  New Entities without
+       an X.509 IDevID credential MAY form the Section 3.2 request using
+       the Section 3.3 format to ensure the Pledge's serial number
+       information is provided to the Registar (this includes the
+       IDevIDAuthorityKeyIdentifier value which would be statically
+       configured on the Pledge).  The Pledge MAY refuse to provide a
+       TLS client certificate (as one is not available).  The Pledge
+       SHOULD support HTTP-based or certificate-less TLS authentication
+       as described in EST RFC7030 section 3.3.2.  A Registrar MUST NOT
+       accept unauthenticated New Entities unless it has been configured
+       to do so by an administrator that has verified that only expected
+       new entities can communicate with a Registrar (presumably via a
+       physically secured perimeter).
+
+Q3: Is there a list of assignments needed ?
+    Page 13: id-mod-MASAURLExtn2016 - who assigns this ?
+
+5.  IANA Considerations
+5.1.  PKIX Registry
+
+   This document requests a number for id-mod-MASAURLExtn2016(TBD) from
+   the pkix(7) id-mod(0) Registry.  [[EDNOTE: fix names]]
+
+   This document requests a number from the id-pe registry for id-pe-
+   masa-url.  XXX
+
+--------------------------------
+Note 1: text is in textual order, sometimes i went back and found additional issues,
+so the point numbering (Nxxx) is not in numerical order.
+
+Note 2: I gave up on typos quickly, thats a separate round.
+
+====================================================================================================
+
+--------------------------------
+
+N1: The intro with "BRSKI provides a foundation to securely answer" is great if we would
+want the document to target only a room full of security expert. For the rest of us (ANIMA = OPS)
+i think it would be great to prepend a few sentences that answer questions like "what planet are we
+on, what context do i need to load int my brain to understand the following". 
+
+I have suggested text to do that preprended before the existing text. 
+
+COMMENT: section 3.8 attempts to draw a clear line between BRSKI and EST to ensure a reasonable pivot to non-PKI solutions as necessary. Future proofed. 
+
+--------------------------------
+A change has been added to clarify why voucher's are their own document.
+OK.
+---------------------------------
+
+N2: "storing an X.509 root certificate". 
+
+Does this need to be a "root" certificate ?
+Consider the most likely simple enterprise or SP deployment of BRSKI.
+Organization has some root-CA. for the purpose of a particular ANI, a sub-CA is created, which
+becomes the assigning CA that the registrar uses. The root-CA itself is likely never online
+except when both Data Centers with the asigning CAs burn down.
+
+In these environments, it is not suffficient to only store on the pledge the root-CA, because
+that root-CA will also assign other subCA that create certificates, and those certificates
+would not be valid for our ANI.
+
+So, the pledge could either just store the assigning-CA, which becomes a virtual root CA,
+and if it burns down the ANI is frozen (no new pledges possible, re-enroll whole ANI with
+new CA), or the pledges need to store the CA-chain with root-CA and assigning CA. WHich is the
+best solution because it allows revocation/renewal of assigning CA in desaster cases.
+
+I did not modify any text, but i am worried about this problem for actual deployments so i would
+like to make sure we have documented an actual working solution.
+
+Agreed: Remove the word "root". 
+TBD: Move example of root CA and assigning CA into voucher document
+The current text of the voucher document is (description of the relevant field in the yang module):
+      leaf-list pinned-domain-cert {
+        type binary;
+        min-elements 1;
+        description
+          "An X.509 v3 certificate structure as specified by RFC 5280,
+           Section 4 encoded using the ASN.1 distinguished encoding
+           rules (DER), as specified in ITU-T X.690.
+
+           This certificate is used by a pledge to trust a public key
+           infrastructure, in order to verify a domain certificate.
+In BRSKI terms: "in order to verify that the registrar is a member of the domain by verifying it has a certificate that can be verified using pinned-domain-cert". 
+           supplied to the pledge separately by the bootstrapping
+           protocol.  The domain certificate MUST have this certificate
+           somewhere in its chain of certificates.  This certificate
+           MAY be an end-entity certificate, including a self-signed
+           entity.";
+        reference
+          "RFC 5280:
+             Internet X.509 Public Key Infrastructure Certificate
+             and Certificate Revocation List (CRL) Profile.
+           ITU-T X.690:
+              Information technology – ASN.1 encoding rules:
+              Specification of Basic Encoding Rules (BER),
+              Canonical Encoding Rules (CER) and Distinguished
+              Encoding Rules (DER).";
+      }
+      
+      
+      leaf domain-cert-revocation-checks {
+        type boolean;
+        must "../expires-on";
+        description
+          "A processing instruction to the pledge that it MUST verify
+           the revocation status for the domain certificate.  This 
+           instruction is only available for vouchers that expire. If
+           this field is not set, then normal PKIX behaviour applies
+           to validation of the domain certificate.";
+      }
+      
+      leaf voucher-revocation-check {
+          // something to force (e.g. MUST) verify the revocation
+          // status for the voucher's certificate chain, to the
+          // extent possible
+      }
+          
+          
+	          KENT: What does it say in your version of voucher about lifetime? Section 6.1 4th paragraph?   just a sec
+			Or can you push your version?  (i can't, i'm mid-edit right now...)
+	          OK, pkease just check for us and i'll wait till your edit is done.
+	
+	6.1.  Renewals instead of Revocations
+	The EDNOTE needs to be removed.  (done, in my local copy)
+	
+
+In BRSKI -06 it indicates:
+"The maximum
+   lifetime of the voucher issued SHOULD NOT exceed the lifetime of the
+   Registrar's revocation validation (for example if the Registrar
+   revocation status is indicated in a CRL that is valid for two weeks
+   then that is an appropriate lifetime for the voucher)."
+I think this is ok. The voucher document doesn't include this because it is a MASA behavior discussion.
+--------------------------------
+
+N3: The intro says "and local access control lists. The Pledge actions"...
+What "and local access control lists" does this talk about ? If nobody knows, maybe delete ?
+
+Suggest: (eg: whitelist or blacklist on registrar).
+	 
+	-      lists. The Pledge actions derive from a cryptographically protected
+	+      lists (administratively defined white or black lists). The Pledge actions derive from a cryptographically protected
+	
+--------------------------------
+
+N4: I think the "Other Bootstrapping Approaches" is also a level of brackground information that
+hurts the "ease of digestion" flow for the reader, so i have moved it into an appendix and left
+a breadcrump in the intro section. Otherwise unchanged.
+
+Not clear if we want to accept this change at all. MCR made it less destructive by moving it to the last appendix in Toerless's suggested XML.
+Here the git best practices of individual commits (via pull requests) would be helpful. 
+
+--------------------------------
+
+N5: "In many target applications, the systems involved are ".... this section
+in secion 1.3 is i think quite crucial and one of the biggest benefits of BRSKI
+and a great reasoning why we have new complex elements like proxy and MASA, but i
+think it is more suggestive than descriptive and raises more questions than
+it answers. And even tthat is already divesting the readers attention by being
+in the beginning of the document. This topic IMHO deserves a more thorough explanation.
+I have suggested an appendix section "Flexible SKU management" that tries to do this.
+
+I think it is appropriate for an appendix, because it seems that to enable this functionality,
+we would need some more functionality eg: across ACP, in MASA and so on.
+
+TODO: Change text to indicate the overall property is an ANIMA feature where both BRSKI and ACP need to collaborate to improbe ove existing bootstraps.
+
+--------------------------------
+
+N6: The "Scope of the solution" section is really a discussion about the applicability to
+constrained environments. This IMHO also is not necessary to be at the top, so i also moved
+it into an appendix and left a breadcrump in the introduction. Also changed the name
+to "Applicability to constrained environments" as this is more descriptive of the actual content.
+     https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=draft-ietf-anima-bootstrapping-keyinfra-06&url2=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/toerless_review_20170530/dtbootstrap-anima-keyinfra.txt
+     
+N6.1: "The bootstrapping process can take minutes to complete". I bulletized and extended
+the reasons for this. If i missed any core reasons contributing to the problem, please add.
+
+          <t>The bootstrapping process can take minutes to complete depending on
+        the network infrastructure and device processing speed.  Some of the reasons for this include: </t>
+      <t><list style="symbols">
+           <t>The network communication itself is not optimized for speed (eg: no optimization for the number of round-trips).</t>
+           <t>For privacy reasons, the discovery process allows for the Pledge to
+              avoid announcing it's presence through broadcasting. This can delay
+              bootstrap by the periodicity interval of the GRASP M_FLOOD announcements
+              (eg: 30 seconds).</t>
+             <t>Cryptographic operations (such as key generation and
+           exponentiation) can take a minute or more on pledges because of low-end CPU or TPM chips.</t>
+           </list>
+        </t>
+
+N6.2: "This protocol is not intended for low latency handoffs". I find the idea of
+thinking to use this protocol for that purpose as grotesque as requesting a new passport
+every time i want to go through airport security (instead of using one i got in before).
+Aka: to me the statement is more confusing than helpfull. I would recommend to remove the sentence
+or provide a more founded explanation why anybody would think about this option.
+
+N6.3: "specifically there are protocol aspects described here which might result
+in congestion collapse"...  The following text makes it sound as if the verbosity of the
+per-pledge enrolment is main the reason. I think this is misleading. From my understanding,
+the likely even more important reason is the fact that parallel enrollment of multiple pledges
+can not well be serialized. At least thats exactly the issue the 6TSCH adaptation of BRSKI is trying
+to fix by reverting the initiator/responder roles. I have tried to improve the text accordingly. Please check.
+
+N6.4: "It could also be used by non-constrained devices across a non-energy constrained, but challenged network"
+An short explanation what constitute being challenged in respect to 802.15.4 would help. Otherwise it is unclear why that example is being mentioned.
+
+-        <t>BRSKI provides a foundation to securely answer the following
++
++        <t>The primary use-case for BRSKI is to be the secure, zero-touch
++        bootstrap component of an Autonomic Networking Infrastructure (ANI) as defined in
++        <xref target="RFC7575" /> and refined in <xref target="I-D.ietf-anima-reference-model" />.
++        The normative part of this document is necessary and sufficient for a
++        minimum interoperability standard to achieve this for equipment in well
++        managed, non-constrained networks and non-constrained class 2+ devices
++        (as per <xref target="RFC7228" />).</t>
++
++        <t>Limitations and possible modifications/extensions to BRSKI are discussed
++        later in the document. For example refer to <xref target="IoT" /> for how BRSKI relates
++        to IoT environments and to <xref target="reducedsecuritymodes" /> for how to adopt BRSKI
++        to various degress of reduced security.</t>
++
++        <t>BRSKI is most easily understood as a new layer around PKI certificate
++        enrollment using Enrollment over Secure Transport (EST, <xref target="RFC7030" />) to make it</t>
++            <t><list style="symbols">
++               <t>fully zero-touch and reliably diagnosed</t>
++               <t>eliminate trust on first use via  the introduction of protocol between a 
+			eliminate 'Trust  on First Use' (TOFU) [RFC7435], 'resurrecting duckling' [Stajano99theresurrecting] or 'pre-staging' via the introduction of this BRSKI protocol between a 
++                  MASA (Manufacturer Authorized Signing Authority) and (owner) Registrar</t>
++               <t>support minimal connectivity for initial bootstrap while protecting core network resources 
++                  by the introduction of a component called the (Circuit) Proxy.</t>
++               </list>
++            </t>
++
++        <t>This new layer of BRSKI provides a foundation to securely answer the following
+
+--------------------------------
+
+N7: The paragraph mentioning 802.1X is very suggestive and IMHO opens more questions
+than answering them. It also breaks the core flow of the text. I suggest to move this
+discussion into an appendix and make it more descriptive. I have proposed text for this
+via a separate appendix (Network Access Control interop).
+
+for section 1.1:
+        <t>BRSKI does not depend upon, or preclude <xref target="NACinterop">Network Access Control.</xref></t>
+
+
+
+--------------------------------
+
+N8: "Architectural Overview"
+
+N8.1: "Each component is logical and may be combined with other components as necessary."
+I have no idea what this means. It sounds like i can build a solution without Registrar
+and without Pledge. Aka: either clarify or remove sentence.
+	combined->colocated
+
+N8.2: Figure 1: Suggested improvements to picture leveraged in below improved explanation.
+Added protocol to lines to clarify which protocols run where.
+
+      In order to deploy an LDevID to the pledge, the Registrar also acts as a
+      PKI Registration Authority.</t>
+
+IMprove picture:
+      - PKI RA included in Domain Registrar box
+      - dotted line through the circuit proxy (to clarify it is just a proxy)
+      - Label edges with appropriate protocols (need to come up with different word instead of BRSKI for new protocol elements -> Max:).
+      EST        - unchanged EST PKI RA to CA
+      BRSKI-EST    - these are EST as exists plus section 3.8
+      BRSKI-MASA   - these are the communications to the MASA from the vendor
+      
+      - Ownership Tracker in Vendor Service dotted (optional).
+      
+	eg: remove from toerless pictuer - optional extension (no, PKI RA madatory in registrar).
+
+N8.3: Suggested improved text for textual explanation of Figure 1. 
+- It needed to better explain each block shown and how they relate. Eg; Added text for MASA.
+- Original text said that PKI RA can optionally be integrated with Domain Registrar.
+  In reality i think that it is the other way around: It MUST be integrated with Domain
+  Registrar unless additional extensions are implemented, eg: in Circuit Proxy. Explained that
+  in the text.
+- Mentioned that PKI CA can be outsourced and does not require any BRSKI extensions.
+  important IMHO to show the simplicity of deployment.
+  
+  
+                                           +------------------------+
+   +--------------Drop Ship--------------->| Vendor Service         |
+   |                                       +------------------------+
+   |                                       | M anufacturer|         .
+   |                                       | A uthorized  |Ownership|
+   |                                       | S igning     |Tracker  .
+   |                                       | A uthority   |         |
+   |                                       +--------------+-.-.-.-.-+
+   |                                                      ^
+   |                                            3.3,3.4   |  BRSKI-
+   V                                            3.6,3.7   |   MASA
++-------+     ............................................|...
+|       |     .                                           |  .
+|       |     .  +------------+ 3.2   +-----------+       |  .
+|       |     .  |            | 3.4   |           |       |  .
+|Pledge |     .  |   Circuit  | 3.5   | Domain    <-------+  .
+|       |     .  |   Proxy    | BRSKI | Registrar |          .
+|       <-------->............<-------> (PKI RA)  |          .
+|       |     .  |            | B-EST |           |          .
+|       |     .  +------------+ 3.8   +-----+-----+          .
+|IDevID |     .                             | EST RFC7030    .
+|       |     .           +-----------------+----------+     .
+|       |     .           | Key Infrastructure         |     .
+|       |     ............| (e.g. PKI Certificate      |......
++-------+     .           |       Authority)           |     .
+              .           +----------------------------+     .
+              .                                              .
+              ................................................
+                            "Domain" components
+
+ 
+  
+
+--------------------------------
+
+N9: 2.3 Protocol flow 
+
+N9.1: Expanded picture
+  - showing GRASP for Registrar discovery by Circuit Proxy, ACP, L2 to circuit proxy
+
+N9.2 - redid discovery part.
+
+
++--------+         +---------+    +------------+     +------------+
+| Pledge |         | Circuit |    | Domain     |     | Vendor     |
+|        |         | Proxy   |    | Registrar  |     | Service    |
+|        |         |         |    |  (PKI RA)  |     |  (MASA)    |
++--------+         +---------+    +------------+     +------------+
+  Discovery of Registrar by Proxy:
+  |                     |<------------------|                    |
+  |                     |  GRASP M_FLOOD    |                    |
+  |                     |                   |                    |
+
+    Discovery of Proxy by Pledge:
+  |<-RFC4862 IPv6 adr   |                   |                    |
+or|<-RFC3927 IPv4 adr   | Appendix A/E      |                    |  
+  |                     |                   |                    |
+  |-------------------->|                   |                    |
+  | optional: mDNS query| Appendix E        |                    |
+  | RFC6763/RFC6762     |                   |                    |
+  |<--------------------|                   |                    |
+  | GRASP M_FLOOD       |                   |                    |
+  |   periodic broadcast|                   |                    |
+  |                     |                   |                    |
+  
+  TLS connection Proxy to Proxy:
+  |<------------------->C<----------------->|                    |
+  |              TLS via the Circuit Proxy  |                    |
+  |<--Registrar TLS server authentication---|                    |
+[PROVISIONAL accept of server cert]         |                    |
+  P---X.509 client authentication---------->|                    |
+  P                     |                   |                    |
+  P---Request Voucher (include nonce)------>|                    |
+  P                     |                   |                    |
+  P                     |       /--->       |                    |
+  P                     |       |      [accept device?]          |
+  P                     |       |      [contact Vendor]          |
+  P                     |       |           |--Pledge ID-------->|
+  P                     |       |           |--Domain ID-------->|
+  P                     |       |           |--optional:nonce--->|
+  P                     |       |           |     [extract DomainID]
+  P                     |       |           |                    |
+  P                     |    optional:      |     [update audit log]
+  P                     |       |can        |                    |
+  P                     |       |occur      |                    |
+  P                     |       |in         |                    |
+  P                     |       |advance    |                    |
+  P                     |       |           |                    |
+  P                     |       |           |<-device audit log--|
+  P                     |       |           |<- voucher ---------|
+  P                     |       \---->      |                    |
+  P                     |                   |                    |
+  P                     |       [verify audit log and voucher]   |
+  P                     |                   |                    |
+  P<------voucher---------------------------|                    |
+[verify voucher ]       |                   |                    |
+[verify provisional cert|                   |                    |
+  |                     |                   |                    |
+  |<--------------------------------------->|                    |
+  | Continue with RFC7030 enrollment        |                    |
+  | using now bidirectionally authenticated |                    |
+  | TLS session.        |                   |                    |
+  |                     |                   |                    |
+  |                     |                   |                    |
+  |                     |                   |                    |
+
+--------------------------------
+
+at end of 2017-06-02:
+https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=draft-ietf-anima-bootstrapping-keyinfra-06&url2=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/toerless_review_20170530/dtbootstrap-anima-keyinfra.txt
+
+
+at the end of 2017-06-06:
+https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/toerless_review_20170530/dtbootstrap-anima-keyinfra.txt&url2=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/toerless_review_section3_20160606/dtbootstrap-anima-keyinfra.txt
+
+https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=draft-ietf-anima-bootstrapping-keyinfra-06&url2=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/toerless_review_section3_20160606/dtbootstrap-anima-keyinfra.txt
+
+N10: Protocol details
+
+N10.1: Moved "run BRSKI when unconfigured" into subsection "High Level" and amended that
+with an explanation of the high level workflow.
+
+
+N10.2: Added explanation why BRSKI is EST7030 extension (instead of separate connection)
+also ecause of circuit proxy.
+
+N10.2: "If the Registrar responds with a redirection to other web origins the Pledge MUST follow
+            only a single redirection"
+Can we detail a single workflow where this is beneficial in the standard workflow, eg:
+wrt to the Circuit Proxy ? I fail to see how this would work in general except if the
+Pledge has aquired a global IPv4/IPv6 address.
+
+N10.3: "discovered Registar" -> "discovered Circuit Proxies"
+
+
+--------------------------------
+
+N11: "IPv4/mDNS operations"
+
+It is unclear from existing text when and why pledges and/or proxies would want to use
+IPv4 instead of IPv6 and/or mDNS instead of GRASP. Without further changes, these sections
+would easily result in a lot of incompatible implementation choices.
+
+I have proposed an expanded, refined text under the title of "Supporting pledges without ANI".
+That IMHO is really the context for which all these options are relevant:
+ - which devices could this apply to (many)
+ - benefits of BRSKI for these devices with simple example
+ - explain how to do BRSKI discovery using whatever protocols pledge already uses without BRSKI
+   (IPv4 vs. IPv6, mDNS vs GRASP)
+ - 
+
+I suggest to move this whole text into a new standalone document. Even if it becomes a rather
+sort document, it would IMHO help a lot to promote the idea of applying BRSKI outside of full ANI
+implementations. 
+
+If we fork off a document for this right now, we can leave a breadcrump (reference) to it
+in BRSKI itself and therefore make sure that readers of BRSKI will still know about that
+large scope of applicability of BRSKI.
+
+Note: This move would of course eradicate all mentioning of IPv4 and mDNS from the main BRSKI
+document.
+
+NX.1: I have added a sentence "Circuit Proxy SHOULD send unsolicited multicast responses for
+      the bootstrap service every 30 seconds" to the section about how to operate mDNS.
+
+My understanding of RFC6762 is that there is NO periodic unsolicited multicast of
+responses, so what this sentence says is a change to RFC6762. If that change is acceptable
+to IESG review, then pledges can passively listen to mDNS. If this sentence is not acceptable,
+then the whole paragraph will become questionable and pledges using mDNS may be forced to
+send queries to reliably get responses.
+
+--------------------------------
+
+TODO: Need to update author addresses. (Also for Steinthor - just pinged him)
+
+Toerless: Webex loading slowly...(toerless) 39% now..
+Whats a good URL to compare two RFC XML files, then i can bring that up and screen share once my webex is up
+
+
+2017-06-02:
+	    present: mcr, 
+	webex or appear.in?
+
+May Kuato live!!
+
+
+6/6: kent - are we meeting today? where?
+	we are doing appear.in right now?
+	(I have a webex standing by if we need it ;) 
+2017-06-06: 
+	    present: mcr, toerless, max, michaelbehringer, kent (still here, just listening...)
+	
+	
+3.  Protocol Details
+
+   The Pledge MUST initiate BRSKI after boot if it is unconfigured.  The
+   Pledge MUST NOT automatically initiate BRSKI if it has been
+   configured or is in the process of being configured.
+
+   BRSKI is described as extensions to EST [RFC7030] to reduce the
+   number of TLS connections and crypto operations required on the
+   Pledge.  The Registrar implements the BRSKI REST interface within the
+   same .well-known URI tree as the existing EST URIs as described in
+   EST [RFC7030] section 3.2.2.  A MASA URI is therefore "https://
+   authority "./well-known/est".
+
+   Establishment of the TLS connection for bootstrapping is as specified
+   in EST [RFC7030] section 4.1.1 "Bootstrap Distribution of CA
+   Certificates" [RFC7030] with the following extensions for automation:
+
+   Automation extensions for the Pledge (equivalent to EST client) are:
+
+   o  The Pledge provisionally accepts the Registrar certificate during
+      the TLS handshake as detailed in EST.
+
+   o  If the Registrar responds with a redirection to other web origins
+      the Pledge MUST follow only a single redirection.  (EST supports
+      redirection but does not allow redirections to other web origins
+      without user input).
+
+   o  The Registar MAY respond with an HTTP 202 ("the request has been
+      accepted for processing, but the processing has not been
+      completed") as described in EST [RFC7030] section 4.2.3 wherein
+      the client "MUST wait at least the specified 'retry-after' time
+      before repeating the same request".  The Pledge is RECOMMENDED to
+      provide local feed (blinked LED etc) during this wait cycle if
+      mechanisms for this are available.  To prevent an attacker
+      Registrar from significantly delaying bootstrapping the Pledge
+      MUST limit the 'retry-after' time to 60 seconds.  To avoid waiting
+      on a single erroneous Registrar the Pledge MUST drop the
+      connection after 5 seconds and proceed to other discovered
+      Registrars.  Ideally the Pledge could keep track of the
+      appropriate retry-after value for any number of outstanding
+      Registrars but this would involve a large state table on the
+      Pledge.  Instead the Pledge MAY ignore the exact retry-after value
+      in favor of a single hard coded value that takes effect between
+      discovery (Appendix D.1.1.1) attempts.  A Registrar that is unable
+      to complete the transaction the first time due to timing reasons
+      will have future chances.
+
+   o  The Pledge requests and validates a voucher using the new REST
+      calls described below.
+
+   o  If necessary the Pledge calls the EST defined /cacerts method to
+      obtain the current CA certificate.  These are validated using the
+      Voucher.
+
+   o  The Pledge completes authentication of the server certificate as
+      detailed in Section 3.4.1.  This moves the TLS connection out of
+      the provisional state.  Optionally the TLS connection can now be
+      used for EST enrollment.
+
+   The Pledge establishes the TLS connection with the Registrar through
+   the circuit proxy (see Appendix D.1.2) but the TLS connection is with
+   the Registar; so in the above section the "Pledge" is the TLS client
+   and the "Registrar" is the TLS server.  All security associations
+   established are between the new device and the Registrar regardless
+   of proxy operations.
+
+   The extensions for a Registrar (equivalent to EST server) are:
+
+   o  Client authentication is automated using Initial Device Identity.
+      The subject field's DN encoding MUST include the "serialNumber"
+      attribute with the device's unique serial number.  In the language
+      of RFC6125 this provides for a SERIALNUM-ID category of identifier
+      that can be included in a certificate and therefore that can also
+      be used for matching purposes.  The SERIALNUM-ID whitelist is
+      collated according to vendor trust anchor since serial numbers are
+      not globally unique.
+
+   o  The Registrar requests and validates the Voucher from the vendor
+      authorized MASA service.
+
+   o  The Registrar forwards the Voucher to the Pledge when requested.
+
+   o  The Registar performs log verifications in addition to local
+      authorization checks before accepting optional Pledge device
+      enrollment requests.
+
+3.1.  Discovery
+
+   The result of discovery is a logical communication with a Registrar,
+   through a Proxy.  The Proxy is transparent to the Pledge but is
+   always assumed to exist.
+
+   To discover the Registrar the Pledge performs the following actions:
+
+   a.  MUST: Obtains a local address using IPv6 methods as described in
+       [RFC4862] IPv6 Stateless Address AutoConfiguration.  [RFC7217] is
+       encouraged.  Pledges will generally prefer use of IPv6 Link-Local
+       addresses, and discovery of Proxy will be by Link-Local
+       mechanisms.  [[EDNOTE: In some environments, a routable public
+       address may be obtained, should it be?  Should it be used?]] IPv4
+       methods are described in Appendix A
+
+   b.  MUST: Listen for GRASP M_FLOOD ([I-D.ietf-anima-grasp])
+       announcements of the objective: "ACP+Proxy".  See section
+       Section 3.1.1 for the details of the the objective.  The Pledge
+       may listen concurrently for other sources of information, see
+       Appendix B.
+
+   Once a proxy is discovered the Pledge communicates with a Registrar
+   through the proxy using the bootstrapping protocol defined in
+   Section 3.
+
+   Each discovery method attempted SHOULD exponentially back-off
+   attempts (to a maximum of one hour) to avoid overloading the network
+   infrastructure with discovery.  The back-off timer for each method
+   MUST be independent of other methods.
+
+   Methods SHOULD be run in parallel to avoid head of queue problems
+   wherein an attacker running a fake proxy or registrar can operate
+   protocol actions intentionally slowly.
+
+   Once a connection to a Registrar is established (e.g. establishment
+   of a TLS session key) there are expectations of more timely
+   responses, see Section 3.2.
+
+   Once all discovered services are attempted the device SHOULD return
+   to listening for GRASP M_FLOOD.  It should periodically retry the
+   vendor specific mechanisms.  The Pledge MAY prioritize selection
+   order as appropriate for the anticipated environment.
+
+3.1.1.  Proxy Discovery Protocol Details
+
+   The proxy uses the GRASP M_FLOOD mechanism to announce itself.  This
+   announcement is done with the same message as the ACP announcement
+   detailed in [I-D.ietf-anima-autonomic-control-plane].
+
+    proxy-objective = ["Proxy", [ O_IPv6_LOCATOR, ipv6-address,
+    transport-proto, port-number ] ]
+
+    ipv6-address       - the v6 LL of the proxy
+    transport-proto    - 6, for TCP 17 for UDP
+    port-number        - the TCP or UDP port number to find the proxy
+
+   Figure 5
+
+3.1.2.  Registrar Discovery Protocol Details
+
+   A Registrar is typically configured manually.  When the Registrar
+   joins an Autonomic Control Plane
+   ([I-D.ietf-anima-autonomic-control-plane]) it MUST respond to GRASP
+   ([I-D.ietf-anima-grasp]) M_NEG_SYN message.
+
+   The registrar responds to discovery messages from the proxy (or GRASP
+   caches between them) as follows: (XXX changed from M_DISCOVERY)
+
+    objective         = ["AN_registrar", F_DISC, 255 ]
+    discovery-message = [M_NEG_SYN, session-id, initiator, objective]
+
+   Figure 6: Registrar Discovery
+
+   The response from the registrar (or cache) will be a M_RESPONSE with
+   the following parameters:
+
