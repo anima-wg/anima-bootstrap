@@ -1,6 +1,10 @@
 This directory contains shepherd review suggestions and proposed text
 changes that were written against a pre-version of draft-ietf-anima-bootstrapping-keyinfra-06.
 
+Diff:
+
+http://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/master/1706-shepherd-review/dtbootstrap-anima-keyinfra-06-pre.txt&url2=https://raw.githubusercontent.com/anima-wg/anima-bootstrap/master/1706-shepherd-review/dtbootstrap-anima-keyinfra-06-pre.reviewed.txt
+
 These where subsequently discussed in the weekly meetings and to a large part included
 into a separate branch of the github:
 
