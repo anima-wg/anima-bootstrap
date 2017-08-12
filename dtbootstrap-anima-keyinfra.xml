@@ -13,7 +13,7 @@
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 ]>
 
-<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-07"
+<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-08"
     ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -1750,6 +1750,66 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       choses whichever voucher to accept based on internal logic. The
       Registrar's verifying log information will see multiple entries
       and take this into account for their analytics purposes.</t>
+
+      <section title="Freshness in Voucher Requests">
+        <t>
+          A concern has been raised that the voucher request produced by the
+          Pledge should contain some content (a nonce) from the Registrar and/or MASA
+          in order for those actors to verify that the voucher request is fresh.
+        </t>
+        <t>
+          There are a number of operational problems with getting a nonce
+          from the MASA to the pledge. It is somewhat easier to collect a
+          random value from the Registrar, but as the Registrar is not yet at
+          this point validated, such a Registrar nonce has little value.
+          There are privacy and logistical challenges to the process, so if
+          such a thing were to be considered, it would have to provide some
+          clear value.  This section examines the impacts of not having a
+          fresh voucher request from the pledge.
+        </t>
+        <t>
+          Consider the case where a MITM is between the Pledge and the
+          legitimate Registrar.   This fake Registrar will obtain from the
+          Pledge a signed voucher request.  The pledge will have accepted the
+          fake Registrar as legitimate up to this point as the EST connection
+          will still be at the provisional state.
+        </t>
+        <t>
+          The fake Registrar (Ra) can communicate the signed voucher request to a
+          collaborator, perhaps located in another network, and communicate
+          with a some Registrar (Rb) to obtain a voucher signed by the MASA.
+          Assuming that the MASA accepts the voucher request (either because
+          this is the legitimate Registrar according to supply chain
+          information, or because the MASA is in audit-log only mode), then
+          a voucher linking the pledge to the Registrar Rb.
+        </t>
+        <t>
+          Such a voucher, when passed back to the Pledge, would link the
+          pledge to Registrar Rb, and would permit the Pledge to attempt to
+          end the provisional state.  The pledge will then attempt to
+          validate the pinned-domain-certificate linked to in the voucher.
+          That certificate will point at Registrar Rb. But the pledge will
+          have a provisional TLS/EST connection to the MITM Registrar Ra.
+          The pledge will fail the process, close the provisional connection
+          unsuccessfully, and restart.
+        </t>
+        <t>
+          The conclusion is that lack of MASA provided freshness does cause
+          a pledge to join the wrong network.
+        </t>
+        <t>
+          There is an additional concern when the MASA is in audit-log only
+          mode.  When the unfortunate pledge above does connect to directly
+          to a legitimate Registrar, that Registrar will discover that a
+          voucher was previously issued.  If the legimate Registrar is
+          actually Rb, then all is well. Otherwise, there is a fault as the
+          Registrar has to consider whether or not to accept a previously
+          owned device.  This may involve consulting a human.  If a large
+          number of devices are attacked in such a way, a human might just
+          accept all the devices in a batch mode, permitting an actually
+          compromise device through.
+        </t>
+      </section>
     </section>
 
     <section title="Acknowledgements">
