@@ -91,7 +91,7 @@ Table of Contents
        3.1.2.  Registrar Discovery Protocol Details  . . . . . . . .  18
      3.2.  Pledge Requests Voucher from the Registrar  . . . . . . .  19
        3.2.1.  Yang Model for Voucher Request  . . . . . . . . . . .  21
-     3.3.  Registrar Requests Voucher from MASA  . . . . . . . . . .  23
+     3.3.  Registrar Requests Voucher from MASA  . . . . . . . . . .  24
      3.4.  Voucher Response  . . . . . . . . . . . . . . . . . . . .  26
        3.4.1.  Completing authentication of Provisional TLS
                connection  . . . . . . . . . . . . . . . . . . . . .  27
@@ -1149,6 +1149,7 @@ Internet-Draft                    BRSKI                      August 2017
 
    The YANG definition:
 
+<CODE BEGINS> file "ietf-voucher-request@2017-08-23.yang"
 module ietf-voucher-request {
   yang-version 1.1;
 
@@ -1169,7 +1170,6 @@ module ietf-voucher-request {
     description
       "FIXME";
     reference "RFC ????: Voucher Profile for Bootstrapping Protocols";
-  }
 
 
 
@@ -1177,6 +1177,8 @@ Pritikin, et al.        Expires February 24, 2018              [Page 21]
 
 Internet-Draft                    BRSKI                      August 2017
 
+
+  }
 
   organization
    "IETF ANIMA Working Group";
@@ -1224,8 +1226,6 @@ Internet-Draft                    BRSKI                      August 2017
     uses voucher-request-grouping;
   }
 
-  // Grouping defined for future usage
-  grouping voucher-request-grouping {
 
 
 
@@ -1234,6 +1234,8 @@ Pritikin, et al.        Expires February 24, 2018              [Page 22]
 Internet-Draft                    BRSKI                      August 2017
 
 
+  // Grouping defined for future usage
+  grouping voucher-request-grouping {
     description
       "Grouping to allow reuse/extensions in future work.";
 
@@ -1274,14 +1276,12 @@ Internet-Draft                    BRSKI                      August 2017
 
 }
 
+<CODE ENDS>
 
-3.3.  Registrar Requests Voucher from MASA
 
-   when a Registrar receives a voucher request from a Pledge it in turn
-   requests a voucher from the MASA service.  For simplicity this is
-   defined as an optional EST message between a Registrar and an EST
-   server running on the MASA service although the Registrar is not
-   required to make use of any other EST functionality when
+
+
+
 
 
 
@@ -1290,6 +1290,13 @@ Pritikin, et al.        Expires February 24, 2018              [Page 23]
 Internet-Draft                    BRSKI                      August 2017
 
 
+3.3.  Registrar Requests Voucher from MASA
+
+   when a Registrar receives a voucher request from a Pledge it in turn
+   requests a voucher from the MASA service.  For simplicity this is
+   defined as an optional EST message between a Registrar and an EST
+   server running on the MASA service although the Registrar is not
+   required to make use of any other EST functionality when
    communicating with the MASA service.  (The MASA service MUST properly
    reject any EST functionality requests it does not wish to service; a
    requirement that holds for any REST interface).
@@ -1332,19 +1339,16 @@ Internet-Draft                    BRSKI                      August 2017
       request then it SHOULD be included in the voucher request built by
       the Registrar.
 
-   All other fields MAY be ommitted in the voucher request.
-
-   An example JSON payload of a voucher request from a Registrar:
-
-
-
-
 
 
 Pritikin, et al.        Expires February 24, 2018              [Page 24]
 
 Internet-Draft                    BRSKI                      August 2017
 
+
+   All other fields MAY be ommitted in the voucher request.
+
+   An example JSON payload of a voucher request from a Registrar:
 
    {
      "ietf-voucher:voucher": {
@@ -1390,10 +1394,6 @@ Internet-Draft                    BRSKI                      August 2017
       intended this to be a Registrar.  Performing this check provides
       value to domain PKI by assuring the domain administrator that the
       MASA service will only respect claims from authorized Registration
-      Authorities of the domain.  (The requirement for the Registrar to
-      include the Domain CA certificate in the signature structure was
-      stated above).
-
 
 
 
@@ -1401,6 +1401,10 @@ Pritikin, et al.        Expires February 24, 2018              [Page 25]
 
 Internet-Draft                    BRSKI                      August 2017
 
+
+      Authorities of the domain.  (The requirement for the Registrar to
+      include the Domain CA certificate in the signature structure was
+      stated above).
 
    Registrar revocation consistency:  The MASA SHOULD check for
       revocation of the Registrar certificate.  The maximum lifetime of
@@ -1446,10 +1450,6 @@ Internet-Draft                    BRSKI                      August 2017
 
    The response media type is:
 
-   application/pkcs7-mime; smime-type=voucher  The response is a "YANG-
-      defined JSON document that has been signed using a PKCS#7
-      structure" as described in [I-D.ietf-anima-voucher] using the JSON
-      encoded described in [RFC7951].  The MASA MUST sign the request.
 
 
 
@@ -1457,6 +1457,11 @@ Pritikin, et al.        Expires February 24, 2018              [Page 26]
 
 Internet-Draft                    BRSKI                      August 2017
 
+
+   application/pkcs7-mime; smime-type=voucher  The response is a "YANG-
+      defined JSON document that has been signed using a PKCS#7
+      structure" as described in [I-D.ietf-anima-voucher] using the JSON
+      encoded described in [RFC7951].  The MASA MUST sign the request.
 
    The syntactic details of vouchers are described in detail in
    [I-D.ietf-anima-voucher].  For example, the voucher consists of:
@@ -1500,11 +1505,6 @@ Internet-Draft                    BRSKI                      August 2017
    inconsistently could also be the result an active MITM attack on the
    EST connection.
 
-   The Registrar MUST use a certificate that chains to the pinned-
-   domain-cert as its TLS server certificate.
-
-   The Pledge's PKIX path validation of a Registrar certificate's
-   validity period information is as described in Section 2.4.  Once the
 
 
 
@@ -1514,6 +1514,11 @@ Pritikin, et al.        Expires February 24, 2018              [Page 27]
 Internet-Draft                    BRSKI                      August 2017
 
 
+   The Registrar MUST use a certificate that chains to the pinned-
+   domain-cert as its TLS server certificate.
+
+   The Pledge's PKIX path validation of a Registrar certificate's
+   validity period information is as described in Section 2.4.  Once the
    PKIX path validation is successful the TLS connection is no longer
    provisional.
 
@@ -1553,6 +1558,18 @@ Internet-Draft                    BRSKI                      August 2017
    Voucher was ignored by a client the registar expected to continue
    joining the domain.
 
+
+
+
+
+
+
+
+Pritikin, et al.        Expires February 24, 2018              [Page 28]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    {
      "version":"1",
      "Status":FALSE /* TRUE=Success, FALSE=Fail"
@@ -1562,13 +1579,6 @@ Internet-Draft                    BRSKI                      August 2017
    The server SHOULD respond with an HTTP 200 but MAY simply fail with
    an HTTP 404 error.  The client ignores any response.  Within the
    server logs the server SHOULD capture this telemetry information.
-
-
-
-Pritikin, et al.        Expires February 24, 2018              [Page 28]
-
-Internet-Draft                    BRSKI                      August 2017
-
 
 3.6.  MASA authorization log Request
 
@@ -1605,16 +1615,6 @@ Internet-Draft                    BRSKI                      August 2017
 
    A log data file is returned consisting of all log entries.  For
    example:
-
-
-
-
-
-
-
-
-
-
 
 
 
