@@ -2,16 +2,17 @@ VERSION=$(shell ./getver ${DRAFT}.xml )
 
 YANGDATE=$(shell date +%Y-%m-%d)
 DRAFT=dtbootstrap-anima-keyinfra
+VRDATE=ietf-voucher-request@${YANGDATE}.yang
 
 ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
 	git add ${DRAFT}-${VERSION}.txt ${DRAFT}.txt
 
 ietf-voucher-request-tree.txt: ietf-voucher-request@${YANGDATE}.yang
-	pyang --path=../voucher -f tree --tree-print-groupings ietf-voucher-request@${YANGDATE}.yang > ietf-voucher-request-tree.txt
+	pyang --path=../voucher -f tree --tree-print-groupings ${VRDATE} > ietf-voucher-request-tree.txt
 
-ietf-voucher-request@${YANGDATE}.yang: ietf-voucher-request.yang
-	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ietf-voucher-request@${YANGDATE}.yang
+${VRDATE}: ietf-voucher-request.yang
+	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ${VRDATE}
 
 ${DRAFT}.xml: ietf-voucher-request-tree.txt
 ${DRAFT}.xml: ietf-voucher-request@${YANGDATE}.yang
@@ -31,6 +32,15 @@ clean:
 	-rm -f ALL-${DRAFT}-${VERSION}.xml
 	-rm -f *~
 	-rm -f ietf-voucher-request@*.yang
+
+validate: ${VRDATE}
+	pyang --ietf --strict --max-line-length=70 -p ../voucher ${VRDATE}
+	pyang --canonical -p ../voucher/ ${VRDATE}
+	-yanglint -p ../voucher/ ${VRDATE}
+
+	echo "Testing ex-file-voucher-request.json..."
+	-yanglint -p ../../voucher/ -s ${VRDATE} refs/ex-file-voucher-request.json
+
 
 .PRECIOUS: ${DRAFT}-${VERSION}.xml ALL-${DRAFT}-${VERSION}.xml
 .PRECIOUS: ietf-voucher-request@${YANGDATE}.yang
