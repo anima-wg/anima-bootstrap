@@ -1714,22 +1714,22 @@ Internet-Draft                    BRSKI                      August 2017
    extensions.  They supplement the RFC7030 EST to better support
    automated devices that do not have an end user.
 
-   EST allows clients to obtain multiple certificates by sending
-   multiple CSR requests.  BRSKI does not restrict or enhance this
-   capability.  A Pledge that properly implements Section 3.7.2 would be
-   expected to request a certificate with the same attributes each time.
-   The PKI infrastructure handling of this is underdefined, and this
-   specification does not add clarity.
+   Although EST allows clients to obtain multiple certificates by
+   sending multiple CSR requests BRSKI mandates use of the CSR
+   Attributes request and mandates that the Registrar validate the CSR
+   against the expected attributes.  This implies that client requests
+   will "look the same" and therefore result in a single logical
+   certificate being issued even if the client were to make multiple
+   requests.  Registrars MAY contain more complex logic but doing so is
+   out-of-scope of this specification.  BRSKI does not signal any
+   enhancement or restriction to this capability.
 
 3.7.1.  EST Distribution of CA Certificates
 
    The Pledge MUST request the full EST Distribution of CA Certificates
    message.  See RFC7030, section 4.1.
 
-   This ensures that the Pledge has the complete set of current CA
-   certificates beyond the domainCAcert (see Section 3.4 for a
-   discussion of the limitations).  Although these restrictions are
-   acceptable for a Registrar integrated with initial bootstrapping they
+
 
 
 
@@ -1738,6 +1738,10 @@ Pritikin, et al.          Expires March 2, 2018                [Page 31]
 Internet-Draft                    BRSKI                      August 2017
 
 
+   This ensures that the Pledge has the complete set of current CA
+   certificates beyond the domainCAcert (see Section 3.4 for a
+   discussion of the limitations).  Although these restrictions are
+   acceptable for a Registrar integrated with initial bootstrapping they
    are not appropriate for ongoing PKIX end entity certificate
    validation.
 
@@ -1782,10 +1786,6 @@ Internet-Draft                    BRSKI                      August 2017
    indicated before forwarding the request to a CA.  If the Registar is
    communicating with the CA using a protocol like full CMC which
    provides mechanisms to override the CSR attributes, then these
-   mechanisms MAY be used even if the client ignores CSR Attribute
-   guidance.
-
-
 
 
 
@@ -1793,6 +1793,9 @@ Pritikin, et al.          Expires March 2, 2018                [Page 32]
 
 Internet-Draft                    BRSKI                      August 2017
 
+
+   mechanisms MAY be used even if the client ignores CSR Attribute
+   guidance.
 
 3.7.3.  EST Client Certificate Request
 
@@ -1838,9 +1841,6 @@ Internet-Draft                    BRSKI                      August 2017
      "SubjectKeyIdentifier":"base64encodedvalue=="
    }
 
-   The server SHOULD respond with an HTTP 200 but MAY simply fail with
-   an HTTP 404 error.
-
 
 
 
@@ -1849,6 +1849,9 @@ Pritikin, et al.          Expires March 2, 2018                [Page 33]
 
 Internet-Draft                    BRSKI                      August 2017
 
+
+   The server SHOULD respond with an HTTP 200 but MAY simply fail with
+   an HTTP 404 error.
 
    Within the server logs the server MUST capture if this message was
    received over an TLS session with a matching client certificate.
@@ -1895,9 +1898,6 @@ Internet-Draft                    BRSKI                      August 2017
    Proxy:  Provides proxy functionalities but is not involved in
       security considerations.
 
-   Registrar:  When interacting with a MASA server a Registrar makes all
-      decisions.  When Ownership Vouchers are involved a Registrar is
-
 
 
 
@@ -1906,6 +1906,8 @@ Pritikin, et al.          Expires March 2, 2018                [Page 34]
 Internet-Draft                    BRSKI                      August 2017
 
 
+   Registrar:  When interacting with a MASA server a Registrar makes all
+      decisions.  When Ownership Vouchers are involved a Registrar is
       only a conduit and all security decisions are made on the vendor
       service.
 
@@ -1949,8 +1951,6 @@ Internet-Draft                    BRSKI                      August 2017
    Assessment [RFC5209] is supported.  This recommendation ensures that
    domain network monitoring can detect innappropriate use of offline or
    emergency deployment procedures.
-
-
 
 
 
