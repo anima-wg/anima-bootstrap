@@ -8,7 +8,7 @@ ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
 	git add ${DRAFT}-${VERSION}.txt ${DRAFT}.txt
 
-ietf-voucher-request-tree.txt: ietf-voucher-request@${YANGDATE}.yang
+ietf-voucher-request-tree.txt: ${VRDATE}
 	pyang --path=../voucher -f tree --tree-print-groupings ${VRDATE} > ietf-voucher-request-tree.txt
 
 ${VRDATE}: ietf-voucher-request.yang
