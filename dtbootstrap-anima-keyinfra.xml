@@ -8,7 +8,9 @@
 <!ENTITY RFC5246 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
 <!ENTITY RFC5280 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml">
 <!ENTITY RFC5652 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5652.xml">
+<!ENTITY RFC7159 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7159.xml">
 <!ENTITY RFC7575 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7575.xml">
+<!ENTITY RFC7950 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml">
 <!ENTITY RFC7951 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7951.xml">
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 ]>
@@ -669,6 +671,80 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       </section>
     </section>
 
+    <section title="Voucher Request artifact" anchor="voucher-request">
+        <t>The voucher request is how an entity requests a voucher. The
+            Pledge forms a voucher request and submits it to the Registrar. The 
+            Registrar in turn submits a voucher request to the MASA server. A voucher
+            request is a voucher structure with an additional 
+            "prior-signed-voucher-request" "leaf to support forwarding the Pledge's 
+            initial voucher request.</t>
+        
+        <t>Unless otherwise signaled (outside the voucher artifact), the signing
+            structure is as defined for vouchers, see <xref target="I-D.ietf-anima-voucher"/>.</t>
+        
+        <section title="Tree Diagram" anchor="voucher-request-tree-diagram">
+            <t>The following tree diagram illustrates a high-level view of a
+                voucher request document.  The notation used in this diagram is described
+                in <xref target="I-D.ietf-anima-voucher" />.  Each node in the diagram is
+                fully described by the YANG module in <xref target="voucher-request-yang-module"/>.
+                Please review the YANG module for a detailed description of the
+                voucher request format.</t>
+            
+INSERT_TEXT_FROM_FILE ietf-voucher-request-tree.txt END
+
+        </section> <!-- tree diagram -->
+        
+        <section title="Examples" anchor="voucher-request-examples">
+            <t>This section provides voucher examples for illustration
+                purposes.  That these examples conform to the encoding rules
+                defined in <xref target="RFC7951"/>.</t>
+            
+            <t>The following example illustrates a Pledge generated voucher-request. The
+            assertion leaf is indicated as 'proximity' and the Registrar's TLS server
+            certificate is included in the 'pinned-domain-cert' leaf. See 
+            <xref target="RequestVoucherFromRegistrar"/>.</t>
+
+INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-proximity.json END
+            
+            <t>The following example illustrates a Registrar generated voucher-request.
+                The 'prior-signed-voucher-request' leaf is populated with the Pledge's 
+                voucher request (such as the prior example).</t>
+
+INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-prior.json END
+
+            <t>The following example illustrates a Registrar generated voucher-request.
+                The 'prior-signed-voucher-request' leaf is not populated with the Pledge's 
+                voucher request nor is the nonce leaf. This form might be used by a Registrar 
+                requesting a voucher when the Pledge is offline or when the Registrar expects
+                to be offline during deployment.</t>
+
+INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-offline.json END
+
+            <t>The following example illustrates a Registrar generated voucher-request.
+                The 'prior-signed-voucher-request' leaf is not populated with the Pledge's 
+                voucher request because the Pledge did not sign it's own request. This form 
+                might be used when more constrained Pledges are being deployed. The 
+                nonce is populated from the Pledge's request.</t>
+
+INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-constrained.json END
+        </section>  <!-- examples -->
+
+        <section title="YANG Module" anchor="voucher-request-yang-module">
+
+          <t>Following is a YANG <xref target="RFC7950"/> module formally
+          describing the voucher requests's JSON document structure.</t>
+
+<!-- with this version of INSERT_TEXT_FROM_FILE we can't easily add  
+<CODE BEGINS> file "ietf-voucher-request@YYYY-MM-DD.yang"
+ -->
+INSERT_TEXT_FROM_FILE ietf-voucher-request@YYYY-MM-DD.yang END
+<!-- with this version of INSERT_TEXT_FROM_FILE we can't easily add  
+<CODE ENDS>
+ -->
+
+</section>  <!-- yang module -->
+    </section>   <!-- voucher request artifact -->
+    
     <section anchor="ProtocolDetails" title="Protocol Details">
         <t>The Pledge MUST initiate BRSKI after boot if it is unconfigured.
         The Pledge MUST NOT automatically initiate BRSKI if it has been
@@ -985,11 +1061,11 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
             The voucher request is derived from the Voucher artifact defined
             in <xref target="I-D.ietf-anima-voucher" />.
             Here is the YANG tree:
-            INSERT_TEXT_FROM_FILE ietf-voucher-request-tree.txt END
+INSERT_TEXT_FROM_FILE ietf-voucher-request-tree.txt END
           </t>
           <t>
             The YANG definition:
-            INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
+INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
           </t>
         </section>
       </section>
@@ -1867,6 +1943,10 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
 
       &RFC5280;
 
+      &RFC7159;
+
+      &RFC7950;
+      
       &RFC7951;
 
       <?rfc include="reference.RFC.3542" ?>
