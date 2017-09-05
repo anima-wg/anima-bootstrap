@@ -20,8 +20,7 @@ ${DRAFT}.xml: ietf-voucher-request-tree.txt
 ${DRAFT}.xml: ietf-voucher-request@${YANGDATE}.yang
 
 ALL-%.xml: %.xml
-	sed -e "s/YYYY-MM-DD/${YANGDATE}/" $? > DATE-$?
-	cat DATE-$? | ./insert-figures > ALL-$?
+	cat $? | ./insert-figures > ALL-$?
 
 %.txt: ALL-%.xml
 	@echo PROCESSING: $(subst ALL-,,$@)
