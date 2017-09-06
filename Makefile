@@ -4,9 +4,11 @@ YANGDATE=$(shell date +%Y-%m-%d)
 DRAFT=dtbootstrap-anima-keyinfra
 VRDATE=ietf-voucher-request@${YANGDATE}.yang
 
-${DRAFT}-${VERSION}.txt: ${DRAFT}.txt
+${DRAFT}-${VERSION}.txt: ${DRAFT}.txt ${DRAFT}.html
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
 	git add ${DRAFT}-${VERSION}.txt ${DRAFT}.txt
+	cp ${DRAFT}.html ${DRAFT}-${VERSION}.html
+	@echo Consider a \'git add\' of html version 
 
 ietf-voucher-request-tree.txt: ${VRDATE}
 	pyang --path=../voucher -f tree --tree-print-groupings ${VRDATE} > ietf-voucher-request-tree.txt
@@ -18,7 +20,7 @@ ${DRAFT}.xml: ietf-voucher-request-tree.txt
 ${DRAFT}.xml: ietf-voucher-request@${YANGDATE}.yang
 
 ALL-%.xml: %.xml
-	cat $? | ./insert-figures >ALL-$?
+	cat $? | ./insert-figures > ALL-$?
 
 %.txt: ALL-%.xml
 	@echo PROCESSING: $(subst ALL-,,$@)
@@ -30,6 +32,7 @@ ALL-%.xml: %.xml
 clean:
 	-rm -f ${DRAFT}-${VERSION}.xml ${DRAFT}-${VERSION}.txt
 	-rm -f ALL-${DRAFT}-${VERSION}.xml
+	-rm -f ALL-${DRAFT}.xml
 	-rm -f *~
 	-rm -f ietf-voucher-request@*.yang
 
@@ -42,8 +45,10 @@ validate: ${VRDATE}
 	-yanglint -p ../../voucher/ -s ${VRDATE} refs/ex-file-voucher-request.json
 
 
-.PRECIOUS: ${DRAFT}-${VERSION}.xml ALL-${DRAFT}-${VERSION}.xml
+.PRECIOUS: ${DRAFT}-${VERSION}.xml 
 .PRECIOUS: ietf-voucher-request@${YANGDATE}.yang
+.PRECIOUS: ALL-${DRAFT}.xml
+.PRECIOUS: DATE-${DRAFT}.xml
 
 version:
 	echo Version: ${VERSION}

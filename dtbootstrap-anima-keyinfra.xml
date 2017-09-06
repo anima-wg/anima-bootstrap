@@ -8,7 +8,9 @@
 <!ENTITY RFC5246 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
 <!ENTITY RFC5280 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml">
 <!ENTITY RFC5652 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5652.xml">
+<!ENTITY RFC7159 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7159.xml">
 <!ENTITY RFC7575 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7575.xml">
+<!ENTITY RFC7950 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml">
 <!ENTITY RFC7951 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7951.xml">
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 ]>
@@ -121,11 +123,14 @@
       answer the above questions. The Registrar actions derive from Pledge identity,
       third party cloud service communications, and local access control
       lists. The Pledge actions derive from a cryptographically protected
-      "voucher" message delivered through the Registrar.</t>
+      "voucher" message delivered through the Registrar but originating
+      at a Manufacturer Authorized Signing Authority.</t>
 
       <t>The syntactic details of vouchers are described in detail in <xref
       target="I-D.ietf-anima-voucher" />. This document details automated
-      protocol mechanisms to obtain vouchers.</t>
+      protocol mechanisms to obtain vouchers, including the definition
+      of a necessary 'voucher request' message that is a minor extension
+      to the voucher format (see <xref target="voucher-request" />).</t>
 
      <t>BRSKI results in the Pledge storing an X.509 root
     certificate sufficient for verifying the Registrar identity. In the
@@ -669,6 +674,75 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
       </section>
     </section>
 
+    <section title="Voucher Request artifact" anchor="voucher-request">
+        <t>The voucher request is how an entity requests a voucher. The
+            Pledge forms a voucher request and submits it to the Registrar. The 
+            Registrar in turn submits a voucher request to the MASA server. A voucher
+            request is a voucher structure with an additional 
+            "prior-signed-voucher-request" "leaf to support forwarding the Pledge's 
+            initial voucher request.</t>
+        
+        <t>Unless otherwise signaled (outside the voucher artifact), the signing
+            structure is as defined for vouchers, see <xref target="I-D.ietf-anima-voucher"/>.</t>
+        
+        <section title="Tree Diagram" anchor="voucher-request-tree-diagram">
+            <t>The following tree diagram illustrates a high-level view of a
+                voucher request document.  The notation used in this diagram is described
+                in <xref target="I-D.ietf-anima-voucher" />.  Each node in the diagram is
+                fully described by the YANG module in <xref target="voucher-request-yang-module"/>.
+                Please review the YANG module for a detailed description of the
+                voucher request format.</t>
+            
+INSERT_TEXT_FROM_FILE ietf-voucher-request-tree.txt END
+
+        </section> <!-- tree diagram -->
+        
+        <section title="Examples" anchor="voucher-request-examples">
+            <t>This section provides voucher examples for illustration
+                purposes.  That these examples conform to the encoding rules
+                defined in <xref target="RFC7951"/>.</t>
+            
+            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Pledge generated voucher-request. The
+            assertion leaf is indicated as 'proximity' and the Registrar's TLS server
+            certificate is included in the 'pinned-domain-cert' leaf. See 
+            <xref target="RequestVoucherFromRegistrar"/>.</t></list></t>
+INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-proximity.json END
+
+            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Registrar generated voucher-request.
+                The 'prior-signed-voucher-request' leaf is populated with the Pledge's 
+                voucher request (such as the prior example). See 
+                <xref target="RequestVoucherFromMASA"/>.</t></list></t>
+INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-prior.json END
+
+            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Registrar generated voucher-request.
+                The 'prior-signed-voucher-request' leaf is not populated with the Pledge's 
+                voucher request nor is the nonce leaf. This form might be used by a
+                Registrar requesting a voucher when the Pledge is offline or when 
+                the Registrar expects to be offline during deployment.  See 
+                <xref target="RequestVoucherFromMASA"/>.</t></list></t>
+INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-offline.json END
+
+            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Registrar generated voucher-request.
+                The 'prior-signed-voucher-request' leaf is not populated with the Pledge's 
+                voucher request because the Pledge did not sign it's own request. This form 
+                might be used when more constrained Pledges are being deployed. The 
+                nonce is populated from the Pledge's request.   See 
+                <xref target="RequestVoucherFromMASA"/>.</t></list></t>
+ INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-constrained.json END
+            
+        </section>  <!-- examples -->
+
+        <section title="YANG Module" anchor="voucher-request-yang-module">
+
+          <t>Following is a YANG <xref target="RFC7950"/> module formally
+          extending the <xref target="I-D.ietf-anima-voucher" /> voucher into 
+          the voucher request.</t>
+
+INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
+
+</section>  <!-- yang module -->
+    </section>   <!-- voucher request artifact -->
+    
     <section anchor="ProtocolDetails" title="Protocol Details">
         <t>The Pledge MUST initiate BRSKI after boot if it is unconfigured.
         The Pledge MUST NOT automatically initiate BRSKI if it has been
@@ -954,22 +1028,8 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         </list></t>
         <t>All other fields MAY be ommitted in the voucher request.</t>
 
-        <t>An example JSON payload of a voucher request from a Pledge:</t>
-
-        <figure>
-          <artwork><![CDATA[
-{
-  "ietf-voucher:voucher": {
-    "nonce": "62a2e7693d82fcda2624de58fb6722e5",
-    "created-on": "2017-01-01T00:00:00.000Z",
-    "assertion": "proximity",
-    "pinned-domain-cert": "base64encodedvalue=="
-  }
-}
-]]></artwork>
-        </figure>
-
-        <t></t>
+        <t>An example JSON payload of a voucher request from a Pledge is in 
+            <xref target="voucher-request-examples"/> Example 1.</t>
 
         <t>The Registrar validates the client identity as described in EST
         <xref target="RFC7030"/> section 3.3.2. If the request is signed the Registrar confirms the
@@ -980,22 +1040,11 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         <t>If authorization is successful the Registrar obtains a voucher from the MASA service (see
             <xref target="RequestVoucherFromMASA"/>) and returns that MASA signed voucher to the pledge
         as described in <xref target="VoucherResponse"/>.</t>
-        <section title="Yang Model for Voucher Request">
-          <t>
-            The voucher request is derived from the Voucher artifact defined
-            in <xref target="I-D.ietf-anima-voucher" />.
-            Here is the YANG tree:
-            INSERT_TEXT_FROM_FILE ietf-voucher-request-tree.txt END
-          </t>
-          <t>
-            The YANG definition:
-            INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
-          </t>
-        </section>
+
       </section>
 
       <section anchor="RequestVoucherFromMASA" title="Registrar Requests Voucher from MASA">
-        <t>when a Registrar receives a voucher request from a Pledge it in turn requests
+        <t>When a Registrar receives a voucher request from a Pledge it in turn requests
             a voucher from the MASA service. For simplicity this is defined as an optional EST message
         between a Registrar and an EST server running on the MASA service
         although the Registrar is not required to make use of any other EST
@@ -1030,27 +1079,10 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         is included to ensure a statistically unique identity. The Pledge's serial number is
         extracted from the X.509 IDevID. See <xref target="IDevIDextension"></xref>.</t>
         <t hangText="prior-signed-voucher:">If the Pledge provided a signed voucher request
-        then it SHOULD be included in the voucher request built by the Registrar.</t>
+        then it SHOULD be included in the voucher request built by the Registrar. 
+        (NOTE: this is the full signed voucher request, inclusive of the PKCS#7 
+        signature wrapper.)</t>
         </list></t>
-        <t>All other fields MAY be ommitted in the voucher request.</t>
-
-        <t>An example JSON payload of a voucher request from a Registrar:</t>
-
-
-        <t><figure>
-            <artwork><![CDATA[
-{
-  "ietf-voucher:voucher": {
-    "nonce": "62a2e7693d82fcda2624de58fb6722e5",
-    "created-on": "2017-01-01T00:00:00.000Z",
-    "assertion": "proximity"
-    "idevid-issuer": "base64encodedvalue=="
-    "serial-number": "JADA123456789"
-    "prior-signed-voucher": "base64encodedvalue=="
-  }
-}
-]]></artwork>
-        </figure></t>
 
         <t>A Registrar MAY exclude the nonce from the voucher request
             it submits to the MASA. Doing so allows
@@ -1064,6 +1096,11 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         section 3.3.2 to reduce the risk of DDoS attacks and to provide an
         authenticated identity as an input to sales channel integration and
         authorizations (also out-of-scope of this document).</t>
+
+        <t>All other fields MAY be ommitted in the voucher request.</t>
+
+        <t>Example JSON payloads of voucher requests from a Registrar are in 
+            <xref target="voucher-request-examples"/> Example 2 through 4.</t>
 
         <t>The MASA verifies that the voucher request is internally consistent
         but does not authenticate the domain identity information since the
@@ -1259,7 +1296,6 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
         internal state to associate this request with the original, and by now
         already validated, voucher request so as to avoid an extra crypto
         validation.</t>
-
 
         <t>The request media type is:</t>
         <t><list style="hanging">
@@ -1867,6 +1903,10 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
 
       &RFC5280;
 
+      &RFC7159;
+
+      &RFC7950;
+      
       &RFC7951;
 
       <?rfc include="reference.RFC.3542" ?>
