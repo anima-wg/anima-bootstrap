@@ -1026,7 +1026,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             <t hangText="created-on:">Pledges that have a realtime clock are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
             <t hangText="nonce:">The voucher request MUST contain a cryptographically strong random or pseudo-random number nonce. Doing so ensures <xref target="timeunknown"/> functionality. The nonce MUST NOT be reused for bootstrapping attempts [[EDNOTE: even with the same Registrar?  Does this put an an undo crypto-overhead?]].</t>
             <t hangText="assertion:">The voucher request MAY contain an assertion of "proximity".</t>
-            <t hangText="pinned-domain-cert:">In a Pledge voucher request this is the Registrar certificate as extracted from the TLS handshake (for example the first certificate in the TLS 'certificate_list' sequence (see <xref target="RFC5246" />). This MUST be populated in a Pledge's voucher request if the "proximity" assertion is populated.</t>
+            <t hangText="proximity-registrar-cert:">In a Pledge voucher request this is the first certificate in the TLS server 'certificate_list' sequence (see [RFC5246]) presented by the Registrar to the Pledge. This MUST be populated in a Pledge's voucher request if the "proximity" assertion is populated.</t>
         </list></t>
         <t>All other fields MAY be ommitted in the voucher request.</t>
 
@@ -1034,8 +1034,8 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             <xref target="voucher-request-examples"/> Example 1.</t>
 
         <t>The Registrar validates the client identity as described in EST
-        <xref target="RFC7030"/> section 3.3.2. If the request is signed then the Registrar verifies the signature and confirms the
-        'proximity' asserion and associated 'pinned-domain-cert' are correct. The Registrar performs
+        <xref target="RFC7030"/> section 3.3.2. If the request is signed the Registrar confirms the
+        'proximity' asserion and associated 'proximity-registrar-cert' are correct. The registrar performs
         authorization as detailed in [[EDNOTE: UNRESOLVED. See Appendix D "Pledge Authorization"]]. If
         these validations fail the Registrar SHOULD respond with an appropriate HTTP error code.</t>
 
@@ -1082,8 +1082,8 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         extracted from the X.509 IDevID. See <xref target="IDevIDextension"></xref>.</t>
         <t hangText="prior-signed-voucher:">If the Pledge provided a signed voucher request
         then it SHOULD be included in the voucher request built by the Registrar. 
-        (NOTE: this is the full signed voucher request, inclusive of the PKCS#7 
-        signature wrapper.)</t>
+        (NOTE: this is the Pledge's complete voucher request, inclusive of the 
+        'assertion', 'proximity-registrar-cert', etc wrapped by the PKCS#7 signature).</t>
         </list></t>
 
         <t>A Registrar MAY exclude the nonce from the voucher request
@@ -1140,16 +1140,17 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             <t hangText="Pledge proximity assertion:">
                 The MASA server MAY verify that the Registrar signed voucher includes
                 the 'prior-signed-voucher' field populated
-                with a Pledge signed voucher that includes a pinned-domain-cert
-                that is consistent with the Registrar certificate chain. The MASA
+                with a Pledge signed voucher that includes a 'proximity-registrar-cert'
+                that is consistent with the Registrar's 'TLS client certificate. The MASA
                 server is aware of which Pledge's support signing of their voucher
                 requests and can use this information to confirm proximity of
                 the Pledge with the Registrar.</t>
         </list></t>
 
-        <t>The root certificate is extracted from the signature method and used to populate the
-        "pinned-domain-cert" of the Voucher being issued. The domain ID (e.g. hash of the public key of the domain) is
-        extracted from the root certificate and is used to update the audit log.</t>
+        <t>The Registrar certificate chain root certificate is extracted from the signature 
+        method and used to populate the "pinned-domain-cert" of the Voucher being issued. The 
+        domain ID (e.g. hash of the public key of the domain) is extracted from the root certificate 
+        and is used to update the audit log.</t>
       </section>
 
       <section anchor="VoucherResponse" title="Voucher Response">
@@ -1199,7 +1200,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             anchor to immediately complete authentication of the provisional TLS
             connection.</t>
         <t>The Pledge MUST be prepared to parse and fail gracefully from
-        an Voucher response that does not contain a 'pinned-domain-cert' field. The
+        a Voucher response that does not contain a 'pinned-domain-cert' field. The
         Pledge MUST be prepared to ignore additional fields it does not recognize.
         </t>
 
