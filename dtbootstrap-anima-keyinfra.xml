@@ -135,8 +135,13 @@
      <t>BRSKI results in the Pledge storing an X.509 root
     certificate sufficient for verifying the Registrar identity. In the
     process a TLS connection is established which can be directly used for
-    Enrollment over Secure Transport (EST). The Pledge can use these
-    credentials to secure additional protocol exchanges.</t>
+    Enrollment over Secure Transport (EST). In effect BRSKI provides 
+    an automated mechanism for the "Bootstrap Distribution of CA Certificates" 
+    described in <xref target="RFC7030"></xref> Section 4.1.1 wherein 
+    the Pledge "MUST [...]. engage a human user to authorize the CA certificate using
+    out-of-band" information". With BRSKI the Pledge now can automate 
+    this process using the voucher. Integration with a complete EST
+    enrollment is optional but trivial.</t>
 
       <t>BRSKI is agile enough to support
       bootstrapping alternative key infrastructures, such as a symmetric key
@@ -1359,33 +1364,14 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       </section>
 
       <section title="EST Integration for PKI bootstrapping">
-        <t>This section describes EST extensions necessary to enable
-        fully automated bootstrapping. Although the Voucher
-        request/response structure members "idevid-issuer" and
-        "pinned-domain-cert" are specific to PKI bootstrapping these are the only
-        PKI specific aspects of the extensions and future voucher definitions might replace
-        them with non-PKI fields.</t>
+        <t>The Pledge SHOULD follow the BRSKI operations with EST enrollment operations
+        including "CA Certificates Request", "CSR Attributes" and "Client Certificate Request" 
+        or "Server-Side Key Generation" etc. This is a relatively seamless integration
+        since BRSKI REST calls provide an automated alternative to the manual bootstrapping method 
+        described in <xref target="RFC7030"></xref>. As noted above, use of HTTP 1.1 persistent 
+        connections simplifies the Pledge state machine.</t>
 
-        <t>Once the Voucher is received, as specified in this document, the
-        client has sufficient information to leverage the existing
-        communication channel with a Registrar to continue an EST RFC7030
-        enrollment. The voucher provides an automated mechanism for the "Bootstrap
-        Distribution of CA Certificates" described in <xref target="RFC7030"></xref>
-        section 4.1.1 wherein the Pledge "MUST [...]. engage a human user
-        to authorize the CA certificate using
-        out-of-band" information". Instead the Pledge now can automate this
-        process using the voucher provided "pinned-domain-cert".</t>
-
-        <t>The Pledge SHOULD use the existing current TLS connection
-        to proceed with EST enrollment, thus reducing the total amount of
-        cryptographic and round trip operations required during
-        bootstrapping. After voucher verification the Pledge continues with
-        EST enrollment operations including "CA Certificates Request",
-        "CSR Attributes" and "Client Certificate Request" or "Server-Side Key Generation" etc.</t>
-
-        <t>The Pledge SHOULD follow the BRSKI operations with an EST enrollment.</t>
-
-        <t>The Pledge is RECOMMENDED to implement the following EST automation extensions. They
+        <t>The Pledge is also RECOMMENDED to implement the following EST automation extensions. They
         supplement the RFC7030 EST to better support automated devices that do not
         have an end user.</t>
 
