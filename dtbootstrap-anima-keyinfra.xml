@@ -468,7 +468,7 @@
       </section>
 
       <section anchor="IDevIDextension" title="Initial Device Identifier">
-          <t>Pledge authentication is via an X.509 certificate installed
+          <t>Pledge authentication and voucher request signing is via an X.509 certificate installed
              during the manufacturing process. This Initial Device Identifier
              provides a basis for authenticating the Pledge during subsequent
              protocol exchanges and informing the Registrar of the MASA
@@ -1007,16 +1007,13 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         <t><list style="hanging">
           <t hangText="application/pkcs7-mime; smime-type=voucher-request">The request is a
           "YANG-defined JSON document that has been signed using a PKCS#7 structure" as described in
-          <xref target="I-D.ietf-anima-voucher"/> using the JSON encoded described in <xref target="RFC7951"/>.
-          The Registrar MUST sign the request. The entire Registrar certificate chain, up to and including the Domain CA,
-          MUST be included in the PKCS#7 structure. [EDNOTE: once/if voucher-requests are defined in this document
-          then the reference needs to be updated]
+          <xref target="voucher-request"/> using the JSON encoding described in <xref target="RFC7951"/>.
+          The Pledge SHOULD sign the request using the <xref target="IDevIDextension"/> credential.
           </t>
           <t hangText="application/json">The request is the "YANG-defined JSON document"
-          as described in <xref target="I-D.ietf-anima-voucher"/> with exception that it is not within
+          as described in <xref target="voucher-request"/> with exception that it is not within
           a PKCS#7 structure. It is protected only by the TLS client authentication.
-          This reduces the cryptographic requirements on the Pledge.
-          [EDNOTE: once/if voucher-requests are defined in this document then the reference needs to be updated]</t>
+          This reduces the cryptographic requirements on the Pledge.</t>
         </list></t>
 
         <t>For simplicity the term 'voucher request' is used to refer to either of these media types. Registrar
@@ -1037,8 +1034,8 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             <xref target="voucher-request-examples"/> Example 1.</t>
 
         <t>The Registrar validates the client identity as described in EST
-        <xref target="RFC7030"/> section 3.3.2. If the request is signed the Registrar confirms the
-        'proximity' asserion and associated 'pinned-domain-cert' are correct. The registrar performs
+        <xref target="RFC7030"/> section 3.3.2. If the request is signed then the Registrar verifies the signature and confirms the
+        'proximity' asserion and associated 'pinned-domain-cert' are correct. The Registrar performs
         authorization as detailed in [[EDNOTE: UNRESOLVED. See Appendix D "Pledge Authorization"]]. If
         these validations fail the Registrar SHOULD respond with an appropriate HTTP error code.</t>
 
@@ -1065,10 +1062,10 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         <t><list style="hanging">
           <t hangText="application/pkcs7-mime; smime-type=voucher-request">The request is a
           "YANG-defined JSON document that has been signed using a PKCS#7 structure" as described
-          in <xref target="I-D.ietf-anima-voucher"/> using the JSON encoded described in <xref target="RFC7951"/>.
+          in <xref target="I-D.ietf-anima-voucher"/> using the JSON encoding described in <xref target="RFC7951"/>.
           The Registrar MUST sign the request. The entire Registrar certificate chain,
           up to and including the Domain CA, MUST be included in the PKCS#7 structure.
-          [EDNOTE: once/if voucher-requests are defined in this document then the reference needs to be updated]</t>
+          </t>
         </list></t>
 
         <t>For simplicity the term 'voucher request' is used.  MASA impementations SHOULD anticipate future media
