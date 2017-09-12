@@ -8,7 +8,7 @@ ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt ${DRAFT}.html
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
 	git add ${DRAFT}-${VERSION}.txt ${DRAFT}.txt
 	cp ${DRAFT}.html ${DRAFT}-${VERSION}.html
-	@echo Consider a \'git add\' of html version 
+	@echo Consider a \'git add\' of html version
 
 ietf-voucher-request-tree.txt: ${VRDATE}
 	pyang --path=../voucher -f tree --tree-print-groupings ${VRDATE} > ietf-voucher-request-tree.txt
@@ -16,11 +16,8 @@ ietf-voucher-request-tree.txt: ${VRDATE}
 ${VRDATE}: ietf-voucher-request.yang
 	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ${VRDATE}
 
-${DRAFT}.xml: ietf-voucher-request-tree.txt
-${DRAFT}.xml: ietf-voucher-request@${YANGDATE}.yang
-
-ALL-%.xml: %.xml
-	cat $? | ./insert-figures > ALL-$?
+ALL-${DRAFT}.xml: ${DRAFT}.xml ietf-voucher-request-tree.txt ietf-voucher-request@${YANGDATE}.yang
+	cat ${DRAFT}.xml | ./insert-figures > ALL-${DRAFT}.xml
 
 %.txt: ALL-%.xml
 	@echo PROCESSING: $(subst ALL-,,$@)
@@ -45,7 +42,7 @@ validate: ${VRDATE}
 	-yanglint -p ../../voucher/ -s ${VRDATE} refs/ex-file-voucher-request.json
 
 
-.PRECIOUS: ${DRAFT}-${VERSION}.xml 
+.PRECIOUS: ${DRAFT}-${VERSION}.xml
 .PRECIOUS: ietf-voucher-request@${YANGDATE}.yang
 .PRECIOUS: ALL-${DRAFT}.xml
 .PRECIOUS: DATE-${DRAFT}.xml
