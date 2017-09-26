@@ -380,6 +380,7 @@
         Extensible Authentication Protocol (EAP) method
         (see <xref target="RFC3748"></xref>), is out-of-scope.</t>
       </section>
+
     </section>
 
     <section title="Architectural Overview">
@@ -440,6 +441,84 @@
       registrar authenticates the Pledge, makes authorization decisions, and distributes
       vouchers obtained from the Vendor Service. Optionally the Registrar
       also acts as a PKI Registration Authority.</t>
+
+      <section title="Behavior of a Pledge">
+        <t>The pledge goes through a series of steps which are outlined here
+        at a high level.</t>
+
+        <figure>
+<artwork><![CDATA[
+             +--------------+
+             |   Factory    |
+             |   default    |
+             +------+-------+
+                    |
+             +------v-------+
+             |  Discover    |
++------------>              |
+|            +------+-------+
+|                   |
+|            +------v-------+
+|            |  Identity    |
+^------------+              |
+| rejected   +------+-------+
+|                   |
+|            +------v-------+
+|            | Request      |
+|            | Join         |
+|            +------+-------+
+|                   |
+|            +------v-------+
+|            |  Imprint     |   Optional
+^------------+              <--+Manual input (Appendix C)
+| Bad Vendor +------+-------+
+| response          |
+|            +------v-------+
+|            |  Enroll      |
+^------------+              |
+| Enroll     +------+-------+
+| Failure           |
+|            +------v-------+
+|            |  Enrolled    |
+^------------+              |
+ Factory     +--------------+
+ reset
+
+]]></artwork>
+
+            <postamble>Figure 3</postamble>
+        </figure>
+
+        <t>State descriptions for the pledge are as follows:</t>
+
+        <t><list style="numbers">
+            <t>Discover a communication channel to a Registrar.</t>
+
+            <t>Identify itself. This is done by presenting an X.509 IDevID
+                credential to the discovered Registrar (via the Proxy) in a TLS
+                handshake. (The Registrar credentials are only provisionally
+                accepted at this time).</t>
+
+            <t>Requests to Join the discovered Registrar. A unique nonce [[RESOLVED:can be]]
+                included ensuring that any responses can be associated with this
+                particular bootstrapping attempt.</t>
+
+            <t>Imprint on the Registrar. This requires verification of the
+                vendor service provided voucher. A voucher contains sufficient
+                information for the Pledge to complete authentication of a
+                Registrar. (It enables the Pledge to finish
+                authentication of the Registrar TLS server certificate).</t>
+
+            <t>Enroll. By accepting the domain specific information from a
+                Registrar, and by obtaining a domain certificate from a Registrar
+                using a standard enrollment protocol, e.g. Enrollment over Secure
+                Transport (EST) <xref target="RFC7030"></xref>.</t>
+
+            <t>The Pledge is now a member of, and can be managed by, the
+                domain and will only repeat the discovery aspects of bootstrapping
+                if it is returned to factory default settings.</t>
+        </list></t>
+      </section>
 
       <section title="Secure Imprinting using Vouchers">
         <t>A voucher is a cryptographically protected statement to the Pledge
