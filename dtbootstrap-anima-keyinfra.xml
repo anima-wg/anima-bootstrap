@@ -887,7 +887,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                 appropriate retry-after value for any number of outstanding Registrars
                 but this would involve a large state table on the Pledge. Instead the
                 pledge MAY ignore the exact retry-after value in favor of a single hard
-                coded value that takes effect between discovery (<xref target="ProxyDiscovery"/>)
+                coded value that takes effect between discovery ([[ProxyDiscovery]])
                 attempts. A Registrar that is unable
                 to complete the transaction the first time due to timing reasons will
                 have future chances.
@@ -2437,263 +2437,6 @@ Data        +----------------------nonce---->   (discard     |
       <t></t>
     <t></t>
 
-    <section title="Behavior of a Pledge">
-        <t>A pledge that has not yet been bootstrapped attempts to find a
-            local domain and join it. A pledge [[RESOLVED:MUST NOT]] automatically initiate
-            bootstrapping if it has already been configured or is in the process
-            of being configured.</t>
-
-        <t>States of a pledge are as follows:</t>
-
-        <t></t>
-
-        <figure>
-<artwork><![CDATA[
-             +--------------+
-             |   Factory    |
-             |   default    |
-             +------+-------+
-                    |
-             +------v-------+
-             |  Discover    |
-+------------>              |
-|            +------+-------+
-|                   |
-|            +------v-------+
-|            |  Identity    |
-^------------+              |
-| rejected   +------+-------+
-|                   |
-|            +------v-------+
-|            | Request      |
-|            | Join         |
-|            +------+-------+
-|                   |
-|            +------v-------+
-|            |  Imprint     |   Optional
-^------------+              <--+Manual input (Appendix C)
-| Bad Vendor +------+-------+
-| response          |
-|            +------v-------+
-|            |  Enroll      |
-^------------+              |
-| Enroll     +------+-------+
-| Failure           |
-|            +------v-------+
-|            |  Enrolled    |
-^------------+              |
- Factory     +--------------+
- reset
-
-]]></artwork>
-
-            <postamble>Figure 3</postamble>
-        </figure>
-
-        <t></t>
-
-        <t>State descriptions for the pledge are as follows:</t>
-
-        <t><list style="numbers">
-            <t>Discover a communication channel to a Registrar.</t>
-
-            <t>Identify itself. This is done by presenting an X.509 IDevID
-                credential to the discovered Registrar (via the Proxy) in a TLS
-                handshake. (The Registrar credentials are only provisionally
-                accepted at this time).</t>
-
-            <t>Requests to Join the discovered Registrar. A unique nonce [[RESOLVED:can be]]
-                included ensuring that any responses can be associated with this
-                particular bootstrapping attempt.</t>
-
-            <t>Imprint on the Registrar. This requires verification of the
-                vendor service provided voucher. A voucher contains sufficient
-                information for the Pledge to complete authentication of a
-                Registrar. (It enables the Pledge to finish
-                authentication of the Registrar TLS server certificate).</t>
-
-            <t>Enroll. By accepting the domain specific information from a
-                Registrar, and by obtaining a domain certificate from a Registrar
-                using a standard enrollment protocol, e.g. Enrollment over Secure
-                Transport (EST) <xref target="RFC7030"></xref>.</t>
-
-            <t>The Pledge is now a member of, and can be managed by, the
-                domain and will only repeat the discovery aspects of bootstrapping
-                if it is returned to factory default settings.</t>
-        </list>The following sections describe each of these steps in more
-        detail.</t>
-
-        <section anchor="ProxyDiscovery" title="Discovery">
-            <t>[[RESOLVED:TEXT moved up into above]]</t>
-        </section>
-
-        <section anchor="identity" title="Identity">
-            <t>
-                The Pledge identifies itself during the communication protocol
-                handshake. If the client identity is rejected (that is, the TLS
-                handshake does not complete) the Pledge repeats the
-                Identity process using the next proxy or discovery method
-                available.
-            </t>
-
-            <t>[[RESOLVED: need normative statement in protocol section]] The bootstrapping protocol server is not initially authenticated.
-                Thus the connection is provisional and all data received is
-                untrusted until sufficiently validated even though it is over a TLS
-                connection. This is aligned with the existing provisional mode of
-                EST <xref target="RFC7030"/> during s4.1.1 "Bootstrap Distribution of CA
-                Certificates". See <xref target="VoucherResponse"></xref> for
-                more information about when the TLS connection authentication is
-                completed.</t>
-
-            <t>[[RESOLVED:]]All security associations established are between the new device
-                and the Bootstrapping server regardless of proxy operations.</t>
-
-            <section title="Concurrent attempts to join">
-                <t>[[RESOLVED: by dropping this text. the "priority mechanism" is unspecified
-                    thus any discussion is unclear. Not only that once an initial request is
-                    sent to the registrar the question of multiple MASA interactions has
-                    already occurred. Nothing breaks if implementations do this. I've added
-                    text to the security considerations indicating the end result (MASA entries
-                    that might be ignored by the device but which confuse the end administrator)]]
-                    The Pledge MAY attempt multiple mechanisms concurrently, but
-                    if it does so, it MUST wait in the provisional state until all
-                    mechanisms have either succeeded or failed, and then MUST proceed
-                    with the highest priority mechanism which has succeed.
-                    To proceed beyond this point, specifically, to provide a nonce,
-                    could result in the MASA gratuitously auditing a connection.
-                </t>
-            </section>
-
-        </section>
-
-        <section title="Request Join">
-            <t>The Pledge POSTs a request to join the domain to the
-                Bootstrapping server. This request contains a Pledge generated nonce
-                and informs the Bootstrapping server which imprint methods the
-                Pledge will accept.</t>
-
-            <t>The nonce ensures the Pledge can verify that responses are
-                specific to this bootstrapping attempt. This minimizes the use of
-                global time and provides a substantial benefit for devices without a
-                valid clock.</t>
-
-            <section title="Redirects during the Join Process">
-                <t>[[RESOVED via current root protocol discussion. reference to mdnsmethods is dropped]] EST <xref target="RFC7030"/> describes situations where the bootstrapping
-                    server MAY redirect the client to an alternate server via a 3xx
-                    status code.   Such redirects MAY be accepted if the pledge
-                    has used the methods described in <xref target="mdnsmethods" />,
-                    in combination with an implicit trust anchor.  Redirects during the
-                    provisional period are otherwise unstrusted, and MUST cause a
-                    failure.
-                </t>
-            </section>
-        </section>
-
-        <section anchor="AcceptDomain" title="Imprint">
-            <t>The Pledge validates the voucher and accepts the Registrar ID.
-                The provisional TLS connection is validated using the Registrar ID
-                from the voucher.</t>
-        </section>
-
-        <section anchor="timeunknownAPPENDIX" title="Lack of realtime clock APPENDIX">
-            <t>[[RESOVED: entire section promoted back into the main text]]</t>
-            <t>Many devices when bootstrapping do not have knowledge of the
-                current time. Mechanisms like Network Time Protocols can not be
-                secured until bootstrapping is complete. Therefore bootstrapping is
-                defined in a method that does not require knowledge of the current
-                time.</t>
-
-            <t>Unfortunately there are moments during bootstrapping when
-                certificates are verified, such as during the TLS handshake, where
-                validity periods are confirmed. This paradoxical "catch-22" is
-                resolved by the Pledge maintaining a concept of the current "window"
-                of presumed time validity that is continually refined throughout the
-                bootstrapping process as follows:</t>
-
-            <t><list style="symbols">
-                <t>Initially the Pledge does not know the current time.</t>
-
-                <t>During Pledge authentiation by the Registrar a realtime clock
-                    can be used by the Registrar. This bullet expands on a closely
-                    related issue regarding Pledge lifetimes. RFC5280 indicates that
-                    long lived Pledge certifiates "SHOULD be assigned the
-                    GeneralizedTime value of 99991231235959Z" <xref target="RFC7030"/> so the
-                    Registrar MUST support such lifetimes and SHOULD support
-                    ignoring Pledge lifetimes if they did not follow the RFC5280
-                    recommendations.</t>
-
-                <t>The Pledge authenticates the voucher presented to it. During
-                    this authentication the Pledge ignores certificate
-                    lifetimes (by necessity because it does not have a clock).
-                    The voucher itself SHOULD contain the nonce
-                    included in the original request which proves the
-                    voucher is fresh.</t>
-
-                <t>Once the voucher is accepted the validity period of the
-                    domainCAcert in the voucher (see <xref
-                        target="VoucherResponse"></xref>) now serves as a valid time
-                    window. Any subsequent certificate validity periods checked
-                    during RFC5280 path validation MUST occur within this
-                    window.</t>
-
-                <t>When accepting an enrollment certificate the validity period
-                    within the new certificate is assumed to be valid by the Pledge.
-                    The Pledge is now willing to use this credential for client
-                    authentication.</t>
-            </list></t>
-        </section>
-
-        <section title="Enrollment">
-            <t>As the final step of bootstrapping a Registrar helps to issue a
-                domain specific credential to the Pledge. For simplicity in this
-                document, a Registrar primarily facilitates issuing a credential by
-                acting as an RFC5280 Registration Authority for the Domain
-                Certification Authority.</t>
-
-            <t>Enrollment proceeds as described in <xref
-                target="RFC7030"></xref>. Authentication of the EST server is done
-            using the Voucher rather than the methods defined in EST.</t>
-
-            <t>[[RESOLVED: moved to protocol discussion]]Once the Voucher is received, as specified in
-                this document, the client has sufficient information to leverage the
-                existing communication channel with a Registrar to continue an EST
-                RFC7030 enrollment. Enrollment picks up at RFC7030 section 4.1.1.
-                bootstrapping where the Voucher provides the "out-of-band" CA
-                certificate fingerprint (in this case the full CA certificate) such
-                that the client can now complete the TLS server authentication. At
-                this point the client continues with EST enrollment operations
-                including "CA Certificates Request", "CSR Attributes" and "Client
-                Certificate Request" or "Server-Side Key Generation".</t>
-
-            <t>[[RESOLVED: included into EST discussion]]For the purposes of creating the ANIMA Autonomic Control Plane,
-                the contents of the new certificate MUST be carefully specified.
-                <xref target="I-D.ietf-anima-autonomic-control-plane" /> section
-                5.1.1 contains details.  The Registrar MUST provide
-                the correct ACP information to populate the subjectAltName /
-                rfc822Name field in the "CSR Attributes" step.
-            </t>
-        </section>
-
-        <section title="Being Managed">
-            <t>[[RESOLVED: by slight change to introduction text.]] Functionality to provide generic "configuration" information is
-                supported. The parsing of this data and any subsequent use of the
-                data, for example communications with a Network Management System is
-                out of scope but is expected to occur after bootstrapping enrollment
-                is complete. This ensures that all communications with management
-                systems which can divulge local security information (e.g. network
-                topology or raw key material) is secured using the local credentials
-                issued during enrollment.</t>
-
-            <t>The Pledge uses bootstrapping to join only one domain. Management
-                by multiple domains is out-of-scope of bootstrapping. After the
-                device has successfully joined a domain and is being managed it is
-                plausible that the domain can insert credentials for other domains
-                depending on the device capabilities.</t>
-
-            <t>See <xref target="PostEnrollment"></xref>.</t>
-        </section>
-    </section>
-
     <section anchor="proxybehaviour" title="Behavior of a Join Proxy">
         <t>The role of the Proxy is to facilitate communications. The Proxy
             forwards packets between the Pledge and a Registrar that has been
@@ -2712,8 +2455,8 @@ Data        +----------------------nonce---->   (discard     |
             can grow concentrically around the Registrar)
         </t>
 
-        <t>As a result of the Proxy Discovery process in section <xref
-            target="ProxyDiscovery"></xref>, the port number exposed by the proxy
+        <t>As a result of the Proxy Discovery process in section [[ProxyDiscovery]],
+        the port number exposed by the proxy
         does not need to be well known, or require an IANA allocation.</t>
 
         <t>If the Proxy joins an Autonomic Control Plane (<xref
@@ -2896,8 +2639,7 @@ Contacted by Pledge
         <section title="Claiming the Pledge">
             <t>Claiming an pledge establishes an audit log at the MASA server
                 and provides a Registrar with proof, in the form of the
-                Voucher, that the log entry has been inserted. As indicated in <xref
-                    target="AcceptDomain"></xref> a Pledge will only proceed with
+                Voucher, that the log entry has been inserted. As indicated in [[AcceptDomain]] a Pledge will only proceed with
                 bootstrapping if a Voucher has been received.
                 The Pledge therefore enforces that bootstrapping only occurs if the
                 claim has been logged. There is no requirement for the vendor to
