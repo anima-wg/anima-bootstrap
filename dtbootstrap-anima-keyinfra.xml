@@ -290,7 +290,7 @@
             Signing Authority (MASA) service on the global Internet. The MASA
             signs vouchers. It also provides a repository for audit log
             information of privacy protected bootstrapping events. It does
-            not track ownership.</t>
+            not track ownership. </t>
 
             <t hangText="Ownership Tracker:">An Ownership Tracker service on
             the global internet. The Ownership Tracker uses business processes
@@ -695,9 +695,38 @@ or|<-RFC4862 IPv6 adr   |                   |                    |
 ]]></artwork>
 
         <postamble>Figure 3</postamble>
-    </figure>
+        </figure>
 
-    </section>
+        <section anchor="pledge-overview" title="Architectural component: Pledge">
+          <t>
+            The Pledge is the device which is attempting to join.
+            Until the pledge completes the enrollment process, it does has
+            network connectivity only to the Proxy.
+          </t>
+        </section>
+        <section anchor="proxy-overview" title="Architectural component: Circuit Proxy">
+          <t>
+            The (Circuit) Proxy provides HTTPS connectivity between the
+            pledge and the registrar. The proxy mechanism is
+            described in <xref target="proxydetails" />, with an optional
+            stateless mechanism described in <xref target="IPIPmechanism" />.
+          </t>
+        </section>
+        <section anchor="registrar-overview" title="Architectural component: Domain Registrar">
+          <t>
+            The Domain Registrar (having the formal name Join Registrar/Coordinator (JRC)), operates as a CMC Registrar, terminating the EST connections.
+            The Registrar communicates with the Vendor supplied MASA to
+            establish ownership.
+          </t>
+        </section>
+        <section anchor="masa-overview" title="Architectural component: Vendor Service">
+          <t>
+            The Vendor Service provides two logically seperate functions:
+            the Manufacturer Authorized Signing Authority (MASA), and an
+            ownership tracking/auditing function.
+          </t>
+        </section>
+      </section>
 
       <section anchor="timeunknown" title="Lack of realtime clock">
           <t>Many devices when bootstrapping do not have knowledge of the
@@ -1628,6 +1657,12 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       </section>
     </section>
 
+    <section anchor="proxydetails" title="Proxy protocol details">
+      <t>
+        This section details how the proxy works.
+      </t>
+    </section>
+
     <section anchor="reducedsecuritymodes"
              title="Reduced security operational modes">
       <t>A common requirement of bootstrapping is to support less secure
@@ -1946,11 +1981,11 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         <t>
           Because the Registrar authenticates the Pledge a full Man-in-the-Middle
           attack is not possible, despite the provisional TLS authentication
-          by the Pledge (see <xref target="ProtocolDetails"></xref>). 
+          by the Pledge (see <xref target="ProtocolDetails"></xref>).
           Instead we examine the case of a fake Registrar (Rm)
           that communicates with the Pledge in parallel or in close time proximity
-          with the intended Registrar. (This scenario is intentionally supported as 
-          described in <xref target="discovery"></xref>). 
+          with the intended Registrar. (This scenario is intentionally supported as
+          described in <xref target="discovery"></xref>).
         </t>
         <t>
           The fake Registrar (Rm) can obtain a voucher signed by the MASA
@@ -1964,25 +1999,25 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
           Such a voucher, when passed back to the Pledge, would link the
           pledge to Registrar Rm, and would permit the Pledge to
           end the provisional state. It now trusts Rm and, if it has any
-          security vulnerabilities leveragable by an Rm with full 
+          security vulnerabilities leveragable by an Rm with full
           administrative control, can be assumed to be a
           threat against the intended Registrar.
         </t>
         <t>
           This flow is mitigated by the intended Registar verifying the audit
-          logs available from the MASA as described in 
+          logs available from the MASA as described in
           <xref target="authzLogRequest" ></xref>. Rm might chose to wait
           until after the intended Registrar completes the authorization
-          process before submitting the now-stale voucher request. The Rm 
-          would need to remove the Pledge's nonce. 
+          process before submitting the now-stale voucher request. The Rm
+          would need to remove the Pledge's nonce.
         </t>
         <t>
           In order to successfully use the resulting "stale voucher" Rm
           would have to attack the Pledge and return it to a bootstrapping
           enabled state. This would require wiping the Pledge of current
-          configuration and triggering a re-bootstrapping of the Pledge. 
+          configuration and triggering a re-bootstrapping of the Pledge.
           This is no more likely than simply taking control of the Pledge
-          directly but if this is a consideration the target network is 
+          directly but if this is a consideration the target network is
           RECOMMENDED to take the following steps:
         </t>
         <t><list style="symbols">
