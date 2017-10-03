@@ -79,6 +79,7 @@ Table of Contents
      1.1.  Other Bootstrapping Approaches  . . . . . . . . . . . . .   5
      1.2.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   6
      1.3.  Scope of solution . . . . . . . . . . . . . . . . . . . .   8
+     1.4.  Leveraging the new key infrastructure / next steps  . . .   9
    2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   9
      2.1.  Behavior of a Pledge  . . . . . . . . . . . . . . . . . .  11
      2.2.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  12
@@ -105,7 +106,6 @@ Table of Contents
      4.5.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  32
      4.6.  MASA authorization log Request  . . . . . . . . . . . . .  33
        4.6.1.  MASA authorization log Response . . . . . . . . . . .  34
-     4.7.  EST Integration for PKI bootstrapping . . . . . . . . . .  35
 
 
 
@@ -114,6 +114,7 @@ Pritikin, et al.          Expires April 6, 2018                 [Page 2]
 Internet-Draft                    BRSKI                     October 2017
 
 
+     4.7.  EST Integration for PKI bootstrapping . . . . . . . . . .  35
        4.7.1.  EST Distribution of CA Certificates . . . . . . . . .  35
        4.7.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  35
        4.7.3.  EST Client Certificate Request  . . . . . . . . . . .  36
@@ -154,14 +155,13 @@ Internet-Draft                    BRSKI                     October 2017
        D.1.1.  Behavior of a Join Proxy  . . . . . . . . . . . . . .  58
        D.1.2.  Behavior of the Registrar . . . . . . . . . . . . . .  58
        D.1.3.  Behavior of the MASA Service  . . . . . . . . . . . .  62
-       D.1.4.  Leveraging the new key infrastructure / next steps  .  63
-       D.1.5.  Interactions with Network Access Control  . . . . . .  63
      D.2.  Domain Operator Activities  . . . . . . . . . . . . . . .  63
-       D.2.1.  Instantiating the Domain Certification Authority  . .  64
-       D.2.2.  Instantiating the Registrar . . . . . . . . . . . . .  64
-       D.2.3.  Accepting New Entities  . . . . . . . . . . . . . . .  64
-       D.2.4.  Automatic Enrollment of Devices . . . . . . . . . . .  65
-       D.2.5.  Secure Network Operations . . . . . . . . . . . . . .  65
+       D.2.1.  Instantiating the Domain Certification Authority  . .  63
+       D.2.2.  Instantiating the Registrar . . . . . . . . . . . . .  63
+       D.2.3.  Accepting New Entities  . . . . . . . . . . . . . . .  63
+       D.2.4.  Automatic Enrollment of Devices . . . . . . . . . . .  64
+       D.2.5.  Secure Network Operations . . . . . . . . . . . . . .  64
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  65
 
 
 
@@ -169,8 +169,6 @@ Pritikin, et al.          Expires April 6, 2018                 [Page 3]
 
 Internet-Draft                    BRSKI                     October 2017
 
-
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  66
 
 1.  Introduction
 
@@ -217,6 +215,8 @@ Internet-Draft                    BRSKI                     October 2017
    BRSKI is agile enough to support bootstrapping alternative key
    infrastructures, such as a symmetric key solutions, but no such
    system is described in this document.
+
+
 
 
 
@@ -474,29 +474,29 @@ Internet-Draft                    BRSKI                     October 2017
    Extensible Authentication Protocol (EAP) method (see [RFC3748]), is
    out-of-scope.
 
+1.4.  Leveraging the new key infrastructure / next steps
+
+   As a result of the protocol described herein, the devices now all a
+   common trust anchor, device identity can be securely established,
+   making it possible to automatically deploy services across the domain
+   in a secure manner.
+
+   Services which benefit from this:
+
+   o  Device management.
+
+   o  Routing authentication.
+
+   o  Service discovery.
+
+   The major beneficiary is that it possible to use the credentials
+   deployed by this protocol to secure the Autonomic Control Plane (ACP)
+   ([I-D.ietf-anima-autonomic-control-plane]).
+
 2.  Architectural Overview
 
    The logical elements of the bootstrapping framework are described in
    this section.  Figure 1 provides a simplified overview of the
-   components.  Each component is logical and may be combined with other
-   components as necessary.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -506,26 +506,30 @@ Pritikin, et al.          Expires April 6, 2018                 [Page 9]
 Internet-Draft                    BRSKI                     October 2017
 
 
-                                             .+------------------------+
-      +--------------Drop Ship-------------->.| Vendor Service         |
-      |                                      .+------------------------+
-      |                                      .| M anufacturer|         |
-      |                                      .| A uthorized  |Ownership|
-      |                                      .| S igning     |Tracker  |
-      |                                      .| A uthority   |         |
-      |                                      .+--------------+---------+
-      |                                      ..............  ^
-      V                                                      |
+   components.  Each component is logical and may be combined with other
+   components as necessary.
+
+                                              +------------------------+
+      +--------------Drop Ship--------------->| Vendor Service         |
+      |                                       +------------------------+
+      |                                       | M anufacturer|         |
+      |                                       | A uthorized  |Ownership|
+      |                                       | S igning     |Tracker  |
+      |                                       | A uthority   |         |
+      |                                       +--------------+---------+
+      |                                                      ^
+      |                                            3.3,3.4   |  BRSKI-
+      V                                            3.6,3.7   |   MASA
    +-------+     ............................................|...
    |       |     .                                           |  .
-   |       |     .  +------------+       +-----------+       |  .
-   |       |     .  |            |       |           |       |  .
-   |Pledge |     .  |   Circuit  |       | Domain    <-------+  .
-   |       |     .  |   Proxy    |       | Registrar |          .
-   |       <-------->            <------->           |          .
-   |       |     .  |            |       |           |          .
-   |X.509  |     .  +------------+       +-----+-----+          .
-   |IDevID |     .                             |                .
+   |       |     .  +------------+ 3.2   +-----------+       |  .
+   |       |     .  |            | 3.4   |           |       |  .
+   |Pledge |     .  |   Circuit  | 3.5   | Domain    <-------+  .
+   |       |     .  |   Proxy    | BRSKI | Registrar |          .
+   |       <-------->............<-------> (PKI RA)  |          .
+   |       |     .  |            | B-EST |           |          .
+   |       |     .  +------------+ 3.8   +-----+-----+          .
+   |IDevID |     .                             | EST RFC7030    .
    |       |     .           +-----------------+----------+     .
    |       |     .           | Key Infrastructure         |     .
    |       |     .           | (e.g. PKI Certificate      |     .
@@ -534,8 +538,6 @@ Internet-Draft                    BRSKI                     October 2017
                  .                                              .
                  ................................................
                                "Domain" components
-
-
 
    Figure 1
 
@@ -552,8 +554,6 @@ Internet-Draft                    BRSKI                     October 2017
    device connectivity sufficient for bootstrapping with a Circuit
    Proxy.  The Domain registrar authenticates the Pledge, makes
    authorization decisions, and distributes vouchers obtained from the
-   Vendor Service.  Optionally the Registrar also acts as a PKI
-   Registration Authority.
 
 
 
@@ -561,6 +561,9 @@ Pritikin, et al.          Expires April 6, 2018                [Page 10]
 
 Internet-Draft                    BRSKI                     October 2017
 
+
+   Vendor Service.  Optionally the Registrar also acts as a PKI
+   Registration Authority.
 
 2.1.  Behavior of a Pledge
 
@@ -608,15 +611,14 @@ Internet-Draft                    BRSKI                     October 2017
 
    State descriptions for the pledge are as follows:
 
-   1.  Discover a communication channel to a Registrar.
-
-
 
 
 Pritikin, et al.          Expires April 6, 2018                [Page 11]
 
 Internet-Draft                    BRSKI                     October 2017
 
+
+   1.  Discover a communication channel to a Registrar.
 
    2.  Identify itself.  This is done by presenting an X.509 IDevID
        credential to the discovered Registrar (via the Proxy) in a TLS
@@ -664,8 +666,6 @@ Internet-Draft                    BRSKI                     October 2017
 
    Vouchers provide a signed but non-encrypted communication channel
    between the Pledge, the MASA, and the Registrar.  The Registrar
-   maintains control over the transport and policy decisions allowing
-   the local security policy of the domain network to be enforced.
 
 
 
@@ -673,6 +673,9 @@ Pritikin, et al.          Expires April 6, 2018                [Page 12]
 
 Internet-Draft                    BRSKI                     October 2017
 
+
+   maintains control over the transport and policy decisions allowing
+   the local security policy of the domain network to be enforced.
 
 2.3.  Initial Device Identifier
 
@@ -718,9 +721,6 @@ Internet-Draft                    BRSKI                     October 2017
    information.  The BRSKI .well-known tree is described in Section 4
 
    The new extension is identified as follows:
-
-
-
 
 
 
@@ -3474,61 +3474,10 @@ Pritikin, et al.          Expires April 6, 2018                [Page 62]
 Internet-Draft                    BRSKI                     October 2017
 
 
-D.1.4.  Leveraging the new key infrastructure / next steps
-
-   As the devices have a common trust anchor, device identity can be
-   securely established, making it possible to automatically deploy
-   services across the domain in a secure manner.
-
-   Examples of services:
-
-   o  Device management.
-
-   o  Routing authentication.
-
-   o  Service discovery.
-
-D.1.4.1.  Network boundaries
-
-   When a device has joined the domain, it can validate the domain
-   membership of other devices.  This makes it possible to create trust
-   boundaries where domain members have higher level of trusted than
-   external devices.  Using the autonomic User Interface, specific
-   devices can be grouped into to sub domains and specific trust levels
-   can be implemented between those.
-
-D.1.5.  Interactions with Network Access Control
-
-   [[RESOLVED: via paragraph in 'scope of solution' discussion.]]
-
-   The assumption is that Network Access Control (NAC) completes using
-   the Pledge 's X.509 IDevID credentials and results in the device
-   having sufficient connectivity to discovery and communicate with the
-   proxy.  Any additional connectivity or quarantine behavior by the NAC
-   infrastructure is out-of-scope.  After the devices has completed
-   bootstrapping the mechanism to trigger NAC to re-authenticate the
-   device and provide updated network privileges is also out-of-scope.
-
-   This achieves the goal of a bootstrap architecture that can integrate
-   with NAC but does not require NAC within the network where it wasn't
-   previously required.  Future optimizations can be achieved by
-   integrating the bootstrapping protocol directly into an initial EAP
-   exchange.
-
 D.2.  Domain Operator Activities
 
    This section describes how an operator interacts with a domain that
    supports the bootstrapping as described in this document.
-
-
-
-
-
-
-Pritikin, et al.          Expires April 6, 2018                [Page 63]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
 D.2.1.  Instantiating the Domain Certification Authority
 
@@ -3573,19 +3522,18 @@ D.2.3.  Accepting New Entities
 
    3.  Whitelist acceptance: In larger networks, neither of the previous
        approaches is acceptable.  Default acceptance is not secure, and
-       a manual per device methods do not scale.  Here, the registrar is
-       provided a priori with a list of identifiers of devices that
-       belong to the network.  This list can be extracted from an
-       inventory database, or sales records.  If a device is detected
 
 
 
-
-Pritikin, et al.          Expires April 6, 2018                [Page 64]
+Pritikin, et al.          Expires April 6, 2018                [Page 63]
 
 Internet-Draft                    BRSKI                     October 2017
 
 
+       a manual per device methods do not scale.  Here, the registrar is
+       provided a priori with a list of identifiers of devices that
+       belong to the network.  This list can be extracted from an
+       inventory database, or sales records.  If a device is detected
        that is not on the list of known devices, it can still be
        manually accepted using the per device acceptance methods.
 
@@ -3623,9 +3571,9 @@ D.2.5.  Secure Network Operations
    subsequent operations.  For example, to determine the boundaries of
    the domain: If a neighbor has a certificate from the same trust
    anchor it can be assumed "inside" the same organization; if not, as
-   outside.  See also Appendix D.1.4.1.  The certificate can also be
-   used to securely establish a connection between devices and central
-   control functions.  Also autonomic transactions can use the domain
+   outside.  See also [[boundary]].  The certificate can also be used to
+   securely establish a connection between devices and central control
+   functions.  Also autonomic transactions can use the domain
    certificates to authenticate and/or encrypt direct interactions
    between devices.  The usage of the domain certificates is outside
    scope for this document.
@@ -3633,11 +3581,7 @@ D.2.5.  Secure Network Operations
 
 
 
-
-
-
-
-Pritikin, et al.          Expires April 6, 2018                [Page 65]
+Pritikin, et al.          Expires April 6, 2018                [Page 64]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -3693,4 +3637,4 @@ Authors' Addresses
 
 
 
-Pritikin, et al.          Expires April 6, 2018                [Page 66]
+Pritikin, et al.          Expires April 6, 2018                [Page 65]
