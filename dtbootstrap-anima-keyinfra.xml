@@ -1597,82 +1597,81 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
     </section>
 
     <section anchor="proxydetails" title="Proxy protocol details">
+      <t>The role of the Proxy is to facilitate communications. The Proxy
+      forwards packets between the Pledge and a Registrar that has been
+      configured on the Proxy.
+      </t>
+
       <t>
-        <t>The role of the Proxy is to facilitate communications. The Proxy
-            forwards packets between the Pledge and a Registrar that has been
-            configured on the Proxy.
-        </t>
+        The Proxy does not terminate the TLS handshake: it passes streams
+        of bytes onward without examination.
+      </t>
+      <t>
+        A proxy MAY assume TLS framing for auditing purposes,
+        but MUST NOT assume any TLS version.
+      </t>
 
-        <t>
-          The Proxy does not terminate the TLS handshake: it passes streams
-          of bytes onward without examination.
-        </t>
-        <t>
-          A proxy MAY assume TLS framing for auditing purposes,
-          but MUST NOT assume any TLS version.
-        </t>
+      <t>
+        A Proxy is always assumed even if it is directly integrated
+        into a Registrar.
+        (In a completely autonomic network, the Registrar MUST provide
+        proxy functionality so that it can be discovered, and the network
+        can grow concentrically around the Registrar)
+      </t>
 
-        <t>
-          A Proxy is always assumed even if it is directly integrated
-          into a Registrar.
-          (In a completely autonomic network, the Registrar MUST provide
-          proxy functionality so that it can be discovered, and the network
-          can grow concentrically around the Registrar)
-        </t>
-
-        <t>
-          As a result of the Proxy Discovery process in section <xref target="brskigrasp" />,
-          the port number exposed by the proxy
+      <t>
+        As a result of the Proxy Discovery process in section <xref target="brskigrasp" />,
+        the port number exposed by the proxy
         does not need to be well known, or require an IANA allocation.
+      </t>
+
+      <t>
+        If the Proxy joins an Autonomic Control Plane (<xref
+        target="I-D.ietf-anima-autonomic-control-plane"></xref>) it
+        SHOULD use Autonomic Control Plane secured GRASP (<xref
+        target="I-D.ietf-anima-grasp"></xref>) to discovery the Registrar
+        address and port.  As part of the discovery process, the proxy mechanism
+        (Circuit Proxy vs IPIP encapsulation) is agreed to between the
+        Registrar and Join Proxy.
+      </t>
+
+      <t>
+        For the IPIP encapsulation methods (described in <xref target="IPIPmechanism" />), the port
+        announced by the Proxy SHOULD be the same as on the registrar in order
+        for the proxy to remain stateless.
+      </t>
+
+      <t>
+        In order to permit the proxy functionality to be implemented on the
+        maximum variety of devices the chosen mechanism SHOULD use the minimum
+        amount of state on the proxy device. While many devices in the ANIMA
+        target space will be rather large routers, the proxy function is
+        likely to be implemented in the control plane CPU of such a device,
+        with available capabilities for the proxy function similar to many
+        class 2 IoT devices.
+      </t>
+
+      <t>
+        The document <xref
+        target="I-D.richardson-anima-state-for-joinrouter"></xref> provides a
+        more extensive analysis and background of the alternative proxy methods.
+      </t>
+
+      <section anchor="coapconnection" title="CoAP connection to Registrar">
+        <t>The use of CoAP to connect from Pledge to Registrar is out of scope for this document, and may be described in future work.
+        </t>
+      </section>
+
+      <section title="HTTPS proxy connection to Registrar">
+        <t>The proxy SHOULD also provide one of: an IPIP encapsulation of
+        HTTP traffic to the registrar, or a TCP circuit
+        proxy that connects the Pledge to a Registrar.
         </t>
 
-        <t>
-          If the Proxy joins an Autonomic Control Plane (<xref
-            target="I-D.ietf-anima-autonomic-control-plane"></xref>) it
-          SHOULD use Autonomic Control Plane secured GRASP (<xref
-            target="I-D.ietf-anima-grasp"></xref>) to discovery the Registrar
-          address and port.  As part of the discovery process, the proxy mechanism
-          (Circuit Proxy vs IPIP encapsulation) is agreed to between the
-          Registrar and Join Proxy.
+        <t>When the Proxy provides a circuit proxy to a Registrar the
+        Registrar MUST accept HTTPS connections.
         </t>
-
-        <t>
-            For the IPIP encapsulation methods (described in <xref target="IPIPmechanism" />, the port
-            announced by the Proxy MUST be the same as on the registrar in order
-            for the proxy to remain stateless.
-        </t>
-
-        <t>
-          In order to permit the proxy functionality to be implemented on the
-          maximum variety of devices the chosen mechanism SHOULD use the minimum
-          amount of state on the proxy device. While many devices in the ANIMA
-          target space will be rather large routers, the proxy function is
-          likely to be implemented in the control plane CPU of such a device,
-          with available capabilities for the proxy function similar to many
-          class 2 IoT devices.
-        </t>
-
-        <t>
-          The document <xref
-            target="I-D.richardson-anima-state-for-joinrouter"></xref> provides a
-          more extensive analysis of the alternative proxy methods.
-        </t>
-
-        <section anchor="coapconnection" title="CoAP connection to Registrar">
-          <t>The use of CoAP to connect from Pledge to Registrar is out of scope for this document, and may be described in future work.
-          </t>
-        </section>
-
-        <section title="HTTPS proxy connection to Registrar">
-            <t>The proxy SHOULD also provide one of: an IPIP encapsulation of
-                HTTP traffic to the registrar, or a TCP circuit
-                proxy that connects the Pledge to a Registrar.
-            </t>
-
-            <t>When the Proxy provides a circuit proxy to a Registrar the
-                Registrar MUST accept HTTPS connections.
-            </t>
-        </section>
+      </section>
 
       <section title="Registrar Discovery Protocol Details">
         <t> A Registrar is typically configured manually.  Once configured
