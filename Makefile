@@ -16,7 +16,7 @@ ietf-voucher-request-tree.txt: ${VRDATE}
 ${VRDATE}: ietf-voucher-request.yang
 	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ${VRDATE}
 
-ALL-${DRAFT}.xml: ${DRAFT}.xml ietf-voucher-request-tree.txt ietf-voucher-request@${YANGDATE}.yang
+ALL-${DRAFT}.xml: ${DRAFT}.xml ietf-voucher-request-tree.txt ietf-voucher-request@${YANGDATE}.yang time-sequence-diagram.txt component-diagram.txt
 	cat ${DRAFT}.xml | ./insert-figures > ALL-${DRAFT}.xml
 
 %.txt: ALL-%.xml
