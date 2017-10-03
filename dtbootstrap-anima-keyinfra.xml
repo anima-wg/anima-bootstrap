@@ -940,7 +940,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
           authorization checks before accepting optional Pledge device enrollment requests.</t>
         </list></t>
 
-        <section title="Discovery">
+        <section anchor="discovery" title="Discovery">
             <t>The result of discovery is a logical communication with a
                 Registrar, through a Proxy. The Proxy is transparent to the Pledge
                 but is always assumed to exist.</t>
@@ -1016,7 +1016,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                  </figure>
              </t>
          </section>
-         <section anchor="discovery" title="Registrar Discovery Protocol Details">
+         <section title="Registrar Discovery Protocol Details">
              <t> A Registrar is typically configured manually.
                  When the Registrar joins an Autonomic Control Plane
                  (<xref target="I-D.ietf-anima-autonomic-control-plane"></xref>)
@@ -1389,10 +1389,10 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         </t>
       </section>
 
-      <section title="MASA authorization log Request ">
+      <section anchor="authzLogRequest" title="MASA authorization log Request ">
          <t>
            After receiving the voucher status telemetry <xref target="voucherstatus" />,
-           the registrar requests the MASA authorization log from the MASA
+           the Registrar SHOULD request the MASA authorization log from the MASA
            service using this EST extension. If a device had previously registered
            with another domain, a Registrar of that domain would show in the
            log.
@@ -1935,55 +1935,61 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         <t>
           There are a number of operational problems with getting a nonce
           from the MASA to the pledge. It is somewhat easier to collect a
-          random value from the Registrar, but as the Registrar is not yet at
-          this point validated, such a Registrar nonce has little value.
-          There are privacy and logistical challenges to the process, so if
+          random value from the Registrar, but as the Registrar is not yet
+          vouched for, such a Registrar nonce has little value.
+          There are privacy and logistical challenges to addressing these
+          operational issues, so if
           such a thing were to be considered, it would have to provide some
           clear value.  This section examines the impacts of not having a
           fresh voucher request from the pledge.
         </t>
         <t>
-          Consider the case where a MITM is between the Pledge and the
-          legitimate Registrar.   This fake Registrar will obtain from the
-          Pledge a signed voucher request.  The pledge will have accepted the
-          fake Registrar as legitimate up to this point as the EST connection
-          will still be at the provisional state.
+          Because the Registrar authenticates the Pledge a full Man-in-the-Middle
+          attack is not possible, despite the provisional TLS authentication
+          by the Pledge (see <xref target="ProtocolDetails"></xref>). 
+          Instead we examine the case of a fake Registrar (Rm)
+          that communicates with the Pledge in parallel or in close time proximity
+          with the intended Registrar. (This scenario is intentionally supported as 
+          described in <xref target="discovery"></xref>). 
         </t>
         <t>
-          The fake Registrar (Rm) can communicate the signed voucher request to a
-          collaborator, perhaps located in another network, and communicate
-          with a some Registrar (Rm) to obtain a voucher signed by the MASA.
+          The fake Registrar (Rm) can obtain a voucher signed by the MASA
+          either directly or through arbitrary intermediaries.
           Assuming that the MASA accepts the voucher request (either because
-          this is the legitimate Registrar according to supply chain
+          Rm is collaborating with a legitimate Registrar according to supply chain
           information, or because the MASA is in audit-log only mode), then
-          a voucher linking the pledge to the Registrar Rm.
+          a voucher linking the pledge to the Registrar Rm is issued.
         </t>
         <t>
           Such a voucher, when passed back to the Pledge, would link the
-          pledge to Registrar Rm, and would permit the Pledge to attempt to
-          end the provisional state.  The pledge will then attempt to
-          validate the pinned-domain-certificate linked to in the voucher.
-          That certificate will point at Registrar Rm. But the pledge will
-          have a provisional TLS/EST connection to the MITM Registrar Ra.
-          The pledge will fail the process, close the provisional connection
-          unsuccessfully, and restart.
+          pledge to Registrar Rm, and would permit the Pledge to
+          end the provisional state. It now trusts Rm and, if it has any
+          security vulnerabilities leveragable by an Rm with full 
+          administrative control, can be assumed to be a
+          threat against the intended Registrar.
         </t>
         <t>
-          The conclusion is that lack of MASA provided freshness does cause
-          a pledge to join the wrong network.
+          This flow is mitigated by the intended Registar verifying the audit
+          logs available from the MASA as described in 
+          <xref target="authzLogRequest" ></xref>. Rm might chose to wait
+          until after the intended Registrar completes the authorization
+          process before submitting the now-stale voucher request. The Rm 
+          would need to remove the Pledge's nonce. 
         </t>
         <t>
-          There is an additional concern when the MASA is in audit-log only
-          mode.  When the unfortunate pledge above does connect to directly
-          to a legitimate Registrar, that Registrar will discover that a
-          voucher was previously issued.  If the legimate Registrar is
-          actually Rm, then all is well. Otherwise, there is a fault as the
-          Registrar has to consider whether or not to accept a previously
-          owned device.  This may involve consulting a human.  If a large
-          number of devices are attacked in such a way, a human might just
-          accept all the devices in a batch mode, permitting an actually
-          compromise device through.
+          In order to successfully use the resulting "stale voucher" Rm
+          would have to attack the Pledge and return it to a bootstrapping
+          enabled state. This would require wiping the Pledge of current
+          configuration and triggering a re-bootstrapping of the Pledge. 
+          This is no more likely than simply taking control of the Pledge
+          directly but if this is a consideration the target network is 
+          RECOMMENDED to take the following steps:
         </t>
+        <t><list style="symbols">
+          <t>Ongoing network monitoring for unexpected bootstrapping attempts by Pledges.</t>
+          <t>Retreival and examination of MASA log information upon the occurance
+              of any such unexpected events. Rm will be listed in the logs.</t>
+        </list></t>
       </section>
     </section>
 
