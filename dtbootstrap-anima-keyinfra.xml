@@ -649,7 +649,7 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
         </section>
         <section anchor="registrar-overview" title="Architectural component: Domain Registrar">
           <t>
-            The Domain Registrar (having the formal name Join Registrar/Coordinator (JRC)), operates as a CMC Registrar, terminating the EST connections.
+            The Domain Registrar (having the formal name Join Registrar/Coordinator (JRC)), operates as a CMC Registrar, terminating the EST and BRSKI connections. The Registrar is manually configured or distributed with a list of trust anchors necessary to authenticate any Pledge device expected on the network.
             The Registrar communicates with the Vendor supplied MASA to
             establish ownership.
           </t>
@@ -721,28 +721,14 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
               <xref target="RFC7030"/> which also depends on RFC6125.</t>
       </section>
       <section title="Determining the MASA to contact">
-          <t>The registrar needs to be able to contact a MASA that is trusted by the Pledge in order to obtain vouchers. There are a few mechanisms available:</t>
-          <t><list style="symbols">
-              <t>The device's Initial Device Identifier will normally contain the MASA URL as detailed in <xref target="IDevIDextension"></xref>. This is the RECOMMENDED
-                  mechanism.</t>              
-              <t>The Registrar is configured with a trust anchor database for the purposes of authenticating the Initial Device Identifiers. If there is a unique
-                  relationship between the IDevID issuer and the MASA service then
-                  an appropriate default URL can be configured along with each 
-                  trust anchor.</t>
-              <t>If the Registrar is integrated with <xref target="I-D.ietf-opsawg-mud"></xref> then the MUD file is a reasonable location to include pointers to the MASA server. This integration allows vendors
-                  who have chosen to include the <xref target="I-D.ietf-opsawg-mud"></xref> 
-                  defined id-pe-mud-url in their IDevID certificate to avoid also
-                  including the masa-url.</t>
-          </list></t>
-          <t>The following extension extension augments the MUD model to include a single node, as described in <xref target="I-D.ietf-opsawg-mud"></xref> section 3.6, 
-              using the following sample module that has the following tree structure:</t>
-<figure>
-INSERT_TEXT_FROM_FILE ietf-mud-extension-tree.txt END
-</figure>
-          <t>The model is defined as follows:</t>
-<figure>
-INSERT_TEXT_FROM_FILE ietf-mud-extension-yang.txt END
-</figure>
+          <t>The registrar needs to be able to contact a MASA that is trusted by the Pledge in order to obtain vouchers. There are three mechanisms described:</t>
+
+        <t>The device's Initial Device Identifier will normally contain the MASA URL as detailed in <xref target="IDevIDextension"></xref>. This is the RECOMMENDED
+            mechanism.</t>              
+        <t>If the Registrar is integrated with <xref target="I-D.ietf-opsawg-mud"></xref> and the Pledge IDevID contains the id-pe-mud-url then the Registrar MAY attempt to obtain the MASA URL from the MUD file. The MUD file extension
+            for the MASA URL is defined in <xref target="mud-extension"></xref>.</t>
+        <t>It can be operationally difficult to ensure the necessary X.509 extensions are in the Pledge's' IDevID due to the difficulty of aligning current Pledge manufacturing with software releases and development. As a final fallback the Registrar MAY be manually configured or distributed with a MASA URL for each vendor. Note that the Registrar can only select the configured MASA URL based on the trust anchor -- so vendors can only leverage this approach if they ensure a single MASA URL works for all Pledge's associated with each trust anchor.</t>
+
       </section>
     </section>
 
@@ -2403,6 +2389,17 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
           the same challenges.
         </t>
       </section>
+    </section>
+    <section anchor="mud-extension" title="MUD Extension">
+        <t>The following extension augments the MUD model to include a single node, as described in <xref target="I-D.ietf-opsawg-mud"></xref> section 3.6, 
+            using the following sample module that has the following tree structure:</t>
+        <figure>
+            INSERT_TEXT_FROM_FILE ietf-mud-extension-tree.txt END
+        </figure>
+        <t>The model is defined as follows:</t>
+        <figure>
+            INSERT_TEXT_FROM_FILE ietf-mud-extension-yang.txt END
+        </figure>
     </section>
   </back>
 </rfc>
