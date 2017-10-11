@@ -720,7 +720,7 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
               consistent with the human user configuration of an EST server URI in
               <xref target="RFC7030"/> which also depends on RFC6125.</t>
       </section>
-      <section title="Determining the MASA to contact">
+      <section title="Determining the MASA to contact" anchor="obtainmasaurl">
           <t>The registrar needs to be able to contact a MASA that is trusted by the Pledge in order to obtain vouchers. There are three mechanisms described:</t>
 
         <t>The device's Initial Device Identifier will normally contain the MASA URL as detailed in <xref target="IDevIDextension"></xref>. This is the RECOMMENDED
@@ -1042,33 +1042,24 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         reduce the number of TLS connections and crypto operations required on
         the Pledge. The Registrar implements the BRSKI REST interface within
         the same .well-known URI tree as the existing EST URIs as described in
-        EST <xref target="RFC7030"/> section 3.2.2. A MASA URI is therefore
-        "https:// authority "./well-known/est".</t>
+        EST <xref target="RFC7030"/> section 3.2.2. The communication channel between the Pledge and the Registrar is referred to as "BRSKI-EST" (see Figure 1).</t>
+        
+        <t>The communication channel between the Registrar and MASA is similarly described as extensions to EST within the same ./well-known tree. For clarity this channel is referred to as "BRSKI-MASA". (See Figure 1).</t>
+            
+        <t>MASA URI is "https:// authority "./well-known/est".</t>
 
         <t>BRSKI uses EST message formats for existing operations, uses JSON
         <xref target="RFC7159" /> for all new operations defined here, and
         voucher formats.
         </t>
 
-        <t>Establishment of the TLS connection for bootstrapping is as
-            specified in EST <xref target="RFC7030"/> section 4.1.1 "Bootstrap
-            Distribution of CA Certificates" <xref target="RFC7030"/> wherein
-            the client is authenticated with the IDevID certificate, and the
-            EST server (the registrar) is authenticated with a provisional
-            server certificate.
-            While EST section 3.2 does not insist
-            upon use of HTTP 1.1 persistent connections,
-            BRSKI connections SHOULD use persistent connections.
-            This is due to the provisional state that occurs in the
-            TLS connection.
-            The following extensions are added for automation:
-        </t>
+        <t>While EST section 3.2 does not insist upon use of HTTP 1.1 persistent connections, BRSKI-EST connections SHOULD use persistent connections. The intention of this guidance is to ensure the provisional TLS authentication occurs only once and is properly managed.</t>
 
-        <t>Automation extensions for the Pledge (equivalent to EST client) are:</t>
+        <t>Summarized automation extensions for the BRSKI-EST flow are:</t>
 
         <t><list style="symbols">
             <t>The Pledge provisionally accepts the Registrar certificate during
-            the TLS handshake as detailed in EST.</t>
+            the TLS handshake as detailed in <xref target="brskiesttls"></xref>.</t>
 
             <t>If the Registrar responds with a redirection to other web origins the Pledge MUST follow
             only a single redirection. (EST supports redirection but does
@@ -1110,28 +1101,15 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             element from the voucher should validate this certificate, or be
             identical to it.</t>
 
-            <t>The Pledge completes authentication of the server certificate as detailed in <xref
-            target="CompletingAuthenticationBootstrapping"></xref>. This moves the TLS
-            connection out of the provisional state. Optionally the TLS connection can
-            now be used for EST enrollment.</t>
+            <t>The Pledge completes authentication of the server certificate as detailed in <xref target="CompletingAuthenticationBootstrapping"></xref>. This moves the BRSKI-EST TLS connection out of the provisional state. Optionally, the BRSKI-EST TLS connection can now be used for EST enrollment.</t>
 
         </list></t>
-
-        <t>
-          The Pledge establishes the TLS connection with the Registrar through
-          the circuit proxy (see <xref target="proxydetails"></xref>)
-          but the TLS connection is with the Registar; so in the above
-          section the "Pledge" is the TLS client and the "Registrar" is
-          the TLS server. All security associations established are
-          between the new device and the Registrar regardless of proxy
-          operations.
-        </t>
 
       <t>The extensions for a Registrar (equivalent to EST server) are:</t>
 
       <t><list style="symbols">
           <t>Client authentication is automated using Initial Device Identity
-          (IDevID).
+          (IDevID) as per the EST certificate based client authentication.
               The subject field's DN encoding MUST include the "serialNumber"
               attribute with the device's unique serial number. In the language of
               RFC6125 this provides for a SERIALNUM-ID category of identifier that
@@ -1150,7 +1128,22 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
           authorization checks before accepting optional Pledge device enrollment requests.</t>
         </list></t>
 
-
+        <section anchor="brskiesttls" title="BRSKI-EST TLS establishment details">
+            <t>The Pledge establishes the TLS connection with the Registrar through
+                the circuit proxy (see <xref target="proxydetails"></xref>)
+                but the TLS handshake is with the Registar. The BRSKI-EST Pledge 
+                is the TLS client and the BRSKI-EST Registrar is the TLS server. 
+                All security associations established are
+                between the Pledge and the Registrar regardless of proxy
+                operations.</t>
+            <t>Establishment of the BRSKI-EST TLS connection is as
+                specified in EST <xref target="RFC7030"/> section 4.1.1 "Bootstrap
+                Distribution of CA Certificates" <xref target="RFC7030"/> wherein
+                the client is authenticated with the IDevID certificate, and the
+                EST server (the Registrar) is provisionally authenticated with a unverified
+                server certificate.</t>
+            <t>The Pledge maintains a security paranoia concerning the provisional state, and all data recieved, until a voucher is received and verified as specified in <xref target="CompletingAuthenticationBootstrapping"></xref>
+        </section>
         <section anchor="RequestVoucherFromRegistrar"
                title="Pledge Requests Voucher from the Registrar">
         <t>When the Pledge bootstraps it makes a request for a Voucher from a
@@ -1200,7 +1193,9 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         as described in <xref target="VoucherResponse"/>.</t>
 
       </section>
-
+    <section anchor="brskimasatls" title="BRSKI-MASA TLS establishment details">
+        <t>The BRSKI-MASA TLS connection is a 'normal' bidirection TLS connection appropriate for HTTPS REST interfaces. The Registrar initiates the connection and uses the MASA URL obtained as described in <xref target="obtainmasaurl"></xref> for RFC6125 authentication.</t>
+    </section>
       <section anchor="RequestVoucherFromMASA" title="Registrar Requests Voucher from MASA">
         <t>When a Registrar receives a voucher request from a Pledge it in turn requests
             a voucher from the MASA service. For simplicity this is defined as an optional EST message
