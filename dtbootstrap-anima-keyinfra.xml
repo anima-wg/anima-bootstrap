@@ -214,16 +214,7 @@
         <t>The following terms are defined for clarity:</t>
 
         <t><list style="hanging">
-            <t hangText="DomainID:">The domain identity is the 160-bit SHA-1
-            hash of the BIT STRING of the subjectPublicKey of the domain trust
-            anchor that is stored by the Domain CA. This is consistent with
-            the Certification Authority subject key identifier (<xref
-            target="RFC5280">Section 4.2.1.2</xref>) of the Domain CA's self
-            signed root certificate. (A string value bound to the Domain CA's
-            self signed root certificate subject and issuer fields is often
-            colloquially used as a humanized identity value but during
-            protocol discussions the more exact term as defined here is
-            used).</t>
+            <t hangText="registrarID:">The registrar identity is the 160-bit SHA-1 hash of the BIT STRING of the subjectPublicKey of the registrar certificate. This is consistent with the subject key identifier (<xref target="RFC5280">Section 4.2.1.2</xref>).</t>
 
             <t hangText="drop ship:">The physical distribution of equipment
             containing the "factory default" configuration to a final
@@ -1296,10 +1287,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                 This only occurs if the Registrar voucher-request is nonceless. As noted above the details concerning necessary sales-channel integration for the MASA to authenticate a Registrar certificate is out-of-scope.</t>
         </list></t>
 
-        <t>The Registrar certificate chain root certificate is extracted from the signature
-        method and used to populate the "pinned-domain-cert" of the Voucher being issued. The
-        domain ID (e.g. hash of the public key of the domain) is extracted from the root certificate
-        and is used to update the audit log.</t>
+        <t>The Registrar's certificate chain is extracted from the signature method and the root certificate is used to populate the "pinned-domain-cert" of the Voucher being issued. The registrarID (e.g. hash of the public key) is determined from the registrar certificate itself and is used to update the audit log.</t>
       </section>
 
       <section anchor="VoucherResponse" title="Voucher Response">
@@ -1491,14 +1479,12 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
   "events":[
     {
      "date":"<date/time of the entry>",
-     "domainID":"<domainID as extracted from the domain CA certificate
-                  within the CMS of the audit voucher-request>",
+     "registrarID":"<registrarID as extracted from the Registrar certificate during voucher-request validation>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     },
     {
      "date":"<date/time of the entry>",
-     "domainID":"<domainID as extracted from the domain CA certificate
-                  within the CMS of the audit voucher-request>",
+     "registrarID":"<registrarID as extracted from the Registrar certificate during voucher-request validation>"
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     }
   ]
@@ -1506,22 +1492,22 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
           </figure></t>
 
           <t>Distribution of a large log is less than ideal. This structure can
-          be optimized as follows: All nonceless entries for the same domainID
+          be optimized as follows: All nonceless entries for the same registrarID
           MAY be condensed into the single most recent nonceless entry.</t>
 
           <t>A Registrar SHOULD use this log information to make an informed decision
           regarding the continued bootstrapping of the Pledge. For example if
-          the log includes unexpected domainIDs this is indicative of
+          the log includes unexpected registrarIDs this is indicative of
           problematic imprints by the Pledge. If the log includes nonceless
-          entries this is indicative of the permanent ability for the indicated
-          domain to trigger a reset of the device and take over management of
-          it. Equipment that is purchased pre-owned can be expected to have an
+          entries this is indicative of the permanent ability for any registrar 
+          in the same domain to trigger a reset of the device and take over management of
+          the Pledge. Equipment that is purchased pre-owned can be expected to have an
           extensive history. A Registrar MAY request logs at future times.
           A Registrar MAY be configured to ignore the
           history of the device but it is RECOMMENDED that this only be
           configured if hardware assisted NEA [RFC5209] is supported.</t>
 
-          <t>Log entries containing the Domain's ID can be compared against
+          <t>Log entries can be compared against
           local history logs in search of discrepancies.</t>
 
           <t>This document specifies a simple log format as provided by the
@@ -1952,6 +1938,8 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       benefits of an informed administrator in cases where the failure is
       indicative of a problem. The Registrar is RECOMMENDED to verify MASA logs
       if voucher status telemetry is not received.</t>
+
+      <t>The MASA authorization log includes a hash of the registrarID for each registrar a voucher has been issued to. This information is closely related to the actual domain identity, especially when paired with the DoS authentication information the MASA might collect. This provides an oportunity for the MASA service to build a detailed understanding of the vendor's devices that have been provisioned within a domain. The domain itself has not been authenticated and is not authoritatively bound to the supply chain which does provide a level of privacy for the domain. Additionally the registrarID captures only the subject key identifier of the registrar. A privacy sensitive domain could theoretically generate a new registrar key, or even domain, for each device being deployed.</t> 
 
       <t>To facilitate truely limited clients EST RFC7030 section 3.3.2
       requirements that the client MUST support a client authentication model
