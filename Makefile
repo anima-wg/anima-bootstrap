@@ -6,7 +6,7 @@ VRDATE=ietf-voucher-request@${YANGDATE}.yang
 
 ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt ${DRAFT}.html
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
-	git add ${DRAFT}-${VERSION}.txt ${DRAFT}.txt
+	: git add ${DRAFT}-${VERSION}.txt ${DRAFT}.txt
 	cp ${DRAFT}.html ${DRAFT}-${VERSION}.html
 	@echo Consider a \'git add\' of html version
 
