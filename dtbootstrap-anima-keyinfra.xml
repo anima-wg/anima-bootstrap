@@ -968,59 +968,84 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         <t> The Registrar SHOULD announce itself so that proxies can find it
         and determine what kind of connections can be terminated.
         </t>
-             <t>
-                 The registrar responds to discovery messages from the proxy
-                 (or GRASP caches between them) as follows:
-                 <figure>
-                     <artwork><![CDATA[
- objective         = ["AN_registrar", F_DISC, 255 ]
- discovery-message = [M_NEG_SYN, session-id, initiator, objective]]]></artwork>
+        <t>
+          The registrar announces itself using GRASP M_FLOOD messages.
+          The M_FLOOD is formatted as follows:
+          <figure>
+            <artwork><![CDATA[
+[M_FLOOD, 12340815, h'fda379a6f6ee0000200000064000001', 180000,
+            ["AN_join_registrar", 4, 255, "EST-TLS"],
+            [O_IPv6_LOCATOR,
+                 h'fda379a6f6ee0000200000064000001', TCP, 80
+                 ]]></artwork>
+        <postamble>Figure 6: Registrar Discovery</postamble>
+        </figure>
+        </t>
+        <t>
+          The formal CDDL definition is:
+          <figure>
+            <artwork><![CDATA[
+flood-message = [M_FLOOD, session-id, initiator, ttl,
+                 +[objective, (locator-option / [])]]
 
-                     <postamble>Figure 6: Registrar Discovery</postamble>
-                 </figure>
+objective = ["AN_join_registrar", objective-flags, loop-count,
+                                       objective-value]
+
+initiator = ACP address to contact Registrar
+objective-flags = sync-only  ; as in GRASP spec
+sync-only =  4               ; M_FLOOD only requires synchronization
+loop-count      = 255        ; mandatory maximum
+objective-value = text       ; name of the (list of) of supported
+                             ; protocols: "EST-TLS" for RFC7030.
+                 ]]></artwork>
+        <postamble>Figure 7: AN_join_registrar CDDL</postamble>
+          </figure>
+        </t>
+
+             <t>
+   The M_FLOOD message MUST be sent periodically.  The period is subject
+   to network administrator policy (EST server configuration).  It must
+   be so low that the aggregate amount of periodic M_FLOODs from all EST
+   servers causes negligible traffic across the ACP.
              </t>
-
              <t>
-                 The response from the registrar (or cache) will be a M_RESPONSE with the
-                 following parameters:<figure>
-                     <artwork><![CDATA[
- response-message = [M_RESPONSE, session-id, initiator, ttl,
- (+locator-option // divert-option), ?objective)]
- initiator = ACP address of Registrar
- locator1  = [O_IPv6_LOCATOR, fd45:1345::6789, 6,  443]
- locator2  = [O_IPv6_LOCATOR, fd45:1345::6789, 17, 5683]
- locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
+               The locators are to be interpreted as follows:
+               <figure>
+                 <artwork><![CDATA[
+locator1  = [O_IPv6_LOCATOR, fd45:1345::6789, 6,  443]
+locator2  = [O_IPv6_LOCATOR, fd45:1345::6789, 17, 5683]
+locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
                      <postamble>Figure 7: Registrar Response</postamble>
                  </figure>
              </t>
              <t>
-                 The set of locators is to be interpreted as follows.
-                 A protocol of 6 indicates that TCP proxying on the
-                 indicated port is desired.  A protocol of 17 indicates that UDP
-                 proxying on the indicated port is desired.  In each case, the traffic
-                 SHOULD be proxied to the same port at the ULA address provided.
+               The set of locators is to be interpreted as follows.
+               A protocol of 6 indicates that TCP proxying on the
+               indicated port is desired.  A protocol of 17 indicates that UDP
+               proxying on the indicated port is desired.  In each case, the traffic
+               SHOULD be proxied to the same port at the ULA address provided.
              </t>
              <t>
-                 A protocol of 41 indicates that packets may be IPIP proxy'ed.
-                 In the case of that IPIP proxying is used, then the provided
-                 link-local address MUST be advertised on the local link using
-                 proxy neighbour discovery.  The Join Proxy MAY limit forwarded
-                 traffic to the protocol (6 and 17) and port numbers
-                 indicated by locator1 and locator2.
-                 The address to which the IPIP traffic should be sent is the
-                 initiator address (an ACP address of the Registrar), not the
-                 address given in the locator.
+               A protocol of 41 indicates that packets may be IPIP proxy'ed.
+               In the case of that IPIP proxying is used, then the provided
+               link-local address MUST be advertised on the local link using
+               proxy neighbour discovery.  The Join Proxy MAY limit forwarded
+               traffic to the protocol (6 and 17) and port numbers
+               indicated by locator1 and locator2.
+               The address to which the IPIP traffic should be sent is the
+               initiator address (an ACP address of the Registrar), not the
+               address given in the locator.
              </t>
              <t>
-                 Registrars MUST accept TCP / UDP traffic on the ports given at
-                 the ACP address of the Registrar.  If the Registrar supports IPIP
-                 tunnelling, it MUST also accept traffic encapsulated with IPIP.
+               Registrars MUST accept TCP / UDP traffic on the ports given at
+               the ACP address of the Registrar.  If the Registrar supports IPIP
+               ntunnelling, it MUST also accept traffic encapsulated with IPIP.
              </t>
              <t>
-                 Registrars MUST accept HTTPS/EST traffic on the TCP ports
-                 indicated.
-                 Registrars MAY accept DTLS/CoAP/EST traffic on the UDP in
-                 addition to TCP traffic.
+               Registrars MUST accept HTTPS/EST traffic on the TCP ports
+               indicated.
+               Registrars MAY accept DTLS/CoAP/EST traffic on the UDP in
+               addition to TCP traffic.
              </t>
          </section>
     </section>
