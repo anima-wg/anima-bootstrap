@@ -1489,16 +1489,40 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>This is done with an HTTP GET using the operation path value of
         "/requestauditlog".</t>
 
-        <t>The Registrar MUST HTTP POSTs the same Registrar voucher-request as it did when requesting a
-        Voucher. It is posted to the /requestauditlog URI instead. The
-        "idevid-issuer" and "serial-number" informs the MASA
-        server which log is requested so the appropriate log can be prepared
-        for the response. Using the same media type and message minimizes
-        cryptographic and message operations although it results in additional
-        network traffic. The relying MASA server implementation MAY leverage
-        internal state to associate this request with the original, and by now
-        already validated, Registrar voucher-request so as to avoid an extra crypto
-        validation.</t>
+        <t>
+          The Registrar MUST HTTP POSTs the same Registrar voucher-request
+          as it did when requesting a
+          Voucher. It is posted to the /requestauditlog URI instead.
+          The "idevid-issuer" and "serial-number" informs the MASA
+          server which log is requested so the appropriate log can be prepared
+          for the response.
+          Using the same media type and message minimizes
+          cryptographic and message operations although it results in additional
+          network traffic.
+          The relying MASA server implementation MAY leverage internal state
+          to associate this request with the original, and by now already
+          validated, Registrar voucher-request so as to avoid an extra crypto
+          validation.
+        </t>
+        <t>
+          Rather than returning the audit log as a response to the POST (with
+          a return code 200), the MASA MAY instead return a 201 ("Created")
+          RESTful response (<xref target="RFC7231" /> section 7.1) containing
+          a URL to the prepared (and easily cachable) audit response.
+        </t>
+        <t>
+          MASA servers that return URLs SHOULD take care to make the returned
+          URL unguessable.  URLs containing a database number
+          such as https://example.com/auditlog/1234 or the EUI of the device
+          such https://example.com/auditlog/10-00-00-11-22-33, would be
+          easily enumerable by an attacker.  It is recommended put to put
+          some meaningless randomly generated slug that indexes a database
+          instead.
+        </t>
+        <t>
+          A MASA that returns a code 200 MAY also include a Location: header
+          for future reference by the Registrar.
+        </t>
 
         <t>The request media type is:</t>
         <t><list style="hanging">
@@ -2112,7 +2136,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       <?rfc include="reference.RFC.7435" ?>
       <?rfc include="reference.RFC.7217" ?>
       &RFC7575;
-
+      <?rfc include="reference.RFC.7231" ?>
       <?rfc include="reference.RFC.2473" ?>
       <?rfc include="reference.I-D.vanderstok-ace-coap-est" ?>
 
