@@ -3,6 +3,26 @@ VERSION=$(shell ./getver ${DRAFT}.xml )
 YANGDATE=$(shell date +%Y-%m-%d)
 DRAFT=dtbootstrap-anima-keyinfra
 VRDATE=ietf-voucher-request@${YANGDATE}.yang
+EXTRA_FILES+=ietf-voucher-request-tree.txt
+EXTRA_FILES+=ietf-voucher-request@${YANGDATE}.yang
+EXTRA_FILES+=time-sequence-diagram.txt
+EXTRA_FILES+=component-diagram.txt
+EXTRA_FILES+=examples/jrc_prime256v1.txt
+EXTRA_FILES+=examples/jrc_prime256v1.crt
+EXTRA_FILES+=examples/jrc_prime256v1.key
+EXTRA_FILES+=examples/vr_00-D0-E5-F2-00-02.pkcs
+EXTRA_FILES+=examples/vr_00-D0-E5-F2-00-02.asn1.txt
+EXTRA_FILES+=examples/vr_00-D0-E5-F2-00-02.json
+EXTRA_FILES+=examples/parboiled_vr-00-D0-E5-F2-00-02.pkcs
+EXTRA_FILES+=examples/parboiled_vr-00-D0-E5-F2-00-02.asn1.txt
+EXTRA_FILES+=examples/parboiled_vr-00-D0-E5-F2-00-02.json
+EXTRA_FILES+=examples/voucher_00-D0-E5-F2-00-02.pkcs
+EXTRA_FILES+=examples/voucher_00-D0-E5-F2-00-02.asn1.txt
+EXTRA_FILES+=examples/voucher_00-D0-E5-F2-00-02.json
+EXTRA_FILES+=examples/idevid_00-D0-E5-F2-00-02.crt
+EXTRA_FILES+=examples/idevid_00-D0-E5-F2-00-02.txt
+EXTRA_FILES+=examples/idevid_00-D0-E5-F2-00-02.asn1.txt
+EXTRA_FILES+=examples/idevid_00-D0-E5-F2-00-02.key
 
 ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt ${DRAFT}.html
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
@@ -16,7 +36,7 @@ ietf-voucher-request-tree.txt: ${VRDATE}
 ${VRDATE}: ietf-voucher-request.yang
 	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ${VRDATE}
 
-ALL-${DRAFT}.xml: ${DRAFT}.xml ietf-voucher-request-tree.txt ietf-voucher-request@${YANGDATE}.yang time-sequence-diagram.txt component-diagram.txt
+ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
 	cat ${DRAFT}.xml | ./insert-figures > ALL-${DRAFT}.xml
 
 %.txt: ALL-%.xml
