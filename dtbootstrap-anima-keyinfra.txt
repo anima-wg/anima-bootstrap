@@ -5,14 +5,14 @@
 ANIMA WG                                                     M. Pritikin
 Internet-Draft                                                     Cisco
 Intended status: Standards Track                           M. Richardson
-Expires: April 26, 2018                                              SSW
+Expires: May 3, 2018                                                 SSW
                                                             M. Behringer
                                                                    Cisco
                                                             S. Bjarnason
                                                           Arbor Networks
                                                                K. Watsen
                                                         Juniper Networks
-                                                        October 23, 2017
+                                                        October 30, 2017
 
 
         Bootstrapping Remote Secure Key Infrastructures (BRSKI)
@@ -41,19 +41,19 @@ Status of This Memo
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
-   Drafts is at http://datatracker.ietf.org/drafts/current/.
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 26, 2018.
+   This Internet-Draft will expire on May 3, 2018.
 
 
 
 
-Pritikin, et al.         Expires April 26, 2018                 [Page 1]
+Pritikin, et al.           Expires May 3, 2018                  [Page 1]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -65,7 +65,7 @@ Copyright Notice
 
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
-   (http://trustee.ietf.org/license-info) in effect on the date of
+   (https://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -75,10 +75,10 @@ Copyright Notice
 
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
-     1.1.  Other Bootstrapping Approaches  . . . . . . . . . . . . .   4
-     1.2.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   5
-     1.3.  Scope of solution . . . . . . . . . . . . . . . . . . . .   7
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   4
+     1.1.  Other Bootstrapping Approaches  . . . . . . . . . . . . .   5
+     1.2.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   6
+     1.3.  Scope of solution . . . . . . . . . . . . . . . . . . . .   8
      1.4.  Leveraging the new key infrastructure / next steps  . . .   9
    2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   9
      2.1.  Behavior of a Pledge  . . . . . . . . . . . . . . . . . .  11
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Pritikin, et al.         Expires April 26, 2018                 [Page 2]
+Pritikin, et al.           Expires May 3, 2018                  [Page 2]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -126,7 +126,7 @@ Internet-Draft                    BRSKI                     October 2017
        5.8.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  40
        5.8.3.  EST Client Certificate Request  . . . . . . . . . . .  41
        5.8.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  41
-       5.8.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  42
+       5.8.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  43
    6.  Reduced security operational modes  . . . . . . . . . . . . .  43
      6.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  43
      6.2.  Pledge security reductions  . . . . . . . . . . . . . . .  44
@@ -137,23 +137,41 @@ Internet-Draft                    BRSKI                     October 2017
      7.2.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  46
    8.  Security Considerations . . . . . . . . . . . . . . . . . . .  47
      8.1.  Freshness in Voucher-Requests . . . . . . . . . . . . . .  48
-   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  49
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  50
    10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  50
      10.1.  Normative References . . . . . . . . . . . . . . . . . .  50
      10.2.  Informative References . . . . . . . . . . . . . . . . .  52
-   Appendix A.  IPv4 operations  . . . . . . . . . . . . . . . . . .  53
-     A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  53
-     A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  53
-   Appendix B.  mDNS / DNSSD proxy discovery options . . . . . . . .  53
-   Appendix C.  IPIP Join Proxy mechanism  . . . . . . . . . . . . .  54
+   Appendix A.  IPv4 operations  . . . . . . . . . . . . . . . . . .  54
+     A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  54
+     A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  54
+   Appendix B.  mDNS / DNSSD proxy discovery options . . . . . . . .  54
+   Appendix C.  IPIP Join Proxy mechanism  . . . . . . . . . . . . .  55
      C.1.  Multiple Join networks on the Join Proxy side . . . . . .  55
-     C.2.  Automatic configuration of tunnels on Registrar . . . . .  55
+     C.2.  Automatic configuration of tunnels on Registrar . . . . .  56
      C.3.  Proxy Neighbor Discovery by Join Proxy  . . . . . . . . .  56
      C.4.  Use of connected sockets; or IP_PKTINFO for CoAP on
-           Registrar . . . . . . . . . . . . . . . . . . . . . . . .  56
-     C.5.  Use of socket extension rather than virtual interface . .  56
+           Registrar . . . . . . . . . . . . . . . . . . . . . . . .  57
+     C.5.  Use of socket extension rather than virtual interface . .  57
    Appendix D.  MUD Extension  . . . . . . . . . . . . . . . . . . .  57
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  59
+   Appendix E.  Example Vouchers . . . . . . . . . . . . . . . . . .  59
+     E.1.  Keys involved . . . . . . . . . . . . . . . . . . . . . .  59
+       E.1.1.  MASA key pair for voucher signatures  . . . . . . . .  59
+       E.1.2.  Manufacturer key pair for IDevID signatures . . . . .  59
+       E.1.3.  Registrar key pair  . . . . . . . . . . . . . . . . .  60
+       E.1.4.  Pledge key pair . . . . . . . . . . . . . . . . . . .  62
+     E.2.  Example process . . . . . . . . . . . . . . . . . . . . .  64
+       E.2.1.  Pledge to Registrar . . . . . . . . . . . . . . . . .  64
+       E.2.2.  Registrar to MASA . . . . . . . . . . . . . . . . . .  66
+
+
+
+Pritikin, et al.           Expires May 3, 2018                  [Page 3]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+       E.2.3.  MASA to Registrar . . . . . . . . . . . . . . . . . .  67
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  69
 
 1.  Introduction
 
@@ -161,14 +179,6 @@ Internet-Draft                    BRSKI                     October 2017
    questions between an element of the network domain called the
    "Registrar" and an unconfigured and untouched device called a
    "Pledge":
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                 [Page 3]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
    o  Registrar authenticating the Pledge: "Who is this device?  What is
       its identity?"
@@ -209,6 +219,13 @@ Internet-Draft                    BRSKI                     October 2017
    infrastructures, such as a symmetric key solutions, but no such
    system is described in this document.
 
+
+
+Pritikin, et al.           Expires May 3, 2018                  [Page 4]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
 1.1.  Other Bootstrapping Approaches
 
    To literally "pull yourself up by the bootstraps" is an impossible
@@ -218,14 +235,6 @@ Internet-Draft                    BRSKI                     October 2017
    until key distribution is complete, or that domain-specific keying
    material is pre-provisioned on each new device in a costly and non-
    scalable manner.  Existing mechanisms are known as non-secured 'Trust
-
-
-
-Pritikin, et al.         Expires April 26, 2018                 [Page 4]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    on First Use' (TOFU) [RFC7435], 'resurrecting duckling'
    [Stajano99theresurrecting] or 'pre-staging'.
 
@@ -264,6 +273,15 @@ Internet-Draft                    BRSKI                     October 2017
    o  the vendor is responsible for making the authorization decisions
       (this is a liability concern),
 
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                  [Page 5]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
    BRSKI addresses these issues by defining extensions to the EST
    protocol for the automated distribution of vouchers.
 
@@ -274,20 +292,12 @@ Internet-Draft                    BRSKI                     October 2017
    "OPTIONAL" in this document are to be interpreted as described in
    [RFC2119].
 
-
-
-
-Pritikin, et al.         Expires April 26, 2018                 [Page 5]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    The following terms are defined for clarity:
 
-   registrarID:  The registrar identity is the 160-bit SHA-1 hash of the
-      BIT STRING of the subjectPublicKey of the registrar certificate.
-      This is consistent with the subject key identifier
-      (Section 4.2.1.2 [RFC5280]).
+   domainID:  The domain IDentity is the 160-bit SHA-1 hash of the BIT
+      STRING of the subjectPublicKey of the root certificate for the
+      registrars in the domain.  This is consistent with the subject key
+      identifier (Section 4.2.1.2 [RFC5280]).
 
    drop ship:  The physical distribution of equipment containing the
       "factory default" configuration to a final destination.  In zero-
@@ -320,6 +330,14 @@ Internet-Draft                    BRSKI                     October 2017
       that trust asserted.  Multiple voucher types are defined in
       [I-D.ietf-anima-voucher]
 
+
+
+
+Pritikin, et al.           Expires May 3, 2018                  [Page 6]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
    Domain:  The set of entities that trust a common key infrastructure
       trust anchor.  This includes the Proxy, Registrar, Domain
       Certificate Authority, Management components and any existing
@@ -330,13 +348,6 @@ Internet-Draft                    BRSKI                     October 2017
       provides certification functionalities to a Registrar and stores
       the trust anchor that defines the domain.  Optionally, it
       certifies all elements.
-
-
-
-Pritikin, et al.         Expires April 26, 2018                 [Page 6]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
    Join Registrar (and Coordinator):  A representative of the domain
       that is configured, perhaps autonomically, to decide whether a new
@@ -374,6 +385,15 @@ Internet-Draft                    BRSKI                     October 2017
 
    TOFU:  Trust on First Use. Used similarly to [RFC7435].  This is
       where a Pledge device makes no security decisions but rather
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                  [Page 7]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
       simply trusts the first Registrar it is contacted by.  This is
       also known as the "resurrecting duckling" model.
 
@@ -386,14 +406,6 @@ Internet-Draft                    BRSKI                     October 2017
 
    The solution described in this document is aimed in general at non-
    constrained (i.e. class 2+) devices operating on a non-Challenged
-
-
-
-Pritikin, et al.         Expires April 26, 2018                 [Page 7]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    network.  The entire solution as described here is not intended to be
    useable as-is by constrained devices operating on challenged networks
    (such as 802.15.4 LLNs).
@@ -429,6 +441,15 @@ Internet-Draft                    BRSKI                     October 2017
    operations (TLS handshake and signing structures) have sufficient
    algorithm agility to support such techniques when defined.
 
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                  [Page 8]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
    The imprint protocol described here could, however, be used by non-
    energy constrained devices joining a non-constrained network (for
    instance, smart light bulbs are usually mains powered, and speak
@@ -442,14 +463,6 @@ Internet-Draft                    BRSKI                     October 2017
    occurred, is not required, or is integrated by the proxy and
    registrar in such a way that the device itself does not need to be
    aware of the details.  Although the use of an X.509 Initial Device
-
-
-
-Pritikin, et al.         Expires April 26, 2018                 [Page 8]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    Identity is consistant with IEEE 802.1AR [IDevID], and allows for
    alignment with 802.1X network access control methods, its use here is
    for Pledge authentication rather than network access control.
@@ -488,20 +501,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                 [Page 9]
+Pritikin, et al.           Expires May 3, 2018                  [Page 9]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -557,7 +557,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 10]
+Pritikin, et al.           Expires May 3, 2018                 [Page 10]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -613,7 +613,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 11]
+Pritikin, et al.           Expires May 3, 2018                 [Page 11]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -669,7 +669,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 12]
+Pritikin, et al.           Expires May 3, 2018                 [Page 12]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -725,7 +725,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 13]
+Pritikin, et al.           Expires May 3, 2018                 [Page 13]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -781,7 +781,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 14]
+Pritikin, et al.           Expires May 3, 2018                 [Page 14]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -837,7 +837,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 15]
+Pritikin, et al.           Expires May 3, 2018                 [Page 15]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -893,7 +893,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 16]
+Pritikin, et al.           Expires May 3, 2018                 [Page 16]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -949,7 +949,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 17]
+Pritikin, et al.           Expires May 3, 2018                 [Page 17]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1005,27 +1005,26 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 18]
+Pritikin, et al.           Expires May 3, 2018                 [Page 18]
 
 Internet-Draft                    BRSKI                     October 2017
 
 
    module: ietf-voucher-request
-     groupings:
-     voucher-request-grouping
-         +---- voucher
-            +---- created-on?                      yang:date-and-time
-            +---- expires-on?                      yang:date-and-time
-            +---- assertion                        enumeration
-            +---- serial-number                    string
-            +---- idevid-issuer?                   binary
-            +---- pinned-domain-cert?              binary
-            +---- domain-cert-revocation-checks?   boolean
-            +---- nonce?                           binary
-            +---- last-renewal-date?               yang:date-and-time
-            +---- prior-signed-voucher-request?    binary
-            +---- proximity-registrar-cert?        binary
 
+     grouping voucher-request-grouping
+       +---- voucher
+          +---- created-on?                      yang:date-and-time
+          +---- expires-on?                      yang:date-and-time
+          +---- assertion                        enumeration
+          +---- serial-number                    string
+          +---- idevid-issuer?                   binary
+          +---- pinned-domain-cert?              binary
+          +---- domain-cert-revocation-checks?   boolean
+          +---- nonce?                           binary
+          +---- last-renewal-date?               yang:date-and-time
+          +---- prior-signed-voucher-request?    binary
+          +---- proximity-registrar-cert?        binary
 
 3.2.  Examples
 
@@ -1061,7 +1060,8 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 19]
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 19]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1117,7 +1117,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 20]
+Pritikin, et al.           Expires May 3, 2018                 [Page 20]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1127,7 +1127,7 @@ Internet-Draft                    BRSKI                     October 2017
    Following is a YANG [RFC7950] module formally extending the
    [I-D.ietf-anima-voucher] voucher into a voucher-request.
 
-<CODE BEGINS> file "ietf-voucher-request@2017-10-23.yang"
+<CODE BEGINS> file "ietf-voucher-request@2017-10-30.yang"
 module ietf-voucher-request {
   yang-version 1.1;
 
@@ -1173,7 +1173,7 @@ module ietf-voucher-request {
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 21]
+Pritikin, et al.           Expires May 3, 2018                 [Page 21]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1192,7 +1192,7 @@ Internet-Draft                    BRSKI                     October 2017
     This version of this YANG module is part of RFC XXXX; see the RFC
     itself for full legal notices.";
 
-  revision "2017-10-23" {
+  revision "2017-10-30" {
     description
      "Initial version";
     reference
@@ -1229,7 +1229,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 22]
+Pritikin, et al.           Expires May 3, 2018                 [Page 22]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1285,7 +1285,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 23]
+Pritikin, et al.           Expires May 3, 2018                 [Page 23]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1341,7 +1341,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 24]
+Pritikin, et al.           Expires May 3, 2018                 [Page 24]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1397,7 +1397,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 25]
+Pritikin, et al.           Expires May 3, 2018                 [Page 25]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1453,7 +1453,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 26]
+Pritikin, et al.           Expires May 3, 2018                 [Page 26]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1509,7 +1509,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 27]
+Pritikin, et al.           Expires May 3, 2018                 [Page 27]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1565,7 +1565,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 28]
+Pritikin, et al.           Expires May 3, 2018                 [Page 28]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1621,7 +1621,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 29]
+Pritikin, et al.           Expires May 3, 2018                 [Page 29]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1677,7 +1677,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 30]
+Pritikin, et al.           Expires May 3, 2018                 [Page 30]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1733,7 +1733,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 31]
+Pritikin, et al.           Expires May 3, 2018                 [Page 31]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1789,7 +1789,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 32]
+Pritikin, et al.           Expires May 3, 2018                 [Page 32]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1845,7 +1845,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 33]
+Pritikin, et al.           Expires May 3, 2018                 [Page 33]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1893,15 +1893,15 @@ Internet-Draft                    BRSKI                     October 2017
 
    The Registrar's certificate chain is extracted from the signature
    method and the root certificate is used to populate the "pinned-
-   domain-cert" of the Voucher being issued.  The registrarID (e.g. hash
-   of the public key) is determined from the registrar certificate
-   itself and is used to update the audit log.
+   domain-cert" of the Voucher being issued.  The domainID (e.g. hash of
+   the root public key) is determined from the pinned-domain-cert and is
+   used to update the audit log.
 
 
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 34]
+Pritikin, et al.           Expires May 3, 2018                 [Page 34]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -1957,7 +1957,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 35]
+Pritikin, et al.           Expires May 3, 2018                 [Page 35]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -2013,7 +2013,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 36]
+Pritikin, et al.           Expires May 3, 2018                 [Page 36]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -2069,7 +2069,7 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 37]
+Pritikin, et al.           Expires May 3, 2018                 [Page 37]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -2096,6 +2096,10 @@ Internet-Draft                    BRSKI                     October 2017
    request with the original, and by now already validated, Registrar
    voucher-request so as to avoid an extra crypto validation.
 
+   A MASA which receives a request for a device which does not exist, or
+   for which the requesting owner was never an owner returns an HTTP 404
+   ("Not found") code.
+
    Rather than returning the audit log as a response to the POST (with a
    return code 200), the MASA MAY instead return a 201 ("Created")
    RESTful response ([RFC7231] section 7.1) containing a URL to the
@@ -2117,18 +2121,17 @@ Internet-Draft                    BRSKI                     October 2017
       "YANG-defined JSON document that has been signed using a PKCS#7
       structure" as described in Section 3 using the JSON encoded
       described in [RFC7951].  The Registrar MUST sign the request.  The
-      entire Registrar certificate chain, up to and including the Domain
-      CA, MUST be included in the PKCS#7 structure.
 
 
 
 
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 38]
+Pritikin, et al.           Expires May 3, 2018                 [Page 38]
 
 Internet-Draft                    BRSKI                     October 2017
 
+
+      entire Registrar certificate chain, up to and including the Domain
+      CA, MUST be included in the PKCS#7 structure.
 
 5.7.1.  MASA authorization log Response
 
@@ -2140,34 +2143,32 @@ Internet-Draft                    BRSKI                     October 2017
      "events":[
        {
         "date":"<date/time of the entry>",
-        "registrarID":"<registrarID extracted from voucher-request>",
+        "domainID":"<domainID extracted from voucher-request>",
         "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
        },
        {
         "date":"<date/time of the entry>",
-        "registrarID":"<registrarID extracted from voucher-request>",
+        "domainID":"<domainID extracted from voucher-request>",
         "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
        }
      ]
    }
 
    Distribution of a large log is less than ideal.  This structure can
-   be optimized as follows: All nonceless entries for the same
-   registrarID MAY be condensed into the single most recent nonceless
-   entry.
+   be optimized as follows: All nonceless entries for the same domainID
+   MAY be condensed into the single most recent nonceless entry.
 
    A Registrar SHOULD use this log information to make an informed
    decision regarding the continued bootstrapping of the Pledge.  For
-   example if the log includes unexpected registrarIDs this is
-   indicative of problematic imprints by the Pledge.  If the log
-   includes nonceless entries this is indicative of the permanent
-   ability for any registrar in the same domain to trigger a reset of
-   the device and take over management of the Pledge.  Equipment that is
-   purchased pre-owned can be expected to have an extensive history.  A
-   Registrar MAY request logs at future times.  A Registrar MAY be
-   configured to ignore the history of the device but it is RECOMMENDED
-   that this only be configured if hardware assisted NEA [RFC5209] is
-   supported.
+   example if the log includes an unexpected domainID then the Pledge
+   could have imprinted on an unexpected domain.  If the log includes
+   nonceless entries then any registrar in the same domain could
+   theoretically trigger a reset of the device and take over management
+   of the Pledge.  Equipment that is purchased pre-owned can be expected
+   to have an extensive history.  A Registrar MAY request logs at future
+   times.  A Registrar MAY be configured to ignore the history of the
+   device but it is RECOMMENDED that this only be configured if hardware
+   assisted NEA [RFC5209] is supported.
 
    Log entries can be compared against local history logs in search of
    discrepancies.
@@ -2177,15 +2178,15 @@ Internet-Draft                    BRSKI                     October 2017
    distributed consensus technologies that integrate vouchers with a
    technologies such as block-chain or hash trees or the like.  Doing so
    is out of the scope of this document but are anticipated improvements
-   for future work.  As such, the Registrar client SHOULD anticipate new
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 39]
+Pritikin, et al.           Expires May 3, 2018                 [Page 39]
 
 Internet-Draft                    BRSKI                     October 2017
 
 
+   for future work.  As such, the Registrar client SHOULD anticipate new
    kinds of responses, and SHOULD provide operator controls to indicate
    how to process unknown responses.
 
@@ -2233,15 +2234,15 @@ Internet-Draft                    BRSKI                     October 2017
    configuration of the Pledge.  In some deployments its plausible that
    the Pledge generates a certificate request containing only identity
    information known to the Pledge (essentially the X.509 IDevID
-   information) and ultimately receives a certificate containing domain
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 40]
+Pritikin, et al.           Expires May 3, 2018                 [Page 40]
 
 Internet-Draft                    BRSKI                     October 2017
 
 
+   information) and ultimately receives a certificate containing domain
    specific identity information.  Conceptually the CA has complete
    control over all fields issued in the end entity certificate.
    Realistically this is operationally difficult with the current status
@@ -2289,15 +2290,15 @@ Internet-Draft                    BRSKI                     October 2017
    For automated bootstrapping of devices the adminstrative elements
    providing bootstrapping also provide indications to the system
    administrators concerning device lifecycle status.  This might
-   include information concerning attempted bootstrapping messages seen
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 41]
+Pritikin, et al.           Expires May 3, 2018                 [Page 41]
 
 Internet-Draft                    BRSKI                     October 2017
 
 
+   include information concerning attempted bootstrapping messages seen
    by the client, MASA provides logs and status of credential
    enrollment.  The EST protocol assumes an end user and therefore does
    not include a final success indication back to the server.  This is
@@ -2341,19 +2342,23 @@ Internet-Draft                    BRSKI                     October 2017
    at the cost of the server not being able to accurately verify that
    enrollment was truly successful.
 
+
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 42]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
 5.8.5.  EST over CoAP
 
    This document describes extensions to EST for the purposes of
    bootstrapping of remote key infrastructures.  Bootstrapping is
    relevant for CoAP enrollment discussions as well.  The defintion of
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 42]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    EST and BRSKI over CoAP is not discussed within this document beyond
    ensuring proxy support for CoAP operations.  Instead it is
    anticipated that a definition of CoAP mappings will occur in
@@ -2397,18 +2402,19 @@ Internet-Draft                    BRSKI                     October 2017
       information to Registrars.  The MASA does not know which devices
       are associated with which domains.  These claims could be
       strengthened by using cryptographic log techniques to provide
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 43]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
       append only, cryptographic assured, publicly auditable logs.
       Current text provides only for a trusted vendor.
 
    Vendor Service, Ownership Validation:  This form of vendor service is
       trusted to accurately know which device is owned by which domain.
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 43]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
 6.2.  Pledge security reductions
 
@@ -2452,20 +2458,20 @@ Internet-Draft                    BRSKI                     October 2017
        occur when informing all Registrars of unique identifiers of new
        entities might be operationally difficult.
 
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 44]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
    2.  A registrar MAY choose to accept devices that claim a unique
        identity without the benefit of authenticating that claimed
        identity.  This could occur when the Pledge does not include an
        X.509 IDevID factory installed credential.  New Entities without
        an X.509 IDevID credential MAY form the Section 5.2 request using
        the Section 5.4 format to ensure the Pledge's serial number
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 44]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
        information is provided to the Registar (this includes the IDevID
        AuthorityKeyIdentifier value which would be statically configured
        on the Pledge).  The Pledge MAY refuse to provide a TLS client
@@ -2508,19 +2514,20 @@ Internet-Draft                    BRSKI                     October 2017
        online during actual device deployment.  Because this results in
        long lived Voucher and does not require the proof that the device
        is online this is only accepted when the Registrar is
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 45]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
        authenticated by the MASA server and authorized to provide this
        functionality.  The MASA server is RECOMMENDED to use this
        functionality only in concert with an enhanced level of ownership
        tracking (out-of-scope).  If the Pledge device is known to have a
        real-time-clock that is set from the factory use of a voucher
        validity period is RECOMMENDED.
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 45]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
    2.  Not verifying ownership before responding with an Voucher.  This
        is expected to be a common operational model because doing so
@@ -2563,20 +2570,19 @@ Internet-Draft                    BRSKI                     October 2017
 
    o  version
 
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 46]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
    o  Status
 
    o  Reason
 
    o  reason-context
-
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 46]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
 8.  Security Considerations
 
@@ -2620,29 +2626,35 @@ Internet-Draft                    BRSKI                     October 2017
    this information is informative to a potentially malicious Registar
    but this is mandated anyway because of the operational benefits of an
    informed administrator in cases where the failure is indicative of a
-   problem.  The Registrar is RECOMMENDED to verify MASA logs if voucher
-   status telemetry is not received.
-
-   The MASA authorization log includes a hash of the registrarID for
-   each registrar a voucher has been issued to.  This information is
-   closely related to the actual domain identity, especially when paired
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 47]
+Pritikin, et al.           Expires May 3, 2018                 [Page 47]
 
 Internet-Draft                    BRSKI                     October 2017
 
 
-   with the DoS authentication information the MASA might collect.  This
-   provides an oportunity for the MASA service to build a detailed
-   understanding of the vendor's devices that have been provisioned
-   within a domain.  The domain itself has not been authenticated and is
-   not authoritatively bound to the supply chain which does provide a
-   level of privacy for the domain.  Additionally the registrarID
-   captures only the subject key identifier of the registrar.  A privacy
-   sensitive domain could theoretically generate a new registrar key, or
-   even domain, for each device being deployed.
+   problem.  The Registrar is RECOMMENDED to verify MASA logs if voucher
+   status telemetry is not received.
+
+   The MASA authorization log includes a hash of the domainID for each
+   registrar a voucher has been issued to.  This information is closely
+   related to the actual domain identity, especially when paired with
+   the anti-DDoS authentication information the MASA might collect.
+   This could provide sufficient information for the MASA service to
+   build a detailed understanding the devices that have been provisioned
+   within a domain.  There are a number of design choices that mitigate
+   this risk.  The domain can maintain some privacy since it has not
+   necessarily been authenticated and is not authoritatively bound to
+   the supply chain.  Additionally the domainID captures only the
+   unauthenticated subject key identifier of the domain.  A privacy
+   sensitive domain could theoretically generate a new domainID for each
+   device being deployed.  Similarly a privacy sensitive domain would
+   likely purchase devices that support proximity assertions from a
+   vendor that does not require sales channel integrations.  This would
+   result in a significant level of privacy while maintaining the
+   security characteristics provided by Registrar based audit log
+   inspection.
 
    To facilitate truely limited clients EST RFC7030 section 3.3.2
    requirements that the client MUST support a client authentication
@@ -2669,6 +2681,15 @@ Internet-Draft                    BRSKI                     October 2017
 
    A concern has been raised that the Pledge voucher-request should
    contain some content (a nonce) provided by the Registrar and/or MASA
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 48]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
    in order for those actors to verify that the Pledge voucher-request
    is fresh.
 
@@ -2680,15 +2701,6 @@ Internet-Draft                    BRSKI                     October 2017
    such a thing were to be considered, it would have to provide some
    clear value.  This section examines the impacts of not having a fresh
    Pledge voucher-request.
-
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 48]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
    Because the Registrar authenticates the Pledge a full Man-in-the-
    Middle attack is not possible, despite the provisional TLS
@@ -2725,6 +2737,15 @@ Internet-Draft                    BRSKI                     October 2017
    is a consideration the target network is RECOMMENDED to take the
    following steps:
 
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 49]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
    o  Ongoing network monitoring for unexpected bootstrapping attempts
       by Pledges.
 
@@ -2737,14 +2758,6 @@ Internet-Draft                    BRSKI                     October 2017
    We would like to thank the various reviewers for their input, in
    particular Brian Carpenter, Toerless Eckert, Fuyu Eleven, Eliot Lear,
    Sergey Kasatkin, Markus Stenberg, and Peter van der Stok
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 49]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
 10.  References
 
@@ -2765,47 +2778,54 @@ Internet-Draft                    BRSKI                     October 2017
               "Voucher Profile for Bootstrapping Protocols", draft-ietf-
               anima-voucher-05 (work in progress), August 2017.
 
-   [IDevID]   IEEE Standard, , "IEEE 802.1AR Secure Device Identifier",
+   [IDevID]   IEEE Standard, "IEEE 802.1AR Secure Device Identifier",
               December 2009, <http://standards.ieee.org/findstds/
               standard/802.1AR-2009.html>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997, <https://www.rfc-
-              editor.org/info/rfc2119>.
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
 
    [RFC3542]  Stevens, W., Thomas, M., Nordmark, E., and T. Jinmei,
               "Advanced Sockets Application Program Interface (API) for
-              IPv6", RFC 3542, May 2003.
-
-   [RFC3748]  Aboba, B., Blunk, L., Vollbrecht, J., Carlson, J., and H.
-              Levkowetz, "Extensible Authentication Protocol (EAP)",
-              RFC 3748, June 2004.
-
-   [RFC3927]  Cheshire, S., Aboba, B., and E. Guttman, "Dynamic
-              Configuration of IPv4 Link-Local Addresses", RFC 3927, May
-              2005.
-
-   [RFC4862]  Thomson, S., Narten, T., and T. Jinmei, "IPv6 Stateless
-              Address Autoconfiguration", RFC 4862, September 2007.
-
-   [RFC4941]  Narten, T., Draves, R., and S. Krishnan, "Privacy
-              Extensions for Stateless Address Autoconfiguration in
-              IPv6", RFC 4941, September 2007.
+              IPv6", RFC 3542, DOI 10.17487/RFC3542, May 2003,
+              <https://www.rfc-editor.org/info/rfc3542>.
 
 
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 50]
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 50]
 
 Internet-Draft                    BRSKI                     October 2017
 
 
+   [RFC3748]  Aboba, B., Blunk, L., Vollbrecht, J., Carlson, J., and H.
+              Levkowetz, Ed., "Extensible Authentication Protocol
+              (EAP)", RFC 3748, DOI 10.17487/RFC3748, June 2004,
+              <https://www.rfc-editor.org/info/rfc3748>.
+
+   [RFC3927]  Cheshire, S., Aboba, B., and E. Guttman, "Dynamic
+              Configuration of IPv4 Link-Local Addresses", RFC 3927,
+              DOI 10.17487/RFC3927, May 2005,
+              <https://www.rfc-editor.org/info/rfc3927>.
+
+   [RFC4862]  Thomson, S., Narten, T., and T. Jinmei, "IPv6 Stateless
+              Address Autoconfiguration", RFC 4862,
+              DOI 10.17487/RFC4862, September 2007,
+              <https://www.rfc-editor.org/info/rfc4862>.
+
+   [RFC4941]  Narten, T., Draves, R., and S. Krishnan, "Privacy
+              Extensions for Stateless Address Autoconfiguration in
+              IPv6", RFC 4941, DOI 10.17487/RFC4941, September 2007,
+              <https://www.rfc-editor.org/info/rfc4941>.
+
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
               (TLS) Protocol Version 1.2", RFC 5246,
-              DOI 10.17487/RFC5246, August 2008, <https://www.rfc-
-              editor.org/info/rfc5246>.
+              DOI 10.17487/RFC5246, August 2008,
+              <https://www.rfc-editor.org/info/rfc5246>.
 
    [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
               Housley, R., and W. Polk, "Internet X.509 Public Key
@@ -2815,18 +2835,28 @@ Internet-Draft                    BRSKI                     October 2017
 
    [RFC5386]  Williams, N. and M. Richardson, "Better-Than-Nothing
               Security: An Unauthenticated Mode of IPsec", RFC 5386,
-              November 2008.
+              DOI 10.17487/RFC5386, November 2008,
+              <https://www.rfc-editor.org/info/rfc5386>.
 
    [RFC5652]  Housley, R., "Cryptographic Message Syntax (CMS)", STD 70,
               RFC 5652, DOI 10.17487/RFC5652, September 2009,
               <https://www.rfc-editor.org/info/rfc5652>.
 
    [RFC5660]  Williams, N., "IPsec Channels: Connection Latching",
-              RFC 5660, October 2009.
+              RFC 5660, DOI 10.17487/RFC5660, October 2009,
+              <https://www.rfc-editor.org/info/rfc5660>.
 
    [RFC6762]  Cheshire, S. and M. Krochmal, "Multicast DNS", RFC 6762,
-              DOI 10.17487/RFC6762, February 2013, <https://www.rfc-
-              editor.org/info/rfc6762>.
+              DOI 10.17487/RFC6762, February 2013,
+              <https://www.rfc-editor.org/info/rfc6762>.
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 51]
+
+Internet-Draft                    BRSKI                     October 2017
+
 
    [RFC6763]  Cheshire, S. and M. Krochmal, "DNS-Based Service
               Discovery", RFC 6763, DOI 10.17487/RFC6763, February 2013,
@@ -2834,8 +2864,8 @@ Internet-Draft                    BRSKI                     October 2017
 
    [RFC7030]  Pritikin, M., Ed., Yee, P., Ed., and D. Harkins, Ed.,
               "Enrollment over Secure Transport", RFC 7030,
-              DOI 10.17487/RFC7030, October 2013, <https://www.rfc-
-              editor.org/info/rfc7030>.
+              DOI 10.17487/RFC7030, October 2013,
+              <https://www.rfc-editor.org/info/rfc7030>.
 
    [RFC7159]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
               Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
@@ -2843,20 +2873,12 @@ Internet-Draft                    BRSKI                     October 2017
 
    [RFC7228]  Bormann, C., Ersue, M., and A. Keranen, "Terminology for
               Constrained-Node Networks", RFC 7228,
-              DOI 10.17487/RFC7228, May 2014, <https://www.rfc-
-              editor.org/info/rfc7228>.
+              DOI 10.17487/RFC7228, May 2014,
+              <https://www.rfc-editor.org/info/rfc7228>.
 
    [RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
               RFC 7950, DOI 10.17487/RFC7950, August 2016,
               <https://www.rfc-editor.org/info/rfc7950>.
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 51]
-
-Internet-Draft                    BRSKI                     October 2017
-
 
    [RFC7951]  Lhotka, L., "JSON Encoding of Data Modeled with YANG",
               RFC 7951, DOI 10.17487/RFC7951, August 2016,
@@ -2873,13 +2895,24 @@ Internet-Draft                    BRSKI                     October 2017
    [I-D.ietf-netconf-zerotouch]
               Watsen, K., Abrahamsson, M., and I. Farrer, "Zero Touch
               Provisioning for NETCONF or RESTCONF based Management",
-              draft-ietf-netconf-zerotouch-19 (work in progress),
+              draft-ietf-netconf-zerotouch-18 (work in progress),
               October 2017.
 
    [I-D.ietf-opsawg-mud]
               Lear, E., Droms, R., and D. Romascanu, "Manufacturer Usage
-              Description Specification", draft-ietf-opsawg-mud-12 (work
+              Description Specification", draft-ietf-opsawg-mud-13 (work
               in progress), October 2017.
+
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 52]
+
+Internet-Draft                    BRSKI                     October 2017
+
 
    [I-D.richardson-anima-state-for-joinrouter]
               Richardson, M., "Considerations for stateful vs stateless
@@ -2892,32 +2925,23 @@ Internet-Draft                    BRSKI                     October 2017
               vanderstok-ace-coap-est-02 (work in progress), June 2017.
 
    [imprinting]
-              Wikipedia, , "Wikipedia article: Imprinting", July 2015,
+              Wikipedia, "Wikipedia article: Imprinting", July 2015,
               <https://en.wikipedia.org/wiki/Imprinting_(psychology)>.
 
    [RFC2473]  Conta, A. and S. Deering, "Generic Packet Tunneling in
-              IPv6 Specification", RFC 2473, December 1998.
+              IPv6 Specification", RFC 2473, DOI 10.17487/RFC2473,
+              December 1998, <https://www.rfc-editor.org/info/rfc2473>.
 
    [RFC7217]  Gont, F., "A Method for Generating Semantically Opaque
               Interface Identifiers with IPv6 Stateless Address
               Autoconfiguration (SLAAC)", RFC 7217,
-              DOI 10.17487/RFC7217, April 2014, <https://www.rfc-
-              editor.org/info/rfc7217>.
-
-
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 52]
-
-Internet-Draft                    BRSKI                     October 2017
-
+              DOI 10.17487/RFC7217, April 2014,
+              <https://www.rfc-editor.org/info/rfc7217>.
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
-              DOI 10.17487/RFC7231, June 2014, <https://www.rfc-
-              editor.org/info/rfc7231>.
+              DOI 10.17487/RFC7231, June 2014,
+              <https://www.rfc-editor.org/info/rfc7231>.
 
    [RFC7435]  Dukhovni, V., "Opportunistic Security: Some Protection
               Most of the Time", RFC 7435, DOI 10.17487/RFC7435,
@@ -2926,14 +2950,25 @@ Internet-Draft                    BRSKI                     October 2017
    [RFC7575]  Behringer, M., Pritikin, M., Bjarnason, S., Clemm, A.,
               Carpenter, B., Jiang, S., and L. Ciavaglia, "Autonomic
               Networking: Definitions and Design Goals", RFC 7575,
-              DOI 10.17487/RFC7575, June 2015, <https://www.rfc-
-              editor.org/info/rfc7575>.
+              DOI 10.17487/RFC7575, June 2015,
+              <https://www.rfc-editor.org/info/rfc7575>.
 
    [Stajano99theresurrecting]
               Stajano, F. and R. Anderson, "The resurrecting duckling:
               security issues for ad-hoc wireless networks", 1999,
-              <https://www.cl.cam.ac.uk/~fms27/papers/1999-StajanoAnd-
-              duckling.pdf>.
+              <https://www.cl.cam.ac.uk/~fms27/
+              papers/1999-StajanoAnd-duckling.pdf>.
+
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 53]
+
+Internet-Draft                    BRSKI                     October 2017
+
 
 Appendix A.  IPv4 operations
 
@@ -2962,14 +2997,6 @@ Appendix B.  mDNS / DNSSD proxy discovery options
    To prevent unaccceptable levels of network traffic the congestion
    avoidance mechanisms specified in [RFC6762] section 7 MUST be
    followed.  The Pledge SHOULD listen for an unsolicited broadcast
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 53]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    response as described in [RFC6762].  This allows devices to avoid
    announcing their presence via mDNS broadcasts and instead silently
    join a network by watching for periodic unsolicited broadcast
@@ -2989,6 +3016,15 @@ Internet-Draft                    BRSKI                     October 2017
    URI such as "bootstrapks.vendor-example.com".  The details of the URI
    are vendor specific.  Vendors that leverage this method on the Pledge
    are responsible for providing the bootstrapks service.
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 54]
+
+Internet-Draft                    BRSKI                     October 2017
+
 
    The current DNS services returned during each query is maintained
    until bootstrapping is completed.  If bootstrapping fails and the
@@ -3019,13 +3055,6 @@ Appendix C.  IPIP Join Proxy mechanism
    addresses seen in the tunnel are the link-local addresses of the
    network on which the join activity is occuring.
 
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 54]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    One way to look at this construct is to consider that the Registrar
    is extending attaching an interface to the network on which the Join
    Proxy is physically present.  The Registrar then interacts as if it
@@ -3045,6 +3074,13 @@ C.1.  Multiple Join networks on the Join Proxy side
    multiple interfaces.  Even a device as simple as a wifi access point
    may have wired, and multiple frequencies of wireless interfaces,
    potentially with multiple ESSIDs.
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 55]
+
+Internet-Draft                    BRSKI                     October 2017
+
 
    Each of these interfaces on the Join Proxy may be seperate L3 routing
    domains, and therefore will have a unique set of link-local
@@ -3073,15 +3109,6 @@ C.2.  Automatic configuration of tunnels on Registrar
    from new Join Proxys, it can dynamically configure virtual
    interfaces.
 
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 55]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    A more sophisticated Registrar willing to modify the behaviour of
    it's TCP and UDP stack could note the IPIP traffic origination in the
    socket control block and make information available to the TCP layer
@@ -3100,6 +3127,16 @@ C.3.  Proxy Neighbor Discovery by Join Proxy
    as the TCP and UDP pseudo-header checksum includes the destination
    address, and for the proxy to remain completely stateless, it must
    not be necessary for the checksum to be updated.
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 56]
+
+Internet-Draft                    BRSKI                     October 2017
+
 
 C.4.  Use of connected sockets; or IP_PKTINFO for CoAP on Registrar
 
@@ -3130,14 +3167,6 @@ C.5.  Use of socket extension rather than virtual interface
    interface per Join Proxy may not be needed.  The outgoing path need
    just pay attention to this extra information and add an appropriate
    IPIP header on outgoing.  A CoAP over UDP mechanism may need to
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 56]
-
-Internet-Draft                    BRSKI                     October 2017
-
-
    expose this extra information to the application as the UDP sockets
    are often not connected, and the application will need to specify the
    outgoing path on each packet send.
@@ -3160,36 +3189,7 @@ Appendix D.  MUD Extension
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Pritikin, et al.         Expires April 26, 2018                [Page 57]
+Pritikin, et al.           Expires May 3, 2018                 [Page 57]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -3245,7 +3245,567 @@ Internet-Draft                    BRSKI                     October 2017
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 58]
+Pritikin, et al.           Expires May 3, 2018                 [Page 58]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+Appendix E.  Example Vouchers
+
+   Three entities are involved in a voucher: the MASA issues (signs) it,
+   the registrar's public key is mentioned in the voucher, and the
+   pledge validates it.  In order to provide reproduceable examples the
+   public and private keys for an example MASA and Registrar are first
+   listed.
+
+E.1.  Keys involved
+
+   The Manufacturer has a Certificate Authority that signs the Pledge's
+   IDevID.  In addition the Manufacturer's signing authority (the MASA)
+   signs the vouchers, and that certificate must distributed to the
+   devices at manufacturing time so that vouchers can be validated.
+
+E.1.1.  MASA key pair for voucher signatures
+
+   This private key signs vouchers:
+
+   -----BEGIN EC PRIVATE KEY-----
+   MIGkAgEBBDAgiRoYqKoEcfOfvRvmZ5P5Azn58tuI7nSnIy7OgFnCeiNo+BmbgMho
+   r6lcU60gwVagBwYFK4EEACKhZANiAATZAH3Rb2FvIJOnts+vXuWW35ofyNbCHzjA
+   zOi2kWZFE1ByurKImNcNMFGirGnRXIXGqWCfw5ICgJ8CuM3vV5ty9bf7KUlOkejz
+   Tvv+5PV++elkP9HQ83vqTAws2WwWTxI=
+   -----END EC PRIVATE KEY-----
+
+   This public key validates vouchers:
+
+   -----BEGIN CERTIFICATE-----
+   MIIBzzCCAVagAwIBAgIBATAKBggqhkjOPQQDAjBNMRIwEAYKCZImiZPyLGQBGRYC
+   Y2ExGTAXBgoJkiaJk/IsZAEZFglzYW5kZWxtYW4xHDAaBgNVBAMME1Vuc3RydW5n
+   IEhpZ2h3YXkgQ0EwHhcNMTcwMzI2MTYxOTQwWhcNMTkwMzI2MTYxOTQwWjBHMRIw
+   EAYKCZImiZPyLGQBGRYCY2ExGTAXBgoJkiaJk/IsZAEZFglzYW5kZWxtYW4xFjAU
+   BgNVBAMMDVVuc3RydW5nIE1BU0EwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAATZAH3R
+   b2FvIJOnts+vXuWW35ofyNbCHzjAzOi2kWZFE1ByurKImNcNMFGirGnRXIXGqWCf
+   w5ICgJ8CuM3vV5ty9bf7KUlOkejzTvv+5PV++elkP9HQ83vqTAws2WwWTxKjEDAO
+   MAwGA1UdEwEB/wQCMAAwCgYIKoZIzj0EAwIDZwAwZAIwGb0oyM0doP6t3/LSPL5O
+   DuatEwMYh7WGO+IYTHC8K7EyHBOmCYReKT2+GhV/CLWzAjBNy6UMJTt1tsxJsJqd
+   MPUIFj+4wZg1AOIb/JoA6M7r33pwLQTrHRxEzVMGfWOkYUw=
+   -----END CERTIFICATE-----
+
+E.1.2.  Manufacturer key pair for IDevID signatures
+
+   This private key signs IDevID certificates:
+
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 59]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+   -----BEGIN EC PRIVATE KEY-----
+   MIGkAgEBBDAgiRoYqKoEcfOfvRvmZ5P5Azn58tuI7nSnIy7OgFnCeiNo+BmbgMho
+   r6lcU60gwVagBwYFK4EEACKhZANiAATZAH3Rb2FvIJOnts+vXuWW35ofyNbCHzjA
+   zOi2kWZFE1ByurKImNcNMFGirGnRXIXGqWCfw5ICgJ8CuM3vV5ty9bf7KUlOkejz
+   Tvv+5PV++elkP9HQ83vqTAws2WwWTxI=
+   -----END EC PRIVATE KEY-----
+
+   This public key validates IDevID certificates:
+
+   -----BEGIN CERTIFICATE-----
+   MIIBzzCCAVagAwIBAgIBATAKBggqhkjOPQQDAjBNMRIwEAYKCZImiZPyLGQBGRYC
+   Y2ExGTAXBgoJkiaJk/IsZAEZFglzYW5kZWxtYW4xHDAaBgNVBAMME1Vuc3RydW5n
+   IEhpZ2h3YXkgQ0EwHhcNMTcwMzI2MTYxOTQwWhcNMTkwMzI2MTYxOTQwWjBHMRIw
+   EAYKCZImiZPyLGQBGRYCY2ExGTAXBgoJkiaJk/IsZAEZFglzYW5kZWxtYW4xFjAU
+   BgNVBAMMDVVuc3RydW5nIE1BU0EwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAATZAH3R
+   b2FvIJOnts+vXuWW35ofyNbCHzjAzOi2kWZFE1ByurKImNcNMFGirGnRXIXGqWCf
+   w5ICgJ8CuM3vV5ty9bf7KUlOkejzTvv+5PV++elkP9HQ83vqTAws2WwWTxKjEDAO
+   MAwGA1UdEwEB/wQCMAAwCgYIKoZIzj0EAwIDZwAwZAIwGb0oyM0doP6t3/LSPL5O
+   DuatEwMYh7WGO+IYTHC8K7EyHBOmCYReKT2+GhV/CLWzAjBNy6UMJTt1tsxJsJqd
+   MPUIFj+4wZg1AOIb/JoA6M7r33pwLQTrHRxEzVMGfWOkYUw=
+   -----END CERTIFICATE-----
+
+E.1.3.  Registrar key pair
+
+   The registrar key (or chain) is the representative of the domain
+   owner.  This key signs Registrar voucher-requests:
+
+   -----BEGIN EC PRIVATE KEY-----
+   MHcCAQEEIF+obiToYYYeMifPsZvrjWJ0yFsCJwIFhpokmT/TULmXoAoGCCqGSM49
+   AwEHoUQDQgAENWQOzcNMUjP0NrtfeBc0DJLWfeMGgCFdIv6FUz4DifM1ujMBec/g
+   6W/P6boTmyTGdFOh/8HwKUerL5bpneK8sg==
+   -----END EC PRIVATE KEY-----
+
+   The public key is indicated in a pledge voucher-request to show
+   proximity.
+
+   -----BEGIN CERTIFICATE-----
+   MIIBrjCCATOgAwIBAgIBAzAKBggqhkjOPQQDAzBOMRIwEAYKCZImiZPyLGQBGRYC
+   Y2ExGTAXBgoJkiaJk/IsZAEZFglzYW5kZWxtYW4xHTAbBgNVBAMMFFVuc3RydW5n
+   IEZvdW50YWluIENBMB4XDTE3MDkwNTAxMTI0NVoXDTE5MDkwNTAxMTI0NVowQzES
+   MBAGCgmSJomT8ixkARkWAmNhMRkwFwYKCZImiZPyLGQBGRYJc2FuZGVsbWFuMRIw
+   EAYDVQQDDAlsb2NhbGhvc3QwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQ1ZA7N
+   w0xSM/Q2u194FzQMktZ94waAIV0i/oVTPgOJ8zW6MwF5z+Dpb8/puhObJMZ0U6H/
+   wfApR6svlumd4ryyow0wCzAJBgNVHRMEAjAAMAoGCCqGSM49BAMDA2kAMGYCMQC3
+   /iTQJ3evYYcgbXhbmzrp64t3QC6qjIeY2jkDx062nuNifVKtyaara3F30AIkKSEC
+   MQDi29efbTLbdtDk3tecY/rD7V77XaJ6nYCmdDCR54TrSFNLgxvt1lyFM+0fYpYR
+   c3o=
+   -----END CERTIFICATE-----
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 60]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+   The registrar public certificate as decoded by openssl's x509
+   utility.  Note that the registrar certificate is marked with the
+   cmcRA extension.
+
+   Certificate:
+       Data:
+           Version: 3 (0x2)
+           Serial Number: 3 (0x3)
+           Signature Algorithm: ecdsa-with-SHA384
+           Issuer: DC=ca, DC=sandelman, CN=Unstrung Fountain CA
+           Validity
+               Not Before: Sep  5 01:12:45 2017 GMT
+               Not After : Sep  5 01:12:45 2019 GMT
+           Subject: DC=ca, DC=sandelman, CN=localhost
+           Subject Public Key Info:
+               Public Key Algorithm: id-ecPublicKey
+               EC Public Key:
+                   pub:
+                       04:35:64:0e:cd:c3:4c:52:33:f4:36:bb:5f:7
+   8:17:
+                       34:0c:92:d6:7d:e3:06:80:21:5d:22:fe:85:5
+   3:3e:
+                       03:89:f3:35:ba:33:01:79:cf:e0:e9:6f:cf:e
+   9:ba:
+                       13:9b:24:c6:74:53:a1:ff:c1:f0:29:47:ab:2
+   f:96:
+                       e9:9d:e2:bc:b2
+                   ASN1 OID: prime256v1
+           X509v3 extensions:
+               X509v3 Basic Constraints:
+                   CA:FALSE
+       Signature Algorithm: ecdsa-with-SHA384
+           30:66:02:31:00:b7:fe:24:d0:27:77:af:61:87:20:6d:78:5
+   b:
+           9b:3a:e9:eb:8b:77:40:2e:aa:8c:87:98:da:39:03:c7:4e:b
+   6:
+           9e:e3:62:7d:52:ad:c9:a6:ab:6b:71:77:d0:02:24:29:21:0
+   2:
+           31:00:e2:db:d7:9f:6d:32:db:76:d0:e4:de:d7:9c:63:fa:c
+   3:
+           ed:5e:fb:5d:a2:7a:9d:80:a6:74:30:91:e7:84:eb:48:53:4
+   b:
+           83:1b:ed:d6:5c:85:33:ed:1f:62:96:11:73:7a
+
+
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 61]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+E.1.4.  Pledge key pair
+
+   The pledge has an IDevID key pair built in at manufacturing time:
+
+   -----BEGIN EC PRIVATE KEY-----
+   MHcCAQEEIL+ue8PQcN+M7LFBGPsompYwobI/rsoHnTb2a+0hO+8joAoGCCqGSM49
+   AwEHoUQDQgAEumBVaDlX87WyME8CJToyt9NWy6sYw0DTbjjJIn79pgr7ALa//Y8p
+   r70WpK1SIaiUeeFw7e+lCzTp1Z+wJu14Bg==
+   -----END EC PRIVATE KEY-----
+
+   The public key is used by the registrar to find the MASA.  The MASA
+   URL is in an extension described in Section 2.3.  RFC-EDITOR: Note
+   that these certificates are using a Private Enterprise Number for the
+   not-yet-assigned by IANA MASA URL, and need to be replaced before
+   AUTH48.
+
+   -----BEGIN CERTIFICATE-----
+   MIICMjCCAbegAwIBAgIBDDAKBggqhkjOPQQDAjBNMRIwEAYKCZImiZPyLGQBGRYC
+   Y2ExGTAXBgoJkiaJk/IsZAEZFglzYW5kZWxtYW4xHDAaBgNVBAMME1Vuc3RydW5n
+   IEhpZ2h3YXkgQ0EwIBcNMTcxMDEyMTM1MjUyWhgPMjk5OTEyMzEwMDAwMDBaMEsx
+   EjAQBgoJkiaJk/IsZAEZFgJjYTEZMBcGCgmSJomT8ixkARkWCXNhbmRlbG1hbjEa
+   MBgGA1UEAwwRMDAtRDAtRTUtRjItMDAtMDIwWTATBgcqhkjOPQIBBggqhkjOPQMB
+   BwNCAARJp5i0dU1aUnR2u8wMRwgkNupNbNM7m1n0mj+0KJZjcPIqID+trPjTSobt
+   uIdpRPfGZ8hU/nIUveqwyoYI8BPbo4GHMIGEMB0GA1UdDgQWBBQdMRZhthFQmzz6
+   E7YVXzkL7XZDKjAJBgNVHRMEAjAAMCsGA1UdEQQkMCKgIAYJKwYBBAGC7lIBoBMM
+   ETAwLUQwLUU1LUYyLTAwLTAyMCsGCSsGAQQBgu5SAgQeDBxodHRwczovL2hpZ2h3
+   YXkuc2FuZGVsbWFuLmNhMAoGCCqGSM49BAMCA2kAMGYCMQDhJ1N+eanW1U/e5qoM
+   SGvUvWHR7uic8cJbh7vXy580nBs8bpNn60k/+IzvEUetMzICMQCr1uxvdYeKq7mb
+   RXCR4ZCJsw67fJ7jyXZbCUSir+3wBT2+lWggzPDRgYB5ABb7sAw=
+   -----END CERTIFICATE-----
+
+   The pledge public certificate as decoded by openssl's x509 utility so
+   that the extensions can be seen.  A second custom Extension is
+   included to provided to contain the EUI48/EUI64 that the pledge will
+   configure.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 62]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+   Certificate:
+       Data:
+           Version: 3 (0x2)
+           Serial Number: 12 (0xc)
+           Signature Algorithm: ecdsa-with-SHA256
+           Issuer: DC=ca, DC=sandelman, CN=Unstrung Highway CA
+           Validity
+               Not Before: Oct 12 13:52:52 2017 GMT
+               Not After : Dec 31 00:00:00 2999 GMT
+           Subject: DC=ca, DC=sandelman, CN=00-D0-E5-F2-00-02
+           Subject Public Key Info:
+               Public Key Algorithm: id-ecPublicKey
+               EC Public Key:
+                   pub:
+                       04:49:a7:98:b4:75:4d:5a:52:74:76:bb:cc:0
+   c:47:
+                       08:24:36:ea:4d:6c:d3:3b:9b:59:f4:9a:3f:b
+   4:28:
+                       96:63:70:f2:2a:20:3f:ad:ac:f8:d3:4a:86:e
+   d:b8:
+                       87:69:44:f7:c6:67:c8:54:fe:72:14:bd:ea:b
+   0:ca:
+                       86:08:f0:13:db
+                   ASN1 OID: prime256v1
+           X509v3 extensions:
+               X509v3 Subject Key Identifier:
+                   1D:31:16:61:B6:11:50:9B:3C:FA:13:B6:15:5F:39
+   :0B:ED:76:43:2A
+               X509v3 Basic Constraints:
+                   CA:FALSE
+               X509v3 Subject Alternative Name:
+                   othername:<unsupported>
+               1.3.6.1.4.1.46930.2:
+                   ..https://highway.sandelman.ca
+       Signature Algorithm: ecdsa-with-SHA256
+           30:66:02:31:00:e1:27:53:7e:79:a9:d6:d5:4f:de:e6:aa:0
+   c:
+           48:6b:d4:bd:61:d1:ee:e8:9c:f1:c2:5b:87:bb:d7:cb:9f:3
+   4:
+           9c:1b:3c:6e:93:67:eb:49:3f:f8:8c:ef:11:47:ad:33:32:0
+   2:
+           31:00:ab:d6:ec:6f:75:87:8a:ab:b9:9b:45:70:91:e1:90:8
+   9:
+           b3:0e:bb:7c:9e:e3:c9:76:5b:09:44:a2:af:ed:f0:05:3d:b
+   e:
+           95:68:20:cc:f0:d1:81:80:79:00:16:fb:b0:0c
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 63]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+E.2.  Example process
+
+   RFC-EDITOR: these examples will need to be replaced with CMS versions
+   once IANA has assigned the eContentType in [I-D.ietf-anima-voucher].
+
+E.2.1.  Pledge to Registrar
+
+   As described in Section 5.2, the pledge will sign a pledge voucher-
+   request containing the Registrar's public key in the proximity-
+   registrar-cert field.  The base64 has been wrapped at 60 characters
+   for presentation reasons.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 64]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+   MIIHHAYJKoZIhvcNAQcCoIIHDTCCBwkCAQExDzANBglghkgBZQMEAgEFADCC
+   Aw4GCSqGSIb3DQEHAaCCAv8EggL7eyJpZXRmLXZvdWNoZXItcmVxdWVzdDp2
+   b3VjaGVyIjp7ImFzc2VydGlvbiI6InByb3hpbWl0eSIsImNyZWF0ZWQtb24i
+   OiIyMDE3LTA5LTAxIiwic2VyaWFsLW51bWJlciI6IjAwLUQwLUU1LUYyLTAw
+   LTAyIiwibm9uY2UiOiJEc3M5OXNCcjNwTk1PQUNlLUxZWTd3IiwicHJveGlt
+   aXR5LXJlZ2lzdHJhci1jZXJ0IjoiTUlJQnJqQ0NBVE9nQXdJQkFnSUJBekFL
+   QmdncWhrak9QUVFEQXpCT01SSXdFQVlLQ1pJbWlaUHlMR1FCR1JZQ1kyRXhH
+   VEFYQmdvSmtpYUprL0lzWkFFWkZnbHpZVzVrWld4dFlXNHhIVEFiQmdOVkJB
+   TU1GRlZ1YzNSeWRXNW5JRVp2ZFc1MFlXbHVJRU5CTUI0WERURTNNRGt3TlRB
+   eE1USTBOVm9YRFRFNU1Ea3dOVEF4TVRJME5Wb3dRekVTTUJBR0NnbVNKb21U
+   OGl4a0FSa1dBbU5oTVJrd0Z3WUtDWkltaVpQeUxHUUJHUllKYzJGdVpHVnNi
+   V0Z1TVJJd0VBWURWUVFEREFsc2IyTmhiR2h2YzNRd1dUQVRCZ2NxaGtqT1BR
+   SUJCZ2dxaGtqT1BRTUJCd05DQUFRMVpBN053MHhTTS9RMnUxOTRGelFNa3Ra
+   OTR3YUFJVjBpL29WVFBnT0o4elc2TXdGNXorRHBiOC9wdWhPYkpNWjBVNkgv
+   d2ZBcFI2c3ZsdW1kNHJ5eW93MHdDekFKQmdOVkhSTUVBakFBTUFvR0NDcUdT
+   TTQ5QkFNREEya0FNR1lDTVFDMy9pVFFKM2V2WVljZ2JYaGJtenJwNjR0M1FD
+   NnFqSWVZMmprRHgwNjJudU5pZlZLdHlhYXJhM0YzMEFJa0tTRUNNUURpMjll
+   ZmJUTGJkdERrM3RlY1kvckQ3Vjc3WGFKNm5ZQ21kRENSNTRUclNGTkxneHZ0
+   MWx5Rk0rMGZZcFlSYzNvPSJ9faCCAjYwggIyMIIBt6ADAgECAgEMMAoGCCqG
+   SM49BAMCME0xEjAQBgoJkiaJk/IsZAEZFgJjYTEZMBcGCgmSJomT8ixkARkW
+   CXNhbmRlbG1hbjEcMBoGA1UEAwwTVW5zdHJ1bmcgSGlnaHdheSBDQTAgFw0x
+   NzEwMTIxMzUyNTJaGA8yOTk5MTIzMTAwMDAwMFowSzESMBAGCgmSJomT8ixk
+   ARkWAmNhMRkwFwYKCZImiZPyLGQBGRYJc2FuZGVsbWFuMRowGAYDVQQDDBEw
+   MC1EMC1FNS1GMi0wMC0wMjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABEmn
+   mLR1TVpSdHa7zAxHCCQ26k1s0zubWfSaP7QolmNw8iogP62s+NNKhu24h2lE
+   98ZnyFT+chS96rDKhgjwE9ujgYcwgYQwHQYDVR0OBBYEFB0xFmG2EVCbPPoT
+   thVfOQvtdkMqMAkGA1UdEwQCMAAwKwYDVR0RBCQwIqAgBgkrBgEEAYLuUgGg
+   EwwRMDAtRDAtRTUtRjItMDAtMDIwKwYJKwYBBAGC7lICBB4MHGh0dHBzOi8v
+   aGlnaHdheS5zYW5kZWxtYW4uY2EwCgYIKoZIzj0EAwIDaQAwZgIxAOEnU355
+   qdbVT97mqgxIa9S9YdHu6JzxwluHu9fLnzScGzxuk2frST/4jO8RR60zMgIx
+   AKvW7G91h4qruZtFcJHhkImzDrt8nuPJdlsJRKKv7fAFPb6VaCDM8NGBgHkA
+   FvuwDDGCAaUwggGhAgEBMFIwTTESMBAGCgmSJomT8ixkARkWAmNhMRkwFwYK
+   CZImiZPyLGQBGRYJc2FuZGVsbWFuMRwwGgYDVQQDDBNVbnN0cnVuZyBIaWdo
+   d2F5IENBAgEMMA0GCWCGSAFlAwQCAQUAoIHkMBgGCSqGSIb3DQEJAzELBgkq
+   hkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTE3MTAxMjE3NTQzMFowLwYJKoZI
+   hvcNAQkEMSIEIP59cuKVAPkKOOlQIaIV/W1AsWKbmVmBd9wFSuD5yLafMHkG
+   CSqGSIb3DQEJDzFsMGowCwYJYIZIAWUDBAEqMAsGCWCGSAFlAwQBFjALBglg
+   hkgBZQMEAQIwCgYIKoZIhvcNAwcwDgYIKoZIhvcNAwICAgCAMA0GCCqGSIb3
+   DQMCAgFAMAcGBSsOAwIHMA0GCCqGSIb3DQMCAgEoMAoGCCqGSM49BAMCBEYw
+   RAIgYUy0NTdP+xTkm/Et69eI++S/2z3dQwPKOwdL0cDCSvACIAh3jJbybMnK
+   cf7DKKnsn2G/O06HeB/8imMI+hnA7CfN
+
+   file: examples/vr_00-D0-E5-F2-00-02.pkcs
+
+   The ASN1 decoding of the artifact:
+
+
+   The JSON contained in the voucher request:
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 65]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+E.2.2.  Registrar to MASA
+
+   As described in Section 5.4 the Registrar will sign a registrar
+   voucher-request, and will include pledge's voucher request in the
+   prior-signed-voucher-request.
+
+   MIIN2gYJKoZIhvcNAQcCoIINyzCCDccCAQExDzANBglghkgBZQMEAgEFADCC
+   Ck4GCSqGSIb3DQEHAaCCCj8Eggo7eyJpZXRmLXZvdWNoZXItcmVxdWVzdDp2
+   b3VjaGVyIjp7ImFzc2VydGlvbiI6InByb3hpbWl0eSIsImNyZWF0ZWQtb24i
+   OiIyMDE3LTA5LTE1VDAwOjAwOjAwLjAwMFoiLCJzZXJpYWwtbnVtYmVyIjoi
+   SkFEQTEyMzQ1Njc4OSIsIm5vbmNlIjoiYWJjZDEyMzQiLCJwcmlvci1zaWdu
+   ZWQtdm91Y2hlci1yZXF1ZXN0IjoiTUlJSEhRWUpLb1pJaHZjTkFRY0NvSUlI
+   RGpDQ0J3b0NBUUV4RHpBTkJnbGdoa2dCWlFNRUFnRUZBRENDQXc0R0NTcUdT
+   SWIzRFFFSEFhQ0NBdjhFZ2dMN2V5SnBaWFJtTFhadmRXTm9aWEl0Y21WeGRX
+   VnpkRHAyYjNWamFHVnlJanA3SW1GemMyVnlkR2x2YmlJNkluQnliM2hwYlds
+   MGVTSXNJbU55WldGMFpXUXRiMjRpT2lJeU1ERTNMVEE1TFRBeElpd2ljMlZ5
+   YVdGc0xXNTFiV0psY2lJNklqQXdMVVF3TFVVMUxVWXlMVEF3TFRBeUlpd2li
+   bTl1WTJVaU9pSkVjM001T1hOQ2NqTndUazFQUVVObExVeFpXVGQzSWl3aWNI
+   SnZlR2x0YVhSNUxYSmxaMmx6ZEhKaGNpMWpaWEowSWpvaVRVbEpRbkpxUTBO
+   QlZFOW5RWGRKUWtGblNVSkJla0ZMUW1kbmNXaHJhazlRVVZGRVFYcENUMDFT
+   U1hkRlFWbExRMXBKYldsYVVIbE1SMUZDUjFKWlExa3lSWGhIVkVGWVFtZHZT
+   bXRwWVVwckwwbHpXa0ZGV2tabmJIcFpWelZyV2xkNGRGbFhOSGhJVkVGaVFt
+   ZE9Wa0pCVFUxR1JsWjFZek5TZVdSWE5XNUpSVnAyWkZjMU1GbFhiSFZKUlU1
+   Q1RVSTBXRVJVUlROTlJHdDNUbFJCZUUxVVNUQk9WbTlZUkZSRk5VMUVhM2RP
+   VkVGNFRWUkpNRTVXYjNkUmVrVlRUVUpCUjBObmJWTktiMjFVT0dsNGEwRlNh
+   MWRCYlU1b1RWSnJkMFozV1V0RFdrbHRhVnBRZVV4SFVVSkhVbGxLWXpKR2RW
+   cEhWbk5pVjBaMVRWSkpkMFZCV1VSV1VWRkVSRUZzYzJJeVRtaGlSMmgyWXpO
+   UmQxZFVRVlJDWjJOeGFHdHFUMUJSU1VKQ1oyZHhhR3RxVDFCUlRVSkNkMDVE
+   UVVGUk1WcEJOMDUzTUhoVFRTOVJNblV4T1RSR2VsRk5hM1JhT1RSM1lVRkpW
+   akJwTDI5V1ZGQm5UMG80ZWxjMlRYZEdOWG9yUkhCaU9DOXdkV2hQWWtwTldq
+   QlZOa2d2ZDJaQmNGSTJjM1pzZFcxa05ISjVlVzkzTUhkRGVrRktRbWRPVmto
+   U1RVVkJha0ZCVFVGdlIwTkRjVWRUVFRRNVFrRk5SRUV5YTBGTlIxbERUVkZE
+   TXk5cFZGRktNMlYyV1ZsaloySllhR0p0ZW5Kd05qUjBNMUZETm5GcVNXVlpN
+   bXByUkhnd05qSnVkVTVwWmxaTGRIbGhZWEpoTTBZek1FRkphMHRUUlVOTlVV
+   UnBNamxsWm1KVVRHSmtkRVJyTTNSbFkxa3Zja1EzVmpjM1dHRktObTVaUTIx
+   a1JFTlNOVFJVY2xOR1RreG5lSFowTVd4NVJrMHJNR1paY0ZsU1l6TnZQU0o5
+   ZmFDQ0FqWXdnZ0l5TUlJQnQ2QURBZ0VDQWdFTU1Bb0dDQ3FHU000OUJBTUNN
+   RTB4RWpBUUJnb0praWFKay9Jc1pBRVpGZ0pqWVRFWk1CY0dDZ21TSm9tVDhp
+   eGtBUmtXQ1hOaGJtUmxiRzFoYmpFY01Cb0dBMVVFQXd3VFZXNXpkSEoxYm1j
+   Z1NHbG5hSGRoZVNCRFFUQWdGdzB4TnpFd01USXhNelV5TlRKYUdBOHlPVGs1
+   TVRJek1UQXdNREF3TUZvd1N6RVNNQkFHQ2dtU0pvbVQ4aXhrQVJrV0FtTmhN
+   Umt3RndZS0NaSW1pWlB5TEdRQkdSWUpjMkZ1WkdWc2JXRnVNUm93R0FZRFZR
+   UUREQkV3TUMxRU1DMUZOUzFHTWkwd01DMHdNakJaTUJNR0J5cUdTTTQ5QWdF
+   R0NDcUdTTTQ5QXdFSEEwSUFCRW1ubUxSMVRWcFNkSGE3ekF4SENDUTI2azFz
+   MHp1YldmU2FQN1FvbG1Odzhpb2dQNjJzK05OS2h1MjRoMmxFOThabnlGVCtj
+   aFM5NnJES2hnandFOXVqZ1ljd2dZUXdIUVlEVlIwT0JCWUVGQjB4Rm1HMkVW
+   Q2JQUG9UdGhWZk9RdnRka01xTUFrR0ExVWRFd1FDTUFBd0t3WURWUjBSQkNR
+   d0lxQWdCZ2tyQmdFRUFZTHVVZ0dnRXd3Uk1EQXRSREF0UlRVdFJqSXRNREF0
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 66]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+   TURJd0t3WUpLd1lCQkFHQzdsSUNCQjRNSEdoMGRIQnpPaTh2YUdsbmFIZGhl
+   UzV6WVc1a1pXeHRZVzR1WTJFd0NnWUlLb1pJemowRUF3SURhUUF3WmdJeEFP
+   RW5VMzU1cWRiVlQ5N21xZ3hJYTlTOVlkSHU2Snp4d2x1SHU5ZkxuelNjR3p4
+   dWsyZnJTVC80ak84UlI2MHpNZ0l4QUt2VzdHOTFoNHFydVp0RmNKSGhrSW16
+   RHJ0OG51UEpkbHNKUktLdjdmQUZQYjZWYUNETThOR0JnSGtBRnZ1d0RER0NB
+   YVl3Z2dHaUFnRUJNRkl3VFRFU01CQUdDZ21TSm9tVDhpeGtBUmtXQW1OaE1S
+   a3dGd1lLQ1pJbWlaUHlMR1FCR1JZSmMyRnVaR1ZzYldGdU1Sd3dHZ1lEVlFR
+   RERCTlZibk4wY25WdVp5QklhV2RvZDJGNUlFTkJBZ0VNTUEwR0NXQ0dTQUZs
+   QXdRQ0FRVUFvSUhrTUJnR0NTcUdTSWIzRFFFSkF6RUxCZ2txaGtpRzl3MEJC
+   d0V3SEFZSktvWklodmNOQVFrRk1ROFhEVEUzTVRBeE1qRXpOVGd5TTFvd0x3
+   WUpLb1pJaHZjTkFRa0VNU0lFSVA1OWN1S1ZBUGtLT09sUUlhSVYvVzFBc1dL
+   Ym1WbUJkOXdGU3VENXlMYWZNSGtHQ1NxR1NJYjNEUUVKRHpGc01Hb3dDd1lK
+   WUlaSUFXVURCQUVxTUFzR0NXQ0dTQUZsQXdRQkZqQUxCZ2xnaGtnQlpRTUVB
+   UUl3Q2dZSUtvWklodmNOQXdjd0RnWUlLb1pJaHZjTkF3SUNBZ0NBTUEwR0ND
+   cUdTSWIzRFFNQ0FnRkFNQWNHQlNzT0F3SUhNQTBHQ0NxR1NJYjNEUU1DQWdF
+   b01Bb0dDQ3FHU000OUJBTUNCRWN3UlFJZ0VNZzFkSkw3RmNkdHJWRHg4cUNh
+   em9lOSsyMk56NFp3UkI5Z0FUR0w3TU1DSVFEanNzVWxaekpxcDIva0NkNFdo
+   eFVoc2FDcFRGd1Bybk5ldzV3Q2tZVUY4UT09In19oIIBsjCCAa4wggEzoAMC
+   AQICAQMwCgYIKoZIzj0EAwMwTjESMBAGCgmSJomT8ixkARkWAmNhMRkwFwYK
+   CZImiZPyLGQBGRYJc2FuZGVsbWFuMR0wGwYDVQQDDBRVbnN0cnVuZyBGb3Vu
+   dGFpbiBDQTAeFw0xNzA5MDUwMTEyNDVaFw0xOTA5MDUwMTEyNDVaMEMxEjAQ
+   BgoJkiaJk/IsZAEZFgJjYTEZMBcGCgmSJomT8ixkARkWCXNhbmRlbG1hbjES
+   MBAGA1UEAwwJbG9jYWxob3N0MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE
+   NWQOzcNMUjP0NrtfeBc0DJLWfeMGgCFdIv6FUz4DifM1ujMBec/g6W/P6boT
+   myTGdFOh/8HwKUerL5bpneK8sqMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQD
+   AwNpADBmAjEAt/4k0Cd3r2GHIG14W5s66euLd0AuqoyHmNo5A8dOtp7jYn1S
+   rcmmq2txd9ACJCkhAjEA4tvXn20y23bQ5N7XnGP6w+1e+12iep2ApnQwkeeE
+   60hTS4Mb7dZchTPtH2KWEXN6MYIBpzCCAaMCAQEwUzBOMRIwEAYKCZImiZPy
+   LGQBGRYCY2ExGTAXBgoJkiaJk/IsZAEZFglzYW5kZWxtYW4xHTAbBgNVBAMM
+   FFVuc3RydW5nIEZvdW50YWluIENBAgEDMA0GCWCGSAFlAwQCAQUAoIHkMBgG
+   CSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTE3MTAy
+   NjAxMzYxOFowLwYJKoZIhvcNAQkEMSIEIEQBM73PZzPo7tE9Mj8gQvaaYeMQ
+   OsxlACaW/HenAqNwMHkGCSqGSIb3DQEJDzFsMGowCwYJYIZIAWUDBAEqMAsG
+   CWCGSAFlAwQBFjALBglghkgBZQMEAQIwCgYIKoZIhvcNAwcwDgYIKoZIhvcN
+   AwICAgCAMA0GCCqGSIb3DQMCAgFAMAcGBSsOAwIHMA0GCCqGSIb3DQMCAgEo
+   MAoGCCqGSM49BAMCBEcwRQIgDdp5uPUlMKp7GFQAD7ypAgqFv8q+KkJt6c3O
+   7iVpVI8CIQCD1u8BkxipvigwvIDmWfjlYdJxcvozNjffq5j3UHg7Rg==
+
+   file: examples/parboiled_vr_00-D0-E5-F2-00-02.pkcs
+
+   The ASN1 decoding of the artifact:
+
+
+E.2.3.  MASA to Registrar
+
+   The MASA will return a voucher to the Registrar, to be relayed to the
+   pledge.
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 67]
+
+Internet-Draft                    BRSKI                     October 2017
+
+
+   MIIG3AYJKoZIhvcNAQcCoIIGzTCCBskCAQExDzANBglghkgBZQMEAgEFADCC
+   AxAGCSqGSIb3DQEHAaCCAwEEggL9eyJpZXRmLXZvdWNoZXI6dm91Y2hlciI6
+   eyJhc3NlcnRpb24iOiJsb2dnZWQiLCJjcmVhdGVkLW9uIjoiMjAxNy0xMC0x
+   MlQxMzo1NDozMS40MzktMDQ6MDAiLCJzZXJpYWwtbnVtYmVyIjoiMDAtRDAt
+   RTUtRjItMDAtMDIiLCJub25jZSI6IkRzczk5c0JyM3BOTU9BQ2UtTFlZN3ci
+   LCJwaW5uZWQtZG9tYWluLWNlcnQiOiJNSUlCcmpDQ0FUT2dBd0lCQWdJQkF6
+   QUtCZ2dxaGtqT1BRUURBekJPTVJJd0VBWUtDWkltaVpQeUxHUUJHUllDWTJF
+   eEdUQVhCZ29Ka2lhSmsvSXNaQUVaRmdsellXNWtaV3h0WVc0eEhUQWJCZ05W
+   QkFNTUZGVnVjM1J5ZFc1bklFWnZkVzUwWVdsdUlFTkJNQjRYRFRFM01Ea3dO
+   VEF4TVRJME5Wb1hEVEU1TURrd05UQXhNVEkwTlZvd1F6RVNNQkFHQ2dtU0pv
+   bVQ4aXhrQVJrV0FtTmhNUmt3RndZS0NaSW1pWlB5TEdRQkdSWUpjMkZ1WkdW
+   c2JXRnVNUkl3RUFZRFZRUUREQWxzYjJOaGJHaHZjM1F3V1RBVEJnY3Foa2pP
+   UFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVExWkE3TncweFNNL1EydTE5NEZ6UU1r
+   dFo5NHdhQUlWMGkvb1ZUUGdPSjh6VzZNd0Y1eitEcGI4L3B1aE9iSk1aMFU2
+   SC93ZkFwUjZzdmx1bWQ0cnl5b3cwd0N6QUpCZ05WSFJNRUFqQUFNQW9HQ0Nx
+   R1NNNDlCQU1EQTJrQU1HWUNNUUMzL2lUUUozZXZZWWNnYlhoYm16cnA2NHQz
+   UUM2cWpJZVkyamtEeDA2Mm51TmlmVkt0eWFhcmEzRjMwQUlrS1NFQ01RRGky
+   OWVmYlRMYmR0RGszdGVjWS9yRDdWNzdYYUo2bllDbWREQ1I1NFRyU0ZOTGd4
+   dnQxbHlGTSswZllwWVJjM289In19oIIB0zCCAc8wggFWoAMCAQICAQEwCgYI
+   KoZIzj0EAwIwTTESMBAGCgmSJomT8ixkARkWAmNhMRkwFwYKCZImiZPyLGQB
+   GRYJc2FuZGVsbWFuMRwwGgYDVQQDDBNVbnN0cnVuZyBIaWdod2F5IENBMB4X
+   DTE3MDMyNjE2MTk0MFoXDTE5MDMyNjE2MTk0MFowRzESMBAGCgmSJomT8ixk
+   ARkWAmNhMRkwFwYKCZImiZPyLGQBGRYJc2FuZGVsbWFuMRYwFAYDVQQDDA1V
+   bnN0cnVuZyBNQVNBMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE2QB90W9hbyCT
+   p7bPr17llt+aH8jWwh84wMzotpFmRRNQcrqyiJjXDTBRoqxp0VyFxqlgn8OS
+   AoCfArjN71ebcvW3+ylJTpHo8077/uT1fvnpZD/R0PN76kwMLNlsFk8SoxAw
+   DjAMBgNVHRMBAf8EAjAAMAoGCCqGSM49BAMCA2cAMGQCMBm9KMjNHaD+rd/y
+   0jy+Tg7mrRMDGIe1hjviGExwvCuxMhwTpgmEXik9vhoVfwi1swIwTculDCU7
+   dbbMSbCanTD1CBY/uMGYNQDiG/yaAOjO6996cC0E6x0cRM1TBn1jpGFMMYIB
+   xjCCAcICAQEwUjBNMRIwEAYKCZImiZPyLGQBGRYCY2ExGTAXBgoJkiaJk/Is
+   ZAEZFglzYW5kZWxtYW4xHDAaBgNVBAMME1Vuc3RydW5nIEhpZ2h3YXkgQ0EC
+   AQEwDQYJYIZIAWUDBAIBBQCggeQwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEH
+   ATAcBgkqhkiG9w0BCQUxDxcNMTcxMDEyMTc1NDMxWjAvBgkqhkiG9w0BCQQx
+   IgQgQXnG628cIW8MoYfB1ljDDlLlJQlxED2tnjcvkLEfix0weQYJKoZIhvcN
+   AQkPMWwwajALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+   AjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcNAwICAUAw
+   BwYFKw4DAgcwDQYIKoZIhvcNAwICASgwCgYIKoZIzj0EAwIEZzBlAjEAhzid
+   /AkNjttpSP1rflNppdHsi324Z2+TXJxueewnJ8z/2NXb+Tf3DsThv7du00Oz
+   AjBjyOnmkkSKHsPR2JluA5c6wovuPEnNKP32daGGeFKGEHMkTInbrqipC881
+   /5K9Q+k=
+
+   file: examples/voucher_00-D0-E5-F2-00-02.pkcs
+
+   The ASN1 decoding of the artifact:
+
+
+
+
+
+
+
+Pritikin, et al.           Expires May 3, 2018                 [Page 68]
 
 Internet-Draft                    BRSKI                     October 2017
 
@@ -3301,4 +3861,4 @@ Authors' Addresses
 
 
 
-Pritikin, et al.         Expires April 26, 2018                [Page 59]
+Pritikin, et al.           Expires May 3, 2018                 [Page 69]
