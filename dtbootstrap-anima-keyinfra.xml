@@ -2398,15 +2398,163 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
     </section>
     <section anchor="mud-extension" title="MUD Extension">
         <t>The following extension augments the MUD model to include a single node, as described in <xref target="I-D.ietf-opsawg-mud"></xref> section 3.6,
-            using the following sample module that has the following tree structure:</t>
+            using the following sample module that has the following tree structure:
         <figure>
             INSERT_TEXT_FROM_FILE ietf-mud-extension-tree.txt END
         </figure>
-        <t>The model is defined as follows:</t>
+      </t>
+      <t>
+        The model is defined as follows:
         <figure>
             INSERT_TEXT_FROM_FILE ietf-mud-extension-yang.txt END
         </figure>
+      </t>
     </section>
+
+    <section title="Example Vouchers">
+      <t>
+        Three entities are involved in a voucher: the MASA issues (signs)
+        it, the registrar's public key is mentioned in the voucher, and the
+        pledge validates it.  In order to provide reproduceable examples
+        the public and private keys for an example MASA and Registrar are
+        first listed.
+      </t>
+      <section title="Keys involved">
+        <t>
+          The Manufacturer has a Certificate Authority that signs the
+          Pledge's IDevID.  In addition the Manufacturer's signing authority
+          (the MASA) signs the vouchers, and that certificate must
+          distributed to the devices at manufacturing time so that vouchers
+          can be validated.
+        </t>
+        <section title="MASA key pair for voucher signatures">
+          <t>
+            This private key signs vouchers:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/masa_secp384r1.key END
+            </figure>
+            This public key validates vouchers:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/masa_secp384r1.crt END
+            </figure>
+          </t>
+        </section>
+        <section title="Manufacturer key pair for IDevID signatures">
+          <t>
+            This private key signs IDevID certificates:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/masa_secp384r1.key END
+            </figure>
+            This public key validates IDevID certificates:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/masa_secp384r1.crt END
+            </figure>
+          </t>
+        </section>
+        <section title="Registrar key pair">
+          <t>
+            The registrar key (or chain) is the representative of the domain
+            owner.  This key signs Registrar voucher-requests:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.key END
+            </figure>
+            The public key is indicated in a pledge voucher-request to show proximity.
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.crt END
+            </figure>
+            The registrar public certificate as decoded by openssl's x509
+            utility.
+            Note that the registrar certificate is marked with the cmcRA extension.
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.txt END
+            </figure>
+          </t>
+        </section>
+        <section title="Pledge key pair">
+          <t>
+            The pledge has an IDevID key pair built in at manufacturing time:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.key END
+            </figure>
+            The public key is used by the registrar to find the MASA. The
+            MASA URL is in an extension described in <xref target="IDevIDextension" />.
+            RFC-EDITOR: Note that these certificates are using a Private
+            Enterprise Number for the not-yet-assigned by IANA MASA URL, and
+            need to be replaced before AUTH48.
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.crt END
+            </figure>
+            The pledge public certificate as decoded by openssl's x509
+            utility so that the extensions can be seen. A second
+            custom Extension is included to provided to contain the EUI48/EUI64 that the
+            pledge will configure.
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.txt END
+            </figure>
+          </t>
+        </section>
+      </section>
+
+      <section title="Example process">
+        <t>
+          RFC-EDITOR: these examples will need to be replaced with CMS
+          versions once IANA has assigned the eContentType in
+          <xref target="I-D.ietf-anima-voucher" />.
+        </t>
+        <section title="Pledge to Registrar">
+          <t>
+            As described in <xref target="RequestVoucherFromRegistrar" />,
+            the pledge will sign a pledge voucher-request containing the
+            Registrar's public key in the proximity-registrar-cert field.
+            The base64 has been wrapped at 60 characters for presentation reasons.
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/vr_00-D0-E5-F2-00-02.pkcs END
+              <postamble>file: examples/vr_00-D0-E5-F2-00-02.pkcs</postamble>
+            </figure>
+            The ASN1 decoding of the artifact:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/vr_00-D0-E5-F2-00-02.asn1.txt END
+            </figure>
+            The JSON contained in the voucher request:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/vr_00-D0-E5-F2-00-02.json END
+            </figure>
+          </t>
+        </section>
+
+        <section title="Registrar to MASA">
+          <t>
+            As described in <xref target="RequestVoucherFromMASA" />
+            the Registrar will sign a registrar voucher-request, and will
+            include pledge's voucher request in the prior-signed-voucher-request.
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/parboiled_vr-00-D0-E5-F2-00-02.pkcs END
+              <postamble>file: examples/parboiled_vr_00-D0-E5-F2-00-02.pkcs</postamble>
+            </figure>
+            The ASN1 decoding of the artifact:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/parboiled_vr-00-D0-E5-F2-00-02.asn1.txt END
+            </figure>
+          </t>
+        </section>
+
+        <section title="MASA to Registrar">
+          <t>
+            The MASA will return a voucher to the Registrar, to be relayed to
+            the pledge.
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/voucher_00-D0-E5-F2-00-02.pkcs END
+              <postamble>file: examples/voucher_00-D0-E5-F2-00-02.pkcs</postamble>
+            </figure>
+            The ASN1 decoding of the artifact:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/voucher_00-D0-E5-F2-00-02.asn1.txt END
+            </figure>
+          </t>
+        </section>
+      </section>
+    </section>
+
   </back>
 </rfc>
 <!--
