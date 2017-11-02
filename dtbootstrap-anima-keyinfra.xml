@@ -925,25 +925,54 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                 return to listening for GRASP M_FLOOD.
                 It should periodically retry the vendor specific mechanisms.
                 The Pledge MAY prioritize selection order as
-                appropriate for the anticipated environment.</t>
+                appropriate for the anticipated environment.
+            </t>
 
-         <section anchor="brskigrasp" title="Proxy Grasp announcements">
-             <t>
+            <section anchor="brskigrasp" title="Proxy Grasp announcements">
+              <t>
                A proxy uses the GRASP M_FLOOD mechanism to announce itself.
                The pledge SHOULD listen for messages of these form.
                This announcement can be within the same message as the ACP
                announcement detailed in
-                 <xref target="I-D.ietf-anima-autonomic-control-plane" />.
-                 <figure>
-                     <artwork><![CDATA[
- proxy-objective = ["AN_Proxy", [ O_IPv6_LOCATOR, ipv6-address,
- transport-proto, port-number ] ]
+               <xref target="I-D.ietf-anima-autonomic-control-plane" />.
 
- ipv6-address       - the v6 LL of the proxy
- transport-proto    - 6, for TCP 17 for UDP
- port-number        - the TCP or UDP port number to find the proxy]]></artwork>
-                     <postamble>Figure 5</postamble>
-                 </figure>
+               The M_FLOOD is formatted as follows:
+               <figure>
+                 <artwork><![CDATA[
+[M_FLOOD, 12340815, h'fe80::1', 180000,
+            ["AN_Proxy", 4, 1, ""],
+            [O_IPv6_LOCATOR,
+                 h'fe80::1', 'TCP', 4443
+                 ]]></artwork>
+                 <postamble>Figure 6b: Proxy Discovery</postamble>
+               </figure>
+             </t>
+
+             <t>
+               The formal CDDL definition is:
+               <figure>
+                 <artwork><![CDATA[
+flood-message = [M_FLOOD, session-id, initiator, ttl,
+                 +[objective, (locator-option / [])]]
+
+objective = ["AN_Proxy", objective-flags, loop-count,
+                                       objective-value]
+
+ttl             = 180000     ; 180,000 ms (3 minutes)
+initiator = ACP address to contact Registrar
+objective-flags = sync-only  ; as in GRASP spec
+sync-only       =  4         ; M_FLOOD only requires synchronization
+loop-count      =  1         ; one hop only
+objective-value = ''         ; none
+
+locator         = [ O_IPv6_LOCATOR, ipv6-address,
+                    transport-proto, port-number ]
+ipv6-address     = the v6 LL of the proxy
+transport-proto  = 'TCP'
+port-number      = selected by proxy
+]]></artwork>
+                 <postamble>Figure 6c: AN_Proxy CDDL</postamble>
+               </figure>
              </t>
          </section>
         </section>
