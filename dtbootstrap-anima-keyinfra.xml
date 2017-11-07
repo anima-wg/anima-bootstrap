@@ -15,7 +15,7 @@
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 ]>
 
-<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-09"
+<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-10"
     ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -55,10 +55,9 @@
 
     <author fullname="Michael H. Behringer" initials="M.H."
             surname="Behringer">
-      <organization>Cisco</organization>
 
       <address>
-        <email>mbehring@cisco.com</email>
+        <email>Michael.H.Behring@gmail.com</email>
       </address>
     </author>
 
@@ -214,11 +213,10 @@
         <t>The following terms are defined for clarity:</t>
 
         <t><list style="hanging">
-            <t hangText="registrarID:">The registrar identity is the
+            <t hangText="domainID:">The domain IDentity is the
             160-bit SHA-1 hash of the BIT STRING of the subjectPublicKey
-            of the registrar certificate. This is consistent with
-            the subject key identifier
-            (<xref target="RFC5280">Section 4.2.1.2</xref>).
+            of the root certificate for the registrars in the domain. 
+            This is consistent with the subject key identifier (<xref target="RFC5280">Section 4.2.1.2</xref>).
             </t>
 
             <t hangText="drop ship:">The physical distribution of equipment
@@ -926,25 +924,54 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                 return to listening for GRASP M_FLOOD.
                 It should periodically retry the vendor specific mechanisms.
                 The Pledge MAY prioritize selection order as
-                appropriate for the anticipated environment.</t>
+                appropriate for the anticipated environment.
+            </t>
 
-         <section anchor="brskigrasp" title="Proxy Grasp announcements">
-             <t>
+            <section anchor="brskigrasp" title="Proxy Grasp announcements">
+              <t>
                A proxy uses the GRASP M_FLOOD mechanism to announce itself.
                The pledge SHOULD listen for messages of these form.
                This announcement can be within the same message as the ACP
                announcement detailed in
-                 <xref target="I-D.ietf-anima-autonomic-control-plane" />.
-                 <figure>
-                     <artwork><![CDATA[
- proxy-objective = ["AN_Proxy", [ O_IPv6_LOCATOR, ipv6-address,
- transport-proto, port-number ] ]
+               <xref target="I-D.ietf-anima-autonomic-control-plane" />.
 
- ipv6-address       - the v6 LL of the proxy
- transport-proto    - 6, for TCP 17 for UDP
- port-number        - the TCP or UDP port number to find the proxy]]></artwork>
-                     <postamble>Figure 5</postamble>
-                 </figure>
+               The M_FLOOD is formatted as follows:
+               <figure>
+                 <artwork><![CDATA[
+[M_FLOOD, 12340815, h'fe80::1', 180000,
+            ["AN_Proxy", 4, 1, ""],
+            [O_IPv6_LOCATOR,
+                 h'fe80::1', 'TCP', 4443
+                 ]]></artwork>
+                 <postamble>Figure 6b: Proxy Discovery</postamble>
+               </figure>
+             </t>
+
+             <t>
+               The formal CDDL definition is:
+               <figure>
+                 <artwork><![CDATA[
+flood-message = [M_FLOOD, session-id, initiator, ttl,
+                 +[objective, (locator-option / [])]]
+
+objective = ["AN_Proxy", objective-flags, loop-count,
+                                       objective-value]
+
+ttl             = 180000     ; 180,000 ms (3 minutes)
+initiator = ACP address to contact Registrar
+objective-flags = sync-only  ; as in GRASP spec
+sync-only       =  4         ; M_FLOOD only requires synchronization
+loop-count      =  1         ; one hop only
+objective-value = ''         ; none
+
+locator         = [ O_IPv6_LOCATOR, ipv6-address,
+                    transport-proto, port-number ]
+ipv6-address     = the v6 LL of the proxy
+transport-proto  = 'TCP'
+port-number      = selected by proxy
+]]></artwork>
+                 <postamble>Figure 6c: AN_Proxy CDDL</postamble>
+               </figure>
              </t>
          </section>
         </section>
@@ -1321,8 +1348,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         The Registrar's certificate chain is extracted from the signature
         method and the root certificate is used to populate the
         "pinned-domain-cert" of the Voucher being issued. The
-        registrarID (e.g. hash of the public key) is determined from the
-        registrar certificate itself and is used to update the audit log.
+        domainID (e.g. hash of the root public key) is determined from the
+        pinned-domain-cert and is used to update the audit log.
         </t>
       </section>
 
@@ -1544,12 +1571,12 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
   "events":[
     {
      "date":"<date/time of the entry>",
-     "registrarID":"<registrarID extracted from voucher-request>",
+     "domainID":"<domainID extracted from voucher-request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     },
     {
      "date":"<date/time of the entry>",
-     "registrarID":"<registrarID extracted from voucher-request>",
+     "domainID":"<domainID extracted from voucher-request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     }
   ]
@@ -1557,15 +1584,15 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </figure></t>
 
           <t>Distribution of a large log is less than ideal. This structure can
-          be optimized as follows: All nonceless entries for the same registrarID
+          be optimized as follows: All nonceless entries for the same domainID
           MAY be condensed into the single most recent nonceless entry.</t>
 
           <t>A Registrar SHOULD use this log information to make an informed decision
           regarding the continued bootstrapping of the Pledge. For example if
-          the log includes unexpected registrarIDs this is indicative of
-          problematic imprints by the Pledge. If the log includes nonceless
-          entries this is indicative of the permanent ability for any registrar
-          in the same domain to trigger a reset of the device and take over management of
+          the log includes an unexpected domainID then the Pledge could have 
+          imprinted on an unexpected domain. If the log includes nonceless
+          entries then any registrar in the same domain could theoretically trigger 
+          a reset of the device and take over management of
           the Pledge. Equipment that is purchased pre-owned can be expected to have an
           extensive history. A Registrar MAY request logs at future times.
           A Registrar MAY be configured to ignore the
@@ -1978,7 +2005,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       indicative of a problem. The Registrar is RECOMMENDED to verify MASA logs
       if voucher status telemetry is not received.</t>
 
-      <t>The MASA authorization log includes a hash of the registrarID for each registrar a voucher has been issued to. This information is closely related to the actual domain identity, especially when paired with the DoS authentication information the MASA might collect. This provides an oportunity for the MASA service to build a detailed understanding of the vendor's devices that have been provisioned within a domain. The domain itself has not been authenticated and is not authoritatively bound to the supply chain which does provide a level of privacy for the domain. Additionally the registrarID captures only the subject key identifier of the registrar. A privacy sensitive domain could theoretically generate a new registrar key, or even domain, for each device being deployed.</t>
+<t>The MASA authorization log includes a hash of the domainID for each registrar a voucher has been issued to. This information is closely related to the actual domain identity, especially when paired with the anti-DDoS authentication information the MASA might collect. This could provide sufficient information for the MASA service to build a detailed understanding the devices that have been provisioned within a domain. There are a number of design choices that mitigate this risk. The domain can maintain some privacy since it has not necessarily been authenticated and is not authoritatively bound to the supply chain. Additionally the domainID captures only the unauthenticated subject key identifier of the domain. A privacy sensitive domain could theoretically generate a new domainID for each device being deployed. Similarly a privacy sensitive domain would likely purchase devices that support proximity assertions from a vendor that does not require sales channel integrations. This would result in a significant level of privacy while maintaining the security characteristics provided by Registrar based audit log inspection.</t>
 
       <t>To facilitate truely limited clients EST RFC7030 section 3.3.2
       requirements that the client MUST support a client authentication model
