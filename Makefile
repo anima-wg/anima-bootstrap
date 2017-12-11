@@ -2,9 +2,9 @@ VERSION=$(shell ./getver ${DRAFT}.xml )
 
 YANGDATE=$(shell date +%Y-%m-%d)
 DRAFT=dtbootstrap-anima-keyinfra
-VRDATE=ietf-voucher-request@${YANGDATE}.yang
+VRDATE=yang/ietf-voucher-request@${YANGDATE}.yang
 EXTRA_FILES+=ietf-voucher-request-tree.txt
-EXTRA_FILES+=ietf-voucher-request@${YANGDATE}.yang
+EXTRA_FILES+=${VRDATE}
 EXTRA_FILES+=time-sequence-diagram.txt
 EXTRA_FILES+=component-diagram.txt
 EXTRA_FILES+=examples/jrc_prime256v1.txt
@@ -75,7 +75,7 @@ validate: ${VRDATE}
 
 
 .PRECIOUS: ${DRAFT}-${VERSION}.xml
-.PRECIOUS: ietf-voucher-request@${YANGDATE}.yang
+.PRECIOUS: ${VRDATE}
 .PRECIOUS: ALL-${DRAFT}.xml
 .PRECIOUS: DATE-${DRAFT}.xml
 
