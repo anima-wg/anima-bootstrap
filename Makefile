@@ -2,9 +2,9 @@ VERSION=$(shell ./getver ${DRAFT}.xml )
 
 YANGDATE=$(shell date +%Y-%m-%d)
 DRAFT=dtbootstrap-anima-keyinfra
-VRDATE=ietf-voucher-request@${YANGDATE}.yang
+VRDATE=yang/ietf-voucher-request@${YANGDATE}.yang
 EXTRA_FILES+=ietf-voucher-request-tree.txt
-EXTRA_FILES+=ietf-voucher-request@${YANGDATE}.yang
+EXTRA_FILES+=${VRDATE}
 EXTRA_FILES+=time-sequence-diagram.txt
 EXTRA_FILES+=component-diagram.txt
 EXTRA_FILES+=examples/jrc_prime256v1.txt
@@ -33,8 +33,8 @@ ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt ${DRAFT}.html
 ietf-voucher-request-tree.txt: ${VRDATE}
 	pyang --path=../voucher -f tree --tree-print-groupings ${VRDATE} > ietf-voucher-request-tree.txt
 
-${VRDATE}: yang/ietf-voucher-request.yang
-	sed -e"s/YYYY-MM-DD/${YANGDATE}/" yang/ietf-voucher-request.yang > ${VRDATE}
+${VRDATE}: ietf-voucher-request.yang
+	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ${VRDATE}
 
 examples/%.txt: examples/%.crt
 	openssl x509 -noout -text -in $? | fold -w 60 >$@
@@ -75,7 +75,7 @@ validate: ${VRDATE}
 
 
 .PRECIOUS: ${DRAFT}-${VERSION}.xml
-.PRECIOUS: ietf-voucher-request@${YANGDATE}.yang
+.PRECIOUS: ${VRDATE}
 .PRECIOUS: ALL-${DRAFT}.xml
 .PRECIOUS: DATE-${DRAFT}.xml
 
