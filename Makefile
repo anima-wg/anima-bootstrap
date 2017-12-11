@@ -33,8 +33,8 @@ ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt ${DRAFT}.html
 ietf-voucher-request-tree.txt: ${VRDATE}
 	pyang --path=../voucher -f tree --tree-print-groupings ${VRDATE} > ietf-voucher-request-tree.txt
 
-${VRDATE}: ietf-voucher-request.yang
-	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ${VRDATE}
+${VRDATE}: yang/ietf-voucher-request.yang
+	sed -e"s/YYYY-MM-DD/${YANGDATE}/" yang/ietf-voucher-request.yang > ${VRDATE}
 
 examples/%.txt: examples/%.crt
 	openssl x509 -noout -text -in $? | fold -w 60 >$@
