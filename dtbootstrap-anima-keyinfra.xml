@@ -1576,7 +1576,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           example:</t>
 
           <t><figure>
-            <artwork><![CDATA[{
+            <artwork><![CDATA[
+{
   "version":"1",
   "events":[
     {
@@ -1589,13 +1590,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
      "domainID":"<domainID extracted from voucher-request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     }
-  ]
+  ],
+  "truncation": { 
+    "nonced duplicates": <number of entries truncated>,
+    "nonceless duplicates": <number of entries truncated>,
+    "arbitrary": <number of entries trucated> 
+    }
 }]]></artwork>
           </figure></t>
-
-          <t>Distribution of a large log is less than ideal. This structure can
-          be optimized as follows: All nonceless entries for the same domainID
-          MAY be condensed into the single most recent nonceless entry.</t>
 
           <t>A Registrar SHOULD use this log information to make an informed decision
           regarding the continued bootstrapping of the Pledge. For example if
@@ -1609,14 +1611,32 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           history of the device but it is RECOMMENDED that this only be
           configured if hardware assisted NEA [RFC5209] is supported.</t>
 
-          <t>Log entries can be compared against
-          local history logs in search of discrepancies.</t>
+        <t>Log entries can be compared against local history logs in search of discrepancies.</t>
 
-          <t>This document specifies a simple log format as provided by the
+          <t>Distribution of a large log is less than ideal. This structure can
+          be optimized as follows: Nonced or Nonceless entries for the 
+          same domainID MAY be truncated from the log leaving only the single 
+          most recent nonced or nonceless entry. The log SHOULD NOT be further
+          reduced but there could exist operational situation where maintaining
+          the full log is not possible. In such situations the log MAY be
+          arbitrarily truncated for length. The trunctation method(s) used MUST
+          be indicated in the JSON truncation dictionary using "nonced
+          duplicates", "nonceless duplicates", and "arbitrary" where the
+          number of entries that have been truncation is indicated. If
+          the truncation count exceeds 1024 then the MASA 
+          MAY use this value without further incrementing it.</t>
+
+          <t>A log where duplicate entries for the same domain have 
+            been truncated ("nonced duplicates" and/or "nonceless duplicates)
+            could still be acceptable for informed decisions. A log that
+            has had "arbitrary" truncations is less acceptable but vendor 
+            transparency is better than hidden truncations.</t>
+          <t>This document 
+            specifies a simple log format as provided by the
           MASA service to the registar. This format could be improved by
           distributed consensus technologies that integrate vouchers
-          with a technologies such as block-chain or hash trees or the
-          like. Doing so is out of the scope of this document but are
+          with a technologies such as block-chain or hash trees or optimized
+          logging approaches. Doing so is out of the scope of this document but are
           anticipated improvements for future work.  As such, the
           Registrar client SHOULD anticipate new kinds of responses, and
           SHOULD provide operator controls to indicate how to process
