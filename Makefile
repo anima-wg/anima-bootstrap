@@ -1,5 +1,6 @@
 VERSION=$(shell ./getver ${DRAFT}.xml )
 
+IETFUSER=mcr+ietf@sandelman.ca
 YANGDATE=$(shell date +%Y-%m-%d)
 DRAFT=dtbootstrap-anima-keyinfra
 VRDATE=yang/ietf-voucher-request@${YANGDATE}.yang
@@ -57,6 +58,9 @@ ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
 
 %.html: ALL-%.xml
 	unset DISPLAY; XML_LIBRARY=$(XML_LIBRARY):./src xml2rfc --html -o $(subst ALL-,,$@) $?
+
+submit: ALL-${DRAFT}.xml
+	curl -S -F "user=${IETFUSER}" -F "xml=@ALL-${DRAFT}.xml" https://datatracker.ietf.org/api/submit
 
 clean:
 	-rm -f ${DRAFT}-${VERSION}.xml ${DRAFT}-${VERSION}.txt
