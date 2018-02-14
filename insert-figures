@@ -1,8 +1,12 @@
 #!/usr/bin/perl
 
+use File::Basename;
+
 while(<>) {
     if(/INSERT_TEXT_FROM_FILE (.*) END/) {
         my $codewrapper=0;
+        my $base;
+        my $basename;
         $file = $1;
         print STDERR "File: $file\n";
         if( $file =~ /(.*)\@DATE/ ) {
@@ -16,13 +20,14 @@ while(<>) {
             my @sorted = reverse sort grep(/^$base@/,@files);
             #print STDERR join(',', @sorted);
             $file = "yang/" . shift @sorted;
-            print STDERR "Setting file=$file\n";
+            $basename = basename($file);
+            print STDERR "Setting file=$file (basename=${basename}\n";
         }
         open(FILE, "<" . $file) || die "Can not open $file: $!\n";
         print "<artwork><![CDATA[\n";
         if($file =~ /\.yang$/) {
             $codewrapper=1;
-            print "<CODE BEGINS> file \"$file\"\n"
+            print "<CODE BEGINS> file \"$basename\"\n"
         }
         while(<FILE>) {
             print;
