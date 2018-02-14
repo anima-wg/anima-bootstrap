@@ -5,16 +5,13 @@
 +--------+         +---------+    +------------+     +------------+
   |                     |                   |           Internet |
   |<-RFC4862 IPv6 addr  |                   |                    |
-  |<-RFC3927 IPv4 addr  | Appendix A        |                    |
-  |                     |                   |                    |
-  |-------------------->|                   |                    |
-  | optional: mDNS query| Appendix B        |                    |
-  | RFC6763/RFC6762     |                   |                    |
-  |                     |                   |                    |
-  |<--------------------|                   |                    |
+  |<-RFC3927 IPv4 addr  | Appendix A        |  Legend            |
+  |-------------------->|                   |  C - circuit       |
+  | optional: mDNS query| Appendix B        |      proxy         |
+  | RFC6763/RFC6762     |                   |  P - provisional   |
+  |<--------------------|                   |    TLS connection  |
   | GRASP M_FLOOD       |                   |                    |
   |   periodic broadcast|                   |                    |
-  |                     |                   |                    |
   |<------------------->C<----------------->|                    |
   |              TLS via the Circuit Proxy  |                    |
   |<--Registrar TLS server authentication---|                    |
@@ -22,7 +19,6 @@
   P---X.509 client authentication---------->|                    |
   P                     |                   |                    |
   P---Voucher Request (include nonce)------>|                    |
-  P                     |                   |                    |
   P                     |       /--->       |                    |
   P                     |       |      [accept device?]          |
   P                     |       |      [contact Vendor]          |
@@ -30,27 +26,21 @@
   P                     |       |           |--Domain ID-------->|
   P                     |       |           |--optional:nonce--->|
   P                     |       |           |     [extract DomainID]
-  P                     |       |           |                    |
   P                     |    optional:      |     [update audit log]
   P                     |       |can        |                    |
   P                     |       |occur      |                    |
   P                     |       |in         |                    |
   P                     |       |advance    |                    |
   P                     |       |if         |                    |
-  P                     |       |nonceless  |                    | 
+  P                     |       |nonceless  |                    |
   P                     |       |           |<- voucher ---------|
   P                     |       \---->      |                    |
-  P                     |                   |                    |
   P<------voucher---------------------------|                    |
-[verify voucher ]       |                   |                    |
-[verify provisional cert|                   |                    |
-  |                     |                   |                    |
+[verify voucher , [verify provisional cert| |                    |
   |---------------------------------------->|                    |
   |      [voucher status telemetry]         |<-device audit log--|
   |                     |       [verify audit log and voucher]   |
-  |                     |                   |                    |
   |<--------------------------------------->|                    |
   | Continue with RFC7030 enrollment        |                    |
   | using now bidirectionally authenticated |                    |
   | TLS session.        |                   |                    |
-  |                     |                   |                    |
