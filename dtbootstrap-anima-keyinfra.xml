@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
-<!ENTITY I-D.behringer-autonomic-network-framework PUBLIC "" "https://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.behringer-homenet-trust-bootstrap.xml">
-<!ENTITY I-D.draft-ietf-anima-autonomic-control-plane PUBLIC "" "https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.behringer-anima-autonomic-control-plane.xml">
 <!ENTITY I-D.vanderstok-ace-coap-est PUBLIC "" "https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.vanderstok-ace-coap-est.xml">
 <!ENTITY RFC2119 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC7030 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7030.xml">
@@ -85,8 +83,8 @@
 
     <abstract>
       <t>This document specifies automated bootstrapping of a remote secure
-      key infrastructure (BRSKI) using vendor installed X.509 certificate, in
-      combination with a vendor's authorizing service, both online and offline.
+      key infrastructure (BRSKI) using manufacturer installed X.509 certificate, in
+      combination with a manufacturer's authorizing service, both online and offline.
       Bootstrapping a new device can occur using a routable address and a
       cloud service, or using only link-local connectivity, or on
       limited/disconnected networks. Support for lower security models,
@@ -154,6 +152,7 @@
         without external help is also an impossibility. Today it is commonly
         accepted that the initial connections between nodes are insecure, until
         key distribution is complete, or that domain-specific keying material
+        (often pre-shared keys, including mechanisms like SIM cards)
         is pre-provisioned on each new device in a costly and non-scalable
         manner. Existing mechanisms are known as non-secured 'Trust on
         First Use' (TOFU) <xref target="RFC7435" />, 'resurrecting duckling'
@@ -183,20 +182,20 @@
           zero-touch.</t>
 
           <t>There are "call home" technologies where the Pledge first
-              establishes a connection to a well known vendor service using a common
+              establishes a connection to a well known manufacturer service using a common
               client-server authentication model. After mutual authentication,
               appropriate credentials to authenticate the target domain are
               transfered to the Pledge. This creates serveral problems and
               limitations:</t>
 
           <t><list style="symbols">
-              <t>the Pledge requires realtime connectivity to the vendor
+              <t>the Pledge requires realtime connectivity to the manufacturer
                   service,</t>
 
-              <t>the domain identity is exposed to the vendor service (this is a
+              <t>the domain identity is exposed to the manufacturer service (this is a
                   privacy concern),</t>
 
-              <t>the vendor is responsible for making the authorization
+              <t>the manufacturer is responsible for making the authorization
                   decisions (this is a liability concern),</t>
           </list></t>
 
@@ -246,10 +245,9 @@
             response.</t>
 
             <t hangText="Pledge:">The prospective device, which has an
-            identity installed by a third-party (e.g., vendor, manufacturer or
-            integrator).</t>
+            identity installed at the factory.</t>
 
-            <t hangText="Voucher">A signed statement from the MASA service
+            <t hangText="Voucher:">A signed artifact from the MASA
             that indicates to a Pledge the cryptographic identity of the
             Registrar it should trust. There are different types of vouchers
             depending on how that trust is asserted. Multiple voucher types are
@@ -273,6 +271,14 @@
             Join Registrar is "inside" its domain. For simplicity this document
             often refers to this as just "Registrar". The term JRC is used in
             common with other bootstrap mechanisms.</t>
+
+            <t hangText="(Public) Key Infrastructure:"> The collection of systems and
+            processes that sustain the activities of a public key system.
+            In an ANIMA Autonomic system, this includes a Domain
+            Certification Authority (CA), (Join) Registrar which acts as an
+            <xref target="RFC5280" /> Registrar, as well as appropriate
+            certificate revocation list (CRL) distribution points and/or OCSP
+            (<xref target="RFC6960" />) servers.</t>
 
             <t hangText="Join Proxy:">A domain entity that helps the Pledge join
             the domain. A Proxy facilitates communication for devices that
@@ -311,6 +317,25 @@
             <t hangText="nonceless:">a voucher (or request) that does not
             contain a nonce, relying upon accurate clocks for expiration, or
             which does not expire.</t>
+
+            <t hangText="manufacturer:">the term manufacturer is used
+            throughout this document to be the entity that created the
+            device.  This is typically the "original equipment manufacturer"
+            or OEM, but in more complex situations it could be a "value added
+            retailer" (VAR), or possibly even a systems integrator.  In
+            general, it a goal of BRSKI to eliminate small distinctions
+            between different sales channels.  The reason for this is
+            that it permits a single device, with a uniform firmware load, to
+            be shipped directly to all customers.  This eliminates costs
+            for the manufacturer.  This also reduces the number of products
+            supported in the field increasing the chance that firmware will
+            be more up to date.
+            </t>
+
+            <t hangText="ANI:">The Autonomic Network Infrastructure as
+            defined by <xref target="I-D.ietf-anima-autonomic-control-plane"
+            />.  This document details specific requirements for pledges,
+            proxies and registrars when they are part of an ANI.</t>
 
           </list></t>
       </section>
@@ -408,6 +433,40 @@
         </t>
       </section>
 
+      <section anchor="ANIrequirements"
+               title="Requirements for Autonomic Network Infrastructure (ANI) devices">
+        <t>
+          The BRSKI protocol can be used in a number of environments. Some of
+          the flexibility in this document is the result of users out of the
+          ANI scope.  This section defines the base requirements for ANI
+          devices.
+        </t>
+        <t>
+          For devices that intend to become part of an Autonomic Network
+          Infrastructure (ANI) (<xref target="I-D.ietf-anima-reference-model" />) that includes an
+          Autonomic Control Plane (<xref target="I-D.ietf-anima-autonomic-control-plane" />), the following actions
+          are required and MUST be performed by the Pledge:
+          <list style="symbols">
+            <t>BRSKI: Request Voucher</t>
+            <t>EST: CA Certificates Request</t>
+            <t>EST: CSR Attributes</t>
+            <t>EST: Client Certificate Request</t>
+            <t>BRSKI: Enrollment status Telemetry</t>
+          </list>
+        </t>
+        <t>
+          The ANI Registrar (JRC) MUST support all the BRSKI and above listed
+          EST operations.
+        </t>
+        <t>
+          All ANI devices SHOULD support the BRSKI proxy function, using
+          circuit proxies. Other proxy methods are optional, and may be
+          enabled only if the JRC indicates support for them in it's
+          announcement. (See <xref target="JRCgrasp" />)
+        </t>
+
+      </section>
+
     </section>
 
     <section title="Architectural Overview">
@@ -424,18 +483,18 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
 </figure>
 
       <t>We assume a multi-vendor network. In such an environment there could
-      be a Vendor Service for each vendor that supports devices following this
+      be a Manufacturer Service for each manufacturer that supports devices following this
       document's specification, or an integrator could provide a generic
-      service authorized by multiple vendors. It is unlikely that an
+      service authorized by multiple manufacturers. It is unlikely that an
       integrator could provide Ownership Tracking services for multiple
-      vendors due to the required sales channel integrations necessary to
+      manufacturers due to the required sales channel integrations necessary to
       track ownership.</t>
 
       <t>The domain is the managed network infrastructure with a Key Infrastructure the Pledge is
       joining. The domain provides initial device connectivity
       sufficient for bootstrapping with a Circuit Proxy. The Domain
       Registrar authenticates the Pledge, makes authorization decisions, and distributes
-      vouchers obtained from the Vendor Service. Optionally the Registrar
+      vouchers obtained from the Manufacturer Service. Optionally the Registrar
       also acts as a PKI Registration Authority.</t>
 
       <section title="Behavior of a Pledge">
@@ -467,7 +526,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
 |            +------v-------+
 |            |  Imprint     |   Optional
 ^------------+              <--+Manual input (Appendix C)
-| Bad Vendor +------+-------+
+| Bad MASA   +------+-------+
 | response          |  send Voucher Status Telemetry
 |            +------v-------+
 |            |  Enroll      |
@@ -500,7 +559,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
                 particular bootstrapping attempt.</t>
 
             <t>Imprint on the Registrar. This requires verification of the
-                vendor service provided voucher. A voucher contains sufficient
+                manufacturer service provided voucher. A voucher contains sufficient
                 information for the Pledge to complete authentication of a
                 Registrar. (It enables the Pledge to finish
                 authentication of the Registrar TLS server certificate).</t>
@@ -517,7 +576,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
       </section>
 
       <section title="Secure Imprinting using Vouchers">
-        <t>A voucher is a cryptographically protected statement to the Pledge
+        <t>A voucher is a cryptographically protected artifact (a digital signature) to the Pledge
         device authorizing a zero-touch imprint on the Registrar
         domain. </t>
 
@@ -532,7 +591,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
             integrations that are beyond the scope of this document. This
             provides the flexibility for a number of use cases via a single
             common protocol mechanism on the Pledge and Registrar devices that
-            are to be widely deployed in the field. The MASA vendor services have
+            are to be widely deployed in the field. The MASA services have
             the flexibility to leverage either the currently defined claim
             mechanisms or to experiment with higher or lower security levels.</t>
 
@@ -548,7 +607,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
              provides a basis for authenticating the Pledge during subsequent
              protocol exchanges and informing the Registrar of the MASA
              URI. There is no requirement for a common root PKI hierarchy. Each
-             device vendor can generate its own root certificate.</t>
+             device manufacturer can generate its own root certificate.</t>
 
               <t>The following previously defined fields are in the
                   X.509 IDevID certificate:</t>
@@ -653,13 +712,13 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
         <section anchor="registrar-overview" title="Architectural component: Domain Registrar">
           <t>
             The Domain Registrar (having the formal name Join Registrar/Coordinator (JRC), operates as a CMC Registrar, terminating the EST and BRSKI connections. The Registrar is manually configured or distributed with a list of trust anchors necessary to authenticate any Pledge device expected on the network.
-            The Registrar communicates with the Vendor supplied MASA to
+            The Registrar communicates with the MASA to
             establish ownership.
           </t>
         </section>
-        <section anchor="masa-overview" title="Architectural component: Vendor Service">
+        <section anchor="masa-overview" title="Architectural component: Manufacturer Service">
           <t>
-            The Vendor Service provides two logically seperate functions:
+            The Manufacturer Service provides two logically seperate functions:
             the Manufacturer Authorized Signing Authority (MASA), and an
             ownership tracking/auditing function.
           </t>
@@ -749,7 +808,7 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
             mechanism.</t>
         <t>If the Registrar is integrated with <xref target="I-D.ietf-opsawg-mud"></xref> and the Pledge IDevID contains the id-pe-mud-url then the Registrar MAY attempt to obtain the MASA URL from the MUD file. The MUD file extension
             for the MASA URL is defined in <xref target="mud-extension"></xref>.</t>
-        <t>It can be operationally difficult to ensure the necessary X.509 extensions are in the Pledge's IDevID due to the difficulty of aligning current Pledge manufacturing with software releases and development. As a final fallback the Registrar MAY be manually configured or distributed with a MASA URL for each vendor. Note that the Registrar can only select the configured MASA URL based on the trust anchor -- so vendors can only leverage this approach if they ensure a single MASA URL works for all Pledge's associated with each trust anchor.</t>
+        <t>It can be operationally difficult to ensure the necessary X.509 extensions are in the Pledge's IDevID due to the difficulty of aligning current Pledge manufacturing with software releases and development. As a final fallback the Registrar MAY be manually configured or distributed with a MASA URL for each manufacturer. Note that the Registrar can only select the configured MASA URL based on the trust anchor -- so manufacturers can only leverage this approach if they ensure a single MASA URL works for all Pledge's associated with each trust anchor.</t>
 
       </section>
     </section>
@@ -956,7 +1015,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
 
             <t>Once all discovered services are attempted the device SHOULD
                 return to listening for GRASP M_FLOOD.
-                It SHOULD periodically retry the vendor specific mechanisms.
+                It SHOULD periodically retry the manufacturer specific mechanisms.
                 The Pledge MAY prioritize selection order as
                 appropriate for the anticipated environment.
             </t>
@@ -1025,7 +1084,7 @@ port-number      = selected by Proxy
         </t>
       </section>
 
-      <section title="Proxy discovery of Registrar">
+      <section title="Proxy discovery of Registrar" anchor="JRCgrasp">
         <t> The Registrar SHOULD announce itself so that proxies can find it
         and determine what kind of connections can be terminated.
         </t>
@@ -1199,11 +1258,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
               <xref target="RFC6125" /> this provides for a SERIALNUM-ID category of identifier that
               can be included in a certificate and therefore that can also be used
               for matching purposes. The SERIALNUM-ID whitelist is collated according
-              to vendor trust anchor since serial numbers are not globally
+              to manufacturer trust anchor since serial numbers are not globally
               unique.</t>
 
-          <t>The Registrar requests and validates the Voucher from the
-          vendor authorized MASA service.</t>
+          <t>The Registrar requests and validates the Voucher from the MASA.</t>
 
           <t>The Registrar forwards the Voucher to the Pledge when
           requested.</t>
@@ -1451,7 +1509,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </figure>
 
         <t>The Pledge verifies the signed voucher using the manufacturer
-        installed trust anchor associated with the vendor's selected Manufacturer
+        installed trust anchor associated with the manufacturer's selected Manufacturer
         Authorized Signing Authority.</t>
 
         <t>The 'pinned-domain-cert' element of the voucher contains the domain
@@ -1676,7 +1734,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           <t>A log where duplicate entries for the same domain have
             been truncated ("nonced duplicates" and/or "nonceless duplicates)
             could still be acceptable for informed decisions. A log that
-            has had "arbitrary" truncations is less acceptable but vendor
+            has had "arbitrary" truncations is less acceptable but manufacturer
             transparency is better than hidden truncations.</t>
           <t>This document
             specifies a simple log format as provided by the
@@ -1860,7 +1918,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <figure>
           <artwork><![CDATA[
 +--------+         +---------+    +------------+     +------------+
-| Pledge |         | Circuit |    | Domain     |     | Vendor     |
+| Pledge |         | Circuit |    | Domain     |     |Manufacturer|
 |        |         | Proxy   |    | Registrar  |     | Service    |
 |        |         |         |    |            |     | (Internet) |
 +--------+         +---------+    +------------+     +------------+
@@ -1882,18 +1940,18 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             <t hangText="Registrar:">When interacting with a MASA server a
             Registrar makes all decisions. When Ownership Vouchers are
             involved a Registrar is only a conduit and all security decisions
-            are made on the vendor service.</t>
+            are made on the manufacturer service.</t>
 
-            <t hangText="Vendor Service, MASA:">This form of vendor service is
+            <t hangText="Vendor Service, MASA:">This form of manufacturer service is
             trusted to accurately log all claim attempts and to provide
             authoritative log information to Registrars. The MASA does not
             know which devices are associated with which domains. These claims
             could be strengthened by using cryptographic log techniques to
             provide append only, cryptographic assured, publicly auditable
-            logs. Current text provides only for a trusted vendor.</t>
+            logs. Current text provides only for a trusted manufacturer.</t>
 
             <t hangText="Vendor Service, Ownership Validation:">This form of
-            vendor service is trusted to accurately know which device is owned
+            manufacturer service is trusted to accurately know which device is owned
             by which domain.</t>
           </list></t>
       </section>
@@ -1913,7 +1971,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         all use cases.</t>
         <t>The Pledge MAY have an operational mode where it skips Voucher
         validation one time. For example if a physical button is depressed
-        during the bootstrapping operation. This can be useful if the vendor
+        during the bootstrapping operation. This can be useful if the manufacturer
         service is unavailable. This behavior SHOULD be available via local
         configuration or physical presence methods to ensure new entities can
         always be deployed even when autonomic methods fail. This allows for
@@ -1996,7 +2054,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
             <t>Not verifying ownership before responding with a
             Voucher. This is expected to be a common operational model because
-            doing so relieves the vendor providing MASA services from having
+            doing so relieves the manufacturer providing MASA services from having
             to track ownership during shipping and supply chain and allows
             for a very low overhead MASA service. A Registrar uses the audit
             log information as a defense in depth strategy to ensure that this
@@ -2041,7 +2099,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         uncooperative to the Registrar. They include planned and unplanned
         network partitions, changes to MASA policy, or other instances where
         MASA policy rejects a claim. These introduce an operational risk to the
-        Registrar owner that MASA/vendor behavior might limit the ability to
+        Registrar owner that MASA behavior might limit the ability to
         re-boostrap a Pledge device. For example this might be an issue during
         disaster recovery. This risk can be mitigated by Registrars that request and
         maintain long term copies of "nonceless" Vouchers. In that way
@@ -2063,7 +2121,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <t>The MASA server is exposed to DoS attacks wherein attackers claim
         an unbounded number of devices. Ensuring a Registrar is
-        representative of a valid vendor customer, even without validating
+        representative of a valid manufacturer customer, even without validating
         ownership of specific Pledge devices, helps to mitigate this. Pledge
         signatures on the Pledge voucher-request, as forwarded by the
         Registrar in the prior-signed-voucher field of the Registrar voucher-request, significantly
@@ -2080,7 +2138,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       indicative of a problem. The Registrar is RECOMMENDED to verify MASA logs
       if voucher status telemetry is not received.</t>
 
-<t>The MASA authorization log includes a hash of the domainID for each Registrar a voucher has been issued to. This information is closely related to the actual domain identity, especially when paired with the anti-DDoS authentication information the MASA might collect. This could provide sufficient information for the MASA service to build a detailed understanding the devices that have been provisioned within a domain. There are a number of design choices that mitigate this risk. The domain can maintain some privacy since it has not necessarily been authenticated and is not authoritatively bound to the supply chain. Additionally the domainID captures only the unauthenticated subject key identifier of the domain. A privacy sensitive domain could theoretically generate a new domainID for each device being deployed. Similarly a privacy sensitive domain would likely purchase devices that support proximity assertions from a vendor that does not require sales channel integrations. This would result in a significant level of privacy while maintaining the security characteristics provided by Registrar based audit log inspection.</t>
+<t>The MASA authorization log includes a hash of the domainID for each Registrar a voucher has been issued to. This information is closely related to the actual domain identity, especially when paired with the anti-DDoS authentication information the MASA might collect. This could provide sufficient information for the MASA service to build a detailed understanding the devices that have been provisioned within a domain. There are a number of design choices that mitigate this risk. The domain can maintain some privacy since it has not necessarily been authenticated and is not authoritatively bound to the supply chain. Additionally the domainID captures only the unauthenticated subject key identifier of the domain. A privacy sensitive domain could theoretically generate a new domainID for each device being deployed. Similarly a privacy sensitive domain would likely purchase devices that support proximity assertions from a manufacturer that does not require sales channel integrations. This would result in a significant level of privacy while maintaining the security characteristics provided by Registrar based audit log inspection.</t>
 
       <t>To facilitate truely limited clients EST RFC7030 section 3.3.2
       requirements that the client MUST support a client authentication model
@@ -2241,7 +2299,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
     </references>
 
     <references title="Informative References">
-      &I-D.behringer-autonomic-network-framework;
+      <?rfc include="reference.I-D.ietf-anima-reference-model" ?>
 
       <?rfc include="reference.RFC.7435" ?>
       <?rfc include="reference.RFC.7217" ?>
@@ -2249,6 +2307,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       <?rfc include="reference.RFC.7231" ?>
       <?rfc include="reference.RFC.2473" ?>
       <?rfc include="reference.RFC.5785" ?>
+      <?rfc include="reference.RFC.2663" ?>
+      <?rfc include="reference.RFC.6960" ?>
       <?rfc include="reference.I-D.vanderstok-ace-coap-est" ?>
 
       <?rfc include="reference.I-D.richardson-anima-state-for-joinrouter" ?>
@@ -2336,10 +2396,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         If no local bootstrapks service is located using the GRASP
         mechanisms, or the above mentioned DNS-based Service Discovery
         methods, the Pledge MAY contact a well
-        known vendor provided bootstrapping server by performing a DNS
+        known manufacturer provided bootstrapping server by performing a DNS
         lookup using a well known URI such as
-        "bootstrapks.vendor-example.com". The details of the URI are
-        vendor specific. Vendors that leverage this method on the Pledge
+        "bootstrapks.manufacturer-example.com". The details of the URI are
+        manufacturer specific. Manufacturers that leverage this method on the Pledge
         are responsible for providing the bootstrapks service.
       </t>
 
@@ -2359,7 +2419,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       <t>
         The Circuit Proxy mechanism suffers from requiring a state on the
         Join Proxy for each connection that is relayed.  The Circuit Proxy
-        can be considered a kind of Algorithm Gateway [FIND-good-REF].
+        can be considered a kind of Algorithm Gateway (see <xref target="RFC2663"
+   />, section 2.9).
       </t>
       <t>
         An alternative to proxying at the TCP layer is to selectively forward
