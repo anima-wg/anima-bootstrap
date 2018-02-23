@@ -1,10 +1,12 @@
 VERSION=$(shell ./getver ${DRAFT}.xml )
 
-YANGDATE=$(shell date +%Y-%m-%d)
+IETFUSER=mcr+ietf@sandelman.ca
+YANGDATE=2018-02-14
 DRAFT=dtbootstrap-anima-keyinfra
 VRDATE=yang/ietf-voucher-request@${YANGDATE}.yang
+MUDDATE=yang/ietf-mud-extension@${YANGDATE}.yang
 EXTRA_FILES+=ietf-voucher-request-tree.txt
-EXTRA_FILES+=${VRDATE}
+EXTRA_FILES+=${VRDATE} ${MUDDATE}
 EXTRA_FILES+=time-sequence-diagram.txt
 EXTRA_FILES+=component-diagram.txt
 EXTRA_FILES+=examples/jrc_prime256v1.txt
@@ -36,6 +38,9 @@ ietf-voucher-request-tree.txt: ${VRDATE}
 ${VRDATE}: ietf-voucher-request.yang
 	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ${VRDATE}
 
+${MUDDATE}: ietf-mud-extension.yang
+	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-mud-extension.yang > ${MUDDATE}
+
 examples/%.txt: examples/%.crt
 	openssl x509 -noout -text -in $? | fold -w 60 >$@
 
@@ -57,6 +62,9 @@ ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
 
 %.html: ALL-%.xml
 	unset DISPLAY; XML_LIBRARY=$(XML_LIBRARY):./src xml2rfc --html -o $(subst ALL-,,$@) $?
+
+submit: ALL-${DRAFT}.xml
+	curl -S -F "user=${IETFUSER}" -F "xml=@ALL-${DRAFT}.xml" https://datatracker.ietf.org/api/submit
 
 clean:
 	-rm -f ${DRAFT}-${VERSION}.xml ${DRAFT}-${VERSION}.txt

@@ -57,7 +57,7 @@
             surname="Behringer">
 
       <address>
-        <email>Michael.H.Behring@gmail.com</email>
+        <email>Michael.H.Behringer@gmail.com</email>
       </address>
     </author>
 
@@ -77,7 +77,7 @@
       </address>
     </author>
 
-    <date year="2017" />
+    <date year="2018" />
 
     <area>Operations and Management</area>
 
@@ -129,7 +129,8 @@
       target="I-D.ietf-anima-voucher" />. This document details automated
       protocol mechanisms to obtain vouchers, including the definition
       of a 'voucher-request' message that is a minor extension
-      to the voucher format (see <xref target="voucher-request" />).</t>
+      to the voucher format (see <xref target="voucher-request" />) defined
+      by <xref target="I-D.ietf-anima-voucher" />.</t>
 
      <t>BRSKI results in the Pledge storing an X.509 root
     certificate sufficient for verifying the Registrar identity. In the
@@ -215,7 +216,7 @@
         <t><list style="hanging">
             <t hangText="domainID:">The domain IDentity is the
             160-bit SHA-1 hash of the BIT STRING of the subjectPublicKey
-            of the root certificate for the registrars in the domain. 
+            of the root certificate for the registrars in the domain.
             This is consistent with the subject key identifier (<xref target="RFC5280">Section 4.2.1.2</xref>).
             </t>
 
@@ -303,6 +304,14 @@
             device makes no security decisions but rather simply trusts the
             first Registrar it is contacted by. This is also known as the
             "resurrecting duckling" model.</t>
+
+            <t hangText="nonced:">a voucher (or request) that contains a nonce (the normal
+            case).</t>
+
+            <t hangText="nonceless:">a voucher (or request) that does not
+            contain a nonce, relying upon accurate clocks for expiration, or
+            which does not expire.</t>
+
           </list></t>
       </section>
 
@@ -569,8 +578,8 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
               <t>Any Internationalized Resource Identifiers (IRIs) MUST be mapped to
               URIs as specified in Section 3.1 of [RFC3987] before they are placed
               in the certificate extension. The URI provides the authority information.
-              The BRSKI .well-known tree is described in
-              <xref target="ProtocolDetails"></xref></t>
+              The BRSKI /.well-known tree (<xref target="RFC5785" />) is
+              described in <xref target="ProtocolDetails"></xref></t>
 
               <t>The new extension is identified as follows:</t>
 
@@ -941,7 +950,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
 [M_FLOOD, 12340815, h'fe80::1', 180000,
             ["AN_Proxy", 4, 1, ""],
             [O_IPv6_LOCATOR,
-                 h'fe80::1', 'TCP', 4443
+                 h'fe80::1', 'TCP', 4443]]
                  ]]></artwork>
                  <postamble>Figure 6b: Proxy Discovery</postamble>
                </figure>
@@ -1085,12 +1094,12 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>BRSKI is described as extensions to EST <xref target="RFC7030"/> to
         reduce the number of TLS connections and crypto operations required on
         the Pledge. The Registrar implements the BRSKI REST interface within
-        the same .well-known URI tree as the existing EST URIs as described in
+        the same /.well-known URI tree as the existing EST URIs as described in
         EST <xref target="RFC7030"/> section 3.2.2. The communication channel between the Pledge and the Registrar is referred to as "BRSKI-EST" (see Figure 1).</t>
 
-        <t>The communication channel between the Registrar and MASA is similarly described as extensions to EST within the same ./well-known tree. For clarity this channel is referred to as "BRSKI-MASA". (See Figure 1).</t>
+        <t>The communication channel between the Registrar and MASA is similarly described as extensions to EST within the same /.well-known tree. For clarity this channel is referred to as "BRSKI-MASA". (See Figure 1).</t>
 
-        <t>MASA URI is "https:// authority "./well-known/est".</t>
+        <t>MASA URI is "https:// authority "/.well-known/est".</t>
 
         <t>BRSKI uses EST message formats for existing operations, uses JSON
         <xref target="RFC7159" /> for all new operations defined here, and
@@ -1198,8 +1207,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <t>The request media types are:</t>
         <t><list style="hanging">
-          <t hangText="application/pkcs7-mime; smime-type=voucher-request">The request is a
-          "YANG-defined JSON document that has been signed using a PKCS#7 structure" as described in
+          <t hangText="application/voucher-cms+json">The request is a
+           "YANG-defined JSON document that has been signed using a CMS structure" as described in
           <xref target="voucher-request"/> using the JSON encoding described in <xref target="RFC7951"/>.
           The Pledge SHOULD sign the request using the <xref target="IDevIDextension"/> credential.
           </t>
@@ -1254,15 +1263,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>This is done with an HTTP POST using the operation path value of
         "/.well-known/est/requestvoucher".</t>
 
-        <t>The request media type is:</t>
-        <t><list style="hanging">
-          <t hangText="application/pkcs7-mime; smime-type=voucher-request">The voucher-request is a
-          "YANG-defined JSON document that has been signed using a PKCS#7 structure" as described
-          in <xref target="I-D.ietf-anima-voucher"/> using the JSON encoding described in <xref target="RFC7951"/>.
+        <t>
+          The request media type is defined in
+          <xref target="I-D.ietf-anima-voucher" /> and is
+          application/voucher-cms+json. It is a JSON document that has been
+          signed using a CMS structure.
           The Registrar MUST sign the Registrar voucher-request. The entire Registrar certificate chain,
           up to and including the Domain CA, MUST be included in the PKCS#7 structure.
-          </t>
-        </list></t>
+        </t>
 
         <t>MASA impementations SHOULD anticipate future media
             types but of course will simply fail the request if those types are not yet known.</t>
@@ -1513,8 +1521,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
            log.
          </t>
 
-        <t>This is done with an HTTP GET using the operation path value of
-        "/.well-known/est/requestauditlog".</t>
+        <t>
+          This is done with an HTTP GET using the operation path value of
+          "/.well-known/est/requestauditlog".
+        </t>
 
         <t>
           The Registrar MUST HTTP POSTs the same Registrar voucher-request
@@ -1557,16 +1567,26 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </t>
 
         <t>The request media type is:</t>
-        <t><list style="hanging">
-        <t hangText="application/pkcs7-mime; smime-type=voucher-request">The request is a "YANG-defined JSON document that has been signed using a PKCS#7 structure" as described in <xref target="voucher-request"/> using the JSON encoded described in <xref target="RFC7951"/>. The Registrar MUST sign the request. The entire Registrar certificate chain, up to and including the Domain CA, MUST be included in the PKCS#7 structure.</t>
-        </list></t>
+        <t>
+          <list style="hanging">
+            <t hangText="application/voucher-cms+json">The request is a
+            "YANG-defined JSON document that has been signed using a CMS
+            structure" as described in <xref target="voucher-request"/> using
+            the JSON encoded described in <xref target="RFC7951"/>. The
+            Registrar MUST sign the request. The entire Registrar certificate
+            chain, up to and including the Domain CA, MUST be included in the
+            CMS structure.
+            </t>
+          </list>
+        </t>
 
         <section title="MASA authorization log Response">
           <t>A log data file is returned consisting of all log entries. For
           example:</t>
 
           <t><figure>
-            <artwork><![CDATA[{
+            <artwork><![CDATA[
+{
   "version":"1",
   "events":[
     {
@@ -1579,19 +1599,20 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
      "domainID":"<domainID extracted from voucher-request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
     }
-  ]
+  ],
+  "truncation": { 
+    "nonced duplicates": <number of entries truncated>,
+    "nonceless duplicates": <number of entries truncated>,
+    "arbitrary": <number of entries trucated> 
+    }
 }]]></artwork>
           </figure></t>
 
-          <t>Distribution of a large log is less than ideal. This structure can
-          be optimized as follows: All nonceless entries for the same domainID
-          MAY be condensed into the single most recent nonceless entry.</t>
-
           <t>A Registrar SHOULD use this log information to make an informed decision
           regarding the continued bootstrapping of the Pledge. For example if
-          the log includes an unexpected domainID then the Pledge could have 
+          the log includes an unexpected domainID then the Pledge could have
           imprinted on an unexpected domain. If the log includes nonceless
-          entries then any registrar in the same domain could theoretically trigger 
+          entries then any registrar in the same domain could theoretically trigger
           a reset of the device and take over management of
           the Pledge. Equipment that is purchased pre-owned can be expected to have an
           extensive history. A Registrar MAY request logs at future times.
@@ -1599,14 +1620,32 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           history of the device but it is RECOMMENDED that this only be
           configured if hardware assisted NEA [RFC5209] is supported.</t>
 
-          <t>Log entries can be compared against
-          local history logs in search of discrepancies.</t>
+        <t>Log entries can be compared against local history logs in search of discrepancies.</t>
 
-          <t>This document specifies a simple log format as provided by the
+          <t>Distribution of a large log is less than ideal. This structure can
+          be optimized as follows: Nonced or Nonceless entries for the 
+          same domainID MAY be truncated from the log leaving only the single 
+          most recent nonced or nonceless entry. The log SHOULD NOT be further
+          reduced but there could exist operational situation where maintaining
+          the full log is not possible. In such situations the log MAY be
+          arbitrarily truncated for length. The trunctation method(s) used MUST
+          be indicated in the JSON truncation dictionary using "nonced
+          duplicates", "nonceless duplicates", and "arbitrary" where the
+          number of entries that have been truncation is indicated. If
+          the truncation count exceeds 1024 then the MASA 
+          MAY use this value without further incrementing it.</t>
+
+          <t>A log where duplicate entries for the same domain have 
+            been truncated ("nonced duplicates" and/or "nonceless duplicates)
+            could still be acceptable for informed decisions. A log that
+            has had "arbitrary" truncations is less acceptable but vendor 
+            transparency is better than hidden truncations.</t>
+          <t>This document 
+            specifies a simple log format as provided by the
           MASA service to the registar. This format could be improved by
           distributed consensus technologies that integrate vouchers
-          with a technologies such as block-chain or hash trees or the
-          like. Doing so is out of the scope of this document but are
+          with a technologies such as block-chain or hash trees or optimized
+          logging approaches. Doing so is out of the scope of this document but are
           anticipated improvements for future work.  As such, the
           Registrar client SHOULD anticipate new kinds of responses, and
           SHOULD provide operator controls to indicate how to process
@@ -1932,11 +1971,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
     </section>
 
     <section title="IANA Considerations">
-        <t>This document requests the following Parameter Values for the "smime-type" Parameters:</t>
-        <t><list style="symbols">
-            <t>voucher-request</t>
-            <t>voucher</t>
-        </list></t>
+        <t>This document requires the following IANA actions:</t>
 
       <section title="PKIX Registry">
         <t>IANA is requested to register the following:</t>
@@ -2170,6 +2205,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       &RFC7575;
       <?rfc include="reference.RFC.7231" ?>
       <?rfc include="reference.RFC.2473" ?>
+      <?rfc include="reference.RFC.5785" ?>
       <?rfc include="reference.I-D.vanderstok-ace-coap-est" ?>
 
       <?rfc include="reference.I-D.richardson-anima-state-for-joinrouter" ?>
@@ -2434,7 +2470,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       <t>
         The model is defined as follows:
         <figure>
-            INSERT_TEXT_FROM_FILE ietf-mud-extension-yang.txt END
+            INSERT_TEXT_FROM_FILE ietf-mud-extension@DATE.yang END
         </figure>
       </t>
     </section>
