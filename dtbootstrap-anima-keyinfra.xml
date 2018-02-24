@@ -2227,6 +2227,69 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
               of any such unexpected events. Rm will be listed in the logs.</t>
         </list></t>
       </section>
+      <section title="Trusting manufacturers">
+        <t>
+          The BRSKI extensions to EST permit a new pledge to be completely
+          configured with domain specific trust anchors.  The link from
+          built-in manufacturer-provided trust anchors to domain-specific
+          trust anchors is mediated by the signed voucher artifact.
+        </t>
+        <t>
+          If the manufacturer's IDevID signing key is not properly validated,
+          then there is a risk that the network will accept a pledge that
+          should not be a member of the network.  As the address of the
+          manufacturer's MASA is provided in the IDevID using the extension
+          from <xref target="IDevIDextension" />, the malicious pledge will have no problem
+          collaborating with it's MASA to produce a completely valid voucher.
+        </t>
+        <t>
+          BRSKI does not, however, fundamentally change the trust model from
+          domain owner to manufacturer.  Assuming that the pledge used
+          its IDevID with RFC7030 EST and BRSKI, the domain (registrar) still needs to
+          trust the manufacturer.
+        </t>
+        <t>
+          Establishing this trust between domain and manufacturer is outside
+          the scope of BRSKI.  There are a number of mechanisms that can
+          adopted including:
+          <list style="symbols">
+            <t>
+              Manually configuring each manufacturer's trust anchor.
+            </t>
+            <t>
+              A Trust-On-First-Use (TOFU) mechanism. A human would be queried upon
+              seeing a manufacturer's trust anchor for the first time, and
+              then the trust anchor would be installed to the trusted store.
+              There are risks with this; even if the key to name is validated
+              using something like the WebPKI, there remains the possibility
+              that the name is a look alike: e.g, c1sco.com, ..
+            </t>
+            <t>
+              scanning the trust anchor from a QR code that came with the
+              packaging (this is really a manual TOFU mechanism)
+            </t>
+            <t>
+              some sales integration process where trust anchors are provided
+              as part of the sales process, probably included in a digital
+              packing "slip", or a sales invoice.
+            </t>
+            <t>
+              consortium membership, where all manufacturers of a particular
+              device category (e.g, a light bulb, or a cable-modem) are
+              signed by an certificate authority specifically for this.
+              This is done by CableLabs today. It is used for authentication
+              and authorization as part of TR-79: <xref target="docsisroot"
+              /> and <xref target="TR069" />.
+            </t>
+          </list>
+        </t>
+        <t>
+          The existing WebPKI provides a reasonable anchor between manufacturer
+          name and public key. It authenticates the key.  It does not provide a
+          reasonable authorization for the manufacturer, so it is not directly
+          useable on it's own.
+        </t>
+      </section>
     </section>
 
     <section title="Acknowledgements">
@@ -2238,6 +2301,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       Fuyu Eleven,
       Eliot Lear,
       Sergey Kasatkin,
+      Anoop Kumar,
       Markus Stenberg,
       and Peter van der Stok</t>
     </section>
@@ -2316,6 +2380,29 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       <?rfc include="reference.I-D.ietf-opsawg-mud" ?>
 
       <?rfc include="reference.I-D.ietf-netconf-zerotouch" ?>
+
+      <reference anchor="docsisroot"
+                 target="https://www.cablelabs.com/resources/digital-certificate-issuance-service/">
+        <front>
+          <title>CableLabs Digital Certificate Issuance Service</title>
+
+          <author surname="CableLabs"></author>
+
+          <date month="February" year="2018" />
+        </front>
+      </reference>
+
+      <reference anchor="TR069"
+                 target="https://www.broadband-forum.org/standards-and-software/technical-specifications/tr-069-files-tools">
+        <front>
+          <title>TR-69: CPE WAN Management Protocol</title>
+
+          <author surname="Broadband Forum"></author>
+
+          <date month="February" year="2018" />
+        </front>
+      </reference>
+
 
       <reference anchor="imprinting"
                  target="https://en.wikipedia.org/wiki/Imprinting_(psychology)">
