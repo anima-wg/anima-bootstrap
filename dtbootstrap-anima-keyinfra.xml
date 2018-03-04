@@ -598,7 +598,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
                 manufacturer service provided voucher. A voucher contains sufficient
                 information for the Pledge to complete authentication of a
                 Registrar. (It enables the Pledge to finish
-                authentication of the Registrar TLS server certificate).</t>
+            authentication of the Registrar TLS server certificate).</t>
 
             <t>Enroll. By accepting the domain specific information from a
                 Registrar, and by obtaining a domain certificate from a Registrar
@@ -609,6 +609,13 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
                 domain and will only repeat the discovery aspects of bootstrapping
                 if it is returned to factory default settings.</t>
         </list></t>
+        <t>
+          After step 4, the pledge has received  and authenticated an
+          explicit TA (trust anchor) (pinned-domain-cert in the Voucher
+          response).  A secure transport exists between pledge and registrar,
+          and it may be used for things other than enrollment into a PKI.
+        </t>
+
       </section>
 
       <section title="Secure Imprinting using Vouchers">
@@ -641,31 +648,79 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
       </section>
 
       <section anchor="IDevIDextension" title="Initial Device Identifier">
-          <t>Pledge authentication and Pledge voucher-request signing is via an X.509 certificate installed
-             during the manufacturing process. This Initial Device Identifier
-             provides a basis for authenticating the Pledge during subsequent
-             protocol exchanges and informing the Registrar of the MASA
-             URI. There is no requirement for a common root PKI hierarchy. Each
-             device manufacturer can generate its own root certificate.</t>
+        <t>
+          Pledge authentication and Pledge voucher-request signing is via
+          a PKIX certificate installed
+          during the manufacturing process. This is the 802.1AR Initial
+          Device Identifier (IDevID), and it
+          provides a basis for authenticating the Pledge during
+          the protocol exchanges described here.
+          There is no requirement for a common root PKI hierarchy.
+          Each device manufacturer can generate its own root certificate.
+          Specifically, the IDevID:
+          <list style="numbers">
+            <t>
+              Uniquely identifying the pledge by the Distinguished Name (DN)
+              and subjectAltName (SAN) parameters in the IDevID. The
+              unique identification of a pledge in the voucher objects are derived
+              from those parameters as described below.
+            </t>
 
-              <t>The following previously defined fields are in the
-                  X.509 IDevID certificate:</t>
+            <t>
+              Securely authentating the pledges identity via TLS connection to
+              registrar.  This provides protection against cloned/fake
+              pledged.
+            </t>
 
-              <t><list style="symbols">
-              <t>The subject field's DN encoding MUST include the "serialNumber"
-                  attribute with the device's unique serial number.</t>
-              <t>The subject-alt field's encoding SHOULD include a non-critical
-                  version of the RFC4108 defined HardwareModuleName.</t>
-              </list></t>
+            <t>
+              Secure auto-discovery of the pledges MASA by the registrar via the
+              MASA URI in IDevID as explained below.
+            </t>
+            <t>
+              (Optionally) communicating the MUD URL (see <xref
+              target="mud-extension" />.
+            </t>
+            <t>
+              (Optional) Signing of voucher-request by the pledges IDevID to enable
+              MASA to generate voucher only to a registrar that has a connection to
+              the pledge.
+            </t>
+            <t>
+              Authorizing pledge (via registrar) to receive certificate
+              from domain CA, by signing the Certificate Signing Request (CSR).
+            </t>
+          </list>
+        </t>
+            <t>
+          The following fields are defined <xref target="IDevID" />
+          and in <xref target="RFC5280" /> are used as follows:
+        </t>
 
-              <t>In order to build the voucher "serial-number" field these IDevID
-              fields need to be converted into a serial-number of "type string". The following
-              methods are used depending on the first available IDevID certificate field (attempted in this order):</t>
-              <t><list style="symbols">
-              <t>An RFC4514 String Representation of the Distinguished Name "serialNumber" attribute.</t>
-              <t>The HardwareModuleName hwSerialNum OCTET STRING base64 encoded.</t>
-              <t>The RFC4514 String Representation of the Distinguished Name "common name" attribute.</t>
-              </list></t>
+        <t><list style="symbols">
+          <t>
+            The subject field's DN encoding MUST include the "serialNumber"
+            attribute with the device's unique serial number.
+          </t>
+          <t>
+            The subject-alt field's encoding SHOULD include a non-critical
+          version of the RFC4108 defined HardwareModuleName.
+          </t>
+        </list>
+        </t>
+
+        <t>
+          In order to build the voucher "serial-number" field these IDevID
+          fields need to be converted into a serial-number of "type string".
+          The following  methods are used depending on the first available
+          IDevID certificate field (attempted in this order):
+        </t>
+        <t>
+          <list style="symbols">
+            <t>An RFC4514 String Representation of the Distinguished Name "serialNumber" attribute.</t>
+            <t>The HardwareModuleName hwSerialNum OCTET STRING base64 encoded.</t>
+            <t>The RFC4514 String Representation of the Distinguished Name "common name" attribute.</t>
+        </list>
+        </t>
 
               <t>The following newly defined field SHOULD be in the X.509 IDevID
               certificate: An X.509 non-critical certificate extension that
