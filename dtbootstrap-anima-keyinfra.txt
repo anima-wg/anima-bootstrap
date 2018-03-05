@@ -5,14 +5,14 @@
 ANIMA WG                                                     M. Pritikin
 Internet-Draft                                                     Cisco
 Intended status: Standards Track                           M. Richardson
-Expires: September 5, 2018                                           SSW
+Expires: September 6, 2018                                           SSW
                                                             M. Behringer
 
                                                             S. Bjarnason
                                                           Arbor Networks
                                                                K. Watsen
                                                         Juniper Networks
-                                                           March 4, 2018
+                                                           March 5, 2018
 
 
         Bootstrapping Remote Secure Key Infrastructures (BRSKI)
@@ -48,12 +48,12 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 5, 2018.
+   This Internet-Draft will expire on September 6, 2018.
 
 
 
 
-Pritikin, et al.        Expires September 5, 2018               [Page 1]
+Pritikin, et al.        Expires September 6, 2018               [Page 1]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -96,90 +96,94 @@ Table of Contents
        2.4.2.  Architectural component: Circuit Proxy  . . . . . . .  19
        2.4.3.  Architectural component: Domain Registrar . . . . . .  19
        2.4.4.  Architectural component: Manufacturer Service . . . .  19
-     2.5.  Lack of realtime clock  . . . . . . . . . . . . . . . . .  19
-     2.6.  Cloud Registrar . . . . . . . . . . . . . . . . . . . . .  20
+       2.4.5.  Architectural component: Public Key Infrastructure
+               (PKI) . . . . . . . . . . . . . . . . . . . . . . . .  19
+     2.5.  Certificate Time Validation . . . . . . . . . . . . . . .  20
+       2.5.1.  Lack of realtime clock  . . . . . . . . . . . . . . .  20
+       2.5.2.  Infinite Lifetime of IDevID . . . . . . . . . . . . .  20
+     2.6.  Cloud Registrar . . . . . . . . . . . . . . . . . . . . .  21
      2.7.  Determining the MASA to contact . . . . . . . . . . . . .  21
-   3.  Voucher-Request artifact  . . . . . . . . . . . . . . . . . .  21
-     3.1.  Tree Diagram  . . . . . . . . . . . . . . . . . . . . . .  21
-     3.2.  Examples  . . . . . . . . . . . . . . . . . . . . . . . .  22
-     3.3.  YANG Module . . . . . . . . . . . . . . . . . . . . . . .  24
-   4.  Proxy details . . . . . . . . . . . . . . . . . . . . . . . .  27
-     4.1.  Pledge discovery of Proxy . . . . . . . . . . . . . . . .  28
-       4.1.1.  Proxy GRASP announcements . . . . . . . . . . . . . .  29
+   3.  Voucher-Request artifact  . . . . . . . . . . . . . . . . . .  22
+     3.1.  Tree Diagram  . . . . . . . . . . . . . . . . . . . . . .  22
+     3.2.  Examples  . . . . . . . . . . . . . . . . . . . . . . . .  23
 
 
 
-Pritikin, et al.        Expires September 5, 2018               [Page 2]
+Pritikin, et al.        Expires September 6, 2018               [Page 2]
 
 Internet-Draft                    BRSKI                       March 2018
 
 
-     4.2.  CoAP connection to Registrar  . . . . . . . . . . . . . .  29
-     4.3.  HTTPS Proxy connection to Registrar . . . . . . . . . . .  29
-     4.4.  Proxy discovery of Registrar  . . . . . . . . . . . . . .  30
-   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  31
-     5.1.  BRSKI-EST TLS establishment details . . . . . . . . . . .  33
-     5.2.  Pledge Requests Voucher from the Registrar  . . . . . . .  33
-     5.3.  BRSKI-MASA TLS establishment details  . . . . . . . . . .  35
-     5.4.  Registrar Requests Voucher from MASA  . . . . . . . . . .  35
-     5.5.  Voucher Response  . . . . . . . . . . . . . . . . . . . .  38
+     3.3.  YANG Module . . . . . . . . . . . . . . . . . . . . . . .  25
+   4.  Proxy details . . . . . . . . . . . . . . . . . . . . . . . .  28
+     4.1.  Pledge discovery of Proxy . . . . . . . . . . . . . . . .  29
+       4.1.1.  Proxy GRASP announcements . . . . . . . . . . . . . .  30
+     4.2.  CoAP connection to Registrar  . . . . . . . . . . . . . .  30
+     4.3.  HTTPS Proxy connection to Registrar . . . . . . . . . . .  30
+     4.4.  Proxy discovery of Registrar  . . . . . . . . . . . . . .  31
+   5.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  32
+     5.1.  BRSKI-EST TLS establishment details . . . . . . . . . . .  34
+     5.2.  Pledge Requests Voucher from the Registrar  . . . . . . .  34
+     5.3.  BRSKI-MASA TLS establishment details  . . . . . . . . . .  36
+     5.4.  Registrar Requests Voucher from MASA  . . . . . . . . . .  36
+     5.5.  Voucher Response  . . . . . . . . . . . . . . . . . . . .  39
        5.5.1.  Completing authentication of Provisional TLS
-               connection  . . . . . . . . . . . . . . . . . . . . .  39
-     5.6.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  40
-     5.7.  MASA authorization log Request  . . . . . . . . . . . . .  41
-       5.7.1.  MASA authorization log Response . . . . . . . . . . .  42
-     5.8.  EST Integration for PKI bootstrapping . . . . . . . . . .  43
-       5.8.1.  EST Distribution of CA Certificates . . . . . . . . .  44
-       5.8.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  44
-       5.8.3.  EST Client Certificate Request  . . . . . . . . . . .  45
-       5.8.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  45
-       5.8.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  46
-   6.  Reduced security operational modes  . . . . . . . . . . . . .  46
-     6.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  46
-     6.2.  Pledge security reductions  . . . . . . . . . . . . . . .  47
-     6.3.  Registrar security reductions . . . . . . . . . . . . . .  48
-     6.4.  MASA security reductions  . . . . . . . . . . . . . . . .  49
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  50
-     7.1.  PKIX Registry . . . . . . . . . . . . . . . . . . . . . .  50
-     7.2.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  50
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  50
-     8.1.  Freshness in Voucher-Requests . . . . . . . . . . . . . .  52
-     8.2.  Trusting manufacturers  . . . . . . . . . . . . . . . . .  53
-   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  54
-   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  54
-     10.1.  Normative References . . . . . . . . . . . . . . . . . .  54
-     10.2.  Informative References . . . . . . . . . . . . . . . . .  57
-   Appendix A.  IPv4 operations  . . . . . . . . . . . . . . . . . .  59
-     A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  59
-     A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  59
-   Appendix B.  mDNS / DNSSD proxy discovery options . . . . . . . .  59
-   Appendix C.  IPIP Join Proxy mechanism  . . . . . . . . . . . . .  60
-     C.1.  Multiple Join networks on the Join Proxy side . . . . . .  61
-     C.2.  Automatic configuration of tunnels on Registrar . . . . .  61
-     C.3.  Proxy Neighbor Discovery by Join Proxy  . . . . . . . . .  61
+               connection  . . . . . . . . . . . . . . . . . . . . .  40
+     5.6.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  41
+     5.7.  MASA authorization log Request  . . . . . . . . . . . . .  42
+       5.7.1.  MASA authorization log Response . . . . . . . . . . .  43
+     5.8.  EST Integration for PKI bootstrapping . . . . . . . . . .  44
+       5.8.1.  EST Distribution of CA Certificates . . . . . . . . .  45
+       5.8.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  45
+       5.8.3.  EST Client Certificate Request  . . . . . . . . . . .  46
+       5.8.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  46
+       5.8.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  47
+   6.  Reduced security operational modes  . . . . . . . . . . . . .  47
+     6.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  47
+     6.2.  Pledge security reductions  . . . . . . . . . . . . . . .  48
+     6.3.  Registrar security reductions . . . . . . . . . . . . . .  49
+     6.4.  MASA security reductions  . . . . . . . . . . . . . . . .  50
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  51
+     7.1.  PKIX Registry . . . . . . . . . . . . . . . . . . . . . .  51
+     7.2.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  51
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  51
+     8.1.  Freshness in Voucher-Requests . . . . . . . . . . . . . .  53
+     8.2.  Trusting manufacturers  . . . . . . . . . . . . . . . . .  54
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  55
+   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  55
+     10.1.  Normative References . . . . . . . . . . . . . . . . . .  55
+     10.2.  Informative References . . . . . . . . . . . . . . . . .  58
+   Appendix A.  IPv4 operations  . . . . . . . . . . . . . . . . . .  60
+     A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  60
+     A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  60
+   Appendix B.  mDNS / DNSSD proxy discovery options . . . . . . . .  60
+   Appendix C.  IPIP Join Proxy mechanism  . . . . . . . . . . . . .  61
+     C.1.  Multiple Join networks on the Join Proxy side . . . . . .  62
+     C.2.  Automatic configuration of tunnels on Registrar . . . . .  62
+     C.3.  Proxy Neighbor Discovery by Join Proxy  . . . . . . . . .  63
      C.4.  Use of connected sockets; or IP_PKTINFO for CoAP on
-           Registrar . . . . . . . . . . . . . . . . . . . . . . . .  62
-     C.5.  Use of socket extension rather than virtual interface . .  62
-   Appendix D.  MUD Extension  . . . . . . . . . . . . . . . . . . .  62
-   Appendix E.  Example Vouchers . . . . . . . . . . . . . . . . . .  65
 
 
 
-Pritikin, et al.        Expires September 5, 2018               [Page 3]
+Pritikin, et al.        Expires September 6, 2018               [Page 3]
 
 Internet-Draft                    BRSKI                       March 2018
 
 
-     E.1.  Keys involved . . . . . . . . . . . . . . . . . . . . . .  65
-       E.1.1.  MASA key pair for voucher signatures  . . . . . . . .  65
-       E.1.2.  Manufacturer key pair for IDevID signatures . . . . .  65
-       E.1.3.  Registrar key pair  . . . . . . . . . . . . . . . . .  66
-       E.1.4.  Pledge key pair . . . . . . . . . . . . . . . . . . .  68
-     E.2.  Example process . . . . . . . . . . . . . . . . . . . . .  69
-       E.2.1.  Pledge to Registrar . . . . . . . . . . . . . . . . .  69
-       E.2.2.  Registrar to MASA . . . . . . . . . . . . . . . . . .  75
-       E.2.3.  MASA to Registrar . . . . . . . . . . . . . . . . . .  81
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  86
+           Registrar . . . . . . . . . . . . . . . . . . . . . . . .  63
+     C.5.  Use of socket extension rather than virtual interface . .  63
+   Appendix D.  MUD Extension  . . . . . . . . . . . . . . . . . . .  64
+   Appendix E.  Example Vouchers . . . . . . . . . . . . . . . . . .  66
+     E.1.  Keys involved . . . . . . . . . . . . . . . . . . . . . .  66
+       E.1.1.  MASA key pair for voucher signatures  . . . . . . . .  66
+       E.1.2.  Manufacturer key pair for IDevID signatures . . . . .  66
+       E.1.3.  Registrar key pair  . . . . . . . . . . . . . . . . .  67
+       E.1.4.  Pledge key pair . . . . . . . . . . . . . . . . . . .  69
+     E.2.  Example process . . . . . . . . . . . . . . . . . . . . .  70
+       E.2.1.  Pledge to Registrar . . . . . . . . . . . . . . . . .  70
+       E.2.2.  Registrar to MASA . . . . . . . . . . . . . . . . . .  76
+       E.2.3.  MASA to Registrar . . . . . . . . . . . . . . . . . .  82
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  87
 
 1.  Introduction
 
@@ -214,17 +218,17 @@ Internet-Draft                    BRSKI                       March 2018
 
    The syntactic details of vouchers are described in detail in
    [I-D.ietf-anima-voucher].  This document details automated protocol
-   mechanisms to obtain vouchers, including the definition of a
-   'voucher-request' message that is a minor extension to the voucher
-   format (see Section 3) defined by [I-D.ietf-anima-voucher].
 
 
 
-
-Pritikin, et al.        Expires September 5, 2018               [Page 4]
+Pritikin, et al.        Expires September 6, 2018               [Page 4]
 
 Internet-Draft                    BRSKI                       March 2018
 
+
+   mechanisms to obtain vouchers, including the definition of a
+   'voucher-request' message that is a minor extension to the voucher
+   format (see Section 3) defined by [I-D.ietf-anima-voucher].
 
    BRSKI results in the Pledge storing an X.509 root certificate
    sufficient for verifying the Registrar identity.  In the process a
@@ -271,16 +275,16 @@ Internet-Draft                    BRSKI                       March 2018
       because the distribution of an explicit TA database is not
       autonomic),
 
-   o  and using a Certificate-Less TLS mutual authentication method (not
-      an autonomic solution because the distribution of symmetric key
-      material is not autonomic).
 
 
-
-Pritikin, et al.        Expires September 5, 2018               [Page 5]
+Pritikin, et al.        Expires September 6, 2018               [Page 5]
 
 Internet-Draft                    BRSKI                       March 2018
 
+
+   o  and using a Certificate-Less TLS mutual authentication method (not
+      an autonomic solution because the distribution of symmetric key
+      material is not autonomic).
 
    These "touch" methods do not meet the requirements for zero-touch.
 
@@ -326,18 +330,18 @@ Internet-Draft                    BRSKI                       March 2018
       material to identify and trust future interactions with a network.
       This term is taken from Konrad Lorenz's work in biology with new
       ducklings: during a critical period, the duckling would assume
-      that anything that looks like a mother duck is in fact their
-      mother.  An equivalent for a device is to obtain the fingerprint
-      of the network's root certification authority certificate.  A
-      device that imprints on an attacker suffers a similar fate to a
 
 
 
-Pritikin, et al.        Expires September 5, 2018               [Page 6]
+Pritikin, et al.        Expires September 6, 2018               [Page 6]
 
 Internet-Draft                    BRSKI                       March 2018
 
 
+      that anything that looks like a mother duck is in fact their
+      mother.  An equivalent for a device is to obtain the fingerprint
+      of the network's root certification authority certificate.  A
+      device that imprints on an attacker suffers a similar fate to a
       duckling that imprints on a hungry wolf.  Securely imprinting is a
       primary focus of this document [imprinting].  The analogy to
       Lorenz's work was first noted in [Stajano99theresurrecting].
@@ -383,17 +387,16 @@ Internet-Draft                    BRSKI                       March 2018
       well as appropriate certificate revocation list (CRL) distribution
       points and/or OCSP ([RFC6960]) servers.
 
-   Join Proxy:  A domain entity that helps the Pledge join the domain.
-      A Proxy facilitates communication for devices that find themselves
-      in an environment where they are not provided connectivity until
 
 
-
-Pritikin, et al.        Expires September 5, 2018               [Page 7]
+Pritikin, et al.        Expires September 6, 2018               [Page 7]
 
 Internet-Draft                    BRSKI                       March 2018
 
 
+   Join Proxy:  A domain entity that helps the Pledge join the domain.
+      A Proxy facilitates communication for devices that find themselves
+      in an environment where they are not provided connectivity until
       after they are validated as members of the domain.  The Pledge is
       unaware that they are communicating with a Proxy rather than
       directly with a Registrar.
@@ -440,16 +443,15 @@ Internet-Draft                    BRSKI                       March 2018
       number of products supported in the field increasing the chance
       that firmware will be more up to date.
 
-   ANI:  The Autonomic Network Infrastructure as defined by
-      [I-D.ietf-anima-autonomic-control-plane].  This document details
 
 
-
-Pritikin, et al.        Expires September 5, 2018               [Page 8]
+Pritikin, et al.        Expires September 6, 2018               [Page 8]
 
 Internet-Draft                    BRSKI                       March 2018
 
 
+   ANI:  The Autonomic Network Infrastructure as defined by
+      [I-D.ietf-anima-autonomic-control-plane].  This document details
       specific requirements for pledges, proxies and registrars when
       they are part of an ANI.
 
@@ -499,9 +501,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-
-
-Pritikin, et al.        Expires September 5, 2018               [Page 9]
+Pritikin, et al.        Expires September 6, 2018               [Page 9]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -557,7 +557,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 10]
+Pritikin, et al.        Expires September 6, 2018              [Page 10]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -613,7 +613,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 11]
+Pritikin, et al.        Expires September 6, 2018              [Page 11]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -669,7 +669,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 12]
+Pritikin, et al.        Expires September 6, 2018              [Page 12]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -725,7 +725,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 13]
+Pritikin, et al.        Expires September 6, 2018              [Page 13]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -781,7 +781,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 14]
+Pritikin, et al.        Expires September 6, 2018              [Page 14]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -837,7 +837,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 15]
+Pritikin, et al.        Expires September 6, 2018              [Page 15]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -893,7 +893,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 16]
+Pritikin, et al.        Expires September 6, 2018              [Page 16]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -949,7 +949,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 17]
+Pritikin, et al.        Expires September 6, 2018              [Page 17]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1005,7 +1005,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 18]
+Pritikin, et al.        Expires September 6, 2018              [Page 18]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1026,8 +1026,9 @@ Internet-Draft                    BRSKI                       March 2018
 2.4.3.  Architectural component: Domain Registrar
 
    The Domain Registrar (having the formal name Join Registrar/
-   Coordinator (JRC)), operates as a CMC Registrar, terminating the EST
-   and BRSKI connections.  The Registrar is manually configured or
+   Coordinator (JRC)), operates as a CMC Registrar, (Certificate
+   Management over CMS, see [RFC5272] section 7) terminating the EST and
+   BRSKI connections.  The Registrar is manually configured or
    distributed with a list of trust anchors necessary to authenticate
    any Pledge device expected on the network.  The Registrar
    communicates with the MASA to establish ownership.
@@ -1035,10 +1036,39 @@ Internet-Draft                    BRSKI                       March 2018
 2.4.4.  Architectural component: Manufacturer Service
 
    The Manufacturer Service provides two logically seperate functions:
-   the Manufacturer Authorized Signing Authority (MASA), and an
-   ownership tracking/auditing function.
+   the Manufacturer Authorized Signing Authority (MASA) described in
+   Section 5.4 and Section 5.5, and an ownership tracking/auditing
+   function described in Section 5.6 and Section 5.7.
 
-2.5.  Lack of realtime clock
+2.4.5.  Architectural component: Public Key Infrastructure (PKI)
+
+   The Key Infrastructure (PKI) administers certificates for the domain
+   of concerns, providing the trust anchor(s) for it and allowing
+   enrollment of Pledges with domain certificates.
+
+   The Domain Registrar uses a Trust Anchor (TE) from the PKI in the
+   BRSKI Voucher pinned-domain-cert to authenticate itself to the Pledge
+   with the help of MASA.  (XXX fix me)
+
+   The Domain Registrar acts as an [RFC5272] Registration Authority,
+   requesting certificates for Pledges from the Key Infrastructure.
+
+   The above requirements and expectations against the Key
+   Infrastructure are unchanged from RFC7030.  This document does not
+   place any additional architectural requirements on the Public Key
+   Infrastructure.
+
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 19]
+
+Internet-Draft                    BRSKI                       March 2018
+
+
+2.5.  Certificate Time Validation
+
+2.5.1.  Lack of realtime clock
 
    Many devices when bootstrapping do not have knowledge of the current
    time.  Mechanisms such as Network Time Protocols cannot be secured
@@ -1054,22 +1084,11 @@ Internet-Draft                    BRSKI                       March 2018
 
    o  Initially the Pledge does not know the current time.
 
-   o  During Pledge authentiation by the Registrar a realtime clock can
-      be used by the Registrar.  This bullet expands on a closely
-      related issue regarding Pledge lifetimes.  RFC5280 indicates that
-      long lived Pledge certifiates "SHOULD be assigned the
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 19]
-
-Internet-Draft                    BRSKI                       March 2018
-
-
-      GeneralizedTime value of 99991231235959Z" [RFC7030], so the
-      Registrar MUST support such lifetimes and SHOULD support ignoring
-      Pledge lifetimes if they did not follow the RFC5280
-      recommendations.
+   o  Bootstrapping Pledges that have a Realtime Clock (RTC), SHOULD use
+      it to verify certificate validity.  However, they MUST be prepared
+      for the recognize that the RTC might be completely wrong when a
+      RTC battery fails and resets to an origin time (e.g., Jan. 1,
+      1970)
 
    o  The Pledge authenticates the voucher presented to it.  During this
       authentication the Pledge ignores certificate lifetimes (by
@@ -1088,6 +1107,24 @@ Internet-Draft                    BRSKI                       March 2018
       within the new certificate is assumed to be valid by the Pledge.
       The Pledge is now willing to use this credential for client
       authentication.
+
+2.5.2.  Infinite Lifetime of IDevID
+
+   [RFC5280] explains that long lived Pledge certificates "SHOULD be
+   assigned the GeneralizedTime value of 99991231235959Z".  Registrars
+   MUST support such lifetimes and SHOULD support ignoring Pledge
+   lifetimes if they did not follow the RFC5280 recommendations.
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 20]
+
+Internet-Draft                    BRSKI                       March 2018
+
+
+   For example, IDevID may have incorrect lifetime of N <= 3 years,
+   rendering replacement Pledges from storage useless after N years
+   unless registrars support ignoring such a lifetime.
 
 2.6.  Cloud Registrar
 
@@ -1113,15 +1150,6 @@ Internet-Draft                    BRSKI                       March 2018
    If the Pledge uses a well known URI for contacting a cloud Registrar
    an Implicit Trust Anchor database (see [RFC7030]) MUST be used to
    authenticate service as described in [RFC6125].  This is consistent
-
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 20]
-
-Internet-Draft                    BRSKI                       March 2018
-
-
    with the human user configuration of an EST server URI in [RFC7030]
    which also depends on RFC6125.
 
@@ -1142,6 +1170,14 @@ Internet-Draft                    BRSKI                       March 2018
    It can be operationally difficult to ensure the necessary X.509
    extensions are in the Pledge's IDevID due to the difficulty of
    aligning current Pledge manufacturing with software releases and
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 21]
+
+Internet-Draft                    BRSKI                       March 2018
+
+
    development.  As a final fallback the Registrar MAY be manually
    configured or distributed with a MASA URL for each manufacturer.
    Note that the Registrar can only select the configured MASA URL based
@@ -1151,15 +1187,30 @@ Internet-Draft                    BRSKI                       March 2018
 
 3.  Voucher-Request artifact
 
-   The Pledge voucher-request is how a Pledge requests a voucher.  The
-   Pledge forms a voucher-request and submits it to the Registrar.  The
-   Registrar in turn submits a voucher-request to the MASA server.  To
-   help differentiate this document refers to "Pledge voucher-request"
-   and "Registrar voucher-request" when indicating the source is
-   beneficial.  The "proximity-registrar-cert" leaf defined in this
-   section is used in Pledge voucher-requests.  The "prior-signed-
-   voucher-request" is used in Registrar voucher-requests that include a
-   Pledge voucher-request.
+   Voucher-requests are how vouchers are requested.  The semantics of
+   the vouchers are described below, in the YANG model.
+
+   A Pledge forms the "Pledge voucher-request" and submits it to the
+   Registrar.
+
+   The Registrar in turn forms the "Registrar voucher-request", and
+   submits it to the MASA server.
+
+   The "proximity-registrar-cert" leaf is used in the Pledge voucher-
+   requests.
+
+   The "prior-signed-voucher-request" leaf is be used in Registrar
+   voucher-requests to the Pledge voucher-request.  It contains the
+   encoded (signed form) of the Pledge voucher-request.
+
+   A Registar MAY also retrieve (nonceless) vouchers by sending voucher-
+   requests to the MASA.  No "prior-signed-voucher-request" leaf would
+   be included.  This can be used to retrieve vouchers for later offline
+   use.  The Registrar will need to know the serial number of the
+   pledge.  This document does not provide a mechanism for the Registrar
+   to learn that in an automated fashion.  Typically this will be done
+   via scanning of bar-code or QR-code on packaging, or via some sales
+   channel integration.
 
    Unless otherwise signaled (outside the voucher-request artifact), the
    signing structure is as defined for vouchers, see
@@ -1170,16 +1221,18 @@ Internet-Draft                    BRSKI                       March 2018
    The following tree diagram illustrates a high-level view of a
    voucher-request document.  The notation used in this diagram is
    described in [I-D.ietf-anima-voucher].  Each node in the diagram is
+   fully described by the YANG module in Section 3.3.  Please review the
+   YANG module for a detailed description of the voucher-request format.
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 21]
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 22]
 
 Internet-Draft                    BRSKI                       March 2018
 
-
-   fully described by the YANG module in Section 3.3.  Please review the
-   YANG module for a detailed description of the voucher-request format.
 
    module: ietf-voucher-request
 
@@ -1225,17 +1278,17 @@ Internet-Draft                    BRSKI                       March 2018
                 object.  In the JSON encoding used here it must be
                 base64 encoded.  The nonce, created-on and assertion is
                 carried forward. serial-number is extracted from the
+                Pledge's Client Certificate from the TLS connection.
+                See Section 5.4.
 
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 22]
+
+Pritikin, et al.        Expires September 6, 2018              [Page 23]
 
 Internet-Draft                    BRSKI                       March 2018
 
-
-                Pledge's Client Certificate from the TLS connection.
-                See Section 5.4.
 
    {
        "ietf-voucher-request:voucher": {
@@ -1285,7 +1338,10 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 23]
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 24]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1341,7 +1397,7 @@ module ietf-voucher-request {
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 24]
+Pritikin, et al.        Expires September 6, 2018              [Page 25]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1397,7 +1453,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 25]
+Pritikin, et al.        Expires September 6, 2018              [Page 26]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1453,7 +1509,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 26]
+Pritikin, et al.        Expires September 6, 2018              [Page 27]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1509,7 +1565,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 27]
+Pritikin, et al.        Expires September 6, 2018              [Page 28]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1565,7 +1621,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 28]
+Pritikin, et al.        Expires September 6, 2018              [Page 29]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1621,7 +1677,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 29]
+Pritikin, et al.        Expires September 6, 2018              [Page 30]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1677,7 +1733,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 30]
+Pritikin, et al.        Expires September 6, 2018              [Page 31]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1733,7 +1789,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 31]
+Pritikin, et al.        Expires September 6, 2018              [Page 32]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1789,7 +1845,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 32]
+Pritikin, et al.        Expires September 6, 2018              [Page 33]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1845,7 +1901,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 33]
+Pritikin, et al.        Expires September 6, 2018              [Page 34]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1879,7 +1935,7 @@ Internet-Draft                    BRSKI                       March 2018
 
    nonce:  The Pledge voucher-request MUST contain a cryptographically
       strong random or pseudo-random number nonce.  Doing so ensures
-      Section 2.5 functionality.  The nonce MUST NOT be reused for
+      Section 2.5.1 functionality.  The nonce MUST NOT be reused for
       bootstrapping attempts.
 
    assertion:  The Pledge voucher-request MAY contain an assertion of
@@ -1901,7 +1957,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 34]
+Pritikin, et al.        Expires September 6, 2018              [Page 35]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -1957,7 +2013,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 35]
+Pritikin, et al.        Expires September 6, 2018              [Page 36]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2013,7 +2069,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 36]
+Pritikin, et al.        Expires September 6, 2018              [Page 37]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2069,7 +2125,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 37]
+Pritikin, et al.        Expires September 6, 2018              [Page 38]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2125,7 +2181,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 38]
+Pritikin, et al.        Expires September 6, 2018              [Page 39]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2173,15 +2229,15 @@ Internet-Draft                    BRSKI                       March 2018
    domain-cert as its TLS server certificate.
 
    The Pledge's PKIX path validation of a Registrar certificate's
-   validity period information is as described in Section 2.5.  Once the
-   PKIX path validation is successful the TLS connection is no longer
-   provisional.
+   validity period information is as described in Section 2.5.1.  Once
+   the PKIX path validation is successful the TLS connection is no
+   longer provisional.
 
 
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 39]
+Pritikin, et al.        Expires September 6, 2018              [Page 40]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2237,7 +2293,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 40]
+Pritikin, et al.        Expires September 6, 2018              [Page 41]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2293,7 +2349,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 41]
+Pritikin, et al.        Expires September 6, 2018              [Page 42]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2349,7 +2405,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 42]
+Pritikin, et al.        Expires September 6, 2018              [Page 43]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2405,7 +2461,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 43]
+Pritikin, et al.        Expires September 6, 2018              [Page 44]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2461,7 +2517,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 44]
+Pritikin, et al.        Expires September 6, 2018              [Page 45]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2517,7 +2573,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 45]
+Pritikin, et al.        Expires September 6, 2018              [Page 46]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2573,7 +2629,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 46]
+Pritikin, et al.        Expires September 6, 2018              [Page 47]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2629,7 +2685,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 47]
+Pritikin, et al.        Expires September 6, 2018              [Page 48]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2685,7 +2741,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 48]
+Pritikin, et al.        Expires September 6, 2018              [Page 49]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2741,7 +2797,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 49]
+Pritikin, et al.        Expires September 6, 2018              [Page 50]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2797,7 +2853,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 50]
+Pritikin, et al.        Expires September 6, 2018              [Page 51]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2853,7 +2909,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 51]
+Pritikin, et al.        Expires September 6, 2018              [Page 52]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2909,7 +2965,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 52]
+Pritikin, et al.        Expires September 6, 2018              [Page 53]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -2965,7 +3021,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 53]
+Pritikin, et al.        Expires September 6, 2018              [Page 54]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3021,7 +3077,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 54]
+Pritikin, et al.        Expires September 6, 2018              [Page 55]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3077,10 +3133,14 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 55]
+Pritikin, et al.        Expires September 6, 2018              [Page 56]
 
 Internet-Draft                    BRSKI                       March 2018
 
+
+   [RFC5272]  Schaad, J. and M. Myers, "Certificate Management over CMS
+              (CMC)", RFC 5272, DOI 10.17487/RFC5272, June 2008,
+              <https://www.rfc-editor.org/info/rfc5272>.
 
    [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
               Housley, R., and W. Polk, "Internet X.509 Public Key
@@ -3125,18 +3185,19 @@ Internet-Draft                    BRSKI                       March 2018
               Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
               2014, <https://www.rfc-editor.org/info/rfc7159>.
 
+
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 57]
+
+Internet-Draft                    BRSKI                       March 2018
+
+
    [RFC7228]  Bormann, C., Ersue, M., and A. Keranen, "Terminology for
               Constrained-Node Networks", RFC 7228,
               DOI 10.17487/RFC7228, May 2014, <https://www.rfc-
               editor.org/info/rfc7228>.
-
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 56]
-
-Internet-Draft                    BRSKI                       March 2018
-
 
    [RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
               RFC 7950, DOI 10.17487/RFC7950, August 2016,
@@ -3181,18 +3242,17 @@ Internet-Draft                    BRSKI                       March 2018
               coaps)", draft-vanderstok-ace-coap-est-04 (work in
               progress), January 2018.
 
-   [imprinting]
-              Wikipedia, , "Wikipedia article: Imprinting", July 2015,
-              <https://en.wikipedia.org/wiki/Imprinting_(psychology)>.
 
 
 
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 57]
+Pritikin, et al.        Expires September 6, 2018              [Page 58]
 
 Internet-Draft                    BRSKI                       March 2018
 
+
+   [imprinting]
+              Wikipedia, , "Wikipedia article: Imprinting", July 2015,
+              <https://en.wikipedia.org/wiki/Imprinting_(psychology)>.
 
    [RFC2473]  Conta, A. and S. Deering, "Generic Packet Tunneling in
               IPv6 Specification", RFC 2473, DOI 10.17487/RFC2473,
@@ -3235,20 +3295,22 @@ Internet-Draft                    BRSKI                       March 2018
               DOI 10.17487/RFC7575, June 2015, <https://www.rfc-
               editor.org/info/rfc7575>.
 
+
+
+
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 59]
+
+Internet-Draft                    BRSKI                       March 2018
+
+
    [Stajano99theresurrecting]
               Stajano, F. and R. Anderson, "The resurrecting duckling:
               security issues for ad-hoc wireless networks", 1999,
               <https://www.cl.cam.ac.uk/~fms27/papers/1999-StajanoAnd-
               duckling.pdf>.
-
-
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 58]
-
-Internet-Draft                    BRSKI                       March 2018
-
 
    [TR069]    Broadband Forum, , "TR-69: CPE WAN Management Protocol",
               February 2018, <https://www.broadband-forum.org/standards-
@@ -3291,21 +3353,21 @@ Appendix B.  mDNS / DNSSD proxy discovery options
    section 11.  This method is only available if the host has received a
    useable IPv4 address via DHCPv4 as suggested in Appendix A.2.
 
+
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 60]
+
+Internet-Draft                    BRSKI                       March 2018
+
+
    If no local bootstrapks service is located using the GRASP
    mechanisms, or the above mentioned DNS-based Service Discovery
    methods, the Pledge MAY contact a well known manufacturer provided
    bootstrapping server by performing a DNS lookup using a well known
    URI such as "bootstrapks.manufacturer-example.com".  The details of
    the URI are manufacturer specific.  Manufacturers that leverage this
-
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 59]
-
-Internet-Draft                    BRSKI                       March 2018
-
-
    method on the Pledge are responsible for providing the bootstrapks
    service.
 
@@ -3348,19 +3410,17 @@ Appendix C.  IPIP Join Proxy mechanism
 
    There are a number of considerations with this mechanism which cause
    some minor amounts of complexity.  Note that due to the tunnels, the
-   Registrar sees multiple connections to a fe80::/10 network on not
-   just physical interfaces, but on each of the virtual interfaces
-   representing the tunnels.
 
 
 
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 60]
+Pritikin, et al.        Expires September 6, 2018              [Page 61]
 
 Internet-Draft                    BRSKI                       March 2018
 
+
+   Registrar sees multiple connections to a fe80::/10 network on not
+   just physical interfaces, but on each of the virtual interfaces
+   representing the tunnels.
 
 C.1.  Multiple Join networks on the Join Proxy side
 
@@ -3403,20 +3463,23 @@ C.2.  Automatic configuration of tunnels on Registrar
    (for HTTPS connections), or to the application (for CoAP connections)
    via a proprietary extension to the socket API.
 
+
+
+
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 62]
+
+Internet-Draft                    BRSKI                       March 2018
+
+
 C.3.  Proxy Neighbor Discovery by Join Proxy
 
    The Join Proxy MUST answer neighbor discovery messages for the
    address given by the Registrar as being its link-local address.  The
    Join Proxy must also advertise this address as the address to which
    to connect when advertising its existence.
-
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 61]
-
-Internet-Draft                    BRSKI                       March 2018
-
 
    This Proxy neighbor discovery means that the Pledge will create TCP
    and UDP connections to the correct Registrar address.  This matters
@@ -3457,6 +3520,16 @@ C.5.  Use of socket extension rather than virtual interface
    are often not connected, and the application will need to specify the
    outgoing path on each packet sent.
 
+
+
+
+
+
+Pritikin, et al.        Expires September 6, 2018              [Page 63]
+
+Internet-Draft                    BRSKI                       March 2018
+
+
    Such an additional socket mechanism has not been standardized.
    Terminating L2TP connections over IPsec transport mode suffers from
    the same challenges.
@@ -3466,13 +3539,6 @@ Appendix D.  MUD Extension
    The following extension augments the MUD model to include a single
    node, as described in [I-D.ietf-opsawg-mud] section 3.6, using the
    following sample module that has the following tree structure:
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 62]
-
-Internet-Draft                    BRSKI                       March 2018
-
 
    module: ietf-mud-brski-masa
    augment /ietf-mud:mud:
@@ -3515,17 +3581,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-
-
-
-
-
-
-
-
-
-
-Pritikin, et al.        Expires September 5, 2018              [Page 63]
+Pritikin, et al.        Expires September 6, 2018              [Page 64]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3581,7 +3637,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 64]
+Pritikin, et al.        Expires September 6, 2018              [Page 65]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3637,7 +3693,7 @@ E.1.2.  Manufacturer key pair for IDevID signatures
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 65]
+Pritikin, et al.        Expires September 6, 2018              [Page 66]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3693,7 +3749,7 @@ E.1.3.  Registrar key pair
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 66]
+Pritikin, et al.        Expires September 6, 2018              [Page 67]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3749,7 +3805,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 67]
+Pritikin, et al.        Expires September 6, 2018              [Page 68]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3805,7 +3861,7 @@ E.1.4.  Pledge key pair
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 68]
+Pritikin, et al.        Expires September 6, 2018              [Page 69]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3861,7 +3917,7 @@ E.2.1.  Pledge to Registrar
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 69]
+Pritikin, et al.        Expires September 6, 2018              [Page 70]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3917,7 +3973,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 70]
+Pritikin, et al.        Expires September 6, 2018              [Page 71]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -3973,7 +4029,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 71]
+Pritikin, et al.        Expires September 6, 2018              [Page 72]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4029,7 +4085,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 72]
+Pritikin, et al.        Expires September 6, 2018              [Page 73]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4085,7 +4141,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 73]
+Pritikin, et al.        Expires September 6, 2018              [Page 74]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4141,7 +4197,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 74]
+Pritikin, et al.        Expires September 6, 2018              [Page 75]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4197,7 +4253,7 @@ E.2.2.  Registrar to MASA
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 75]
+Pritikin, et al.        Expires September 6, 2018              [Page 76]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4253,7 +4309,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 76]
+Pritikin, et al.        Expires September 6, 2018              [Page 77]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4309,7 +4365,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 77]
+Pritikin, et al.        Expires September 6, 2018              [Page 78]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4365,7 +4421,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 78]
+Pritikin, et al.        Expires September 6, 2018              [Page 79]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4421,7 +4477,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 79]
+Pritikin, et al.        Expires September 6, 2018              [Page 80]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4477,7 +4533,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 80]
+Pritikin, et al.        Expires September 6, 2018              [Page 81]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4533,7 +4589,7 @@ E.2.3.  MASA to Registrar
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 81]
+Pritikin, et al.        Expires September 6, 2018              [Page 82]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4589,7 +4645,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 82]
+Pritikin, et al.        Expires September 6, 2018              [Page 83]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4645,7 +4701,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 83]
+Pritikin, et al.        Expires September 6, 2018              [Page 84]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4701,7 +4757,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 84]
+Pritikin, et al.        Expires September 6, 2018              [Page 85]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4757,7 +4813,7 @@ Internet-Draft                    BRSKI                       March 2018
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 85]
+Pritikin, et al.        Expires September 6, 2018              [Page 86]
 
 Internet-Draft                    BRSKI                       March 2018
 
@@ -4813,4 +4869,4 @@ Authors' Addresses
 
 
 
-Pritikin, et al.        Expires September 5, 2018              [Page 86]
+Pritikin, et al.        Expires September 6, 2018              [Page 87]
