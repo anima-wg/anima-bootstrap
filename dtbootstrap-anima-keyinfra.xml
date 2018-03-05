@@ -1105,10 +1105,15 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
 
 </section>  <!-- yang module -->
     </section>   <!-- voucher-request artifact -->
-    <section anchor="proxydetails" title="Proxy details">
-      <t>The role of the Proxy is to facilitate communications. The Proxy
-      forwards packets between the Pledge and a Registrar that has been
-      configured on the Proxy.
+    <section anchor="proxydetails" title="Proxying details (Pledge - Proxy - Registrar)">
+      <t>
+        The role of the Proxy is to facilitate communications. The Proxy
+        forwards packets between the Pledge and a Registrar that has been
+        provisioned to the Proxy via GRASP discovery.
+      </t>
+      <t>
+        This section defines a stateful proxy mechanism which is refered
+        to as a "circuit" proxy.
       </t>
 
       <t>
@@ -1121,11 +1126,13 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       </t>
 
       <t>
-        A Proxy is always assumed even if it is directly integrated
-        into a Registrar.
-        (In a completely autonomic network, the Registrar MUST provide
-        Proxy functionality so that it can be discovered, and the network
-        can grow concentrically around the Registrar.)
+        Registrars are assumed to have logically a locally integrated Proxy to
+        support directly (subnet) connected Pledges - because Registrars
+        themself does not define any functions for Pledges to discover
+        them. Such a logical local proxy does not need to provide actual TCP
+        proxying (just discovery) as long as the Registrar can operate with
+        subnet (link) local addresses on the interfaces where Pledges may
+        connect to.
       </t>
 
       <t>
@@ -1135,13 +1142,17 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       </t>
 
       <t>
-        If the Proxy joins an Autonomic Control Plane (<xref
-        target="I-D.ietf-anima-autonomic-control-plane"></xref>) it
-        SHOULD use Autonomic Control Plane secured GRASP (<xref
-        target="I-D.ietf-anima-grasp"></xref>) to discover the Registrar
-        address and port.  As part of the discovery process, the Proxy mechanism
-        (Circuit Proxy vs IPIP encapsulation) is agreed to between the
-        Registrar and Join Proxy.
+        In the ANI, the Autonomic Control Plane (ACP) secured instance of
+        GRASP (<xref target="I-D.ietf-anima-grasp" />) MUST be used for
+        discovery of ANI Registrar ACP addresses
+        and ports by ANI Proxies.  The TCP leg of the proxy connection between
+        ANI Proxy and ANI Registrar therefore also runs across the ACP.
+      </t>
+
+      <t>
+        If GRASP is used by proxies for discovery of Registrars (ACP or
+        not), the proxy can also learn the proxy mechanism (Circuit Proxy
+        vs. IPIP encapsulation or other)
       </t>
 
       <t>
@@ -1198,30 +1209,62 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             Once a Proxy is
             discovered the Pledge communicates with a Registrar through the
             Proxy using the bootstrapping protocol defined in <xref
-                target="ProtocolDetails"></xref>. </t>
-
-            <t>Each discovery method attempted SHOULD exponentially back-off
-                attempts (to a maximum of one hour) to avoid overloading the network
-                infrastructure with discovery. The back-off timer for each method
-                MUST be independent of other methods.
+                target="ProtocolDetails"></xref>.
             </t>
+
             <t>
-                Methods SHOULD be run in
+              While the GRASP M_FLOOD mechanism is passive for the Pledge,
+              the optional other methods (mDNS, and IPv4 methods) are active.
+              The Pledge SHOULD run those methods in parallel with listening
+              to for the M_FLOOD.  The active methods SHOULD exponentially
+              back-off to a maximum of one hour to avoid overloading the
+              network with discovery attempts.  Detection of change of
+              physical link status (ethernet carrier for instance) SHOULD
+              reset the exponential back off.
+            </t>
+
+            <t>
+              The Pledge may discover more than one proxy on a given physical
+              interface.  The Pledge may have a multitude of physical
+              interfaces as well: a layer-2/3 ethernet switch may have
+              hundreds of physical ports.
+            </t>
+
+            <t>
+              Each possible proxy offer SHOULD be attempted up to the point
+              where a voucher is received: while there are many ways in which
+              the attempt may fail, it does not succeed until the voucher has
+              been validated.
+            </t>
+
+            <t>
+              The connection attempts via a single proxy SHOULD exponentially
+              back-off to a maximum of one hour to avoid overloading the network
+              infrastructure.   The back-off timer for each  MUST be
+              independent of other connection attempts.
+            </t>
+
+            <t>
+                Connection attempts SHOULD be run in
                 parallel to avoid head of queue problems wherein an attacker
-                running a fake Proxy or Registrar can operate protocol
-                actions intentionally slowly.
+                running a fake Proxy or Registrar could perform protocol
+                actions intentionally slowly.  The Pledge SHOULD continue to
+                listen to for additional GRASP M_FLOOD messages during
+                the connection attempts.
             </t>
             <t>
               Once a connection to a
-                Registrar is established (e.g. establishment of a TLS session key)
-                there are expectations of more timely responses, see <xref
-                    target="RequestVoucherFromRegistrar"></xref>.</t>
+              Registrar is established (e.g. establishment of a TLS session key)
+              there are expectations of more timely responses, see <xref
+              target="RequestVoucherFromRegistrar"></xref>.
+            </t>
 
-            <t>Once all discovered services are attempted the device SHOULD
-                return to listening for GRASP M_FLOOD.
-                It SHOULD periodically retry the manufacturer specific mechanisms.
-                The Pledge MAY prioritize selection order as
-                appropriate for the anticipated environment.
+            <t>
+              Once all discovered services are attempted (assuming that none
+              succeeded) the device MUST return to listening for GRASP M_FLOOD.
+              It SHOULD periodically retry the manufacturer specific mechanisms.
+              The Pledge MAY prioritize selection order as
+              appropriate for the anticipated environment.
             </t>
 
             <section anchor="brskigrasp" title="Proxy GRASP announcements">
