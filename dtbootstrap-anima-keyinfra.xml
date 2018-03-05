@@ -1269,8 +1269,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
 
             <section anchor="brskigrasp" title="Proxy GRASP announcements">
               <t>
-               A Proxy uses the GRASP M_FLOOD mechanism to announce itself.
-               The Pledge SHOULD listen for messages of this form.
+               A Proxy uses the DULL GRASP M_FLOOD mechanism to announce itself.
                This announcement can be within the same message as the ACP
                announcement detailed in
                <xref target="I-D.ietf-anima-autonomic-control-plane" />.
@@ -1278,10 +1277,10 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                The M_FLOOD is formatted as follows:
                <figure>
                  <artwork><![CDATA[
-[M_FLOOD, 12340815, h'fe80::1', 180000,
+[M_FLOOD, 12340815, h'fe800000000000000000000000000001', 180000,
             ["AN_Proxy", 4, 1, ""],
             [O_IPv6_LOCATOR,
-                 h'fe80::1', 'TCP', 4443]]
+                 h'fe800000000000000000000000000001', 'TCP', 4443]]
                  ]]></artwork>
                  <postamble>Figure 6b: Proxy Discovery</postamble>
                </figure>
@@ -1320,51 +1319,30 @@ port-number      = selected by Proxy
         </t>
       </section>
 
-      <section title="HTTPS Proxy connection to Registrar">
-        <t>The Proxy SHOULD also provide one of: an IPIP encapsulation of
-        HTTP traffic to the Registrar, or a TCP circuit
-        Proxy that connects the Pledge to a Registrar.
-        </t>
-
-        <t>When the Proxy provides a circuit Proxy to a Registrar the
-        Registrar MUST accept HTTPS connections.
-        </t>
-      </section>
 
       <section title="Proxy discovery of Registrar" anchor="JRCgrasp">
         <t> The Registrar SHOULD announce itself so that proxies can find it
         and determine what kind of connections can be terminated.
         </t>
         <t>
-          The Registrar announces itself using GRASP M_FLOOD messages.
+          The Registrar announces itself using ACP instance of GRASP using
+          M_FLOOD messages.  They MUST support ANI TLS circuit Proxy and
+          therefore BRSKI across HTTPS/TLS native across the ACP. ANI Registrars
+          MAY support the IPIP proxy method by implementing IPIP tunneling for
+          their HTTPS/TLS traffic across the ACP.  ANI Proxies MUST support GRASP
+          discovery of Registrars.
+        </t>
+        <t>
           The M_FLOOD is formatted as follows:
           <figure>
-            <artwork><![CDATA[
-[M_FLOOD, 12340815, h'fda379a6f6ee0000200000064000001', 180000,
-            ["AN_join_registrar", 4, 255, "EST-TLS"],
-            [O_IPv6_LOCATOR,
-                 h'fda379a6f6ee0000200000064000001', TCP, 80
-                 ]]></artwork>
-        <postamble>Figure 7a: Registrar Discovery</postamble>
+INSERT_TEXT_FROM_FILE jrcgrasp-example.txt END
+          <postamble>Figure 7a: Registrar Discovery</postamble>
         </figure>
         </t>
         <t>
           The formal CDDL definition is:
           <figure>
-            <artwork><![CDATA[
-flood-message = [M_FLOOD, session-id, initiator, ttl,
-                 +[objective, (locator-option / [])]]
-
-objective = ["AN_join_registrar", objective-flags, loop-count,
-                                       objective-value]
-
-initiator = ACP address to contact Registrar
-objective-flags = sync-only  ; as in GRASP spec
-sync-only =  4               ; M_FLOOD only requires synchronization
-loop-count      = 255        ; mandatory maximum
-objective-value = text       ; name of the (list of) of supported
-                             ; protocols: "EST-TLS" for RFC7030.
-                 ]]></artwork>
+INSERT_TEXT_FROM_FILE jrcgrasp-cddl.txt END
         <postamble>Figure 7: AN_join_registrar CDDL</postamble>
           </figure>
         </t>
