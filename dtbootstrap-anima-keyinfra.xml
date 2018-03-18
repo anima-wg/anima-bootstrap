@@ -1591,10 +1591,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t><list style="hanging">
         <t hangText="created-on:">Registrars are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
         <t hangText="nonce:">The optional nonce value from the Pledge request if desired (see below).</t>
-        <t hangText="serial-number:">The serial number of the Pledge the Registrar would like a voucher for.</t>
+        <t hangText="serial-number:">The serial number of the Pledge the Registrar would like a voucher for. The Registrar
+        determines this value by parsing the authenticated Pledge IDevID certificate. See <xref target="IDevIDextension"></xref>.
+        The Registrar SHOULD verify that the serial number field it parsed matches the serial number field the Pledge
+        provided in its voucher-request. This provides a sanity check useful for detecting error conditions and logging. 
+        The Registrar MUST NOT simply copy the serial number field from a Pledge voucher request as that field is claimed but 
+        not certified.</t>
         <t hangText="idevid-issuer:">The idevid-issuer value from the Pledge certificate
-        is included to ensure a statistically unique identity. The Pledge's serial number is
-        extracted from the X.509 IDevID. See <xref target="IDevIDextension"></xref>.</t>
+        is included to ensure a statistically unique identity.</t>
         <t hangText="prior-signed-voucher:">If a signed Pledge voucher-request was received
         then it SHOULD be included in the Registrar voucher-request.
         (NOTE: what is included is the complete Pledge voucher-request, inclusive of the
@@ -1727,6 +1731,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>The Pledge verifies the signed voucher using the manufacturer
         installed trust anchor associated with the manufacturer's selected Manufacturer
         Authorized Signing Authority.</t>
+        
+        <t>The Pledge verifies the serial-number field of the signed voucher
+        matches the Pledge's serial-number.</t>
 
         <t>The 'pinned-domain-cert' element of the voucher contains the domain
             CA's public key. The Pledge MUST use the 'pinned-domain-cert' trust
