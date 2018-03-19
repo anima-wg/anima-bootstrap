@@ -832,14 +832,18 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
           </t>
         </section>
         <section anchor="registrar-overview" title="Domain Registrar">
-          <t>
-            The domain's Registrar operates as a server for the BRSKI-EST connections. The Registrar 
-            communicates with the MASA to establish ownership of Pledges by 
-            initiating the BRSKI-MASA connections.</t>
-          <t>The Registrar is manually configured or distributed with an Implicit Trust 
-          Anchor database for authenticating Pledge device(s) expected on the network. The 
-          Registar is also configured with a different Implicit Trust Anchor database for securing 
-          the TLS REST interface with the MASA server(s).</t>
+          <t>The domain's Registrar operates as the BRSKI-MASA client when 
+          requesting vouchers from the MASA (see <xref target="brskimasatls" />). The Registrar 
+          operates as the BRSKI-EST server when Pledges request
+          vouchers (see <xref target="brskiesttls" />). The Registrar operates as the BRSKI-EST server 
+          "Registration Authority" if the Pledge requests an end entity certificate
+          over the BRSKI-EST connection (see <xref target="ESTintegration" />).</t>
+          <t>The Registar uses an Implicit Trust Anchor database for 
+          authenticating the BRSKI-MASA TLS connection MASA server certificate. 
+          The Registrar uses a different Implicit Trust Anchor database for 
+          authenticating the BRSKI-EST TLS connection Pledge client certificate. 
+          Configuration or distribution of these trust anchor databases is out-of-scope 
+          of this specification.</t>
         </section>
         <section anchor="masa-overview" title="Manufacturer Service">
           <t>
@@ -1968,7 +1972,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
       </section>
 
-      <section title="EST Integration for PKI bootstrapping">
+      <section anchor="ESTintegration" title="EST Integration for PKI bootstrapping">
         <t>The Pledge SHOULD follow the BRSKI operations with EST enrollment operations
         including "CA Certificates Request", "CSR Attributes" and "Client Certificate Request"
         or "Server-Side Key Generation", etc. This is a relatively seamless integration
