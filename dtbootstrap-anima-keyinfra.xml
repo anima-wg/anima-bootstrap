@@ -182,8 +182,9 @@
         </t>
 
           <t><list style="symbols">
-              <t>using the Implicit Trust Anchor database (not an autonomic
-                  solution because the URL must be securely distributed),</t>
+              <t>using the Implicit Trust Anchor database to authenticate 
+                an owner specific service (not an autonomic solution because 
+                the URL must be securely distributed),</t>
 
               <t>engaging a human user to authorize the CA certificate using
                   out-of-band data (not an autonomic solution because the human user
@@ -274,15 +275,15 @@
             depending on how that trust is asserted. Multiple voucher types are
             defined in <xref target="I-D.ietf-anima-voucher" /></t>
 
-            <t hangText="Domain:">The set of entities that trust a common key
-            infrastructure trust anchor. This includes the Proxy, Registrar,
+            <t hangText="Domain:">The set of entities that share a common local 
+            trust anchor. This includes the Proxy, Registrar,
             Domain Certificate Authority, Management components and any
             existing entity that is already a member of the domain.</t>
 
             <t hangText="Domain CA:">The domain Certification Authority (CA)
             provides certification functionalities to the domain. At a minimum
             it provides certification functionalities to a Registrar and
-            stores the trust anchor that defines the domain. Optionally, it
+            manages the private key that defines the domain. Optionally, it
             certifies all elements.</t>
 
             <t hangText="Join Registrar (and Coordinator):">A representative of the domain that is
@@ -453,8 +454,8 @@
 
         <t>
           As a result of the protocol described herein, the bootstrapped devices
-          have a common trust anchor and a certificate has
-          optionally been issued from a local PKI. This makes it possible
+          have the Domain CA trust anchor in common. An end entity certificate has
+          optionally been issued from the Domain CA. This makes it possible
           to automatically deploy services across the domain in a secure manner.
         </t>
 
@@ -611,7 +612,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
         </list></t>
         <t>
           After step 4, the pledge has received  and authenticated an
-          explicit TA (trust anchor) (pinned-domain-cert in the Voucher
+          explicit trust anchor (the pinned-domain-cert in the Voucher
           response).  A secure transport exists between pledge and registrar,
           and it may be used for things other than enrollment into a PKI.
         </t>
@@ -837,13 +838,13 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
             The Domain Registrar (having the formal name Join
             Registrar/Coordinator (JRC)), operates as a CMC Registrar,
             (Certificate Management over CMS, see <xref target="RFC5272" />
-            section 7) terminating the EST and BRSKI connections. The Registrar is
-            manually configured or distributed with a list of trust anchors
-            necessary to authenticate any Pledge device expected on the
-            network.
-            The Registrar communicates with the MASA to
-            establish ownership.
-          </t>
+            section 7) terminating the BRSKI-EST connections. The Registrar 
+            communicates with the MASA to establish ownership of Pledges by 
+            initiating the BRSKI-MASA connections.</t>
+          <t>The Registrar is manually configured or distributed with an Implicit Trust 
+          Anchor database for authenticating Pledge device(s) expected on the network. The 
+          Registar is also configured with a different Implicit Trust Anchor database for securing 
+          the TLS REST interface with the MASA server(s).</t>
         </section>
         <section anchor="masa-overview" title="Manufacturer Service">
           <t>
@@ -865,10 +866,8 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
             allowing enrollment of Pledges with domain certificates.
           </t>
           <t>
-            The Domain Registrar uses a Trust Anchor (TE)
-            from the PKI in the BRSKI Voucher  pinned-domain-cert to
-            authenticate itself to the Pledge with the help of MASA.
-            (XXX fix me)
+            The Domain Registrar uses the "pinned-domain-cert" voucher field to
+            distribute a trust anchor for authenticating itself to the Pledge.
           </t>
           <t>
             The Domain Registrar acts as an <xref target="RFC5272" />
