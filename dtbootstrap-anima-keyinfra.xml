@@ -1434,8 +1434,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
               origins.
             </t>
 
+            <t>
               (EST supports redirection but does
-            not allow redirections to other web origins without user input.)</t>
+              not allow redirections to other web origins without user input.)
+            </t>
 
             <t>The Registar MAY respond with an HTTP 202 ("the request has been
                 accepted for processing, but the processing has not been completed") as
@@ -1480,22 +1482,40 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
               validate this certificate, or be identical to it.
             </t>
 
-            <t>The Pledge completes authentication of the server certificate as detailed in <xref target="CompletingAuthenticationBootstrapping"></xref>. This moves the BRSKI-EST TLS connection out of the provisional state. Optionally, the BRSKI-EST TLS connection can now be used for EST enrollment.</t>
+            <t>
+            The Pledge completes authentication of the server certificate as
+            detailed in <xref
+            target="CompletingAuthenticationBootstrapping"></xref>. This
+            moves the BRSKI-EST TLS connection out of the provisional
+            state.
+            </t>
+            <t>
+              Mandatory boostrap steps conclude with Voucher Status
+              Telemetry (see <xref target="voucherstatus" />).
+            </t>
 
         </list></t>
 
-      <t>The extensions for a Registrar (equivalent to EST server) are:</t>
+        <t>
+          The BRSKI-EST TLS connection can now be used for EST enrollment.
+        </t>
 
-      <t><list style="symbols">
-          <t>Client authentication is automated using Initial Device Identity
-          (IDevID) as per the EST certificate based client authentication.
-              The subject field's DN encoding MUST include the "serialNumber"
-              attribute with the device's unique serial number. In the language of
-              <xref target="RFC6125" /> this provides for a SERIALNUM-ID category of identifier that
-              can be included in a certificate and therefore that can also be used
-              for matching purposes. The SERIALNUM-ID whitelist is collated according
-              to manufacturer trust anchor since serial numbers are not globally
-              unique.</t>
+        <t>The extensions for a Registrar (equivalent to EST server) are:</t>
+        <t><list style="symbols">
+          <t>
+            Client authentication is automated using Initial Device Identity
+            (IDevID) as per the EST certificate based client authentication.
+            The subject field's DN encoding MUST include the "serialNumber"
+            attribute with the device's unique serial number.
+          </t>
+          <t>
+            In the language of
+            <xref target="RFC6125" /> this provides for a SERIALNUM-ID
+            category of identifier that can be included in a certificate and
+            therefore that can also be used for matching purposes. The
+            SERIALNUM-ID whitelist is collated according to manufacturer
+            trust anchor since serial numbers are not globally unique.
+          </t>
 
           <t>The Registrar requests and validates the Voucher from the MASA.</t>
 
@@ -1550,8 +1570,17 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>The Pledge populates the voucher-request fields as follows:</t>
 
         <t><list style="hanging">
-            <t hangText="created-on:">Pledges that have a realtime clock are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
-            <t hangText="nonce:">The Pledge voucher-request MUST contain a cryptographically strong random or pseudo-random number nonce. Doing so ensures <xref target="timeunknown"/> functionality. The nonce MUST NOT be reused for bootstrapping attempts.</t>
+            <t hangText="created-on:">Pledges that have a realtime clock are
+            RECOMMENDED to populate this field. This provides additional
+            information to the MASA.</t>
+
+            <t hangText="nonce:">The Pledge voucher-request MUST contain a
+            cryptographically strong random or pseudo-random number
+            nonce. Doing so ensures <xref target="timeunknown"/>
+            functionality. The nonce MUST NOT be reused for multiple
+            bootstrapping attempts.
+            </t>
+
             <t hangText="assertion:">The Pledge voucher-request MAY contain an assertion of "proximity".</t>
             <t hangText="proximity-registrar-cert:">In a Pledge voucher-request this is the first certificate in the TLS server 'certificate_list' sequence (see [RFC5246]) presented by the Registrar to the Pledge. This MUST be populated in a Pledge voucher-request if the "proximity" assertion is populated.</t>
         </list></t>
@@ -1615,8 +1644,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t hangText="serial-number:">The serial number of the Pledge the Registrar would like a voucher for. The Registrar
         determines this value by parsing the authenticated Pledge IDevID certificate. See <xref target="IDevIDextension"></xref>.
         The Registrar SHOULD verify that the serial number field it parsed matches the serial number field the Pledge
-        provided in its voucher-request. This provides a sanity check useful for detecting error conditions and logging. 
-        The Registrar MUST NOT simply copy the serial number field from a Pledge voucher request as that field is claimed but 
+        provided in its voucher-request. This provides a sanity check useful for detecting error conditions and logging.
+        The Registrar MUST NOT simply copy the serial number field from a Pledge voucher request as that field is claimed but
         not certified.</t>
         <t hangText="idevid-issuer:">The idevid-issuer value from the Pledge certificate
         is included to ensure a statistically unique identity.</t>
@@ -1752,7 +1781,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>The Pledge verifies the signed voucher using the manufacturer
         installed trust anchor associated with the manufacturer's selected Manufacturer
         Authorized Signing Authority.</t>
-        
+
         <t>The Pledge verifies the serial-number field of the signed voucher
         matches the Pledge's serial-number.</t>
 
