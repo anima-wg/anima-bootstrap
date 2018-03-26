@@ -45,13 +45,13 @@ examples/%.txt: examples/%.crt
 	openssl x509 -noout -text -in $? | fold -w 60 >$@
 
 examples/%.asn1.txt: examples/%.pkcs
-	base64 -d <$? |	openssl asn1parse -inform der -in - | fold -w 60 >$@
+	base64 --decode <$? |	openssl asn1parse -inform der | fold -w 60 >$@
 
 examples/%.asn1.txt: examples/%.crt
 	openssl asn1parse -in $? | fold -w 60 >$@
 
 examples/%.json: examples/%.pkcs
-	base64 -d <$? | openssl cms -verify -inform der -in - -nosigs -noverify | fold -w 60 >$@
+	base64 --decode <$? | openssl cms -verify -inform der -nosigs -noverify | fold -w 60 >$@
 
 ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
 	cat ${DRAFT}.xml | ./insert-figures > ALL-${DRAFT}.xml
