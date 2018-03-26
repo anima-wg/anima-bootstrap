@@ -1978,7 +1978,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>The client HTTP POSTs the following to the server at the EST well
         known URI "/voucher_status". The Status field indicates if the Voucher
         was acceptable. If it was not acceptable the Reason string indicates
-        why. In the failure case this message is being sent to an
+        why. In the failure case this message may be sent to an
         unauthenticated, potentially malicious Registrar and therefore the
         Reason string SHOULD NOT provide information beneficial to an
         attacker. The operational benefit of this telemetry information is
@@ -2050,13 +2050,15 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           a URL to the prepared (and easily cachable) audit response.
         </t>
         <t>
+          In order to avoid enumeration of device audit logs,
           MASA servers that return URLs SHOULD take care to make the returned
-          URL unguessable.  URLs containing a database number
+          URL unguessable.
+          For instance, rather than returning URLs containing a database number
           such as https://example.com/auditlog/1234 or the EUI of the device
-          such https://example.com/auditlog/10-00-00-11-22-33, would be
-          easily enumerable by an attacker.  It is recommended to put
-          some meaningless randomly generated slug that indexes a database
-          instead.
+          such https://example.com/auditlog/10-00-00-11-22-33,
+          the MASA SHOULD return a randomly generated value (a "slug" in
+          web parlance).  The value is used to find the relevant database
+          entry.
         </t>
         <t>
           A MASA that returns a code 200 MAY also include a Location: header
@@ -2160,10 +2162,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         described in <xref target="RFC7030"></xref>. As noted above, use of HTTP 1.1 persistent
         connections simplifies the Pledge state machine.</t>
 
-        <t>The Pledge is also RECOMMENDED to implement the EST automation
-        extensions described below. They
-        supplement the RFC7030 EST to better support automated devices that do not
-        have an end user.</t>
+        <t>An ANIMA ANI Pledge MUST implement the EST automation
+        extensions described below. They supplement the <xref
+        target="RFC7030" /> EST to better
+        support automated devices that do not have an end user.</t>
 
         <!-- dealing with: https://github.com/anima-wg/anima-bootstrap/issues/24 -->
         <t>
@@ -2176,8 +2178,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           more complex logic but doing so is out-of-scope of this
           specification.
           BRSKI does not signal any enhancement or restriction to this
-          capability. Pledges that require multiple certificates could establish
-          direct EST connections to the Registrar.
+          capability.
         </t>
 
         <section title="EST Distribution of CA Certificates">
@@ -2246,7 +2247,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           administrators concerning device lifecycle status. This might
           include information concerning attempted bootstrapping messages seen
           by the client, MASA provides logs and status of credential
-          enrollment. The EST protocol assumes an end user and therefore does
+          enrollment. <xref target="RFC7030" /> assumes an end user and therefore does
           not include a final success indication back to the server. This is
           insufficient for automated use cases.</t>
 
@@ -2292,6 +2293,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           verify that enrollment was truly successful.</t>
         </section>
 
+        <section title="Multiple certificates">
+          <t>
+            Pledges that require multiple certificates could establish
+            direct EST connections to the Registrar.
+          </t>
+        </section>
+
         <section title="EST over CoAP">
           <t>This document describes extensions to EST for the purposes
               of bootstrapping of remote key infrastructures.
@@ -2310,10 +2318,17 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
     <section anchor="reducedsecuritymodes"
              title="Reduced security operational modes">
-      <t>A common requirement of bootstrapping is to support less secure
-      operational modes for support specific use cases. The following sections
-      detail specific ways that the Pledge, Registrar and MASA can be
-      configured to run in a less secure mode for the indicated reasons.</t>
+      <t>
+        A common requirement of bootstrapping is to support less secure
+        operational modes for support specific use cases. The following sections
+        detail specific ways that the Pledge, Registrar and MASA can be
+        configured to run in a less secure mode for the indicated reasons.
+      </t>
+      <t>
+        This section is considered non-normative: use suggested methods
+        MUST be detailed in specific profiles of BRSKI.  This is the
+        subject for future work.
+      </t>
 
       <section title="Trust Model">
         <figure>
@@ -2374,12 +2389,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         validation one time. For example if a physical button is depressed
         during the bootstrapping operation. This can be useful if the manufacturer
         service is unavailable. This behavior SHOULD be available via local
-        configuration or physical presence methods to ensure new entities can
+        configuration or physical presence methods (such as use of a
+        serial/craft console) to ensure new entities can
         always be deployed even when autonomic methods fail. This allows for
         unsecured imprint.</t></list></t>
 
-        <t>It is RECOMMENDED that "trust on first use" or skipping voucher validation
-        only be available if hardware assisted Network Endpoint Assessment [RFC5209]
+        <t>It is RECOMMENDED that "trust on first use" or skipping voucher
+        validation only be available if hardware assisted Network Endpoint
+        Assessment [RFC5209]
         is supported. This recommendation ensures that domain network monitoring
         can detect innappropriate use of offline or emergency
         deployment procedures.</t>
@@ -2470,7 +2487,22 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
     </section>
 
     <section title="IANA Considerations">
-        <t>This document requires the following IANA actions:</t>
+      <t>This document requires the following IANA actions:</t>
+
+      <section title="Well-known EST registration">
+        <t>
+          This document extends the definitions of "est" (so far defined via
+          RFC7030) in the
+          "https://www.iana.org/assignments/well-known-uris/well-known-uris.xhtml"
+          registry as follows:
+          <list style="symbols">
+            <t>add /.well-known/est/requestvoucher
+            (see <xref target="RequestVoucherFromMASA" /> ) </t>
+            <t>add /.well-known/est/requestauditlog
+            (see <xref target="voucherstatus" />)</t>
+          </list>
+        </t>
+      </section>
 
       <section title="PKIX Registry">
         <t>IANA is requested to register the following:</t>
