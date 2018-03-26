@@ -909,10 +909,57 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
               </t>
 
               <t>
-                The Pledge authenticates the voucher presented to it. During
-                this authentication the Pledge ignores certificate
-                lifetimes (by necessity because it does not have a realtime
-                clock).
+                If the Pledge has any stable storage (such as from where
+                firmware is loaded) then it SHOULD assume that the clock
+                CAN NOT be before the date at which the firmware or the the
+                storage was last time stamped.  The Pledge SHOULD NOT update
+                the timestamps in any file systems until it has a secure
+                time source.
+                This provides an earliest date which is reasonable.  Call
+                this the current reasonable date (CRD).  This value SHOULD NOT
+                be stored in any way, and applies to the current Registration
+                attempt only.  Subsequent attempts MUST follow this
+                proceedure again from scratch.  The current reasonable date
+                may only increase.
+              </t>
+
+              <t>
+                The Pledge is exposed to dates in the following five places
+                (Registrar certificate, notBefore and notAfter. Voucher
+                created-on, and expires-on. Additionally, CMS signatures
+                contain a signingTime)
+              </t>
+              <t>
+                During the initial connection with the Registrar, the
+                Pledge sees the Registrar Certificate. It has an inception
+                date (notBefore) and an expiry date (notAfter).
+                It is reasonable that the notBefore date be after the
+                Pledge's current working reasonable date.
+                It is however, suspicious for the notAfter date to be
+                before the Pledge's current reasonable date. No action is
+                recommended, other than an internal audit entry for this.
+              </t>
+
+              <t>
+                If the notBefore date of the Registrar's certificate is
+                newer than the Pledge's reasonable date, then it MAY
+                update it's current reasonable date to the notBefore value.
+              </t>
+
+              <t>
+                After the voucher request process, the pledge will have
+                a voucher.  It can validate the signature on the voucher,
+                as it has been (by literal construction) provided with the
+                MASA's key as a trust anchor.
+                The time values (created-on, expires-on) in the voucher
+                can not in general be validated as the Pledge has no certain
+                real time clock.  There are some reasonable assumptions
+                that can be made:  the voucher's expires-on time can not
+                be prior to the the Pledge's current reasonable date.
+                For nonceless vouchers, the voucher's created-on time COULD
+                be earlier if the as well if a long-lived voucher was
+                obtained some time in the past, and the Pledge has since
+                gone through a firmware update and factory reset.
               </t>
 
               <t>
@@ -920,18 +967,33 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
                 then the Pledge MUST confirm the nonce matches the original
                 Pledge voucher-request. This ensures the voucher is fresh.
                 See <xref target="RequestVoucherFromRegistrar">/</xref>.
+                In that case, the voucher's created-on date MUST NOT be
+                prior to the Pledge's current reasonable date.
+                In addition, when there is a valid nonce, the current
+                reasonable date MAY be incremented to that of the CMS
+                signingTime.
               </t>
 
-              <t>Once the voucher is accepted the validity period of the
-                  pinned-domain-cert in the voucher now serves as a valid time
-                  window. Any subsequent certificate validity periods checked
-                  during RFC5280 path validation MUST occur within this
-                  window.</t>
+              <t>
+                Once the voucher is accepted the validity period of the
+                pinned-domain-cert in the voucher now serves as a valid time
+                window. As the MASA has checked the Registrar's certificate
+                against real clocks, the endorsement of the MASA allows the
+                Pledge to treat the notBefore and notAfter dates as being
+                constrained on any subsequent certificate validity periods
+                that may need to be checked: for instance, validating
+                peer certificates during ANIMA ACP setup.
+              </t>
 
-              <t>When accepting an enrollment certificate the validity period
-                  within the new certificate is assumed to be valid by the Pledge.
-                  The Pledge is now willing to use this credential for client
-                  authentication.</t>
+              <t>
+                When accepting an enrollment certificate the validity period
+                within the new certificate is assumed to be valid by the Pledge.
+                The Pledge is now willing to use this credential for client
+                authentication.
+              </t>
+              <t>
+
+              </t>
           </list>
           </t>
         </section>
@@ -1696,15 +1758,37 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
                 include the Domain CA certificate in the signature structure was stated above.)</t>
 
                 <t hangText="Registrar revocation consistency:">
-                  The MASA SHOULD check for revocation
-                  of the Registrar certificate. The maximum lifetime of the
-                  voucher issued
-                  SHOULD NOT exceed the lifetime of the Registrar's revocation
-                  validation (for
-                  example if the Registrar revocation status is indicated in
-                  a CRL that is
-                  valid for two weeks then that is an appropriate lifetime
-                  for the voucher.)
+                  If the Registrar uses a CA known to the MASA, and it
+                  makes certificate revocation information available to
+                  the MASA, then the MASA SHOULD check for the maximum
+                  validity of the Registrar's certificate.
+                </t>
+                <t>
+                  There are three times to consider: a) a configured voucher
+                  lifetime in the MASA, b) the expiry time for the
+                  Registrar's Certificate, c) any certificate revocation
+                  information (CRL) lifetime.
+                </t>
+                <t>
+                  The resulting voucher should have a lifetime (expires-on
+                  field) which is the earliest of these three values.
+                  Typically (b) will be some significant time in the future,
+                  but (c) will typically be short (on the order of a week or
+                  less).  The RECOMMENDED period for (a) is on the order of
+                  20 minutes, so it will typically determine the lifespan
+                  of the resulting voucher.
+                </t>
+                <t>
+                  By limiting the voucher lifetime in this way, the MASA
+                  is effectively doing CRL and lifetime checks on behalf
+                  of the Pledge.  While the pledge may be without a real time
+                  clock to tell it absolute time, it SHOULD be able to
+                  calculate relative time.  See section <xref
+                  target="timeunknown" />.
+                </t>
+                <t>
+                  If CRL information is unavailable to the MASA, then
+                  the MASA SHOULD rely on the validity information
                   Because the Registar certificate authority is unknown to
                   the MASA in
                   advance this is only an extended consistency check and is
