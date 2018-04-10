@@ -100,39 +100,39 @@
     <section title="Introduction">
       <t>
         BRSKI provides a solution for secure zero-touch (automated) bootstrap of
-        virgin (untouched) devices that are called Pledges in this
-        document. These Pledges need to discover (or be discovered by) an
-        element of the network domain to which the Pledge belongs to perform
+        virgin (untouched) devices that are called pledges in this
+        document. These pledges need to discover (or be discovered by) an
+        element of the network domain to which the pledge belongs to perform
         the bootstrap.  This element (device) is called the
-        Registrar.  Before any other operation, Pledge and Registrar need to
+        registrar.  Before any other operation, pledge and registrar need to
         establish mutual trust:
       </t>
 
       <t><list style="numbers">
-          <t>Registrar authenticating the Pledge: "Who is this device? What is
+          <t>Registrar authenticating the pledge: "Who is this device? What is
           its identity?"</t>
 
-          <t>Registrar authorizing the Pledge: "Is it mine? Do I want it?
+          <t>Registrar authorizing the pledge: "Is it mine? Do I want it?
           What are the chances it has been compromised?"</t>
 
-          <t>Pledge authenticating the Registrar/Domain: "What is this
-          domain's identity?"</t>
+          <t>Pledge authenticating the registrar: "What is this
+          registrar's identity?"</t>
 
-          <t>Pledge authorizing the Registrar: "Should I join it?"</t>
+          <t>Pledge authorizing the registrar: "Should I join it?"</t>
         </list></t>
 
         <t>
           This document details protocols and messages to answer the above questions.
           It uses a TLS connection and an PKIX (X.509v3) certificate (an IEEE
-          802.1AR <xref target="IDevID" /> LDevID) of the Pledge to answer
+          802.1AR <xref target="IDevID" /> LDevID) of the pledge to answer
           points 1 and 2.
           It uses a new artifact called a "voucher" that the registrar
           receives from a "Manufacturer Authorized Signing Authority" and
-          passes to the Pledge to answer points 3 and 2.
+          passes to the pledge to answer points 3 and 2.
         </t>
         <t>
           A proxy provides very limited connectivity between the pledge and
-          the Registrar.
+          the registrar.
         </t>
 
 
@@ -144,14 +144,14 @@
       to the voucher format (see <xref target="voucher-request" />) defined
       by <xref target="I-D.ietf-anima-voucher" />.</t>
 
-     <t>BRSKI results in the Pledge storing an X.509 root
-    certificate sufficient for verifying the Registrar identity. In the
+     <t>BRSKI results in the pledge storing an X.509 root
+    certificate sufficient for verifying the registrar identity. In the
     process a TLS connection is established that can be directly used for
     Enrollment over Secure Transport (EST). In effect BRSKI provides
     an automated mechanism for the "Bootstrap Distribution of CA Certificates"
     described in <xref target="RFC7030"></xref> Section 4.1.1 wherein
-    the Pledge "MUST [...] engage a human user to authorize the CA certificate using
-    out-of-band" information". With BRSKI the Pledge now can automate
+    the pledge "MUST [...] engage a human user to authorize the CA certificate using
+    out-of-band" information". With BRSKI the pledge now can automate
     this process using the voucher. Integration with a complete EST
     enrollment is optional but trivial.</t>
 
@@ -203,15 +203,15 @@
             zero-touch.
           </t>
 
-          <t>There are "call home" technologies where the Pledge first
+          <t>There are "call home" technologies where the pledge first
               establishes a connection to a well known manufacturer service using a common
               client-server authentication model. After mutual authentication,
               appropriate credentials to authenticate the target domain are
-              transfered to the Pledge. This creates serveral problems and
+              transfered to the pledge. This creates serveral problems and
               limitations:</t>
 
           <t><list style="symbols">
-              <t>the Pledge requires realtime connectivity to the manufacturer
+              <t>the pledge requires realtime connectivity to the manufacturer
                   service,</t>
 
               <t>the domain identity is exposed to the manufacturer service (this is a
@@ -237,7 +237,7 @@
         <t><list style="hanging">
             <t hangText="domainID:">The domain IDentity is the
             160-bit SHA-1 hash of the BIT STRING of the subjectPublicKey
-            of the root certificate for the Registrars in the domain.
+            of the root certificate for the registrars in the domain.
             This is consistent with the subject key identifier (<xref target="RFC5280">Section 4.2.1.2</xref>).
             </t>
 
@@ -270,44 +270,44 @@
             identity installed at the factory.</t>
 
             <t hangText="Voucher:">A signed artifact from the MASA
-            that indicates to a Pledge the cryptographic identity of the
-            Registrar it should trust. There are different types of vouchers
+            that indicates to a pledge the cryptographic identity of the
+            registrar it should trust. There are different types of vouchers
             depending on how that trust is asserted. Multiple voucher types are
             defined in <xref target="I-D.ietf-anima-voucher" /></t>
 
             <t hangText="Domain:">The set of entities that share a common local
-            trust anchor. This includes the Proxy, Registrar,
+            trust anchor. This includes the proxy, registrar,
             Domain Certificate Authority, Management components and any
             existing entity that is already a member of the domain.</t>
 
             <t hangText="Domain CA:">The domain Certification Authority (CA)
             provides certification functionalities to the domain. At a minimum
-            it provides certification functionalities to a Registrar and
+            it provides certification functionalities to a registrar and
             manages the private key that defines the domain. Optionally, it
             certifies all elements.</t>
 
             <t hangText="Join Registrar (and Coordinator):">A representative of the domain that is
             configured, perhaps autonomically, to decide whether a new device
             is allowed to join the domain. The administrator of the domain
-            interfaces with a Join Registrar (and Coordinator) to control this process. Typically a
-            Join Registrar is "inside" its domain. For simplicity this document
-            often refers to this as just "Registrar". Within <xref target="I-D.ietf-anima-reference-model" /> this is
-            refered to as the Join Registrar Autonomic Service Agent.
-            Other communities use the abbreviation JRC.
+            interfaces with a "join registrar (and coordinator)" to control this process. Typically a
+            join registrar is "inside" its domain. For simplicity this document
+            often refers to this as just "registrar". Within <xref target="I-D.ietf-anima-reference-model" /> this is
+            refered to as the "join registrar autonomic service agent".
+            Other communities use the abbreviation "JRC".
             </t>
 
             <t hangText="(Public) Key Infrastructure:"> The collection of systems and
             processes that sustain the activities of a public key system.
-            The Join Registrar (and Coordinator) acts as an
+            The registrar acts as an
             <xref target="RFC5280" /> and <xref target="RFC5272" /> (see
               section 7) "Registration Authority".</t>
 
-            <t hangText="Join Proxy:">A domain entity that helps the Pledge join
-            the domain. A Proxy facilitates communication for devices that
+            <t hangText="Join Proxy:">A domain entity that helps the pledge join
+            the domain. A proxy facilitates communication for devices that
             find themselves in an environment where they are not provided
             connectivity until after they are validated as members of the
-            domain. The Pledge is unaware that they are communicating with a
-            Proxy rather than directly with a Registrar.</t>
+            domain. The pledge is unaware that they are communicating with a
+            proxy rather than directly with a registrar.</t>
 
             <t hangText="MASA Service:">A third-party Manufacturer Authorized
             Signing Authority (MASA) service on the global Internet. The MASA
@@ -328,9 +328,9 @@
             installed by the vendor on new equipment.</t>
 
             <t hangText="TOFU:">Trust on First Use. Used similarly to <xref
-            target="RFC7435" />. This is where a Pledge
+            target="RFC7435" />. This is where a pledge
             device makes no security decisions but rather simply trusts the
-            first Registrar it is contacted by. This is also known as the
+            first registrar it is contacted by. This is also known as the
             "resurrecting duckling" model.</t>
 
             <t hangText="nonced:">a voucher (or request) that contains a nonce (the normal
@@ -386,7 +386,7 @@
           The bootstrapping process can take minutes to complete depending on
           the network infrastructure and device processing speed. The network
           communication itself is not optimized for speed; for privacy reasons,
-          the discovery process allows for the Pledge to avoid announcing its
+          the discovery process allows for the pledge to avoid announcing its
           presence through broadcasting.
         </t>
         <t>
@@ -440,12 +440,12 @@
 
         <section title="Network Access Controls">
         <t>This document presumes that network access control has either
-        already occurred, is not required, or is integrated by the Proxy
-        and Registrar in such a way that the device itself does not need to
+        already occurred, is not required, or is integrated by the proxy
+        and registrar in such a way that the device itself does not need to
         be aware of the details. Although the use of an X.509 Initial
         Device Identity is consistant with IEEE 802.1AR <xref
         target="IDevID"></xref>, and allows for alignment with 802.1X
-        network access control methods, its use here is for Pledge
+        network access control methods, its use here is for pledge
         authentication rather than network access control. Integrating
         this protocol with network access control, perhaps as an
         Extensible Authentication Protocol (EAP) method
@@ -489,7 +489,7 @@
           For devices that intend to become part of an Autonomic Network
           Infrastructure (ANI) (<xref target="I-D.ietf-anima-reference-model" />) that includes an
           Autonomic Control Plane (<xref target="I-D.ietf-anima-autonomic-control-plane" />), the following actions
-          are required and MUST be performed by the Pledge:
+          are required and MUST be performed by the pledge:
           <list style="symbols">
             <t>BRSKI: Request Voucher</t>
             <t>EST: CA Certificates Request</t>
@@ -531,15 +531,15 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
       manufacturers due to the required sales channel integrations necessary to
       track ownership.</t>
 
-      <t>The domain is the managed network infrastructure with a Key Infrastructure the Pledge is
+      <t>The domain is the managed network infrastructure with a Key Infrastructure the pledge is
       joining. The domain provides initial device connectivity
-      sufficient for bootstrapping with a Circuit Proxy. The Domain
-      Registrar authenticates the Pledge, makes authorization decisions, and distributes
-      vouchers obtained from the Manufacturer Service. Optionally the Registrar
+      sufficient for bootstrapping with a circuit proxy. The domain
+      registrar authenticates the pledge, makes authorization decisions, and distributes
+      vouchers obtained from the Manufacturer Service. Optionally the registrar
       also acts as a PKI Registration Authority.</t>
 
       <section title="Behavior of a Pledge">
-        <t>The Pledge goes through a series of steps, which are outlined here
+        <t>The pledge goes through a series of steps, which are outlined here
         at a high level.</t>
 
         <figure>
@@ -585,38 +585,38 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
             <postamble>Figure 2</postamble>
         </figure>
 
-        <t>State descriptions for the Pledge are as follows:</t>
+        <t>State descriptions for the pledge are as follows:</t>
 
         <t><list style="numbers">
-            <t>Discover a communication channel to a Registrar.</t>
+            <t>Discover a communication channel to a registrar.</t>
 
             <t>Identify itself. This is done by presenting an X.509 IDevID
-                credential to the discovered Registrar (via the Proxy) in a TLS
-                handshake. (The Registrar credentials are only provisionally
+                credential to the discovered registrar (via the proxy) in a TLS
+                handshake. (The registrar credentials are only provisionally
                 accepted at this time).</t>
 
-            <t>Request to Join the discovered Registrar. A unique nonce can be
+            <t>Request to join the discovered registrar. A unique nonce can be
                 included ensuring that any responses can be associated with this
                 particular bootstrapping attempt.</t>
 
-            <t>Imprint on the Registrar. This requires verification of the
+            <t>Imprint on the registrar. This requires verification of the
                 manufacturer service provided voucher. A voucher contains sufficient
-                information for the Pledge to complete authentication of a
-                Registrar. (It enables the Pledge to finish
-            authentication of the Registrar TLS server certificate).</t>
+                information for the pledge to complete authentication of a
+                registrar. (It enables the pledge to finish
+            authentication of the registrar TLS server certificate).</t>
 
             <t>Enroll. By accepting the domain specific information from a
-                Registrar, and by obtaining a domain certificate from a Registrar
+                registrar, and by obtaining a domain certificate from a registrar
                 using a standard enrollment protocol, e.g. Enrollment over Secure
                 Transport (EST) <xref target="RFC7030"></xref>.</t>
 
-            <t>The Pledge is now a member of, and can be managed by, the
+            <t>The pledge is now a member of, and can be managed by, the
                 domain and will only repeat the discovery aspects of bootstrapping
                 if it is returned to factory default settings.</t>
         </list></t>
         <t>
           After step 4, the pledge has received  and authenticated an
-          explicit trust anchor (the pinned-domain-cert in the Voucher
+          explicit trust anchor (the pinned-domain-cert in the voucher
           response).  A secure transport exists between pledge and registrar,
           and it may be used for things other than enrollment into a PKI.
         </t>
@@ -624,15 +624,15 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
       </section>
 
       <section title="Secure Imprinting using Vouchers">
-        <t>A voucher is a cryptographically protected artifact (a digital signature) to the Pledge
-        device authorizing a zero-touch imprint on the Registrar
+        <t>A voucher is a cryptographically protected artifact (a digital signature) to the pledge
+        device authorizing a zero-touch imprint on the registrar
         domain. </t>
 
         <t>The format and cryptographic mechanism of vouchers is described in
         detail in <xref target="I-D.ietf-anima-voucher" />.</t>
 
         <t>Vouchers provide a flexible mechanism to secure imprinting: the
-        Pledge device only imprints when a voucher can be validated.
+        pledge device only imprints when a voucher can be validated.
         At the lowest security levels the MASA server can indiscriminately issue
         vouchers and log claims of ownership by domains.  At the highest security
         levels issuance of vouchers can be integrated with complex sales channel
@@ -641,24 +641,24 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
         pledge by the domain.
             This
             provides the flexibility for a number of use cases via a single
-            common protocol mechanism on the Pledge and Registrar devices that
+            common protocol mechanism on the pledge and registrar devices that
             are to be widely deployed in the field. The MASA services have
             the flexibility to leverage either the currently defined claim
             mechanisms or to experiment with higher or lower security levels.</t>
 
         <t>Vouchers provide a signed but non-encrypted communication channel among
-            the Pledge, the MASA, and the Registrar. The Registrar maintains
+            the pledge, the MASA, and the registrar. The registrar maintains
             control over the transport and policy decisions allowing the
             local security policy of the domain network to be enforced.</t>
       </section>
 
       <section anchor="IDevIDextension" title="Initial Device Identifier">
         <t>
-          Pledge authentication and Pledge voucher-request signing is via
+          Pledge authentication and pledge voucher-request signing is via
           a PKIX certificate installed
           during the manufacturing process. This is the 802.1AR Initial
           Device Identifier (IDevID), and it
-          provides a basis for authenticating the Pledge during
+          provides a basis for authenticating the pledge during
           the protocol exchanges described here.
           There is no requirement for a common root PKI hierarchy.
           Each device manufacturer can generate its own root certificate.
@@ -702,8 +702,8 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
           <t>
              In the context of BRSKI, pledges are uniquely identified by a
              "serial-number". This serial-number is used both in the "serial-number"
-             field of Voucher or Voucher requests (see <xref target="voucher-request" />)
-             and in local policies on Registrar or MASA
+             field of voucher or voucher-requests (see <xref target="voucher-request" />)
+             and in local policies on registrar or MASA
              (see <xref target="ProtocolDetails" />).
           </t>
 
@@ -734,7 +734,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
           </t>
 
           <t>
-            and they are used as follows by the Pledge to build the
+            and they are used as follows by the pledge to build the
             "serial-number" that is placed in the voucher-request.
             In order to build it, the fields need to be converted into a
             serial-number of "type string".
@@ -825,30 +825,30 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
     <section title="Architectural Components">
         <section anchor="pledge-overview" title="Pledge">
           <t>
-            The Pledge is the device that is attempting to join.
-            Until the Pledge completes the enrollment process, it has
-            link-local network connectivity only to the Proxy.
+            The pledge is the device that is attempting to join.
+            Until the pledge completes the enrollment process, it has
+            link-local network connectivity only to the proxy.
           </t>
         </section>
         <section anchor="proxy-overview" title="Circuit Proxy">
           <t>
-            The (Circuit) Proxy provides HTTPS connectivity between the
-            Pledge and the Registrar. The circuit proxy mechanism is
+            The circuit proxy provides HTTPS connectivity between the
+            pledge and the registrar. The circuit proxy mechanism is
             described in <xref target="proxydetails" />, with an optional
             stateless proxy mechanism described in <xref target="IPIPmechanism" />.
           </t>
         </section>
         <section anchor="registrar-overview" title="Domain Registrar">
-          <t>The domain's Registrar operates as the BRSKI-MASA client when
-          requesting vouchers from the MASA (see <xref target="brskimasatls" />). The Registrar
-          operates as the BRSKI-EST server when Pledges request
-          vouchers (see <xref target="brskiesttls" />). The Registrar operates as the BRSKI-EST server
-          "Registration Authority" if the Pledge requests an end entity certificate
+          <t>The domain's registrar operates as the BRSKI-MASA client when
+          requesting vouchers from the MASA (see <xref target="brskimasatls" />). The registrar
+          operates as the BRSKI-EST server when pledges request
+          vouchers (see <xref target="brskiesttls" />). The registrar operates as the BRSKI-EST server
+          "Registration Authority" if the pledge requests an end entity certificate
           over the BRSKI-EST connection (see <xref target="ESTintegration" />).</t>
-          <t>The Registar uses an Implicit Trust Anchor database for
+          <t>The registrar uses an Implicit Trust Anchor database for
           authenticating the BRSKI-MASA TLS connection MASA server certificate.
-          The Registrar uses a different Implicit Trust Anchor database for
-          authenticating the BRSKI-EST TLS connection Pledge client certificate.
+          The registrar uses a different Implicit Trust Anchor database for
+          authenticating the BRSKI-EST TLS connection pledge client certificate.
           Configuration or distribution of these trust anchor databases is out-of-scope
           of this specification.</t>
         </section>
@@ -869,15 +869,15 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
           <t>
             The Key Infrastructure (PKI) administers certificates for the
             domain of concerns, providing the trust anchor(s) for it and
-            allowing enrollment of Pledges with domain certificates.
+            allowing enrollment of pledges with domain certificates.
           </t>
           <t>
-            The domain's Registrar uses the "pinned-domain-cert" voucher field to
-            distribute a trust anchor for authenticating itself to the Pledge.
+            The domain's registrar uses the "pinned-domain-cert" voucher field to
+            distribute a trust anchor for authenticating itself to the pledge.
           </t>
           <t>
-            The domain's Registrar acts as an <xref target="RFC5272" />
-            Registration Authority, requesting certificates for Pledges from
+            The domain's registrar acts as an <xref target="RFC5272" />
+            Registration Authority, requesting certificates for pledges from
             the Key Infrastructure.
           </t>
           <t>
@@ -900,15 +900,15 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
           <t>Unfortunately there are moments during bootstrapping when
               certificates are verified, such as during the TLS handshake, where
               validity periods are confirmed. This paradoxical "catch-22" is
-              resolved by the Pledge maintaining a concept of the current "window"
+              resolved by the pledge maintaining a concept of the current "window"
               of presumed time validity that is continually refined throughout the
               bootstrapping process as follows:</t>
 
           <t><list style="symbols">
-              <t>Initially the Pledge does not know the current time.</t>
+              <t>Initially the pledge does not know the current time.</t>
 
               <t>
-                Bootstrapping Pledges that have a Realtime Clock (RTC), SHOULD use it
+                Bootstrapping pledges that have a Realtime Clock (RTC), SHOULD use it
                 to verify certificate validity.  However, they MUST be
                 prepared for the recognize that the RTC might be
                 completely wrong when a RTC battery fails and resets to an
@@ -916,10 +916,10 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
               </t>
 
               <t>
-                If the Pledge has any stable storage (such as from where
+                If the pledge has any stable storage (such as from where
                 firmware is loaded) then it SHOULD assume that the clock
                 CAN NOT be before the date at which the firmware or the the
-                storage was last time stamped.  The Pledge SHOULD NOT update
+                storage was last time stamped.  The pledge SHOULD NOT update
                 the timestamps in any file systems until it has a secure
                 time source.
                 This provides an earliest date which is reasonable.  Call
@@ -930,25 +930,25 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
               </t>
 
               <t>
-                The Pledge is exposed to dates in the following five places
-                (Registrar certificate, notBefore and notAfter. Voucher
+                The pledge is exposed to dates in the following five places
+                (registrar certificate, notBefore and notAfter. Voucher
                 created-on, and expires-on. Additionally, CMS signatures
                 contain a signingTime)
               </t>
               <t>
-                During the initial connection with the Registrar, the
-                Pledge sees the Registrar Certificate. It has an inception
+                During the initial connection with the registrar, the
+                pledge sees the registrar Certificate. It has an inception
                 date (notBefore) and an expiry date (notAfter).
                 It is reasonable that the notBefore date be after the
-                Pledge's current working reasonable date.
+                pledge's current working reasonable date.
                 It is however, suspicious for the notAfter date to be
-                before the Pledge's current reasonable date. No action is
+                before the pledge's current reasonable date. No action is
                 recommended, other than an internal audit entry for this.
               </t>
 
               <t>
-                If the notBefore date of the Registrar's certificate is
-                newer than the Pledge's reasonable date, then it MAY
+                If the notBefore date of the registrar's certificate is
+                newer than the pledge's reasonable date, then it MAY
                 update it's current reasonable date to the notBefore value.
               </t>
 
@@ -958,23 +958,23 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
                 as it has been (by literal construction) provided with the
                 MASA's key as a trust anchor.
                 The time values (created-on, expires-on) in the voucher
-                can not in general be validated as the Pledge has no certain
+                can not in general be validated as the pledge has no certain
                 real time clock.  There are some reasonable assumptions
                 that can be made:  the voucher's expires-on time can not
-                be prior to the the Pledge's current reasonable date.
+                be prior to the pledge's current reasonable date.
                 For nonceless vouchers, the voucher's created-on time COULD
                 be earlier if the as well if a long-lived voucher was
-                obtained some time in the past, and the Pledge has since
+                obtained some time in the past, and the pledge has since
                 gone through a firmware update and factory reset.
               </t>
 
               <t>
                 If the voucher contains a nonce
-                then the Pledge MUST confirm the nonce matches the original
-                Pledge voucher-request. This ensures the voucher is fresh.
+                then the pledge MUST confirm the nonce matches the original
+                pledge voucher-request. This ensures the voucher is fresh.
                 See <xref target="RequestVoucherFromRegistrar">/</xref>.
                 In that case, the voucher's created-on date MUST NOT be
-                prior to the Pledge's current reasonable date.
+                prior to the pledge's current reasonable date.
                 In addition, when there is a valid nonce, the current
                 reasonable date MAY be incremented to that of the CMS
                 signingTime.
@@ -984,9 +984,9 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
                 Once the voucher is accepted the validity period of the
                 pinned-domain-cert in the voucher now serves as a valid time
                 window. As explained in <xref target="revocationcheck" />, the MASA has
-                checked the Registrar's certificate against real clocks , the
+                checked the registrar's certificate against real clocks , the
                 endorsement of the MASA allows the
-                Pledge to treat the notBefore and notAfter dates as being
+                pledge to treat the notBefore and notAfter dates as being
                 constraints on any subsequent certificate validity periods
                 that may need to be checked: for instance, validating
                 peer certificates during ANIMA ACP setup.
@@ -994,8 +994,8 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
 
               <t>
                 When accepting an enrollment certificate the validity period
-                within the new certificate is assumed to be valid by the Pledge.
-                The Pledge is now willing to use this credential for client
+                within the new certificate is assumed to be valid by the pledge.
+                The pledge is now willing to use this credential for client
                 authentication.
               </t>
           </list>
@@ -1005,15 +1005,15 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
                  title="Infinite Lifetime of IDevID">
           <t>
             <xref target="RFC5280" /> explains that
-            long lived Pledge certificates "SHOULD be assigned the
+            long lived pledge certificates "SHOULD be assigned the
             GeneralizedTime value of 99991231235959Z".
             Registrars MUST support such lifetimes and SHOULD support
-            ignoring Pledge lifetimes if they did not follow the RFC5280
+            ignoring pledge lifetimes if they did not follow the RFC5280
             recommendations.
           </t>
           <t>
             For example, IDevID may have incorrect lifetime of N &lt;= 3 years,
-            rendering replacement Pledges from storage useless after N years unless
+            rendering replacement pledges from storage useless after N years unless
             registrars support ignoring such a lifetime.
           </t>
         </section>
@@ -1035,14 +1035,14 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
           instance).   In such a future situation, the device might use
           this management interface to learn that it should
           configure itself by to-be-determined mechanism (such as an Intent)
-          to become the local Registrar.
+          to become the local registrar.
         </t>
         <t>
-          In order to support these scenarios, the Pledge MAY contact a well
-          known URI of a cloud Registrar if a
-              local Registrar cannot be discovered or if the Pledge's target use
-              cases do not include a local Registrar.</t>
-          <t>If the Pledge uses a well known URI for contacting a cloud Registrar
+          In order to support these scenarios, the pledge MAY contact a well
+          known URI of a cloud registrar if a
+              local registrar cannot be discovered or if the pledge's target use
+              cases do not include a local registrar.</t>
+          <t>If the pledge uses a well known URI for contacting a cloud registrar
               an Implicit Trust Anchor database (see <xref target="RFC7030"/>) MUST
               be used to authenticate service as described in <xref
               target="RFC6125" />. This is
@@ -1050,13 +1050,13 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
               <xref target="RFC7030"/> which also depends on RFC6125.</t>
       </section>
       <section title="Determining the MASA to contact" anchor="obtainmasaurl">
-          <t>The Registrar needs to be able to contact a MASA that is trusted by the Pledge in order to obtain vouchers. There are three mechanisms described:</t>
+          <t>The registrar needs to be able to contact a MASA that is trusted by the pledge in order to obtain vouchers. There are three mechanisms described:</t>
 
         <t>The device's Initial Device Identifier will normally contain the MASA URL as detailed in <xref target="IDevIDextension"></xref>. This is the RECOMMENDED
             mechanism.</t>
-        <t>If the Registrar is integrated with <xref target="I-D.ietf-opsawg-mud"></xref> and the Pledge IDevID contains the id-pe-mud-url then the Registrar MAY attempt to obtain the MASA URL from the MUD file. The MUD file extension
+        <t>If the registrar is integrated with <xref target="I-D.ietf-opsawg-mud"></xref> and the pledge IDevID contains the id-pe-mud-url then the registrar MAY attempt to obtain the MASA URL from the MUD file. The MUD file extension
             for the MASA URL is defined in <xref target="mud-extension"></xref>.</t>
-        <t>It can be operationally difficult to ensure the necessary X.509 extensions are in the Pledge's IDevID due to the difficulty of aligning current Pledge manufacturing with software releases and development. As a final fallback the Registrar MAY be manually configured or distributed with a MASA URL for each manufacturer. Note that the Registrar can only select the configured MASA URL based on the trust anchor -- so manufacturers can only leverage this approach if they ensure a single MASA URL works for all Pledge's associated with each trust anchor.</t>
+        <t>It can be operationally difficult to ensure the necessary X.509 extensions are in the pledge's IDevID due to the difficulty of aligning current pledge manufacturing with software releases and development. As a final fallback the registrar MAY be manually configured or distributed with a MASA URL for each manufacturer. Note that the registrar can only select the configured MASA URL based on the trust anchor -- so manufacturers can only leverage this approach if they ensure a single MASA URL works for all pledge's associated with each trust anchor.</t>
 
       </section>
     </section>
@@ -1069,39 +1069,39 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
       </t>
 
       <t>
-        A Pledge forms the "Pledge voucher-request" and submits it to the
-        Registrar.
+        A pledge forms the "pledge voucher-request" and submits it to the
+        registrar.
       </t>
 
       <t>
-        The Registrar in turn forms the "Registrar voucher-request", and
+        The registrar in turn forms the "registrar voucher-request", and
         submits it to the MASA server.
       </t>
 
       <t>
-        The "proximity-registrar-cert" leaf is used in the Pledge
-        voucher-requests. This provides a method for the Pledge to
-        assert the Registrar's proximity.
+        The "proximity-registrar-cert" leaf is used in the pledge
+        voucher-requests. This provides a method for the pledge to
+        assert the registrar's proximity.
       </t>
 
       <t>
-        The "prior-signed-voucher-request" leaf is used in Registrar
+        The "prior-signed-voucher-request" leaf is used in registrar
         voucher-requests. If present, it is the encoded (signed form)
-        of the Pledge voucher-request. This provides a method for
-        the Registrar to forward the Pledge's signed request to the
+        of the pledge voucher-request. This provides a method for
+        the registrar to forward the pledge's signed request to the
         MASA. This completes transmission of the signed
         "proximity-registrar-cert" leaf.
       </t>
 
       <t>
-        A Registar MAY also retrieve nonceless vouchers by sending
+        A registrar MAY also retrieve nonceless vouchers by sending
         nonceless voucher-requests to the MASA in order to obtain
-        vouchers for use when the Registrar does not have connectivity to the
+        vouchers for use when the registrar does not have connectivity to the
         MASA.
         No "prior-signed-voucher-request" leaf
-        would be included.  The Registrar will also need to know the serial number of
+        would be included.  The registrar will also need to know the serial number of
         the pledge. This document does not provide a mechanism for the
-        Registrar to learn that in an automated fashion. Typically this will
+        registrar to learn that in an automated fashion. Typically this will
         be done via scanning of bar-code or QR-code on packaging, or via
         some sales channel integration.
       </t>
@@ -1131,35 +1131,35 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request-tree.txt END
                 purposes.  These examples conform to the encoding rules
                 defined in <xref target="RFC7951"/>.</t>
 
-            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Pledge voucher-request. The
-            assertion leaf is indicated as 'proximity' and the Registrar's TLS server
+            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a pledge voucher-request. The
+            assertion leaf is indicated as 'proximity' and the registrar's TLS server
             certificate is included in the 'proximity-registrar-cert' leaf. See
             <xref target="RequestVoucherFromRegistrar"/>.</t></list></t>
 <figure>
 INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-proximity.json END
 </figure>
 
-            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Registrar voucher-request.
-                The 'prior-signed-voucher-request' leaf is populated with the Pledge's
-                voucher-request (such as the prior example).  The Pledge's
+            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a registrar voucher-request.
+                The 'prior-signed-voucher-request' leaf is populated with the pledge's
+                voucher-request (such as the prior example).  The pledge's
                 voucher-request, if a signed artifact with a CMS format
                 signature is a binary object.  In the JSON encoding used
                 here it must be base64 encoded. The nonce, created-on and
                 assertion is carried forward. serial-number is extracted from
-                the Pledge's Client Certificate from the TLS connection. See
+                the pledge's Client Certificate from the TLS connection. See
                 <xref target="RequestVoucherFromMASA"/>.</t></list></t>
 <figure>
 INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-prior.json END
 </figure>
 
-            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Registrar voucher-request.
-                The 'prior-signed-voucher-request' leaf is not populated with the Pledge's
+            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a registrar voucher-request.
+                The 'prior-signed-voucher-request' leaf is not populated with the pledge's
                 voucher-request nor is the nonce leaf. This form might be used by a
-                Registrar requesting a voucher when the Pledge can not
-                communicate with the Registrar (such as when it is powered
+                registrar requesting a voucher when the pledge can not
+                communicate with the registrar (such as when it is powered
                 down, or still in packaging),
                 and therefore could not submit a nonce.
-                This scenario is most useful when the Registrar is aware that
+                This scenario is most useful when the registrar is aware that
                 it will not be able to reach the MASA during deployment.
                 See
                 <xref target="RequestVoucherFromMASA"/>.</t></list></t>
@@ -1167,11 +1167,11 @@ INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-prior.json END
 INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-offline.json END
 </figure>
 
-            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Registrar voucher-request.
-                The 'prior-signed-voucher-request' leaf is not populated with the Pledge
-                voucher-request because the Pledge did not sign its own request. This form
-                might be used when more constrained Pledges are being deployed. The
-                nonce is populated from the Pledge's request.   See
+            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a registrar voucher-request.
+                The 'prior-signed-voucher-request' leaf is not populated with the pledge
+                voucher-request because the pledge did not sign its own request. This form
+                might be used when more constrained pledges are being deployed. The
+                nonce is populated from the pledge's request.   See
                 <xref target="RequestVoucherFromMASA"/>.</t></list></t>
 <figure>
  INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-constrained.json END
@@ -1193,9 +1193,9 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
     </section>   <!-- voucher-request artifact -->
     <section anchor="proxydetails" title="Proxying details (Pledge - Proxy - Registrar)">
       <t>
-        The role of the Proxy is to facilitate communications. The Proxy
-        forwards packets between the Pledge and a Registrar that has been
-        provisioned to the Proxy via GRASP discovery.
+        The role of the proxy is to facilitate communications. The proxy
+        forwards packets between the pledge and a registrar that has been
+        provisioned to the proxy via GRASP discovery.
       </t>
       <t>
         This section defines a stateful proxy mechanism which is refered
@@ -1203,71 +1203,71 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       </t>
 
       <t>
-        The Proxy does not terminate the TLS handshake: it passes streams
+        The proxy does not terminate the TLS handshake: it passes streams
         of bytes onward without examination.
       </t>
       <t>
-        A Proxy MAY assume TLS framing for auditing purposes,
+        A proxy MAY assume TLS framing for auditing purposes,
         but MUST NOT assume any TLS version.
       </t>
 
       <t>
-        Registrars are assumed to have logically a locally integrated Proxy to
-        support directly (subnet) connected Pledges - because Registrars
-        themself does not define any functions for Pledges to discover
+        Registrars are assumed to have logically a locally integrated proxy to
+        support directly (subnet) connected pledges - because registrars
+        themself does not define any functions for pledges to discover
         them. Such a logical local proxy does not need to provide actual TCP
-        proxying (just discovery) as long as the Registrar can operate with
-        subnet (link) local addresses on the interfaces where Pledges may
+        proxying (just discovery) as long as the registrar can operate with
+        subnet (link) local addresses on the interfaces where pledges may
         connect to.
       </t>
 
       <t>
-        As a result of the Proxy Discovery process in <xref target="brskigrasp" />,
-        the port number exposed by the Proxy
+        As a result of the proxy Discovery process in <xref target="brskigrasp" />,
+        the port number exposed by the proxy
         does not need to be well known, or require an IANA allocation.
       </t>
 
       <t>
         In the ANI, the Autonomic Control Plane (ACP) secured instance of
         GRASP (<xref target="I-D.ietf-anima-grasp" />) MUST be used for
-        discovery of ANI Registrar ACP addresses
+        discovery of ANI registrar ACP addresses
         and ports by ANI Proxies.  The TCP leg of the proxy connection between
-        ANI Proxy and ANI Registrar therefore also runs across the ACP.
+        ANI proxy and ANI registrar therefore also runs across the ACP.
       </t>
 
       <t>
-        If GRASP is used by proxies for discovery of Registrars (ACP or
-        not), the proxy can also learn the proxy mechanism (Circuit Proxy
+        If GRASP is used by proxies for discovery of registrars (ACP or
+        not), the proxy can also learn the proxy mechanism (circuit proxy
         vs. IPIP encapsulation or other)
       </t>
 
       <t>
         For the IPIP encapsulation methods (described in <xref target="IPIPmechanism" />), the port
-        announced by the Proxy SHOULD be the same as on the Registrar in order
-        for the Proxy to remain stateless.
+        announced by the proxy SHOULD be the same as on the registrar in order
+        for the proxy to remain stateless.
       </t>
 
       <t>
-        In order to permit the Proxy functionality to be implemented on the
+        In order to permit the proxy functionality to be implemented on the
         maximum variety of devices the chosen mechanism SHOULD use the minimum
-        amount of state on the Proxy device. While many devices in the ANIMA
-        target space will be rather large routers, the Proxy function is
+        amount of state on the proxy device. While many devices in the ANIMA
+        target space will be rather large routers, the proxy function is
         likely to be implemented in the control plane CPU of such a device,
-        with available capabilities for the Proxy function similar to many
+        with available capabilities for the proxy function similar to many
         class 2 IoT devices.
       </t>
 
       <t>
         The document <xref
         target="I-D.richardson-anima-state-for-joinrouter"></xref> provides a
-        more extensive analysis and background of the alternative Proxy methods.
+        more extensive analysis and background of the alternative proxy methods.
       </t>
         <section anchor="discovery" title="Pledge discovery of Proxy">
             <t>The result of discovery is a logical communication with a
-                Registrar, through a Proxy. The Proxy is transparent to the Pledge
+                registrar, through a proxy. The proxy is transparent to the pledge
                 but is always assumed to exist.</t>
 
-            <t>To discover the Proxy the Pledge performs the following
+            <t>To discover the proxy the pledge performs the following
                 actions:</t>
 
             <t><list style="numbers">
@@ -1279,7 +1279,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                     whenever the discovery process is forced to restart due
                     to failures.
                     Pledges will generally prefer use of IPv6 Link-Local
-                    addresses, and discovery of Proxy will be by Link-Local
+                    addresses, and discovery of proxy will be by Link-Local
                     mechanisms.
                     IPv4 methods are described in <xref target="IPv4operations" /></t>
 
@@ -1287,21 +1287,21 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                     (<xref target="I-D.ietf-anima-grasp" />)
                     announcements of the objective: "AN_Proxy".
                     See section <xref target="brskigrasp" /> for the details of
-                    the objective.  The Pledge MAY listen concurrently for
+                    the objective.  The pledge MAY listen concurrently for
                     other sources of information, see <xref target="mdnsmethods" />.
                 </t>
             </list>
 
-            Once a Proxy is
-            discovered the Pledge communicates with a Registrar through the
-            Proxy using the bootstrapping protocol defined in <xref
+            Once a proxy is
+            discovered the pledge communicates with a registrar through the
+            proxy using the bootstrapping protocol defined in <xref
                 target="ProtocolDetails"></xref>.
             </t>
 
             <t>
-              While the GRASP M_FLOOD mechanism is passive for the Pledge,
+              While the GRASP M_FLOOD mechanism is passive for the pledge,
               the optional other methods (mDNS, and IPv4 methods) are active.
-              The Pledge SHOULD run those methods in parallel with listening
+              The pledge SHOULD run those methods in parallel with listening
               to for the M_FLOOD.  The active methods SHOULD exponentially
               back-off to a maximum of one hour to avoid overloading the
               network with discovery attempts.  Detection of change of
@@ -1310,8 +1310,8 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             </t>
 
             <t>
-              The Pledge may discover more than one proxy on a given physical
-              interface.  The Pledge may have a multitude of physical
+              The pledge may discover more than one proxy on a given physical
+              interface.  The pledge may have a multitude of physical
               interfaces as well: a layer-2/3 ethernet switch may have
               hundreds of physical ports.
             </t>
@@ -1333,14 +1333,14 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             <t>
                 Connection attempts SHOULD be run in
                 parallel to avoid head of queue problems wherein an attacker
-                running a fake Proxy or Registrar could perform protocol
-                actions intentionally slowly.  The Pledge SHOULD continue to
+                running a fake proxy or registrar could perform protocol
+                actions intentionally slowly.  The pledge SHOULD continue to
                 listen to for additional GRASP M_FLOOD messages during
                 the connection attempts.
             </t>
             <t>
               Once a connection to a
-              Registrar is established (e.g. establishment of a TLS session key)
+              registrar is established (e.g. establishment of a TLS session key)
               there are expectations of more timely responses, see <xref
               target="RequestVoucherFromRegistrar"></xref>.
             </t>
@@ -1349,13 +1349,13 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
               Once all discovered services are attempted (assuming that none
               succeeded) the device MUST return to listening for GRASP M_FLOOD.
               It SHOULD periodically retry the manufacturer specific mechanisms.
-              The Pledge MAY prioritize selection order as
+              The pledge MAY prioritize selection order as
               appropriate for the anticipated environment.
             </t>
 
             <section anchor="brskigrasp" title="Proxy GRASP announcements">
               <t>
-               A Proxy uses the DULL GRASP M_FLOOD mechanism to announce itself.
+               A proxy uses the DULL GRASP M_FLOOD mechanism to announce itself.
                This announcement can be within the same message as the ACP
                announcement detailed in
                <xref target="I-D.ietf-anima-autonomic-control-plane" />.
@@ -1377,22 +1377,22 @@ INSERT_TEXT_FROM_FILE proxygrasp-cddl.txt END
          </section>
         </section>
       <section anchor="coapconnection" title="CoAP connection to Registrar">
-        <t>The use of CoAP to connect from Pledge to Registrar is out of scope for this document, and may be described in future work.
+        <t>The use of CoAP to connect from pledge to registrar is out of scope for this document, and may be described in future work.
         </t>
       </section>
 
 
       <section title="Proxy discovery of Registrar" anchor="JRCgrasp">
-        <t> The Registrar SHOULD announce itself so that proxies can find it
+        <t> The registrar SHOULD announce itself so that proxies can find it
         and determine what kind of connections can be terminated.
         </t>
         <t>
-          The Registrar announces itself using ACP instance of GRASP using
-          M_FLOOD messages.  They MUST support ANI TLS circuit Proxy and
-          therefore BRSKI across HTTPS/TLS native across the ACP. ANI Registrars
+          The registrar announces itself using ACP instance of GRASP using
+          M_FLOOD messages.  They MUST support ANI TLS circuit proxy and
+          therefore BRSKI across HTTPS/TLS native across the ACP. ANI registrars
           MAY support the IPIP proxy method by implementing IPIP tunneling for
           their HTTPS/TLS traffic across the ACP.  ANI Proxies MUST support GRASP
-          discovery of Registrars.
+          discovery of registrars.
         </t>
         <t>
           The M_FLOOD is formatted as follows:
@@ -1434,16 +1434,16 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
                A protocol of 41 indicates that packets may be IPIP proxy'ed.
                In the case of that IPIP proxying is used, then the provided
                link-local address MUST be advertised on the local link using
-               proxy neighbour discovery.  The Join Proxy MAY limit forwarded
+               proxy neighbour discovery.  The proxy MAY limit forwarded
                traffic to the protocol (6 and 17) and port numbers
                indicated by locator1 and locator2.
                The address to which the IPIP traffic should be sent is the
-               initiator address (an ACP address of the Registrar), not the
+               initiator address (an ACP address of the registrar), not the
                address given in the locator.
              </t>
              <t>
                Registrars MUST accept TCP / UDP traffic on the ports given at
-               the ACP address of the Registrar.  If the Registrar supports IPIP
+               the ACP address of the registrar.  If the registrar supports IPIP
                tunnelling, it MUST also accept traffic encapsulated with IPIP.
              </t>
              <t>
@@ -1458,24 +1458,24 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
     <section anchor="ProtocolDetails"
              title="Protocol Details (Pledge - Registrar - MASA)">
 
-        <t>The Pledge MUST initiate BRSKI after boot if it is unconfigured.
-        The Pledge MUST NOT automatically initiate BRSKI if it has been
+        <t>The pledge MUST initiate BRSKI after boot if it is unconfigured.
+        The pledge MUST NOT automatically initiate BRSKI if it has been
         configured or is in the process of being configured.</t>
 
         <t>
           BRSKI is described as extensions to EST <xref target="RFC7030"/>.
           The goal of these extensions is to reduce the number of TLS
-          connections and crypto operations required on the Pledge.
+          connections and crypto operations required on the pledge.
 
-          The Registrar implements the BRSKI REST interface within
+          The registrar implements the BRSKI REST interface within
           the same "/.well-known" URI tree as the existing EST URIs as
           described in
           EST <xref target="RFC7030"/> section 3.2.2. The communication channel
-          between the Pledge and the Registrar is referred to as "BRSKI-EST"
+          between the pledge and the registrar is referred to as "BRSKI-EST"
           (see Figure 1).
         </t>
 
-        <t>The communication channel between the Registrar and MASA is similarly described as extensions to EST within the same "/.well-known" tree. For clarity this channel is referred to as "BRSKI-MASA". (See Figure 1).</t>
+        <t>The communication channel between the registrar and MASA is similarly described as extensions to EST within the same "/.well-known" tree. For clarity this channel is referred to as "BRSKI-MASA". (See Figure 1).</t>
 
         <t>MASA URI is "https://" authority "/.well-known/est".</t>
 
@@ -1497,29 +1497,29 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>Summarized automation extensions for the BRSKI-EST flow are:</t>
 
         <t><list style="symbols">
-            <t>The Pledge provisionally accepts the Registrar certificate during
+            <t>The pledge provisionally accepts the registrar certificate during
             the TLS handshake as detailed in <xref target="brskiesttls"></xref>.</t>
 
             <t>
-              The Pledge either attempts concurrent connections, or it
+              The pledge either attempts concurrent connections, or it
               times out quickly and tries connections in series.
             </t>
 
             <t>
-              The Pledge requests and validates a voucher using the new REST calls
+              The pledge requests and validates a voucher using the new REST calls
               described below.
             </t>
 
             <t>
-              The Pledge completes authentication of the server certificate as
+              The pledge completes authentication of the server certificate as
               detailed in <xref
               target="CompletingAuthenticationBootstrapping"></xref>. This
               moves the BRSKI-EST TLS connection out of the provisional
               state.
             </t>
             <t>
-              Mandatory boostrap steps conclude with Voucher Status
-              Telemetry (see <xref target="voucherstatus" />).
+              Mandatory boostrap steps conclude with voucher status
+              telemetry (see <xref target="voucherstatus" />).
             </t>
 
         </list></t>
@@ -1528,7 +1528,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           The BRSKI-EST TLS connection can now be used for EST enrollment.
         </t>
 
-        <t>The extensions for a Registrar (equivalent to EST server) are:</t>
+        <t>The extensions for a registrar (equivalent to EST server) are:</t>
         <t><list style="symbols">
           <t>
             Client authentication is automated using Initial Device Identity
@@ -1545,44 +1545,44 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             trust anchor since serial numbers are not globally unique.
           </t>
 
-          <t>The Registrar requests and validates the Voucher from the MASA.</t>
+          <t>The registrar requests and validates the voucher from the MASA.</t>
 
-          <t>The Registrar forwards the Voucher to the Pledge when
+          <t>The registrar forwards the voucher to the pledge when
           requested.</t>
 
-          <t>The Registar performs log verifications in addition to local
-          authorization checks before accepting optional Pledge device enrollment requests.</t>
+          <t>The registrar performs log verifications in addition to local
+          authorization checks before accepting optional pledge device enrollment requests.</t>
         </list></t>
 
         <section anchor="brskiesttls" title="BRSKI-EST TLS establishment details">
-            <t>The Pledge establishes the TLS connection with the Registrar through
+            <t>The pledge establishes the TLS connection with the registrar through
                 the circuit proxy (see <xref target="proxydetails"></xref>)
-                but the TLS handshake is with the Registar. The BRSKI-EST Pledge
-                is the TLS client and the BRSKI-EST Registrar is the TLS server.
+                but the TLS handshake is with the registrar. The BRSKI-EST pledge
+                is the TLS client and the BRSKI-EST registrar is the TLS server.
                 All security associations established are
-                between the Pledge and the Registrar regardless of proxy
+                between the pledge and the registrar regardless of proxy
                 operations.</t>
             <t>Establishment of the BRSKI-EST TLS connection is as
                 specified in EST <xref target="RFC7030"/> section 4.1.1 "Bootstrap
                 Distribution of CA Certificates" <xref target="RFC7030"/> wherein
                 the client is authenticated with the IDevID certificate, and the
-                EST server (the Registrar) is provisionally authenticated with an unverified
+                EST server (the registrar) is provisionally authenticated with an unverified
             server certificate.</t>
 
-            <t>The Pledge maintains a security paranoia concerning the
+            <t>The pledge maintains a security paranoia concerning the
             provisional state, and all data received, until a voucher is
             received and verified as specified in <xref
             target="CompletingAuthenticationBootstrapping"></xref></t>
 
             <t>
-              To avoid blocking on a single erroneous Registrar the Pledge
+              To avoid blocking on a single erroneous registrar the pledge
               MUST drop the connection after 5 seconds in which there has
               been no progress on the TCP connection.
               It should proceed to
-                connect to any other Registrar's via any other discovered
+                connect to any other registrar's via any other discovered
                 Proxies if there are any.  If there were no
-                other Proxies discovered, the Pledge MAY continue to wait,
-                as long as it is concurrently listening for new Proxy
+                other Proxies discovered, the pledge MAY continue to wait,
+                as long as it is concurrently listening for new proxy
                 announcements.
             </t>
 
@@ -1590,8 +1590,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
         <section anchor="RequestVoucherFromRegistrar"
                title="Pledge Requests Voucher from the Registrar">
-        <t>When the Pledge bootstraps it makes a request for a Voucher from a
-        Registrar.</t>
+        <t>When the pledge bootstraps it makes a request for a voucher from a
+        registrar.</t>
 
         <t>This is done with an HTTPS POST using the operation path value of
         "/.well-known/est/requestvoucher".</t>
@@ -1601,71 +1601,71 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           <t hangText="application/voucher-cms+json">The request is a
            "YANG-defined JSON document that has been signed using a CMS structure" as described in
           <xref target="voucher-request"/> using the JSON encoding described in <xref target="RFC7951"/>.
-          The Pledge SHOULD sign the request using the <xref target="IDevIDextension"/> credential.
+          The pledge SHOULD sign the request using the <xref target="IDevIDextension"/> credential.
           </t>
           <t hangText="application/json">The request is the "YANG-defined JSON document"
           as described in <xref target="voucher-request"/> with the exception that it is not within
           a PKCS#7 structure. It is protected only by the TLS client authentication.
-          This reduces the cryptographic requirements on the Pledge.</t>
+          This reduces the cryptographic requirements on the pledge.</t>
         </list></t>
 
         <t>For simplicity the term 'voucher-request' is used to refer to either of these media types. Registrar
         impementations SHOULD anticipate future media types but of course will simply fail the request if those
         types are not yet known.</t>
 
-        <t>The Pledge populates the voucher-request fields as follows:</t>
+        <t>The pledge populates the voucher-request fields as follows:</t>
 
         <t><list style="hanging">
             <t hangText="created-on:">Pledges that have a realtime clock are
             RECOMMENDED to populate this field. This provides additional
             information to the MASA.</t>
 
-            <t hangText="nonce:">The Pledge voucher-request MUST contain a
+            <t hangText="nonce:">The pledge voucher-request MUST contain a
             cryptographically strong random or pseudo-random number
             nonce. Doing so ensures <xref target="timeunknown"/>
             functionality. The nonce MUST NOT be reused for multiple
             bootstrapping attempts.
             </t>
 
-            <t hangText="assertion:">The Pledge voucher-request MAY contain an assertion of "proximity".</t>
-            <t hangText="proximity-registrar-cert:">In a Pledge voucher-request this is the first certificate in the TLS server 'certificate_list' sequence (see [RFC5246]) presented by the Registrar to the Pledge. This MUST be populated in a Pledge voucher-request if the "proximity" assertion is populated.</t>
+            <t hangText="assertion:">The pledge voucher-request MAY contain an assertion of "proximity".</t>
+            <t hangText="proximity-registrar-cert:">In a pledge voucher-request this is the first certificate in the TLS server 'certificate_list' sequence (see [RFC5246]) presented by the registrar to the pledge. This MUST be populated in a pledge voucher-request if the "proximity" assertion is populated.</t>
         </list></t>
-        <t>All other fields MAY be omitted in the Pledge voucher-request.</t>
+        <t>All other fields MAY be omitted in the pledge voucher-request.</t>
 
-        <t>An example JSON payload of a Pledge voucher-request is in
+        <t>An example JSON payload of a pledge voucher-request is in
             <xref target="voucher-request-examples"/> Example 1.</t>
 
-        <t>The Registrar validates the client identity as described in EST
+        <t>The registrar validates the client identity as described in EST
         <xref target="RFC7030"/> section 3.3.2. If the request is signed the
-        Registrar confirms that the
+        registrar confirms that the
         'proximity' asserion and associated 'proximity-registrar-cert' are
         correct.
-        The Registrar performs authorization as detailed in
+        The registrar performs authorization as detailed in
         [[EDNOTE: UNRESOLVED. See Appendix D "Pledge Authorization"]].
-        If these validations fail the Registrar SHOULD respond with an appropriate HTTP error code.</t>
+        If these validations fail the registrar SHOULD respond with an appropriate HTTP error code.</t>
 
-        <t>If authorization is successful the Registrar obtains a voucher from the MASA service (see
-            <xref target="RequestVoucherFromMASA"/>) and returns that MASA signed voucher to the Pledge
+        <t>If authorization is successful the registrar obtains a voucher from the MASA service (see
+            <xref target="RequestVoucherFromMASA"/>) and returns that MASA signed voucher to the pledge
         as described in <xref target="VoucherResponse"/>.</t>
 
       </section>
     <section anchor="brskimasatls" title="BRSKI-MASA TLS establishment details">
         <t>
           The BRSKI-MASA TLS connection is a 'normal' TLS connection
-          appropriate for HTTPS REST interfaces. The Registrar initiates the
+          appropriate for HTTPS REST interfaces. The registrar initiates the
           connection and uses the MASA URL obtained as described in
           <xref target="obtainmasaurl" /> for <xref target="RFC6125" />
           authentication of the MASA server.
         </t>
         <t>
-          The primary method of Registrar "authentication" by the MASA is
+          The primary method of registrar "authentication" by the MASA is
           detailed in <xref target="RequestVoucherFromMASA"></xref>. As
           detailed in <xref target="securityconsiderations"></xref> the MASA
-          might find it necessary to request additional Registrar
+          might find it necessary to request additional registrar
           authentication.
         </t>
         <t>
-          The MASA and the Registrars SHOULD be prepared to support TLS client
+          The MASA and the registrars SHOULD be prepared to support TLS client
           certificate authentication and/or HTTP Basic or Digest authentication as
           described in RFC7030 for EST clients.  This connection MAY also have no
           client authentication at all (<xref target="masasecurityreductions" />)
@@ -1673,7 +1673,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>
           The authentication of the BRSKI-MASA
           connection does not affect the voucher-request process, as
-          voucher-requests are already signed by the Registrar.
+          voucher-requests are already signed by the registrar.
           Instead, this authentication provides access control to the audit
           log.
         </t>
@@ -1691,8 +1691,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
     <!-- section 5.4 -->
       <section anchor="RequestVoucherFromMASA" title="Registrar Requests Voucher from MASA">
         <t>
-          When a Registrar receives a Pledge voucher-request it in turn
-          submits a Registrar voucher-request to the MASA service via an
+          When a registrar receives a pledge voucher-request it in turn
+          submits a registrar voucher-request to the MASA service via an
           HTTPS RESTful interface (<xref target="RFC7231" />).
         </t>
 
@@ -1704,63 +1704,63 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           <xref target="I-D.ietf-anima-voucher" /> and is
           application/voucher-cms+json. It is a JSON document that has been
           signed using a CMS structure.
-          The Registrar MUST sign the Registrar voucher-request. The entire Registrar certificate chain,
+          The registrar MUST sign the registrar voucher-request. The entire registrar certificate chain,
           up to and including the Domain CA, MUST be included in the PKCS#7 structure.
         </t>
 
         <t>MASA impementations SHOULD anticipate future media
             types but of course will simply fail the request if those types are not yet known.</t>
 
-        <t>The Registrar populates the voucher-request fields as follows:</t>
+        <t>The registrar populates the voucher-request fields as follows:</t>
 
         <t><list style="hanging">
         <t hangText="created-on:">Registrars are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
-        <t hangText="nonce:">The optional nonce value from the Pledge request if desired (see below).</t>
-        <t hangText="serial-number:">The serial number of the Pledge the Registrar would like a voucher for. The Registrar
-        determines this value by parsing the authenticated Pledge IDevID certificate. See <xref target="IDevIDextension"></xref>.
-        The Registrar SHOULD verify that the serial number field it parsed matches the serial number field the Pledge
+        <t hangText="nonce:">The optional nonce value from the pledge request if desired (see below).</t>
+        <t hangText="serial-number:">The serial number of the pledge the registrar would like a voucher for. The registrar
+        determines this value by parsing the authenticated pledge IDevID certificate. See <xref target="IDevIDextension"></xref>.
+        The registrar SHOULD verify that the serial number field it parsed matches the serial number field the pledge
         provided in its voucher-request. This provides a sanity check useful for detecting error conditions and logging.
-        The Registrar MUST NOT simply copy the serial number field from a Pledge voucher request as that field is claimed but
+        The registrar MUST NOT simply copy the serial number field from a pledge voucher request as that field is claimed but
         not certified.</t>
-        <t hangText="idevid-issuer:">The idevid-issuer value from the Pledge certificate
+        <t hangText="idevid-issuer:">The idevid-issuer value from the pledge certificate
         is included to ensure a statistically unique identity.</t>
-        <t hangText="prior-signed-voucher:">If a signed Pledge voucher-request was received
-        then it SHOULD be included in the Registrar voucher-request.
-        (NOTE: what is included is the complete Pledge voucher-request, inclusive of the
-        'assertion', 'proximity-registrar-cert', etc wrapped by the Pledge's
-        original signature). If a signed voucher-request was not recieved from the Pledge
-        then this leaf is omitted from the Registrar voucher request.</t>
+        <t hangText="prior-signed-voucher:">If a signed pledge voucher-request was received
+        then it SHOULD be included in the registrar voucher-request.
+        (NOTE: what is included is the complete pledge voucher-request, inclusive of the
+        'assertion', 'proximity-registrar-cert', etc wrapped by the pledge's
+        original signature). If a signed voucher-request was not recieved from the pledge
+        then this leaf is omitted from the registrar voucher request.</t>
         </list></t>
 
         <t>
-          A nonceless Registrar voucher-request MAY be
+          A nonceless registrar voucher-request MAY be
           submitted to the MASA. Doing so allows
-          the Registrar to request a Voucher when the Pledge is offline, or
-          when the Registrar anticipates not being able to connect to the
+          the registrar to request a voucher when the pledge is offline, or
+          when the registrar anticipates not being able to connect to the
           MASA
-          while the Pledge is being deployed. These use cases require the
-          Registrar to learn the
+          while the pledge is being deployed. These use cases require the
+          registrar to learn the
           appropriate IDevID SerialNumber field from the physical device
           labeling or from the sales channel (out-of-scope for this
           document).
         </t>
 
-        <t>All other fields MAY be omitted in the Registrar voucher-request.</t>
+        <t>All other fields MAY be omitted in the registrar voucher-request.</t>
 
-        <t>Example JSON payloads of Registrar voucher-requests are in
+        <t>Example JSON payloads of registrar voucher-requests are in
             <xref target="voucher-request-examples"/> Examples 2 through 4.</t>
 
-        <t>The MASA verifies that the Registrar voucher-request is internally consistent
-        but does not necessarily authenticate the Registrar certificate since the
-        Registrar is not known to the MASA server in advance. The MASA
+        <t>The MASA verifies that the registrar voucher-request is internally consistent
+        but does not necessarily authenticate the registrar certificate since the
+        registrar is not known to the MASA server in advance. The MASA
         performs the following actions and validation checks before issuing a voucher:</t>
         <section title="Renew for expired voucher">
           <t>
             As described in
             <xref target="I-D.ietf-anima-voucher"/> vouchers
             are normally short lived to avoid revocation issues. If the request
-            is for a previous (expired) voucher using the same Registrar (as
-            determined by the Registrar pinned-domain-cert) and the MASA has
+            is for a previous (expired) voucher using the same registrar (as
+            determined by the registrar pinned-domain-cert) and the MASA has
             not been informed that the claim is invalid then the request for
             a renewed voucher SHOULD be automatically authorized.
             </t>
@@ -1769,17 +1769,17 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <!-- 5.4.2 -->
         <section title="Voucher-Request signature consistency">
           <t>
-            The MASA MUST verify that the Registrar voucher-request is signed
-            by a Registrar. This is confirmed by verifying that the
+            The MASA MUST verify that the registrar voucher-request is signed
+            by a registrar. This is confirmed by verifying that the
             id-kp-cmcRA extended key usage extension field (as detailed in
             EST RFC7030 section 3.6.1) exists in the certificate of the
-            entity that signed the Registrar voucher-request. This
+            entity that signed the registrar voucher-request. This
             verification is only a consistency check that the unauthenticated
-            domain CA intended this to be a Registrar. Performing this check
+            domain CA intended this to be a registrar. Performing this check
             provides value to domain PKI by assuring the domain administrator
             that the MASA service will only respect claims from authorized
             Registration Authorities of the domain. (The requirement for the
-            Registrar to include the Domain CA certificate in the signature
+            registrar to include the Domain CA certificate in the signature
             structure was stated above.)
           </t>
         </section>
@@ -1788,10 +1788,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <section title="Registrar (certificate) authentication">
           <t>
             If a nonceless voucher-request is submitted the MASA server MUST
-            authenticate the Registrar as described in either
+            authenticate the registrar as described in either
             EST <xref target="RFC7030"/> section 3.2, section 3.3,
-            or by validating the Registrar's certificate used to
-            sign the Registrar voucher-request.
+            or by validating the registrar's certificate used to
+            sign the registrar voucher-request.
             Any of these methods reduce the risk of DDoS attacks
             and provide an authenticated identity as an input to
             sales channel integration and authorizations
@@ -1800,7 +1800,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
 
           <t>
-            In the nonced case, validation of the Registrar MAY be omitted
+            In the nonced case, validation of the registrar MAY be omitted
             if the device policy is to accept audit-only vouchers.
           </t>
         </section>
@@ -1808,14 +1808,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <section anchor="revocationcheck" title="Registrar (certificate) revocation consistency">
           <t>
             Note that this section is about ensuring consistency of the
-            Registrar.  These checks are not equivalent to
+            registrar.  These checks are not equivalent to
             <xref target="RFC5280" /> Certificate Revocation Checks that
-            the Pledge would ideally do if it had a real time clock.
+            the pledge would ideally do if it had a real time clock.
           </t>
           <t>
-            If the Registrar uses a CA for which the MASA is able to
+            If the registrar uses a CA for which the MASA is able to
             obtain revocation information, then the MASA SHOULD check for the
-            maximum validity period of the Registrar's certificate.
+            maximum validity period of the registrar's certificate.
           </t>
           <t>
             A registrar which has done these checks may
@@ -1825,7 +1825,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           <t>
             There are three times to consider: a) a configured voucher
             lifetime in the MASA, b) the expiry time for the
-            Registrar's Certificate, c) any certificate revocation
+            registrar's certificate, c) any certificate revocation
             information (CRL) lifetime.
           </t>
           <t>
@@ -1846,14 +1846,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           <t>
             If CRL information is unavailable to the MASA, then
             the MASA SHOULD rely on the validity information
-            Because the Registar certificate authority is unknown to
+            Because the registrar certificate authority is unknown to
             the MASA in
             advance this is only an extended consistency check and is
             not required.
             The maximum lifetime of the voucher issued
-            SHOULD NOT exceed the lifetime of the Registrar's
+            SHOULD NOT exceed the lifetime of the registrar's
             revocation validation (for
-            example if the Registrar revocation status is indicated in
+            example if the registrar revocation status is indicated in
             a CRL that is
             valid for two weeks then that is an appropriate lifetime for
             the voucher.)
@@ -1861,28 +1861,28 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
         <section title="Pledge proximity assertion">
           <t>
-            The MASA server MAY verify that the Registrar voucher-request
+            The MASA server MAY verify that the registrar voucher-request
             includes the 'prior-signed-voucher' field populated
-            with a signed Pledge voucher-request that includes a
+            with a signed pledge voucher-request that includes a
             'proximity-registrar-cert' that is consistent with the
-            certificate used to sign the Registrar voucher-request.
+            certificate used to sign the registrar voucher-request.
             This ensures that the BRSKI-EST TLS connection has no
             man-in-the-middle.
-            The MASA server is aware of which Pledges support signing of
+            The MASA server is aware of which pledges support signing of
             their voucher
             requests and can use this information to confirm proximity of
-            the Pledge with the Registrar.
+            the pledge with the registrar.
 
-            The pledge proximity assertion really helps if the Registrar
+            The pledge proximity assertion really helps if the registrar
             voucher-request is nonceless.
           </t>
         </section>
 
         <section title="Registrar Pinning">
           <t>
-            The Registrar's certificate chain is extracted from the signature
+            The registrar's certificate chain is extracted from the signature
             method and the root certificate is used to populate the
-            "pinned-domain-cert" of the Voucher being issued. The
+            "pinned-domain-cert" of the voucher being issued. The
             domainID (e.g., hash of the root public key) is determined from the
             pinned-domain-cert and is used to update the audit log.
           </t>
@@ -1890,13 +1890,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       </section>
 
       <section anchor="VoucherResponse" title="Voucher Response">
-        <t>The voucher response to requests from the Pledge and requests from
-        a Registrar are in the same format. A Registrar either caches prior
-        MASA responses or dynamically requests a new Voucher based on local
+        <t>The voucher response to requests from the pledge and requests from
+        a registrar are in the same format. A registrar either caches prior
+        MASA responses or dynamically requests a new voucher based on local
         policy.</t>
 
         <t>If the join operation is successful, the server (MASA responding
-        to Registrar, and Registrar responding to Pledge) response MUST
+        to registrar, and registrar responding to pledge) response MUST
         contain an HTTP 200 response code. The server MUST answer with a
         suitable 4xx or 5xx HTTP [RFC2616] error code when a problem occurs.
         In this case, the response data from the MASA server MUST be a plaintext
@@ -1904,45 +1904,45 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         information describing why the request was rejected.</t>
 
         <t>
-          The Registar MAY respond with an HTTP 202 ("the request has been
+          The registrar MAY respond with an HTTP 202 ("the request has been
           accepted for processing, but the processing has not been completed") as
           described in EST <xref target="RFC7030"/> section 4.2.3 wherein the
           client "MUST wait at least the specified 'Retry-After' time before
           repeating the same request".
           (see <xref target="RFC7231" /> section 6.6.4)
-          The Pledge is RECOMMENDED to provide local
+          The pledge is RECOMMENDED to provide local
           feedback (blinked LED etc) during this wait cycle if mechanisms for this
-          are available. To prevent an attacker Registrar from significantly
-          delaying bootstrapping the Pledge MUST limit the 'Retry-After' time to
-          60 seconds.   Ideally the Pledge would keep track of the
+          are available. To prevent an attacker registrar from significantly
+          delaying bootstrapping the pledge MUST limit the 'Retry-After' time to
+          60 seconds.   Ideally the pledge would keep track of the
           appropriate Retry-After header values for any number of
-          outstanding Registrars but this would involve a state table
-          on the Pledge.  Instead the
-          Pledge MAY ignore the exact Retry-After value in favor of a single hard
-          coded value.   A Registrar that is unable
+          outstanding registrars but this would involve a state table
+          on the pledge.  Instead the
+          pledge MAY ignore the exact Retry-After value in favor of a single hard
+          coded value.   A registrar that is unable
           to complete the transaction the first time due to timing reasons will
           have future chances.
         </t>
 
         <t>
           In order to avoid infinite redirect loops, which a malicious
-          Registrar might do in order to keep the Pledge from
-          discovering the correct Registrar, the Pledge MUST NOT
+          registrar might do in order to keep the pledge from
+          discovering the correct registrar, the pledge MUST NOT
           follow more than one redirection (3xx code) to another web
           origins. EST supports redirection but requires user
-          input; this change allows the Pledge to follow a single
+          input; this change allows the pledge to follow a single
           redirection without a user interaction.
         </t>
 
         <t>A 403 (Forbidden) response is appropriate if the voucher-request
-        is not signed correctly, stale, or if the Pledge has another
+        is not signed correctly, stale, or if the pledge has another
         outstanding voucher that cannot be overridden.</t>
         <t>A 404 (Not Found) response is appropriate when the request is for a
         device that is not known to the MASA.</t>
         <t>A 406 (Not Acceptable) response is appropriate if a voucher of the
         desired type, or using the desired algorithms (as indicated by the
         Accept: headers, and algorithms used in the signature) cannot be
-        issued,  such as because the MASA knows the Pledge cannot process
+        issued,  such as because the MASA knows the pledge cannot process
         that type.</t>
         <t>A 415 (Unsupported Media Type) response is approriate for a
         request that has a voucher encoding that is not understood.</t>
@@ -1977,44 +1977,44 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 ]]></artwork>
         </figure>
 
-        <t>The Pledge verifies the signed voucher using the manufacturer
+        <t>The pledge verifies the signed voucher using the manufacturer
         installed trust anchor associated with the manufacturer's selected Manufacturer
         Authorized Signing Authority.</t>
 
-        <t>The Pledge verifies the serial-number field of the signed voucher
-        matches the Pledge's serial-number.</t>
+        <t>The pledge verifies the serial-number field of the signed voucher
+        matches the pledge's serial-number.</t>
 
         <t>The 'pinned-domain-cert' element of the voucher contains the domain
-            CA's public key. The Pledge MUST use the 'pinned-domain-cert' trust
+            CA's public key. The pledge MUST use the 'pinned-domain-cert' trust
             anchor to immediately complete authentication of the provisional TLS
             connection.</t>
-        <t>The Pledge MUST be prepared to parse and fail gracefully from
-        a Voucher response that does not contain a 'pinned-domain-cert' field. The
-        Pledge MUST be prepared to ignore additional fields that it does not recognize.
+        <t>The pledge MUST be prepared to parse and fail gracefully from
+        a voucher response that does not contain a 'pinned-domain-cert' field. The
+        pledge MUST be prepared to ignore additional fields that it does not recognize.
         </t>
 
         <section anchor="CompletingAuthenticationBootstrapping"
                  title="Completing authentication of Provisional TLS connection">
-          <t>If a Registrar's credentials cannot be verified using the
+          <t>If a registrar's credentials cannot be verified using the
           pinned-domain-cert trust anchor from the voucher then the TLS
           connection is immediately
-          discarded and the Pledge abandons attempts to bootstrap with this
-          discovered Registrar. The Pledge SHOULD send voucher status
+          discarded and the pledge abandons attempts to bootstrap with this
+          discovered registrar. The pledge SHOULD send voucher status
           telemetry (described below) before closing the TLS connection.
-          The Pledge MUST attempt to enroll using any other proxies
+          The pledge MUST attempt to enroll using any other proxies
           it has found.  It SHOULD return to the same proxy again after
           attempting with other proxies.  Attempts should be attempted in
           the exponential backoff described earlier.
           Attempts SHOULD be repeated as failure may be the result of a
-          temporary inconsistently (an inconsistently rolled Registrar key,
+          temporary inconsistently (an inconsistently rolled registrar key,
           or some other mis-configuration.)  The inconsistently could also
           be the result an active MITM attack on the EST connection.
           </t>
-          <t> The Registrar MUST use a certificate that chains to the pinned-domain-cert
+          <t> The registrar MUST use a certificate that chains to the pinned-domain-cert
               as its TLS server certificate.
           </t>
 
-          <t>The Pledge's PKIX path validation of a Registrar certificate's validity
+          <t>The pledge's PKIX path validation of a registrar certificate's validity
               period information is as described in <xref target="timeunknown"></xref>.
           Once the PKIX path validation is successful the TLS connection is
           no longer provisional.</t>
@@ -2024,9 +2024,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           can be used to authenticate any dynamically
           discovered EST server that contain the id-kp-cmcRA extended key
           usage extension as detailed in EST RFC7030 section 3.6.1; but to
-          reduce system complexity the Pledge SHOULD avoid additional
-          discovery operations. Instead the Pledge SHOULD communicate directly
-          with the Registrar as the EST server. The 'pinned-domain-cert'
+          reduce system complexity the pledge SHOULD avoid additional
+          discovery operations. Instead the pledge SHOULD communicate directly
+          with the registrar as the EST server. The 'pinned-domain-cert'
           is not a complete
           distribution of the <xref target="RFC7030" /> section 4.1.3 CA Certificate Response,
           which is
@@ -2043,20 +2043,20 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         it needs telemetry information concerning the device's
         status.</t>
 
-        <t>To indicate Pledge status regarding the Voucher, the Pledge
+        <t>To indicate pledge status regarding the voucher, the pledge
         MUST post a status message.</t>
 
         <t>The posted data media type: application/json</t>
 
         <t>The client HTTP POSTs the following to the server at the EST well
-        known URI "/voucher_status". The Status field indicates if the Voucher
+        known URI "/voucher_status". The Status field indicates if the voucher
         was acceptable. If it was not acceptable the Reason string indicates
         why. In the failure case this message may be sent to an
-        unauthenticated, potentially malicious Registrar and therefore the
+        unauthenticated, potentially malicious registrar and therefore the
         Reason string SHOULD NOT provide information beneficial to an
         attacker. The operational benefit of this telemetry information is
         balanced against the operational costs of not recording that an
-        Voucher was ignored by a client the registar expected to continue
+        voucher was ignored by a client the registrar expected to continue
         joining the domain.</t>
 
         <t><figure>
@@ -2073,7 +2073,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>
           The reason-context attribute is an arbitrary JSON object (literal
           value or hash of values) which provides additional information
-          specific to this Pledge.  The contents of this field are not
+          specific to this pledge.  The contents of this field are not
           subject to standardization.
         </t>
         <t>
@@ -2085,9 +2085,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       <section anchor="authzLogRequest" title="MASA authorization log Request ">
          <t>
            After receiving the voucher status telemetry <xref target="voucherstatus" />,
-           the Registrar SHOULD request the MASA authorization log from the MASA
+           the registrar SHOULD request the MASA authorization log from the MASA
            service using this EST extension. If a device had previously registered
-           with another domain, a Registrar of that domain would show in the
+           with another domain, a registrar of that domain would show in the
            log.
          </t>
 
@@ -2097,9 +2097,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </t>
 
         <t>
-          The Registrar MUST HTTP POST the same Registrar voucher-request
+          The registrar MUST HTTP POST the same registrar voucher-request
           as it did when requesting a
-          Voucher. It is posted to the /requestauditlog URI instead.
+          voucher. It is posted to the /requestauditlog URI instead.
           The "idevid-issuer" and "serial-number" informs the MASA
           server which log is requested so the appropriate log can be prepared
           for the response.
@@ -2108,7 +2108,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           network traffic.
           The relying MASA server implementation MAY leverage internal state
           to associate this request with the original, and by now already
-          validated, Registrar voucher-request so as to avoid an extra crypto
+          validated, registrar voucher-request so as to avoid an extra crypto
           validation.
         </t>
         <t>
@@ -2135,7 +2135,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </t>
         <t>
           A MASA that returns a code 200 MAY also include a Location: header
-          for future reference by the Registrar.
+          for future reference by the registrar.
         </t>
 
         <t>The request media type is:</t>
@@ -2145,7 +2145,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             "YANG-defined JSON document that has been signed using a CMS
             structure" as described in <xref target="voucher-request"/> using
             the JSON encoded described in <xref target="RFC7951"/>. The
-            Registrar MUST sign the request. The entire Registrar certificate
+            registrar MUST sign the request. The entire registrar certificate
             chain, up to and including the Domain CA, MUST be included in the
             CMS structure.
             </t>
@@ -2182,15 +2182,15 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 }]]></artwork>
           </figure></t>
 
-          <t>A Registrar SHOULD use this log information to make an informed decision
-          regarding the continued bootstrapping of the Pledge. For example if
-          the log includes an unexpected domainID then the Pledge could have
+          <t>A registrar SHOULD use this log information to make an informed decision
+          regarding the continued bootstrapping of the pledge. For example if
+          the log includes an unexpected domainID then the pledge could have
           imprinted on an unexpected domain. If the log includes nonceless
-          entries then any Registrar in the same domain could theoretically trigger
+          entries then any registrar in the same domain could theoretically trigger
           a reset of the device and take over management of
-          the Pledge. Equipment that is purchased pre-owned can be expected to have an
-          extensive history. A Registrar MAY request logs at future times.
-          A Registrar MAY be configured to ignore the
+          the pledge. Equipment that is purchased pre-owned can be expected to have an
+          extensive history. A registrar MAY request logs at future times.
+          A registrar MAY be configured to ignore the
           history of the device but it is RECOMMENDED that this only be
           configured if hardware assisted NEA [RFC5209] is supported.</t>
 
@@ -2216,13 +2216,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             transparency is better than hidden truncations.</t>
           <t>This document
             specifies a simple log format as provided by the
-          MASA service to the registar. This format could be improved by
+          MASA service to the registrar. This format could be improved by
           distributed consensus technologies that integrate vouchers
           with technologies such as block-chain or hash trees or optimized
           logging approaches. Doing so is out of the scope of this document
           but is an
           anticipated improvement for future work.  As such, the
-          Registrar client SHOULD anticipate new kinds of responses, and
+          registrar client SHOULD anticipate new kinds of responses, and
           SHOULD provide operator controls to indicate how to process
           unknown responses.
           </t>
@@ -2230,14 +2230,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       </section>
 
       <section anchor="ESTintegration" title="EST Integration for PKI bootstrapping">
-        <t>The Pledge SHOULD follow the BRSKI operations with EST enrollment operations
+        <t>The pledge SHOULD follow the BRSKI operations with EST enrollment operations
         including "CA Certificates Request", "CSR Attributes" and "Client Certificate Request"
         or "Server-Side Key Generation", etc. This is a relatively seamless integration
         since BRSKI REST calls provide an automated alternative to the manual bootstrapping method
         described in <xref target="RFC7030"></xref>. As noted above, use of HTTP 1.1 persistent
-        connections simplifies the Pledge state machine.</t>
+        connections simplifies the pledge state machine.</t>
 
-        <t>An ANIMA ANI Pledge MUST implement the EST automation
+        <t>An ANIMA ANI pledge MUST implement the EST automation
         extensions described below. They supplement the <xref
         target="RFC7030" /> EST to better
         support automated devices that do not have an end user.</t>
@@ -2246,7 +2246,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>
           Although EST allows clients to obtain multiple certificates by sending
           multiple CSR requests BRSKI mandates use of the CSR Attributes request
-          and mandates that the Registrar validate the CSR against the expected
+          and mandates that the registrar validate the CSR against the expected
           attributes. This implies that client requests will "look the same" and
           therefore result in a single logical certificate being issued even if
           the client were to make multiple requests. Registrars MAY contain
@@ -2257,10 +2257,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </t>
 
         <section title="EST Distribution of CA Certificates">
-          <t>The Pledge SHOULD request the full EST Distribution of CA
+          <t>The pledge SHOULD request the full EST Distribution of CA
           Certificates message. See RFC7030, section 4.1.</t>
 
-          <t>This ensures that the Pledge has the complete set of current CA
+          <t>This ensures that the pledge has the complete set of current CA
           certificates beyond the pinned-domain-cert (see <xref
           target="CompletingAuthenticationBootstrapping"></xref> for a discussion of the
           limitations inherent in having a single certificate instead of a full
@@ -2269,9 +2269,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <section anchor="csrattributes" title="EST CSR Attributes">
           <t>Automated bootstrapping occurs without local administrative
-          configuration of the Pledge. In some deployments it is plausible that
-          the Pledge generates a certificate request containing only identity
-          information known to the Pledge (essentially the X.509 IDevID information)
+          configuration of the pledge. In some deployments it is plausible that
+          the pledge generates a certificate request containing only identity
+          information known to the pledge (essentially the X.509 IDevID information)
           and ultimately receives a certificate containing domain specific
           identity information. Conceptually the CA has complete control over
           all fields issued in the end entity certificate. Realistically this
@@ -2284,13 +2284,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           into different network services/protocols used. For example, the
           CA could even be outsourced.</t>
 
-          <t>To alleviate these operational difficulties, the Pledge MUST
+          <t>To alleviate these operational difficulties, the pledge MUST
           request the
           EST "CSR Attributes" from the EST server and the EST server needs
           to be able to reply with the attributes necessary for use of
           the certificate in its intended protocols/services. This approach
           allows for minimal CA integrations and instead
-          the local infrastructure (EST server) informs the Pledge of the proper
+          the local infrastructure (EST server) informs the pledge of the proper
           fields to include in the generated CSR. This approach is beneficial
           to automated boostrapping in the widest number of environments.</t>
 
@@ -2303,8 +2303,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           the ACP (Autonomic Control Plane), the EST attributes MUST include
           the "ACP information" field. See <xref target="I-D.ietf-anima-autonomic-control-plane" /> for more details.</t>
 
-          <t>The Registar MUST also confirm that the resulting CSR is formatted as
-          indicated before forwarding the request to a CA. If the Registar is
+          <t>The registrar MUST also confirm that the resulting CSR is formatted as
+          indicated before forwarding the request to a CA. If the registrar is
           communicating with the CA using a protocol such as full CMC, which
           provides mechanisms to override the CSR attributes, then these
           mechanisms MAY be used even if the client ignores CSR Attribute
@@ -2312,7 +2312,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
 
         <section title="EST Client Certificate Request">
-          <t>The Pledge MUST request a new client certificate. See RFC7030,
+          <t>The pledge MUST request a new client certificate. See RFC7030,
           section 4.2.</t>
         </section>
 
@@ -2371,7 +2371,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <section title="Multiple certificates">
           <t>
             Pledges that require multiple certificates could establish
-            direct EST connections to the Registrar.
+            direct EST connections to the registrar.
           </t>
         </section>
 
@@ -2396,7 +2396,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       <t>
         A common requirement of bootstrapping is to support less secure
         operational modes for support specific use cases. The following sections
-        detail specific ways that the Pledge, Registrar and MASA can be
+        detail specific ways that the pledge, registrar and MASA can be
         configured to run in a less secure mode for the indicated reasons.
       </t>
       <t>
@@ -2419,7 +2419,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </figure>
 
         <t><list style="hanging">
-            <t hangText="Pledge:">The Pledge could be compromised and
+            <t hangText="Pledge:">The pledge could be compromised and
             providing an attack vector for malware. The entity is trusted to
             only imprint using secure methods described in this document.
             Additional endpoint assessment techniques are RECOMMENDED but are
@@ -2429,13 +2429,12 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             involved in security considerations.</t>
 
             <t hangText="Registrar:">When interacting with a MASA server a
-            Registrar makes all decisions. When Ownership Vouchers are
-            involved a Registrar is only a conduit and all security decisions
-            are made on the manufacturer service.</t>
+            registrar makes all decisions. For Ownership Audit Vouchers (see <xref target="I-D.ietf-anima-voucher" />) the registrar is provided an opportunity to 
+            accept MASA server decisions.</t>
 
             <t hangText="Vendor Service, MASA:">This form of manufacturer service is
             trusted to accurately log all claim attempts and to provide
-            authoritative log information to Registrars. The MASA does not
+            authoritative log information to registrars. The MASA does not
             know which devices are associated with which domains. These claims
             could be strengthened by using cryptographic log techniques to
             provide append only, cryptographic assured, publicly auditable
@@ -2448,23 +2447,23 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       </section>
 
       <section title="Pledge security reductions">
-        <t>The Pledge can choose to accept vouchers using less
+        <t>The pledge can choose to accept vouchers using less
             secure methods. These methods enable offline and emergency
             (touch based) deployment use cases:
             <list style="numbers">
               <t>
-                The Pledge MUST accept nonceless vouchers. This allows for
-                a use case where the Registrar can not connect to the MASA
+                The pledge MUST accept nonceless vouchers. This allows for
+                a use case where the registrar can not connect to the MASA
                 at the deployment time.
                 Logging and validity periods address the
                 security considerations of supporting these use cases.
               </t>
-        <t>The Pledge MAY support "trust on first use" for physical interfaces
+        <t>The pledge MAY support "trust on first use" for physical interfaces
         such as a local console port or physical user interface but MUST NOT
         support "trust on first use" on network interfaces. This
         is because "trust on first use" permanently degrades the security for
         all use cases.</t>
-        <t>The Pledge MAY have an operational mode where it skips Voucher
+        <t>The pledge MAY have an operational mode where it skips voucher
         validation one time. For example if a physical button is depressed
         during the bootstrapping operation. This can be useful if the manufacturer
         service is unavailable. This behavior SHOULD be available via local
@@ -2482,45 +2481,45 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
       </section>
 
       <section title="Registrar security reductions">
-        <t>A Registrar can choose to accept devices using less secure methods.
+        <t>A registrar can choose to accept devices using less secure methods.
         These methods are acceptable when low security models are needed, as
         the security decisions are being made by the local administrator, but
         they MUST NOT be the default behavior:<list style="numbers">
-            <t>A Registrar MAY choose to accept all devices, or all devices of
+            <t>A registrar MAY choose to accept all devices, or all devices of
             a particular type, at the administrator's discretion. This could
-            occur when informing all Registrars of unique identifiers of new
+            occur when informing all registrars of unique identifiers of new
             entities might be operationally difficult.</t>
 
-            <t>A Registrar MAY choose to accept devices that claim a unique
+            <t>A registrar MAY choose to accept devices that claim a unique
             identity without the benefit of authenticating that claimed
-            identity. This could occur when the Pledge does not include an
+            identity. This could occur when the pledge does not include an
             X.509 IDevID factory installed credential. New Entities without an
             X.509 IDevID credential MAY form the <xref
             target="RequestVoucherFromRegistrar"></xref> request using the
             <xref target="RequestVoucherFromMASA"></xref> format to ensure the
-            Pledge's serial number information is provided to the Registar
+            pledge's serial number information is provided to the registrar
             (this includes the IDevID AuthorityKeyIdentifier value, which would
-            be statically configured on the Pledge.) The Pledge MAY refuse to
+            be statically configured on the pledge.) The pledge MAY refuse to
             provide a TLS client certificate (as one is not available.) The
-            Pledge SHOULD support HTTP-based or certificate-less TLS
+            pledge SHOULD support HTTP-based or certificate-less TLS
             authentication as described in EST RFC7030 section 3.3.2. A
-            Registrar MUST NOT accept unauthenticated New Entities unless it
+            registrar MUST NOT accept unauthenticated New Entities unless it
             has been configured to do so by an administrator that has verified
-            that only expected new entities can communicate with a Registrar
+            that only expected new entities can communicate with a registrar
             (presumably via a physically secured perimeter.)</t>
 
-            <t>A Registrar MAY submit a nonceless voucher-requests to the MASA
+            <t>A registrar MAY submit a nonceless voucher-requests to the MASA
             service (by not including a nonce in the voucher-request.) The resulting
-            Vouchers can then be stored by the Registrar until
+            vouchers can then be stored by the registrar until
             they are needed during bootstrapping operations. This is for use
             cases where the target network is protected by an air gap and
-            therefore cannot contact the MASA service during Pledge
+            therefore cannot contact the MASA service during pledge
             deployment.</t>
 
-            <t>A Registrar MAY ignore unrecognized nonceless log
+            <t>A registrar MAY ignore unrecognized nonceless log
             entries. This could occur when used equipment is purchased with a
             valid history being deployed in air gap networks that required
-            permanent Vouchers.</t>
+            permanent vouchers.</t>
           </list></t>
       </section>
 
@@ -2532,33 +2531,33 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         by:</t>
 
         <t><list style="numbers">
-            <t>Not enforcing that a nonce is in the Voucher. This
-            results in distribution of a Voucher that never expires and in
-            effect makes the Domain an always trusted entity to the Pledge
+            <t>Not enforcing that a nonce is in the voucher. This
+            results in distribution of a voucher that never expires and in
+            effect makes the Domain an always trusted entity to the pledge
             during any subsequent bootstrapping attempts. That this occurred
-            is captured in the log information so that the Registrar
-            can make appropriate security decisions when a Pledge joins the
-            Domain. This is useful to support use cases where Registrars might
+            is captured in the log information so that the registrar
+            can make appropriate security decisions when a pledge joins the
+            Domain. This is useful to support use cases where registrars might
             not be online during actual device deployment. Because this
-            results in a long lived Voucher and does not require the proof
-            that the device is online, this is only accepted when the Registrar
+            results in a long lived voucher and does not require the proof
+            that the device is online, this is only accepted when the registrar
             is authenticated by the MASA server and authorized to provide this
             functionality. The MASA server is RECOMMENDED to use this
             functionality only in concert with an enhanced level of ownership
-            tracking (out-of-scope.) If the Pledge device is known to have
+            tracking (out-of-scope.) If the pledge device is known to have
             a real-time-clock that is set from the factory, use of a voucher
             validity period is RECOMMENDED.</t>
 
             <t>Not verifying ownership before responding with a
-            Voucher. This is expected to be a common operational model because
+            voucher. This is expected to be a common operational model because
             doing so relieves the manufacturer providing MASA services from having
             to track ownership during shipping and supply chain and allows
-            for a very low overhead MASA service. A Registrar uses the audit
+            for a very low overhead MASA service. A registrar uses the audit
             log information as a defense in depth strategy to ensure that this
             does not occur unexpectedly (for example when purchasing new
-            equipment the Registrar would throw an error if any audit log
+            equipment the registrar would throw an error if any audit log
             information is reported.) The MASA SHOULD verify the
-            'prior-signed-voucher' information for Pledges that support
+            'prior-signed-voucher' information for pledges that support
             that functionality. This provides a proof-of-proximity
             check that reduces the need for ownership verification.</t>
           </list></t>
@@ -2669,127 +2668,127 @@ Reference: [This document]
         network partitions, changes to MASA policy, or other instances where
         MASA policy rejects a claim. These introduce an operational risk to the
         Registrar owner that MASA behavior might limit the ability to
-        re-boostrap a Pledge device. For example this might be an issue during
+        re-boostrap a pledge device. For example this might be an issue during
         disaster recovery. This risk can be mitigated by Registrars that
-        request and maintain long term copies of "nonceless" Vouchers. In
+        request and maintain long term copies of "nonceless" vouchers. In
         that way they are guaranteed to be able to repeat bootstrapping for
         their devices.</t>
 
         <t>The issuance of nonceless vouchers themselves creates a security
         concern. If the Registrar of a previous domain can intercept protocol
         communications then it can use a previously issued nonceless voucher to
-        establish management control of a Pledge device even after having sold
+        establish management control of a pledge device even after having sold
         it. This risk is mitigated by recording the issuance of such vouchers
         in the MASA audit log that is verified by the subsequent Registrar.
         This reduces the resale value of the equipment because future owners
         will detect the lowered security inherent in the existence of a
-        nonceless voucher that would be trusted by their Pledge. This
+        nonceless voucher that would be trusted by their pledge. This
         reflects a balance between partition resistant recovery and
-        security of future bootstrapping. Registrars take the Pledge's audit
+        security of future bootstrapping. Registrars take the pledge's audit
         history into account when applying policy to new devices.</t>
 
         <t>The MASA server is exposed to DoS attacks wherein attackers claim
-        an unbounded number of devices. Ensuring a Registrar is
+        an unbounded number of devices. Ensuring a registrar is
         representative of a valid manufacturer customer, even without validating
-        ownership of specific Pledge devices, helps to mitigate this. Pledge
-        signatures on the Pledge voucher-request, as forwarded by the
-        Registrar in the prior-signed-voucher field of the Registrar voucher-request, significantly
+        ownership of specific pledge devices, helps to mitigate this. Pledge
+        signatures on the pledge voucher-request, as forwarded by the
+        registrar in the prior-signed-voucher field of the registrar voucher-request, significantly
         reduce this risk by ensuring the MASA can confirm proximity
-        between the Pledge and the Registrar making the request. This
+        between the pledge and the registrar making the request. This
         mechanism is optional to allow for constrained devices.</t>
 
       <t>To facilitate logging and administrative oversight in addition
-          to triggering Registration verification of MASA logs the Pledge reports
-      on Voucher parsing status to the Registrar. In the case of a
+          to triggering Registration verification of MASA logs the pledge reports
+      on voucher parsing status to the registrar. In the case of a
       failure, this information is informative to a potentially malicious
-      Registar but this is mandated anyway because of the operational
+      registrar but this is mandated anyway because of the operational
       benefits of an informed administrator in cases where the failure is
-      indicative of a problem. The Registrar is RECOMMENDED to verify MASA logs
+      indicative of a problem. The registrar is RECOMMENDED to verify MASA logs
       if voucher status telemetry is not received.</t>
 
       <t>To facilitate truely limited clients EST RFC7030 section 3.3.2
       requirements that the client MUST support a client authentication model
       have been reduced in <xref target="reducedsecuritymodes"></xref> to a
-      statement that the Registrar "MAY" choose to accept devices
+      statement that the registrar "MAY" choose to accept devices
       that fail cryptographic authentication. This reflects
       current (poor) practices in shipping devices without a cryptographic
       identity that are NOT RECOMMENDED.</t>
 
-        <t>During the provisional period of the connection the Pledge MUST treat all HTTP header and
+        <t>During the provisional period of the connection the pledge MUST treat all HTTP header and
         content data as untrusted data. HTTP libraries are
         regularly exposed to non-secured HTTP traffic: mature libraries
         should not have any problems.
         </t>
 
       <t>Pledges might chose to engage in protocol operations with
-      multiple discovered Registrars in parallel. As noted above they
+      multiple discovered registrars in parallel. As noted above they
       will only do so with distinct nonce values, but the end result
-      could be multiple vouchers issued from the MASA if all Registrars
-      attempt to claim the device. This is not a failure and the Pledge
+      could be multiple vouchers issued from the MASA if all registrars
+      attempt to claim the device. This is not a failure and the pledge
       choses whichever voucher to accept based on internal logic. The
-      Registrar's verifying log information will see multiple entries
+      registrar's verifying log information will see multiple entries
       and take this into account for their analytics purposes.</t>
 
       <section title="Freshness in Voucher-Requests">
         <t>
-          A concern has been raised that the Pledge voucher-request should contain some content (a nonce) provided by the Registrar and/or MASA
-          in order for those actors to verify that the Pledge voucher-request is fresh.
+          A concern has been raised that the pledge voucher-request should contain some content (a nonce) provided by the registrar and/or MASA
+          in order for those actors to verify that the pledge voucher-request is fresh.
         </t>
         <t>
           There are a number of operational problems with getting a nonce
-          from the MASA to the Pledge. It is somewhat easier to collect a
-          random value from the Registrar, but as the Registrar is not yet
-          vouched for, such a Registrar nonce has little value.
+          from the MASA to the pledge. It is somewhat easier to collect a
+          random value from the registrar, but as the registrar is not yet
+          vouched for, such a registrar nonce has little value.
           There are privacy and logistical challenges to addressing these
           operational issues, so if
           such a thing were to be considered, it would have to provide some
           clear value.  This section examines the impacts of not having a
-          fresh Pledge voucher-request.
+          fresh pledge voucher-request.
         </t>
         <t>
-          Because the Registrar authenticates the Pledge, a full Man-in-the-Middle
+          Because the registrar authenticates the pledge, a full Man-in-the-Middle
           attack is not possible, despite the provisional TLS authentication
-          by the Pledge (see <xref target="ProtocolDetails"></xref>.)
-          Instead we examine the case of a fake Registrar (Rm)
-          that communicates with the Pledge in parallel or in close time proximity
-          with the intended Registrar. (This scenario is intentionally supported as
+          by the pledge (see <xref target="ProtocolDetails"></xref>.)
+          Instead we examine the case of a fake registrar (Rm)
+          that communicates with the pledge in parallel or in close time proximity
+          with the intended registrar. (This scenario is intentionally supported as
           described in <xref target="discovery"></xref>.)
         </t>
         <t>
-          The fake Registrar (Rm) can obtain a voucher signed by the MASA
+          The fake registrar (Rm) can obtain a voucher signed by the MASA
           either directly or through arbitrary intermediaries.
-          Assuming that the MASA accepts the Registar voucher-request (either because
-          Rm is collaborating with a legitimate Registrar according to supply chain
+          Assuming that the MASA accepts the registrar voucher-request (either because
+          Rm is collaborating with a legitimate registrar according to supply chain
           information, or because the MASA is in audit-log only mode), then
-          a voucher linking the Pledge to the Registrar Rm is issued.
+          a voucher linking the pledge to the registrar Rm is issued.
         </t>
         <t>
-          Such a voucher, when passed back to the Pledge, would link the
-          Pledge to Registrar Rm, and would permit the Pledge to
+          Such a voucher, when passed back to the pledge, would link the
+          pledge to registrar Rm, and would permit the pledge to
           end the provisional state. It now trusts Rm and, if it has any
           security vulnerabilities leveragable by an Rm with full
           administrative control, can be assumed to be a
-          threat against the intended Registrar.
+          threat against the intended registrar.
         </t>
         <t>
-          This flow is mitigated by the intended Registar verifying the audit
+          This flow is mitigated by the intended registrar verifying the audit
           logs available from the MASA as described in
           <xref target="authzLogRequest" ></xref>. Rm might chose to wait
-          until after the intended Registrar completes the authorization
-          process before submitting the now-stale Pledge voucher-request. The Rm
-          would need to remove the Pledge's nonce.
+          until after the intended registrar completes the authorization
+          process before submitting the now-stale pledge voucher-request. The Rm
+          would need to remove the pledge's nonce.
         </t>
         <t>
           In order to successfully use the resulting "stale voucher" Rm
-          would have to attack the Pledge and return it to a bootstrapping
-          enabled state. This would require wiping the Pledge of current
-          configuration and triggering a re-bootstrapping of the Pledge.
-          This is no more likely than simply taking control of the Pledge
+          would have to attack the pledge and return it to a bootstrapping
+          enabled state. This would require wiping the pledge of current
+          configuration and triggering a re-bootstrapping of the pledge.
+          This is no more likely than simply taking control of the pledge
           directly but if this is a consideration the target network is
           RECOMMENDED to take the following steps:
         </t>
         <t><list style="symbols">
-          <t>Ongoing network monitoring for unexpected bootstrapping attempts by Pledges.</t>
+          <t>Ongoing network monitoring for unexpected bootstrapping attempts by pledges.</t>
           <t>Retreival and examination of MASA log information upon the occurance
               of any such unexpected events. Rm will be listed in the logs.</t>
         </list></t>
@@ -3005,7 +3004,7 @@ Reference: [This document]
 
       <t>
         The secification of BRSKI in <xref target="proxydetails" />
-        intentionally only covers the mechanisms for an IPv6 Pledge using
+        intentionally only covers the mechanisms for an IPv6 pledge using
         Link-Local addresses.  This section describes non-normative
         extensions that can be used in other environments.
       </t>
@@ -3032,12 +3031,12 @@ Reference: [This document]
     </section>
 
     <section anchor="mdnsmethods" title="mDNS / DNSSD proxy discovery options">
-      <t>Pledge discovery of Proxy (<xref target="discovery"></xref>) MAY be performed with) DNS-based Service Discovery <xref
+      <t>Pledge discovery of proxy (<xref target="discovery"></xref>) MAY be performed with) DNS-based Service Discovery <xref
       target="RFC6763"></xref> over Multicast DNS <xref
       target="RFC6762"></xref> to discover the proxy at
       "_brski-proxy._tcp.local.". </t>
 
-      <t>Proxy discovery of Registrar (<xref target="JRCgrasp"></xref>) MAY perform DNS-based Service Discovery over Multicast DNS to discover Registrars by searching for the service
+      <t>Proxy discovery of registrar (<xref target="JRCgrasp"></xref>) MAY perform DNS-based Service Discovery over Multicast DNS to discover registrars by searching for the service
         "_brski-registrar._tcp.local.".</t>
 
       <t>
@@ -3045,14 +3044,14 @@ Reference: [This document]
         network traffic, when using mDNS, the congestion avoidance mechanisms
         specified in
         <xref target="RFC6762"></xref> section 7 MUST be followed. The
-        Pledge SHOULD listen for an unsolicited broadcast response as
+        pledge SHOULD listen for an unsolicited broadcast response as
         described in <xref target="RFC6762"></xref>. This allows devices
         to avoid announcing their presence via mDNS broadcasts and
         instead silently join a network by watching for periodic
         unsolicited broadcast responses.
       </t>
 
-      <t>Discovery of Registrar MAY also be performed with DNS-based
+      <t>Discovery of registrar MAY also be performed with DNS-based
         service discovery by searching for the service "_brski-registrar._tcp.example.com".
         In this case the domain
         "example.com" is discovered as described in <xref
@@ -3063,11 +3062,11 @@ Reference: [This document]
       <t>
         If no local proxy or registrar service is located using the GRASP
         mechanisms or the above mentioned DNS-based Service Discovery
-        methods the Pledge MAY contact a well
+        methods the pledge MAY contact a well
         known manufacturer provided bootstrapping server by performing a DNS
         lookup using a well known URI such as
         "brski-registrar.manufacturer.example.com". The details of the URI are
-        manufacturer specific. Manufacturers that leverage this method on the Pledge
+        manufacturer specific. Manufacturers that leverage this method on the pledge
         are responsible for providing the registrar service.
         Also see <xref target="cloudregistrar" />.
       </t>
@@ -3075,67 +3074,66 @@ Reference: [This document]
       <t>
         The current DNS services returned
           during each query are maintained until bootstrapping is completed. If
-          bootstrapping fails and the Pledge returns to the Discovery state, it
+          bootstrapping fails and the pledge returns to the Discovery state, it
           picks up where it left off and continues attempting bootstrapping.
           For example, if the first Multicast DNS _bootstrapks._tcp.local
           response doesn't work then the second and third responses are tried.
-          If these fail the Pledge moves on to normal DNS-based Service
+          If these fail the pledge moves on to normal DNS-based Service
           Discovery.
       </t>
     </section>
 
     <section anchor="IPIPmechanism" title="IPIP Join Proxy mechanism">
       <t>
-        The Circuit Proxy mechanism suffers from requiring a state on the
-        Join Proxy for each connection that is relayed.  The Circuit Proxy
+        The circuit proxy mechanism suffers from requiring a state on the
+        proxy for each connection that is relayed.  The proxy
         can be considered a kind of Algorithm Gateway (see <xref target="RFC2663"
    />, section 2.9).
       </t>
       <t>
         An alternative to proxying at the TCP layer is to selectively forward
-        at the IP layer.  This moves all per-connection to the Join
-        Registrar.  The IPIP tunnel statelessly forwards packets.  This
-        section provides some explanation of some of the details of the
-        Registrar discovery procotol, which are not important to Circuit
-        Proxy, and some implementation advice.
+        at the IP layer.  This moves all per-connection to the
+        registrar.  The IPIP tunnel statelessly forwards packets.  This
+        section provides explanation of some of the details of the
+        registrar discovery procotol, which are not important to 
+        proxy, and some implementation advice.
       </t>
       <t>
         The IPIP tunnel is described in <xref target="RFC2473" />.  Each such tunnel is
         considered a unidirectional construct, but two tunnels may be
         associated to form a bidirectional mechanism.
         An IPIP tunnel is setup as follows.
-        The outer addresses are an ACP address of the Join Proxy,
-        and the ACP address of the Join Registrar.  The inner addresses seen
+        The outer addresses are an ACP address of the proxy,
+        and the ACP address of the join registrar.  The inner addresses seen
         in the tunnel are the link-local addresses of the network on which
         the join activity is occurring.
       </t>
       <t>
-        One way to look at this construct is to consider that the Registrar
-        is extending attaching an interface to the network on which the Join
-        Proxy is physically present.  The Registrar then interacts as if it
+        One way to look at this construct is to consider that the registrar
+        is extending attaching an interface to the network on which the proxy is physically present.  The registrar then interacts as if it
         were present on that network using link-local (fe80::) addresses.
-        The Join node is unaware that the traffic is being proxied through a
+        The registrar is unaware that the traffic is being proxied through a
         tunnel, and does not need any special routing.
       </t>
       <t>
         There are a number of considerations with this mechanism which
         cause some minor amounts of complexity.  Note that due to the
-        tunnels, the Registrar sees multiple connections to a fe80::/10
+        tunnels, the registrar sees multiple connections to a fe80::/10
         network on not just physical interfaces, but on each of the virtual
         interfaces representing the tunnels.
       </t>
       <section title="Multiple Join networks on the Join Proxy side">
         <t>
-          The Join Proxy will in the general case be a routing device with
+          The proxy will in the general case be a routing device with
           multiple interfaces.  Even a device as simple as a wifi access
           point may have wired, and multiple frequencies of wireless
           interfaces, potentially with multiple ESSIDs.
         </t>
         <t>
-          Each of these interfaces on the Join Proxy may be separate L3
+          Each of these interfaces on the proxy may be separate L3
           routing domains, and therefore will have a unique set of link-local
-          addresses.  An IPIP packet being returned by the Registrar needs to
-          be forwarded to the correct interface, so the Join Proxy needs an
+          addresses.  An IPIP packet being returned by the registrar needs to
+          be forwarded to the correct interface, so the proxy needs an
           additional key to distinguish which network the packet should be
           returned to.
         </t>
@@ -3147,20 +3145,20 @@ Reference: [This document]
       </section>
       <section title="Automatic configuration of tunnels on Registrar">
         <t>
-          The Join Proxy is expected to do a GRASP negotiation with the Proxy
-          for each Join Interface that it needs to relay traffic from.  This
-          is to permit Registrars to configure the appropriate virtual
-          interfaces before join traffic arrives.
+          The proxy is expected to do a GRASP negotiation with the proxy
+          for each interface that it needs to relay traffic from.  This
+          is to permit registrars to configure the appropriate virtual
+          interfaces before traffic arrives.
         </t>
         <t>
-          A Registrar serving a large number of interfaces may not wish to
+          A registrar serving a large number of interfaces may not wish to
           allocate resources to every interface at all times, but can instead
           dynamically allocate interfaces.  It can do this by monitoring IPIP
           traffic that arrives on its ACP interface, and when packets arrive
-          from new Join Proxys, it can dynamically configure virtual interfaces.
+          from new proxys, it can dynamically configure virtual interfaces.
         </t>
         <t>
-          A more sophisticated Registrar willing to modify the
+          A more sophisticated registrar willing to modify the
           behaviour of its TCP and UDP stack could note the IPIP traffic
           origination in the socket control block and make information
           available to the TCP layer (for HTTPS connections), or to
@@ -3170,23 +3168,23 @@ Reference: [This document]
       </section>
       <section title="Proxy Neighbor Discovery by Join Proxy">
         <t>
-          The Join Proxy MUST answer neighbor discovery messages for the
-          address given by the Registrar as being its link-local
-          address.  The Join Proxy must also advertise this address as the
+          The proxy MUST answer neighbor discovery messages for the
+          address given by the registrar as being its link-local
+          address.  The proxy must also advertise this address as the
           address to which to connect when advertising its existence.
         </t>
         <t>
-          This Proxy neighbor discovery means that the Pledge will create TCP
-          and UDP connections to the correct Registrar address.  This matters
+          This proxy neighbor discovery means that the pledge will create TCP
+          and UDP connections to the correct registrar address.  This matters
           as the TCP and UDP pseudo-header checksum includes the destination
-          address, and for the Proxy to remain completely stateless, it must
+          address, and for the proxy to remain completely stateless, it must
           not be necessary for the checksum to be updated.
         </t>
       </section>
 
       <section title="Use of connected sockets; or IP_PKTINFO for CoAP on Registrar">
         <t>
-          TCP connections on the Registrar SHOULD properly capture the
+          TCP connections on the registrar SHOULD properly capture the
           ifindex of the incoming connection into the socket structure.  This
           is normal IPv6 socket API processing.  The outgoing responses will
           go out on the same (virtual) interface by ifindex.
@@ -3198,8 +3196,8 @@ Reference: [This document]
           which is a standard part of the IPv6 sockets API <xref target="RFC3542" />.
         </t>
         <t>
-          A Registrar application could, after receipt of an initial CoAP
-          message from the Pledge, create a connected UDP socket (including
+          A registrar application could, after receipt of an initial CoAP
+          message from the pledge, create a connected UDP socket (including
           the ifindex information.)  The kernel would then take care of
           accurate demultiplexing upon receive, and subsequent transmission
           to the correct interface.
@@ -3208,14 +3206,14 @@ Reference: [This document]
 
       <section title="Use of socket extension rather than virtual interface">
         <t>
-          Some operating systems on which a Registrar needs to be implemented may
-          find need for a virtual interface per Join Proxy to be
+          Some operating systems on which a registrar needs to be implemented may
+          find need for a virtual interface per proxy to be
           problematic. There are other mechanisms which can be implemented.
         </t>
         <t>
           If the IPIP decapsulator can mark the (SYN) packet inside the kernel
-          with the address of the Join Proxy sending the traffic, then an
-          interface per Join Proxy may not be needed.  The outgoing path need
+          with the address of the proxy sending the traffic, then an
+          interface per proxy may not be needed.  The outgoing path need
           just pay attention to this extra information and add an appropriate
           IPIP header on outgoing.  A CoAP over UDP mechanism may need to
           expose this extra information to the application as the UDP sockets
@@ -3251,15 +3249,15 @@ Reference: [This document]
     <section title="Example Vouchers">
       <t>
         Three entities are involved in a voucher: the MASA issues (signs)
-        it, the Registrar's public key is mentioned in the voucher, and the
-        Pledge validates it.  In order to provide reproduceable examples
-        the public and private keys for an example MASA and Registrar are
+        it, the registrar's public key is mentioned in the voucher, and the
+        pledge validates it.  In order to provide reproduceable examples
+        the public and private keys for an example MASA and registrar are
         first listed.
       </t>
       <section title="Keys involved">
         <t>
           The Manufacturer has a Certificate Authority that signs the
-          Pledge's IDevID.  In addition the Manufacturer's signing authority
+          pledge's IDevID.  In addition the Manufacturer's signing authority
           (the MASA) signs the vouchers, and that certificate must
           distributed to the devices at manufacturing time so that vouchers
           can be validated.
@@ -3292,18 +3290,18 @@ Reference: [This document]
         </section>
         <section title="Registrar key pair">
           <t>
-            The Registrar key (or chain) is the representative of the domain
-            owner.  This key signs Registrar voucher-requests:
+            The registrar key (or chain) is the representative of the domain
+            owner.  This key signs registrar voucher-requests:
             <figure>
               INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.key END
             </figure>
-            The public key is indicated in a Pledge voucher-request to show proximity.
+            The public key is indicated in a pledge voucher-request to show proximity.
             <figure>
               INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.crt END
             </figure>
-            The Registrar public certificate as decoded by openssl's x509
+            The registrar public certificate as decoded by openssl's x509
             utility.
-            Note that the Registrar certificate is marked with the cmcRA extension.
+            Note that the registrar certificate is marked with the cmcRA extension.
             <figure>
               INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.txt END
             </figure>
@@ -3311,11 +3309,11 @@ Reference: [This document]
         </section>
         <section title="Pledge key pair">
           <t>
-            The Pledge has an IDevID key pair built in at manufacturing time:
+            The pledge has an IDevID key pair built in at manufacturing time:
             <figure>
               INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.key END
             </figure>
-            The public key is used by the Registrar to find the MASA. The
+            The public key is used by the registrar to find the MASA. The
             MASA URL is in an extension described in <xref target="IDevIDextension" />.
             RFC-EDITOR: Note that these certificates are using a Private
             Enterprise Number for the not-yet-assigned by IANA MASA URL, and
@@ -3323,10 +3321,10 @@ Reference: [This document]
             <figure>
               INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.crt END
             </figure>
-            The Pledge public certificate as decoded by openssl's x509
+            The pledge public certificate as decoded by openssl's x509
             utility so that the extensions can be seen. A second
             custom Extension is included to provided to contain the EUI48/EUI64 that the
-            Pledge will configure.
+            pledge will configure.
             <figure>
               INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.txt END
             </figure>
@@ -3343,8 +3341,8 @@ Reference: [This document]
         <section title="Pledge to Registrar">
           <t>
             As described in <xref target="RequestVoucherFromRegistrar" />,
-            the Pledge will sign a Pledge voucher-request containing the
-            Registrar's public key in the proximity-registrar-cert field.
+            the pledge will sign a pledge voucher-request containing the
+            registrar's public key in the proximity-registrar-cert field.
             The base64 has been wrapped at 60 characters for presentation reasons.
             <figure>
               INSERT_TEXT_FROM_FILE examples/vr_00-D0-E5-F2-00-02.pkcs END
@@ -3364,8 +3362,8 @@ Reference: [This document]
         <section title="Registrar to MASA">
           <t>
             As described in <xref target="RequestVoucherFromMASA" />
-            the Registrar will sign a Registrar voucher-request, and will
-            include Pledge's voucher request in the prior-signed-voucher-request.
+            the registrar will sign a registrar voucher-request, and will
+            include pledge's voucher request in the prior-signed-voucher-request.
             <figure>
               INSERT_TEXT_FROM_FILE examples/parboiled_vr-00-D0-E5-F2-00-02.pkcs END
               <postamble>file: examples/parboiled_vr_00-D0-E5-F2-00-02.pkcs</postamble>
@@ -3379,8 +3377,8 @@ Reference: [This document]
 
         <section title="MASA to Registrar">
           <t>
-            The MASA will return a voucher to the Registrar, to be relayed to
-            the Pledge.
+            The MASA will return a voucher to the registrar, to be relayed to
+            the pledge.
             <figure>
               INSERT_TEXT_FROM_FILE examples/voucher_00-D0-E5-F2-00-02.pkcs END
               <postamble>file: examples/voucher_00-D0-E5-F2-00-02.pkcs</postamble>
