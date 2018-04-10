@@ -1501,26 +1501,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             the TLS handshake as detailed in <xref target="brskiesttls"></xref>.</t>
 
             <t>
-              To avoid blocking on a single erroneous Registrar the Pledge
-              MUST drop the connection after 5 seconds in which there has
-              been no progress on the TCP connection.
-              It should proceed to
-                connect to any other Registrar's via any other discovered
-                Proxies if there are any.  If there were no
-                other Proxies discovered, the Pledge MAY continue to wait,
-                as long as it is concurrently listening for new Proxy
-                announcements.
-            </t>
-
-            <t>
-                Ideally the Pledge could keep track of the
-                appropriate retry-after value for any number of outstanding Registrars
-                but this would involve a large state table on the Pledge. Instead the
-                Pledge MAY ignore the exact retry-after value in favor of a single hard
-                coded value that takes effect between discovery
-                attempts. A Registrar that is unable
-                to complete the transaction the first time due to timing reasons will
-                have future chances.
+              The Pledge either attempts concurrent connections, or it
+              times out quickly and tries connections in series.
             </t>
 
             <t>The Pledge requests and validates a voucher using the new REST calls
@@ -1595,7 +1577,24 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
                 EST server (the Registrar) is provisionally authenticated with an unverified
             server certificate.</t>
 
-            <t>The Pledge maintains a security paranoia concerning the provisional state, and all data received, until a voucher is received and verified as specified in <xref target="CompletingAuthenticationBootstrapping"></xref></t>
+            <t>The Pledge maintains a security paranoia concerning the
+            provisional state, and all data received, until a voucher is
+            received and verified as specified in <xref
+            target="CompletingAuthenticationBootstrapping"></xref></t>
+
+            <t>
+              To avoid blocking on a single erroneous Registrar the Pledge
+              MUST drop the connection after 5 seconds in which there has
+              been no progress on the TCP connection.
+              It should proceed to
+                connect to any other Registrar's via any other discovered
+                Proxies if there are any.  If there were no
+                other Proxies discovered, the Pledge MAY continue to wait,
+                as long as it is concurrently listening for new Proxy
+                announcements.
+            </t>
+
+
         </section>
         <section anchor="RequestVoucherFromRegistrar"
                title="Pledge Requests Voucher from the Registrar">
@@ -1916,12 +1915,21 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           The Registar MAY respond with an HTTP 202 ("the request has been
           accepted for processing, but the processing has not been completed") as
           described in EST <xref target="RFC7030"/> section 4.2.3 wherein the
-          client "MUST wait at least the specified 'retry-after' time before
-          repeating the same request". The Pledge is RECOMMENDED to provide local
+          client "MUST wait at least the specified 'Retry-After' time before
+          repeating the same request".
+          (see <xref target="RFC7231" /> section 6.6.4)
+          The Pledge is RECOMMENDED to provide local
           feedback (blinked LED etc) during this wait cycle if mechanisms for this
           are available. To prevent an attacker Registrar from significantly
-          delaying bootstrapping the Pledge MUST limit the 'retry-after' time to
-          60 seconds.
+          delaying bootstrapping the Pledge MUST limit the 'Retry-After' time to
+          60 seconds.   Ideally the Pledge would keep track of the
+          appropriate Retry-After header values for any number of
+          outstanding Registrars but this would involve a state table
+          on the Pledge.  Instead the
+          Pledge MAY ignore the exact Retry-After value in favor of a single hard
+          coded value.   A Registrar that is unable
+          to complete the transaction the first time due to timing reasons will
+          have future chances.
         </t>
 
         <t>
