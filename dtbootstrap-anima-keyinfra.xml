@@ -1096,7 +1096,9 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
       <t>
         A Registar MAY also retrieve nonceless vouchers by sending
         nonceless voucher-requests to the MASA in order to obtain
-        vouchers for later offline use.  No "prior-signed-voucher-request" leaf
+        vouchers for use when the Registrar does not have connectivity to the
+        MASA.
+        No "prior-signed-voucher-request" leaf
         would be included.  The Registrar will also need to know the serial number of
         the pledge. This document does not provide a mechanism for the
         Registrar to learn that in an automated fashion. Typically this will
@@ -1153,8 +1155,13 @@ INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-prior.json END
             <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a Registrar voucher-request.
                 The 'prior-signed-voucher-request' leaf is not populated with the Pledge's
                 voucher-request nor is the nonce leaf. This form might be used by a
-                Registrar requesting a voucher when the Pledge is offline or when
-                the Registrar expects to be offline during deployment.  See
+                Registrar requesting a voucher when the Pledge can not
+                communicate with the Registrar (such as when it is powered
+                down, or still in packaging),
+                and therefore could not submit a nonce.
+                This scenario is most useful when the Registrar is aware that
+                it will not be able to reach the MASA during deployment.
+                See
                 <xref target="RequestVoucherFromMASA"/>.</t></list></t>
 <figure>
 INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-offline.json END
@@ -1757,8 +1764,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           A nonceless Registrar voucher-request MAY be
           submitted to the MASA. Doing so allows
           the Registrar to request a Voucher when the Pledge is offline, or
-          when the Registrar is expected to be offline when the Pledge is
-          being deployed. These use cases require the Registrar to learn the
+          when the Registrar anticipates not being able to connect to the
+          MASA
+          while the Pledge is being deployed. These use cases require the
+          Registrar to learn the
           appropriate IDevID SerialNumber field from the physical device
           labeling or from the sales channel (out-of-scope for this
           document).
@@ -2440,9 +2449,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             secure methods. These methods enable offline and emergency
             (touch based) deployment use cases:
             <list style="numbers">
-        <t>The Pledge MUST accept nonceless vouchers. This allows for offline
-        use cases. Logging and validity periods address the inherent
-        security considerations of supporting these use cases.</t>
+              <t>
+                The Pledge MUST accept nonceless vouchers. This allows for
+                a use case where the Registrar can not connect to the MASA
+                at the deployment time.
+                Logging and validity periods address the
+                security considerations of supporting these use cases.
+              </t>
         <t>The Pledge MAY support "trust on first use" for physical interfaces
         such as a local console port or physical user interface but MUST NOT
         support "trust on first use" on network interfaces. This
