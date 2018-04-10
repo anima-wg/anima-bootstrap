@@ -1501,26 +1501,6 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             the TLS handshake as detailed in <xref target="brskiesttls"></xref>.</t>
 
             <t>
-              In order to avoid infinite redirect loops, which a malicious
-              Registrar might do in order to keep the Pledge from
-              discovering the correct Registrar, the Pledge MUST NOT
-              follow more than one redirection to another other web
-              origins. EST supports redirection but requires user 
-              input; this change allows the Pledge to follow a single 
-              redirection without a user interaction.
-            </t>
-
-            <t>The Registar MAY respond with an HTTP 202 ("the request has been
-                accepted for processing, but the processing has not been completed") as
-                described in EST <xref target="RFC7030"/> section 4.2.3 wherein the
-                client "MUST wait at least the specified 'retry-after' time before
-                repeating the same request". The Pledge is RECOMMENDED to provide local
-                feedback (blinked LED etc) during this wait cycle if mechanisms for this
-                are available. To prevent an attacker Registrar from significantly
-                delaying bootstrapping the Pledge MUST limit the 'retry-after' time to
-                60 seconds.
-            </t>
-            <t>
               To avoid blocking on a single erroneous Registrar the Pledge
               MUST drop the connection after 5 seconds in which there has
               been no progress on the TCP connection.
@@ -1613,7 +1593,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
                 Distribution of CA Certificates" <xref target="RFC7030"/> wherein
                 the client is authenticated with the IDevID certificate, and the
                 EST server (the Registrar) is provisionally authenticated with an unverified
-                server certificate.</t>
+            server certificate.</t>
+
             <t>The Pledge maintains a security paranoia concerning the provisional state, and all data received, until a voucher is received and verified as specified in <xref target="CompletingAuthenticationBootstrapping"></xref></t>
         </section>
         <section anchor="RequestVoucherFromRegistrar"
@@ -1930,6 +1911,28 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         In this case, the response data from the MASA server MUST be a plaintext
         human-readable (ASCII, English) error message containing explanatory
         information describing why the request was rejected.</t>
+
+        <t>
+          The Registar MAY respond with an HTTP 202 ("the request has been
+          accepted for processing, but the processing has not been completed") as
+          described in EST <xref target="RFC7030"/> section 4.2.3 wherein the
+          client "MUST wait at least the specified 'retry-after' time before
+          repeating the same request". The Pledge is RECOMMENDED to provide local
+          feedback (blinked LED etc) during this wait cycle if mechanisms for this
+          are available. To prevent an attacker Registrar from significantly
+          delaying bootstrapping the Pledge MUST limit the 'retry-after' time to
+          60 seconds.
+        </t>
+
+        <t>
+          In order to avoid infinite redirect loops, which a malicious
+          Registrar might do in order to keep the Pledge from
+          discovering the correct Registrar, the Pledge MUST NOT
+          follow more than one redirection (3xx code) to another web
+          origins. EST supports redirection but requires user
+          input; this change allows the Pledge to follow a single
+          redirection without a user interaction.
+        </t>
 
         <t>A 403 (Forbidden) response is appropriate if the voucher-request
         is not signed correctly, stale, or if the Pledge has another
