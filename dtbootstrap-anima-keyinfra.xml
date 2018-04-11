@@ -1982,63 +1982,66 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </figure>
 
         <section anchor="CompletingAuthenticationBootstrapping"
-                 title="Pledge voucher validation, and authentication of Provisional TLS connection">
+                 title="Pledge voucher verification"> 
 
-        <t>The pledge verifies the signed voucher using the manufacturer
-        installed trust anchor associated with the manufacturer's selected Manufacturer
-        Authorized Signing Authority.</t>
+        <t>The pledge MUST verify the voucher signature using the manufacturer
+        installed trust anchor associated with the manufacturer's MASA (this is
+          likely included in the pledge's firmware).</t>
 
-        <t>The pledge verifies the serial-number field of the signed voucher
-        matches the pledge's serial-number.</t>
+        <t>The pledge MUST verify the serial-number field of the signed voucher
+        matches the pledge's own serial-number.</t>
+        
+        <t>The pledge MUST verify that the voucher nonce field is accurate
+          and matches the nonce the pledge submitted to this registrar, or
+          that the voucher is nonceless (see <xref target="pledgeReductions"/>).</t>
 
-        <t>The 'pinned-domain-cert' element of the voucher contains the domain
-            CA's public key. The pledge MUST use the 'pinned-domain-cert' trust
-            anchor to immediately complete authentication of the provisional TLS
-            connection.</t>
         <t>The pledge MUST be prepared to parse and fail gracefully from
         a voucher response that does not contain a 'pinned-domain-cert' field. The
         pledge MUST be prepared to ignore additional fields that it does not recognize.
         </t>
-
+        </section>
+        <section title="Pledge authentication of provisional TLS connection">
+          <t>The 'pinned-domain-cert' element of the voucher contains the domain
+            CA's public key. The pledge MUST use the 'pinned-domain-cert' trust
+            anchor to immediately complete authentication of the provisional TLS
+            connection.</t>
           <t>If a registrar's credentials cannot be verified using the
-          pinned-domain-cert trust anchor from the voucher then the TLS
-          connection is immediately
-          discarded and the pledge abandons attempts to bootstrap with this
-          discovered registrar. The pledge SHOULD send voucher status
-          telemetry (described below) before closing the TLS connection.
-          The pledge MUST attempt to enroll using any other proxies
-          it has found.  It SHOULD return to the same proxy again after
-          attempting with other proxies.  Attempts should be attempted in
-          the exponential backoff described earlier.
-          Attempts SHOULD be repeated as failure may be the result of a
-          temporary inconsistently (an inconsistently rolled registrar key,
-          or some other mis-configuration.)  The inconsistently could also
-          be the result an active MITM attack on the EST connection.
+            pinned-domain-cert trust anchor from the voucher then the TLS
+            connection is immediately
+            discarded and the pledge abandons attempts to bootstrap with this
+            discovered registrar. The pledge SHOULD send voucher status
+            telemetry (described below) before closing the TLS connection.
+            The pledge MUST attempt to enroll using any other proxies
+            it has found.  It SHOULD return to the same proxy again after
+            attempting with other proxies.  Attempts should be attempted in
+            the exponential backoff described earlier.
+            Attempts SHOULD be repeated as failure may be the result of a
+            temporary inconsistently (an inconsistently rolled registrar key,
+            or some other mis-configuration).  The inconsistently could also
+            be the result an active MITM attack on the EST connection.
           </t>
           <t> The registrar MUST use a certificate that chains to the pinned-domain-cert
-              as its TLS server certificate.
+            as its TLS server certificate.
           </t>
-
           <t>The pledge's PKIX path validation of a registrar certificate's validity
-              period information is as described in <xref target="timeunknown"></xref>.
-          Once the PKIX path validation is successful the TLS connection is
-          no longer provisional.</t>
-
-          <t>The pinned-domain-cert is installed as an
-          Explicit Trust Anchor for future operations. It can therefore
-          can be used to authenticate any dynamically
-          discovered EST server that contain the id-kp-cmcRA extended key
-          usage extension as detailed in EST RFC7030 section 3.6.1; but to
-          reduce system complexity the pledge SHOULD avoid additional
-          discovery operations. Instead the pledge SHOULD communicate directly
-          with the registrar as the EST server. The 'pinned-domain-cert'
-          is not a complete
-          distribution of the <xref target="RFC7030" /> section 4.1.3 CA Certificate Response,
-          which is
-          an additional justification for the recommendation to proceed with EST
-          key management operations. Once a full CA Certificate Response is
-          obtained it is more authoritative for the domain than the limited
-          'pinned-domain-cert' response.</t>
+            period information is as described in <xref target="timeunknown"></xref>.
+            Once the PKIX path validation is successful the TLS connection is
+            no longer provisional.</t>
+          <t>The pinned-domain-cert MAY be installed as an
+            trust anchor for future operations. It can therefore
+            can be used to authenticate any dynamically
+            discovered EST server that contain the id-kp-cmcRA extended key
+            usage extension as detailed in EST RFC7030 section 3.6.1; but to
+            reduce system complexity the pledge SHOULD avoid additional
+            discovery operations. Instead the pledge SHOULD communicate directly
+            with the registrar as the EST server. The 'pinned-domain-cert'
+            is not a complete
+            distribution of the <xref target="RFC7030" /> section 4.1.3 CA Certificate Response,
+            which is
+            an additional justification for the recommendation to proceed with EST
+            key management operations. Once a full CA Certificate Response is
+            obtained it is more authoritative for the domain than the limited
+            'pinned-domain-cert' response.</t>
         </section>
       </section>
 
@@ -2500,7 +2503,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </list></t>
       </section>
 
-      <section title="Pledge security reductions">
+      <section anchor="pledgeReductions" title="Pledge security reductions">
         <t>The pledge can choose to accept vouchers using less
             secure methods. These methods enable offline and emergency
             (touch based) deployment use cases:
