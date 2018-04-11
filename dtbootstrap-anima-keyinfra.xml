@@ -550,32 +550,32 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
              +------+-------+
                     |
              +------v-------+
-             |  Discover    |
+             | (1) Discover |
 +------------>              |
 |            +------+-------+
 |                   |
 |            +------v-------+
-|            |  Identity    |
+|            | (2) Identity |
 ^------------+              |
 | rejected   +------+-------+
 |                   |
 |            +------v-------+
-|            | Request      |
-|            | Join         |
+|            | (3) Request  |
+|            |     Join     |
 |            +------+-------+
 |                   |
 |            +------v-------+
-|            |  Imprint     |   Optional
-^------------+              <--+Manual input (Appendix C)
+|            | (4) Imprint  |   
+^------------+              |
 | Bad MASA   +------+-------+
 | response          |  send Voucher Status Telemetry
 |            +------v-------+
-|            |  Enroll      |
+|            | (5) Enroll   |
 ^------------+              |
 | Enroll     +------+-------+
 | Failure           |
 |            +------v-------+
-|            |  Enrolled    |
+|            | (6) Enrolled |
 ^------------+              |
  Factory     +--------------+
  reset
@@ -602,7 +602,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
             <t>Imprint on the registrar. This requires verification of the
                 manufacturer service provided voucher. A voucher contains sufficient
                 information for the pledge to complete authentication of a
-                registrar. (It enables the pledge to finish
+                registrar. (The embedded 'pinned-domain-certificate' enables the pledge to finish
             authentication of the registrar TLS server certificate).</t>
 
             <t>Enroll. By accepting the domain specific information from a
@@ -615,10 +615,10 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
                 if it is returned to factory default settings.</t>
         </list></t>
         <t>
-          After step 4, the pledge has received  and authenticated an
-          explicit trust anchor (the pinned-domain-cert in the voucher
-          response).  A secure transport exists between pledge and registrar,
-          and it may be used for things other than enrollment into a PKI.
+          After imprint a secure transport exists between pledge and registrar. 
+          This specification details integration with EST enrollment so that pledges can 
+          optionally obtain a locally issued certificate, although any REST interface 
+          could be integrated in future work.
         </t>
 
       </section>
@@ -867,13 +867,15 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
         <section anchor="pki-overview"
                  title="Public Key Infrastructure (PKI)">
           <t>
-            The Key Infrastructure (PKI) administers certificates for the
+            The Public Key Infrastructure (PKI) administers certificates for the
             domain of concerns, providing the trust anchor(s) for it and
             allowing enrollment of pledges with domain certificates.
           </t>
           <t>
-            The domain's registrar uses the "pinned-domain-cert" voucher field to
-            distribute a trust anchor for authenticating itself to the pledge.
+            The voucher provides a method for the distribution of a 
+            single PKI trust anchor (as the "pinned-domain-cert"). A distribution
+            of the full set of current trust anchors is possible using the 
+            optional EST integration. 
           </t>
           <t>
             The domain's registrar acts as an <xref target="RFC5272" />
@@ -881,8 +883,7 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
             the Key Infrastructure.
           </t>
           <t>
-            The above requirements and expectations against the Key
-            Infrastructure are unchanged from RFC7030.  This document does
+            The expectations of the PKI are unchanged from EST [<xref target="RFC7030" />].  This document does
             not place any additional architectural requirements on the Public Key
             Infrastructure.
           </t>
@@ -1605,7 +1606,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
           <t hangText="application/json">The request is the "YANG-defined JSON document"
           as described in <xref target="voucher-request"/> with the exception that it is not within
-          a PKCS#7 structure. It is protected only by the TLS client authentication.
+          a CMS structure. It is protected only by the TLS client authentication.
           This reduces the cryptographic requirements on the pledge.</t>
         </list></t>
 
@@ -1705,7 +1706,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           application/voucher-cms+json. It is a JSON document that has been
           signed using a CMS structure.
           The registrar MUST sign the registrar voucher-request. The entire registrar certificate chain,
-          up to and including the Domain CA, MUST be included in the PKCS#7 structure.
+          up to and including the Domain CA, MUST be included in the CMS structure.
         </t>
 
         <t>MASA impementations SHOULD anticipate future media
@@ -1753,8 +1754,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>The MASA verifies that the registrar voucher-request is internally consistent
         but does not necessarily authenticate the registrar certificate since the
         registrar is not known to the MASA server in advance. The MASA
-        performs the following actions and validation checks before issuing a voucher:</t>
-        <section title="Renew for expired voucher">
+        performs the actions and validation checks described in the following
+        sub-sections before issuing a voucher.</t>
+        <section title="MASA renewal of expired vouchers">
           <t>
             As described in
             <xref target="I-D.ietf-anima-voucher"/> vouchers
@@ -1767,7 +1769,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
 
         <!-- 5.4.2 -->
-        <section title="Voucher-Request signature consistency">
+        <section title="MASA verification of voucher-request signature consistency">
           <t>
             The MASA MUST verify that the registrar voucher-request is signed
             by a registrar. This is confirmed by verifying that the
@@ -1775,17 +1777,17 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             EST RFC7030 section 3.6.1) exists in the certificate of the
             entity that signed the registrar voucher-request. This
             verification is only a consistency check that the unauthenticated
-            domain CA intended this to be a registrar. Performing this check
-            provides value to domain PKI by assuring the domain administrator
+            domain CA intended the voucher-request signer to be a registrar. Performing this check
+            provides value to the domain PKI by assuring the domain administrator
             that the MASA service will only respect claims from authorized
-            Registration Authorities of the domain. (The requirement for the
-            registrar to include the Domain CA certificate in the signature
-            structure was stated above.)
+            Registration Authorities of the domain.</t>
+          <t>The MASA verifies that the domain CA certificate is included
+            in the CMS structure as detailed in <xref target="RequestVoucherFromMASA"/>.
           </t>
         </section>
 
         <!-- 5.4.3 -->
-        <section title="Registrar (certificate) authentication">
+        <section title="MASA authentication of registrar (certificate)">
           <t>
             If a nonceless voucher-request is submitted the MASA server MUST
             authenticate the registrar as described in either
@@ -1805,7 +1807,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
         </section>
 
-        <section anchor="revocationcheck" title="Registrar (certificate) revocation consistency">
+        <section anchor="revocationcheck" title="MASA revocation checking of registrar (certificate)">
           <t>
             Note that this section is about ensuring consistency of the
             registrar.  These checks are not equivalent to
@@ -1859,7 +1861,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             the voucher.)
           </t>
         </section>
-        <section title="Pledge proximity assertion">
+        <section title="MASA verification of pledge proximity assertion">
           <t>
             The MASA server MAY verify that the registrar voucher-request
             includes the 'prior-signed-voucher' field populated
@@ -1878,10 +1880,12 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
         </section>
 
-        <section title="Registrar Pinning">
+        <section title="MASA pinning of registrar">
           <t>
             The registrar's certificate chain is extracted from the signature
-            method and the root certificate is used to populate the
+            method. The chain includes the domain CA certificate
+            as specified in <xref target="RequestVoucherFromMASA"/>. This 
+            certificate is used to populate the
             "pinned-domain-cert" of the voucher being issued. The
             domainID (e.g., hash of the root public key) is determined from the
             pinned-domain-cert and is used to update the audit log.
@@ -1889,7 +1893,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
       </section>
 
-      <section anchor="VoucherResponse" title="Voucher Response">
+      <section anchor="VoucherResponse" title="MASA Voucher Response">
         <t>The voucher response to requests from the pledge and requests from
         a registrar are in the same format. A registrar either caches prior
         MASA responses or dynamically requests a new voucher based on local
@@ -1977,6 +1981,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 ]]></artwork>
         </figure>
 
+        <section anchor="CompletingAuthenticationBootstrapping"
+                 title="Pledge voucher validation, and authentication of Provisional TLS connection">
+
         <t>The pledge verifies the signed voucher using the manufacturer
         installed trust anchor associated with the manufacturer's selected Manufacturer
         Authorized Signing Authority.</t>
@@ -1993,8 +2000,6 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         pledge MUST be prepared to ignore additional fields that it does not recognize.
         </t>
 
-        <section anchor="CompletingAuthenticationBootstrapping"
-                 title="Completing authentication of Provisional TLS connection">
           <t>If a registrar's credentials cannot be verified using the
           pinned-domain-cert trust anchor from the voucher then the TLS
           connection is immediately
@@ -2037,7 +2042,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
       </section>
 
-      <section anchor="voucherstatus" title="Voucher Status Telemetry ">
+      <section anchor="voucherstatus" title="Pledge Voucher Status Telemetry ">
         <t>The domain is expected to provide indications to the system
         administrators concerning device lifecycle status. To facilitate this
         it needs telemetry information concerning the device's
@@ -2082,7 +2087,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </t>
       </section>
 
-      <section anchor="authzLogRequest" title="MASA authorization log Request ">
+      <section anchor="authzLogRequest" title="Registrar authorization log Request ">
          <t>
            After receiving the voucher status telemetry <xref target="voucherstatus" />,
            the registrar SHOULD request the MASA authorization log from the MASA
