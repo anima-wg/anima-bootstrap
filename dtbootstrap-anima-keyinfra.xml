@@ -2863,6 +2863,87 @@ Reference: [This document]
           useable on it's own.
         </t>
       </section>
+
+      <section title="Trustworthiness of the Audit Log">
+        <t>
+          Each time the Manufacturer Authorized Signing Authority (MASA)
+          issues a voucher, it places it into the audit log for that device.
+          The details are described in <xref target="authzLogRequest" />.
+          The contents of the audit log can express a variety of trust
+          levels, and this section explains what kind of trust a
+          registrar can derive from the entries.
+        </t>
+        <t>
+          While the audit log provides a list of vouchers that were issued
+          by the MASA, the vouchers are issued in response to
+          voucher-requests, and it is the contents of the voucher-requests
+          which determines how meaningful the audit log entries are.
+        </t>
+        <t>
+          Voucher-requests come in four combinations: signed and unsigned,
+          as well as nonced or nonceless.  The audit log indicates whether a
+          nonce was present by including the actual nonce in the log.
+          The audit log indicates whether or not the Pledge signed the
+          voucher-request by the value of the assertion: it can only have a value
+          of "proximity" if the voucher-request was signed by the Pledge.
+          A "proximity" value of "logged" indicates that the Pledge did not
+          sign the voucher-request.  A "proximity" value of "verified" is a
+          much stronger assertion, indicating that the MASA had some
+          out-of-band knowledge of the ownership of the device.
+        </t>
+        <t><list style="hanging">
+          <t hangText="unsigned, nonceless:">
+            A voucher-request that is unsigned and nonceless can not be
+            proven to be timely, or that it really came from the indicated
+            Pledge.  Such a voucher-request can be made by a Registrar, such
+            as one that needs a voucher that can be used to bootstrap an
+            offline Pledge.   Such a voucher, once issued, can be used to
+            (re-) bootstrap a Pledge at any time up until any Expires-On
+            header in the voucher.  A Pledge without a secure real time clock
+            can be fooled into believing that the voucher is still
+            valid.   Any Registrar trusted by the MASA, and with knowledge of
+            the Pledge's serial-number can make such a voucher-request. The
+            Pledge need not be powered on, or even present.
+          </t>
+          <t hangText="signed, nonceless:">
+            A voucher-request that is signed by the Pledge (having the
+            proximity assertion) can be proven to come from the Pledge.
+            The Pledge must have been nearby at the time that the
+            voucher-request was made.  The signature time of the
+            voucher-request will be the real time clock (if any) when
+            the Pledge made the request.  If the Pledge uses the heuristics
+            from section <xref target="timeunknown" /> (and the MASA, by construction
+            will know if the Pledge has been constructed in this fashion),
+            then the signature ought to be at least as new as the
+            Registrar Certificate's notBefore time.  The MASA can therefore
+            determine if the Pledge has been subject to any kind of large time
+            reversals.
+          </t>
+          <t hangText="unsigned, nonced:">
+            A voucher-request that is unsigned can not be proven to come
+            from the Pledge.  The presence of a nonce in the resulting
+            voucher, which the Pledge will have to validate in order to
+            accept a Registrar, provides a reasonable indication that the
+            Pledge has joined the domain indicated in the voucher.  As the
+            voucher-request is unsigned, the MASA can not be certain that
+            the Pledge as in fact in proximity to the Registrar which made
+            the voucher-request.  The Pledge could have been connected to
+            some other system and the Nonce was observed.  A malicious
+            Registrar could have then made a voucher-request, inserting it's
+            domain certificate into the voucher-request, and a voucher could
+            have been issued connecting to the Pledge to the malicious
+            registrar.
+          </t>
+          <t hangText="signed, nonced:">
+            A voucher-request that is signed, and nonced can be assured to be
+            legitimate (from the real Pledge, with a legitimate proximity
+            assertion), and also to be timely.
+          </t>
+        </list></t>
+        <t>
+          **Conclusion about what different entries mean**
+        </t>
+      </section>
     </section>
 
     <section title="Acknowledgements">
