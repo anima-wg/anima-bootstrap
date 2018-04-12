@@ -303,11 +303,18 @@
               section 7) "Registration Authority".</t>
 
             <t hangText="Join Proxy:">A domain entity that helps the pledge join
-            the domain. A proxy facilitates communication for devices that
+            the domain. A join proxy facilitates communication for devices that
             find themselves in an environment where they are not provided
             connectivity until after they are validated as members of the
-            domain. The pledge is unaware that they are communicating with a
+            domain. For simplicity this document sometimes uses the
+            term of 'proxy' to indicate the join proxy. The pledge 
+            is unaware that they are communicating with a
             proxy rather than directly with a registrar.</t>
+            
+            <t hangText="Circuit Proxy:">A stateful implementation
+              of the join proxy. This is the assumed type of proxy.</t>
+            
+            <t hangText="IPIP Proxy:">A stateless proxy alternative.</t>
 
             <t hangText="MASA Service:">A third-party Manufacturer Authorized
             Signing Authority (MASA) service on the global Internet. The MASA
@@ -533,7 +540,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
 
       <t>The domain is the managed network infrastructure with a Key Infrastructure the pledge is
       joining. The domain provides initial device connectivity
-      sufficient for bootstrapping with a circuit proxy. The domain
+      sufficient for bootstrapping through a proxy. The domain
       registrar authenticates the pledge, makes authorization decisions, and distributes
       vouchers obtained from the Manufacturer Service. Optionally the registrar
       also acts as a PKI Registration Authority.</t>
@@ -830,12 +837,12 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
             link-local network connectivity only to the proxy.
           </t>
         </section>
-        <section anchor="proxy-overview" title="Circuit Proxy">
+        <section anchor="proxy-overview" title="Join Proxy">
           <t>
-            The circuit proxy provides HTTPS connectivity between the
-            pledge and the registrar. The circuit proxy mechanism is
+            The join proxy provides HTTPS connectivity between the
+            pledge and the registrar. A circuit proxy mechanism is
             described in <xref target="proxydetails" />, with an optional
-            stateless proxy mechanism described in <xref target="IPIPmechanism" />.
+            stateless IPIP proxy mechanism described in <xref target="IPIPmechanism" />.
           </t>
         </section>
         <section anchor="registrar-overview" title="Domain Registrar">
@@ -1213,7 +1220,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       </t>
 
       <t>
-        Registrars are assumed to have logically a locally integrated proxy to
+        Registrars are assumed to have logically a locally integrated circuit proxy to
         support directly (subnet) connected pledges - because registrars
         themself does not define any functions for pledges to discover
         them. Such a logical local proxy does not need to provide actual TCP
@@ -1232,7 +1239,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         In the ANI, the Autonomic Control Plane (ACP) secured instance of
         GRASP (<xref target="I-D.ietf-anima-grasp" />) MUST be used for
         discovery of ANI registrar ACP addresses
-        and ports by ANI Proxies.  The TCP leg of the proxy connection between
+        and ports by ANI proxies.  The TCP leg of the proxy connection between
         ANI proxy and ANI registrar therefore also runs across the ACP.
       </t>
 
@@ -1312,8 +1319,8 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             </t>
 
             <t>
-              The pledge may discover more than one proxy on a given physical
-              interface.  The pledge may have a multitude of physical
+              The pledge could discover more than one proxy on a given physical
+              interface.  The pledge can have a multitude of physical
               interfaces as well: a layer-2/3 ethernet switch may have
               hundreds of physical ports.
             </t>
@@ -1393,7 +1400,7 @@ INSERT_TEXT_FROM_FILE proxygrasp-cddl.txt END
           M_FLOOD messages.  They MUST support ANI TLS circuit proxy and
           therefore BRSKI across HTTPS/TLS native across the ACP. ANI registrars
           MAY support the IPIP proxy method by implementing IPIP tunneling for
-          their HTTPS/TLS traffic across the ACP.  ANI Proxies MUST support GRASP
+          their HTTPS/TLS traffic across the ACP.  ANI proxies MUST support GRASP
           discovery of registrars.
         </t>
         <t>
@@ -1582,8 +1589,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
               been no progress on the TCP connection.
               It should proceed to
                 connect to any other registrar's via any other discovered
-                Proxies if there are any.  If there were no
-                other Proxies discovered, the pledge MAY continue to wait,
+                proxies if there are any.  If there were no
+                other proxies discovered, the pledge MAY continue to wait,
                 as long as it is concurrently listening for new proxy
                 announcements.
             </t>
@@ -2477,7 +2484,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <figure>
           <artwork><![CDATA[
 +--------+         +---------+    +------------+     +------------+
-| Pledge |         | Circuit |    | Domain     |     |Manufacturer|
+| Pledge |         | Join    |    | Domain     |     |Manufacturer|
 |        |         | Proxy   |    | Registrar  |     | Service    |
 |        |         |         |    |            |     | (Internet) |
 +--------+         +---------+    +------------+     +------------+
@@ -2493,7 +2500,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             Additional endpoint assessment techniques are RECOMMENDED but are
             out-of-scope of this document.</t>
 
-            <t hangText="Proxy:">Provides proxy functionalities but is not
+            <t hangText="Join Proxy:">Provides proxy functionalities but is not
             involved in security considerations.</t>
 
             <t hangText="Registrar:">When interacting with a MASA server a
@@ -3099,12 +3106,12 @@ Reference: [This document]
     </section>
 
     <section anchor="mdnsmethods" title="mDNS / DNSSD proxy discovery options">
-      <t>Pledge discovery of proxy (<xref target="discovery"></xref>) MAY be performed with) DNS-based Service Discovery <xref
+      <t>Pledge discovery of the proxy (<xref target="discovery"></xref>) MAY be performed with DNS-based Service Discovery <xref
       target="RFC6763"></xref> over Multicast DNS <xref
       target="RFC6762"></xref> to discover the proxy at
       "_brski-proxy._tcp.local.". </t>
 
-      <t>Proxy discovery of registrar (<xref target="JRCgrasp"></xref>) MAY perform DNS-based Service Discovery over Multicast DNS to discover registrars by searching for the service
+      <t>Proxy discovery of the registrar (<xref target="JRCgrasp"></xref>) MAY be performed with DNS-based Service Discovery over Multicast DNS to discover registrars by searching for the service
         "_brski-registrar._tcp.local.".</t>
 
       <t>
@@ -3160,7 +3167,7 @@ Reference: [This document]
       </t>
       <t>
         An alternative to proxying at the TCP layer is to selectively forward
-        at the IP layer.  This moves all per-connection to the
+        at the IP layer.  This moves all per-connection state to the
         registrar.  The IPIP tunnel statelessly forwards packets.  This
         section provides explanation of some of the details of the
         registrar discovery procotol, which are not important to
@@ -3178,7 +3185,7 @@ Reference: [This document]
       </t>
       <t>
         One way to look at this construct is to consider that the registrar
-        is extending attaching an interface to the network on which the proxy is physically present.  The registrar then interacts as if it
+        is extending an interface to attaching to the network on which the proxy is physically present.  The registrar then interacts as if it
         were present on that network using link-local (fe80::) addresses.
         The registrar is unaware that the traffic is being proxied through a
         tunnel, and does not need any special routing.
