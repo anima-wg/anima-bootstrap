@@ -13,7 +13,7 @@
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 ]>
 
-<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-13"
+<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-15"
     ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -1153,7 +1153,7 @@ INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-proximity.json END
                 voucher-request, if a signed artifact with a CMS format
                 signature is a binary object.  In the JSON encoding used
                 here it must be base64 encoded. The nonce, created-on and
-                assertion is carried forward. serial-number is extracted from
+                assertion is carried forward. The serial-number is extracted from
                 the pledge's Client Certificate from the TLS connection. See
                 <xref target="RequestVoucherFromMASA"/>.</t></list></t>
 <figure>
@@ -1769,15 +1769,21 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             As described in
             <xref target="I-D.ietf-anima-voucher"/> vouchers
             are normally short lived to avoid revocation issues. If the request
-            is for a previous (expired) voucher using the same registrar (as
-            determined by the registrar pinned-domain-cert) and the MASA has
-            not been informed that the claim is invalid then the request for
-            a renewed voucher SHOULD be automatically authorized.
+            is for a previous (expired) voucher using the same registrar then the request for
+            a renewed voucher SHOULD be automatically authorized. The MASA has
+            sufficient information to determine this by examining the request, the registrar
+            authentication, and the existing audit log. The issuance of a renewed voucher is
+            logged as detailed in <xref target="VoucherResponse"/>.
             </t>
+          <t>To inform the MASA that existing vouchers are not to be renewed one 
+            can update or revoke the registrar credentials used to authorize the request (see
+            <xref target="MASAauthenticationOfRegistrar"/> and <xref target="revocationcheck"/>). More 
+            flexible methods will likely involve sales channel integration and 
+            authorizations (details are out-of-scope of this document).</t>
         </section>
 
         <!-- 5.4.2 -->
-        <section title="MASA verification of voucher-request signature consistency">
+        <section anchor="MASAsignatureconsistency" title="MASA verification of voucher-request signature consistency">
           <t>
             The MASA MUST verify that the registrar voucher-request is signed
             by a registrar. This is confirmed by verifying that the
@@ -1805,8 +1811,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             Any of these methods reduce the risk of DDoS attacks
             and provide an authenticated identity as an input to
             sales channel integration and authorizations
-            (the actual sale-channel integration is also out-of-scope
-            of this document).
+            (details are out-of-scope of this document).
           </t>
 
           <t>
@@ -1816,60 +1821,17 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
 
         <section anchor="revocationcheck" title="MASA revocation checking of registrar (certificate)">
-          <t>
-            Note that this section is about ensuring consistency of the
-            registrar.  These checks are not equivalent to
-            <xref target="RFC5280" /> Certificate Revocation Checks that
-            the pledge would ideally do if it had a real time clock.
-          </t>
-          <t>
-            If the registrar uses a CA for which the MASA is able to
-            obtain revocation information, then the MASA SHOULD check for the
-            maximum validity period of the registrar's certificate.
-          </t>
-          <t>
-            A registrar which has done these checks may
-            set the "domain-cert-revocation-checks" attribute
-            in the voucher to false (or omit it).
-          </t>
-          <t>
-            There are three times to consider: a) a configured voucher
-            lifetime in the MASA, b) the expiry time for the
-            registrar's certificate, c) any certificate revocation
-            information (CRL) lifetime.
-          </t>
-          <t>
-            The resulting voucher should have a lifetime (expires-on
-            field) which is the earliest of these three values.
-            Typically (b) will be some significant time in the future,
-            but (c) will typically be short (on the order of a week or
-            less).  The RECOMMENDED period for (a) is on the order of
-            20 minutes, so it will typically determine the lifespan
-            of the resulting voucher.
-          </t>
-          <t>
-            By limiting the voucher lifetime in this way, the MASA
-            is ensuring the voucher is consistent with any CRL and lifetime
-            checks.
-            See section <xref target="timeunknown" />.
-          </t>
-          <t>
-            If CRL information is unavailable to the MASA, then
-            the MASA SHOULD rely on the validity information
-            Because the registrar certificate authority is unknown to
-            the MASA in
-            advance this is only an extended consistency check and is
-            not required.
-            The maximum lifetime of the voucher issued
-            SHOULD NOT exceed the lifetime of the registrar's
-            revocation validation (for
-            example if the registrar revocation status is indicated in
-            a CRL that is
-            valid for two weeks then that is an appropriate lifetime for
-            the voucher.)
-          </t>
+          <t>As noted in <xref target="MASAauthenticationOfRegistrar"/> the MASA
+            will have performed registrar authentication in a subset of
+            situations (e.g. nonceless voucher requests). Normal PKIX revocation 
+            checking is assumed during either EST client authentication or
+            voucher-request signature validation. Similarly, as noted in
+            <xref target="MASAsignatureconsistency"/>, the MASA will have
+            performed normal PKIX revocation checking during signature consistency
+            checks (a signature by a registrar certificate that has been revoked is
+            an inconsistency).</t> 
         </section>
-        <section title="MASA verification of pledge prior-signed-voucher-request">
+        <section anchor="MASAassertion" title="MASA verification of pledge prior-signed-voucher-request">
           <t>
             The MASA server MAY verify that the registrar voucher-request
             includes the 'prior-signed-voucher-request' field populated
@@ -1882,11 +1844,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             their voucher
             requests and can use this information to confirm proximity of
             the pledge with the registrar.</t>
-          <t>If this check succeeds the MASA updates the voucher and audit log
-            assertion leafs with the "proximity" assertion.</t>
+          <t>The voucher-request serial-number leaf and the pledge serial-number
+            the MASA extracts from the prior-signed-voucher-request 
+            signing certificate MUST match. If this check succeeds the MASA updates 
+            the voucher and audit log assertion leafs with the "proximity" assertion.</t>
         </section>
 
-        <section title="MASA pinning of registrar">
+        <section anchor="MASApinned" title="MASA pinning of registrar">
           <t>
             The registrar's certificate chain is extracted from the signature
             method. The chain includes the domain CA certificate
@@ -1897,7 +1861,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             pinned-domain-cert and is used to update the audit log.
           </t>
         </section>
-        <section title="MASA nonce handling">
+        <section anchor="MASAnoncehandling" title="MASA nonce handling">
           <t>The MASA does not verify the nonce itself. It MAY perform
             a simple consistency check: If the registrar voucher-request
             contains a nonce and the prior-signed-voucher-request exists then 
@@ -1976,8 +1940,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             signed using a CMS structure" as described in <xref
             target="I-D.ietf-anima-voucher"/>
             using the JSON encoded described in <xref target="RFC7951"/>.
-          The MASA MUST sign the request.
-          </t>
+          The MASA MUST sign the response.</t>
         </list></t>
 
         <t>
@@ -1998,6 +1961,41 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 }
 ]]></artwork>
         </figure>
+
+        <t>The MASA populates the voucher fields as follows:</t>
+
+        <t><list style="hanging">
+        <t hangText="nonce:">The nonce from the pledge if available. See <xref
+          target="MASAnoncehandling"/>.</t>
+        <t hangText="assertion:">The method used to verify assertion. See <xref 
+          target="MASAassertion"/>.</t>      
+        <t hangText="pinned-domain-cert:">The domain CA cert. See <xref 
+          target="MASApinned"/>.</t>
+        <t hangText="serial-number:">The serial-number as provided in the
+          voucher-request. Also see <xref target="MASAassertion"/>.</t> 
+        <t hangText="domain-cert-revocation-checks:">Set as appropriate for the 
+          pledge's capabilities and as documented in <xref target="I-D.ietf-anima-voucher"/>. 
+          The MASA MAY set this field to 'false' since setting it to 'true' would 
+          require that revocation information be available to the pledge and this
+          document does not make normative requirements for 
+          <xref target="RFC6961"/> or equivalent integrations.</t>
+        <t hangText="expires-on:">This is set for nonceless vouchers. The MASA
+          ensures the voucher lifetime is consistent with any revocation or 
+          pinned-domain-cert consistency checks the pledge might perform.
+          See section <xref target="timeunknown" />. There are three times to consider: 
+          (a) a configured voucher lifetime in the MASA, (b) the expiry time for the
+          registrar's certificate, (c) any certificate revocation
+          information (CRL) lifetime. The expires-on field SHOULD be before 
+          the earliest of these three values.
+          Typically (b) will be some significant time in the future,
+          but (c) will typically be short (on the order of a week or
+          less).  The RECOMMENDED period for (a) is on the order of
+          20 minutes, so it will typically determine the lifespan
+          of the resulting voucher.</t>
+        </list></t>
+
+        <t>Whenever a voucher is issued the MASA MUST update the audit log appropriately. 
+          The internal state requirements to maintain the audit log are out-of-scope. See <xref target="MASAauditlog"/> for a discussion of reporting the log to a registrar.</t>
 
         <section anchor="CompletingAuthenticationBootstrapping"
                  title="Pledge voucher verification"> 
@@ -2177,7 +2175,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </list>
         </t>
 
-        <section title="MASA audit log response">
+        <section anchor="MASAauditlog" title="MASA audit log response">
           <t>A log data file is returned consisting of all log entries.
           The returned data is in JSON format (<xref target="RFC7951"/>),
           and the Content-Type SHOULD be "application/json".
@@ -3018,6 +3016,7 @@ Reference: [This document]
       <?rfc include="reference.RFC.5785" ?>
       <?rfc include="reference.RFC.2663" ?>
       <?rfc include="reference.RFC.6960" ?>
+      <?rfc include="reference.RFC.6961" ?>
       <?rfc include="reference.I-D.vanderstok-ace-coap-est" ?>
 
       <?rfc include="reference.I-D.richardson-anima-state-for-joinrouter" ?>
