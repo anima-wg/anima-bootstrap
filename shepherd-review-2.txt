@@ -1,0 +1,1854 @@
+
+Shepherd review against -09.
+
+Did just browse through -10, i think it is orthogonal to the comments below.
+
+Document is IMHO overall in very good shape! Changing into nitpicking mode.
+
+Sorry for length, but i was trying to minimize the number of RTT to resolve comments
+by being explanatory.
+
+Let me know if/how i can help getting the comments applied.
+
+Cheers
+    Toerless
+
+---------------------------------------------------------------------------------------
+1.2) Terminology:
+
+a) vendor vs. manufacturer.
+
+The document uses 48 times "vendor" and 13 times "manufacturer". Please
+revisit this: If there is a clear reason when/why to use vendor and when/why
+to use the term "manufacturer", then please put these explanations into
+terminology. Otherwise maybe eliminate "vendor".
+
+For example: Abstract: "using vendor installed X.509 certificate" ...
+"vendor's authorizing service". This latter one definitely seems to be
+wrong (MASA = "manufacturer authorizied..., not vendor).
+
+b)  Key infrastructure
+
+There  is no definition/reference for this term.  Please describe on
+first use and in terminology.  Is there a difference
+between "key infrastructure" and  "keying material" ? If not, then
+maybe remove one term otherwise pls. describe difference.
+
+c) (terminology) MASA definition: "A third-party Manufacturer...". Why "third-party" ?
+who are the first two parties ? If this is only slang and we can't explain who the
+first two parties are, delete "third-party" ?
+
+d) "Domain Registrar" vs. "Join Registrar", JRC. Especially because the text mostly
+uses "Domain Registrar" and very seldom "Join Registar".
+
+JRC is used in exactly three places in the draft. I also can not find on www.google.com
+or wikipedia any example of "The term JRC is used in common with other bootstrap
+mechanisms" as the Terminology claims. Either provide a non-anima reference for the
+ use of that term or eliminate it in the document.
+
+Suggest to use "(Domain Join) Registar (and Coordinator) in 1.2 and say for example
+that the text uses "Join Registrar" when referring to the mechanics of building the
+connection (Join Proxy and Join Registrar) and Domain Registrar when discussing
+authentication and any other aspects of the registrar (where the domain is relevant).
+
+e) Voucher
+   - misses ":" after term.
+   - please change "statement" to "artifact" so the terminology aligns with both voucher
+     draft and voucher-request text which also uses artifact. See also section 2.2
+      where you use "cryptographically protected" instead of "signed" and figure out
+     which term you want to use in all cases (hint: signed).
+
+f) IMPORTANT: Please add/define the term "ANI"
+
+  ANI - "Autonomic Network Infrastructure". Systems that support both BRSKI and
+  Autonomic Control plane - ACP ([I-D.ietf-anima-autonomic-control-plane]). ANI
+  systems (pledges, proxies, registrar) have specific requirements detailled in
+  the document.
+
+  Without this term we can not nail down the explicit requirements against
+  ANI Pledges, Proxies, Registrars that we need from the document (and distinguish
+  from requirements against any non-ANI adaptation of BRSKI). I added according
+  comments into other parts of the doc.
+
+g) Please replace "MASA server" with "MASA service" everywhere.
+
+-----------------------------------------------------------------------------
+
+Overall:
+
+a) Requirements about EST:
+
+- The introduction says: "Integration with a complete EST enrollment is
+  optional but trivial"
+- 5.8.3 says "The Pledge MUST request a new client certificate".
+- 1.4 says "bootstrapped devices have a common trust anchor and a certificate
+   has optionally been issued from a local PKI
+
+a) The text needs to be made consistent across all places where requirements
+are defined. I have in general no strong opinion how "optional" the text should
+say EST operations are, BUT consider he following points:
+
+b) We need a complete list of BRSKI requirements for ANI devices, where EST
+operation requirements are made stronger. I suggest a separate subsection at an
+appropriate place so that "ANI requirements" shows up in the table of contents: 
+
+   Section X.Y.Z Requirements for ANI devices:
+
+   For BRSKI on ANI Devices (ANI = BRSKI + ACP), EST operations is mandator.
+   The ANI pledge MUST perform
+      - "CA Certificates Request",
+      - "CSR Attributes"
+      - "Client Certificate Request"
+      - "Enrollment status Telemetry"
+   The ANI registrar MUST support BRSKI and these EST operations.
+   All ANI devices SHOULD support the BRSKI proxy function.
+
+c) If EST operations are optional, how about the following considerations: 
+
+   I) In instances of BRSKI where no EST operations happens after bootstrap, the
+   Pledge only has trust anchors, but no certificate. This may still be useful,
+   but today i think this is not really a considered option at all:
+
+   After receipt of the voucher, the pledge is willing to do some action on behalf
+   of the BRSKI connection it was previously unwilling to - e.g: receive & apply config.
+   (i thought Max never liked this idea..., so if it is off the table, then
+    _some_ subset of EST seems mandatory because EST operations is the only thing
+    alowed after receiving a voucher that Ma would like.... unless Max has changed
+    his opinion).
+
+   II) This leaves the option that EST to install trust anchor is mandatory, but
+   enrolment with a certificate is optional (except for ANI case).
+
+Aka: would be good to write a sentence/paragraph exactly outlining what is
+permitted to happen after a voucher and if any, what parts of EST are deemed to
+be necessary by BRSKI (outside of ANI devices. the requirements for ANI devices
+are listed above).
+
+-----------------------------------------------------------------------------
+
+1.) Introduction
+
+a) The intro of 1. is somehat confusing to the uninitiated.
+
+Suggest the followinf replacement text for two paragraps:
+
+BRSKI provides a solution for secure zero-touch (automated) bootstrap of
+virgin (untouched) devices that are called Pledges in this document. These Pledges
+need to discover (or be discovered by) an element of the network domain to which the
+Pledge belongs to perform the bootstrap.  This element (device) is called the
+(Domain Join) Registrar.  Before any other operation, Pledge and Registrar need to
+ establish mutual trust:
+
+Then the four existing bullet points, but number them.
+
+Then followed by th following paragraph to replace the existing paragraph after
+the four bullet poins.
+
+This document details protocols and messages to answer the above questions.
+ It uses a TLS connection and an X.509 certificate
+(LDevID) of the Pledge to answer points 1 and 2. It uses a new artefact
+called a "voucher" that the registrar receives from a 
+"Manufacturer Authorized Signing Authority" and passes to the Pledge to answer
+points 3 and 2.
+
+b) It would be nice to have a paragraph mentioning the proxy as a mean to
+provide easier connectivity for Pledges (no need for full network connectivity).
+
+-----------------------------------------------------------------------------
+
+1.1) 
+
+a) "other Bootstrapping Approaches": "other" -> "prior" or "existing" ?
+
+b) "_or_ that domain-specific keying material". Is this not an _and_ ? 
+
+c) "in a costly and non-scaleable manner". "non-scaleable" may be hard to
+argue. Whole economies where built on manual labor. Might rather use
+qualifiers such as "little or not at all automated", "error-prone" and/or
+referring to physical security (.e.g: trusted pre-staging location).
+
+d) "existing mechanisms" -> "existing automated mechanisms".
+
+e) Paragraph 2 and following about EST: The first two sentences sound
+contradictory/conflicting. "...minimize user action..." , "details a set of 
+non-autonomic bootstrapping methods". Suggest text like:
+
+"EST does reduce user actions during bootstrap but does not provide
+solutions for how the following protocol steps can be made autonomic
+(not involving user actions).
+
+(Note: first use of "autonomic" here, so an explanation like "not
+involving user action" is required (any other definition here what autonomic
+or non-autonomic means in the context of this document is fine too,
+"not involving user action" is just a suggestion).
+
+-----------------------------------------------------------------------------
+1.3) 
+
+a) The order of paragraphs is confusing. Even if the mayority of readers
+(which i don't think) would primarily be interested in class 1 devices,
+it is irritating in style and context to start with the first two
+paragraphs.
+
+I would suggest to start with existing paragraph 3, change maybe the
+sentence to "This solution (BRSKI) can support large router platforms..."
+
+Then insert the first two paragraphs after current paragraph 5. All the
+text after paragraph 5 already discusses constrained situations so
+it would nicely follow on to the first two paragraphs.
+
+b) paragraph 5 is confusing: What is a handoff, why would somebody
+even think to apply BRSKI in a handoff, and why is there a normative,
+capital letter SHOULD. Here is how i would write it more explanatory
+(if i understand the implied use case correctly):
+
+BRSKI could be used by nomadic or mobile devices to aquire certificates
+used as credentials to access the network at the new location. This
+is usually called handoff. Nevertheless, BRSKI is not intended for low-latency
+handoff which is usually a requirement in mobility solutions (e.g.: seamless
+handover). For these solutions BRSKI could be used to aquire keying
+material and re-use that during handover without re-initiating BRSKI
+during handover later on.
+
+(which is also implying that re-using BRSKI in nomadic environments
+ is not off the table, but not saying so explicitly because we really
+ have not thought that trough a lot).
+
+c) It would loosen up a very long section to create three subsection headings
+
+- supported environments
+- constrained envionments
+- network access control
+
+-----------------------------------------------------------------------------
+
+Section 2 1)
+
+a) ..Each component is logical and may be combined with other components as necessary..
+
+    Ok. I always want the pledge to live in the same device as the MASA.
+
+    Would suggest deleting that sentence. More harm than benefit.
+
+b) I suggest to move section 2.4 up to become section 2.1) directly after the
+picture in section 2., because otherwise there is no explanaction following
+the picture.
+
+c) "The a domain" (delete a)
+
+-----------------------------------------------------------------------------
+
+Section 2.1
+
+a) The term "Request Join" is only used here, and its IMHO not very logical
+(disclaimer: toerless: en.wikipedia.org/wiki/ESL). It sounds to me like the
+pledge says "i want to join". And also sounds as if the pledge could be
+disappointed if rejected. I would rather call it "Domain membership inquiry".
+Or if you're hooked up on the term "joining", then maybe "Join Inquiry".
+
+Whatever best makes it clear that rejection is a perfect and important
+outcome option.
+
+b) Please see my issue section 5.1 a). If you agree with that statement, then there
+should be no "rejected" arrow in Figure 2 coming out of the "Identify" block.
+
+I would also suggest that the "Bad Vendor response" arrow does not come out
+of the "Imprint" block but out of the "Request Join" block. AFAIK, this is
+an error reply to the Request Voucher, so it happens before imprinting
+(imprinting happens only when there is a vocker reply. AFAIK).
+
+I don't think "Bad Vendor reply" in Figure 2 is a good term. Most logical to me would
+be "Error or not member". In any case, the text in section 2 below should
+mention the exact words used on the labels, the text is missing ll the
+labels on the left: "Factory reset", "Enroll Failure", "Bad Vendor response",...
+
+
+c)
+
+ Point 1 nicely explains how this is done during TLS.
+
+Likewise, Point 2 should mention that this is the "Voucher Request", and
+Point 3 should mention that it is the "Voucher Reply" - so readers can match
+up section 2.1 with the rest of the document.
+
+remove the "e.g." from "protocol, e.g. Enrollment over". Otherwise some text
+outlining when something else than EST is to be used. (see next comment).
+
+d) 
+
+I am missing in the initial chapters a succinct summary how EST enrollment is optional and
+ what can be achieved with/without it, there is only some side sentences later in the
+EST sections. I would suggest to insert such an explanation here.
+
+After point 4 insert (unnumbered) paragraph:
+
+| After step 4, the pledge has received  and authenticated an explicit TA (trust anchor)
+| (pinned-domain-cert in the Voucher response). In some use cases this may be sufficient
+| and the bootstrap can be terminated here. The pledge can now use this TA to securely
+| trust domain members, but it can not securely identify itself to them as a domain member.
+| Therefore BRSKI usually proceeds with the following steps that support this via EST
+| enrollment (see also 5.5.1 for the limitations of the trust feasible through the imprint).
+
+Also maybe insert some dotted line between imprint and enroll in Figure 2 to
+highlight this distinction. Maybe with "mandatory" / "optional" (EST enroll part)
+on the right hand side
+
+-----------------------------------------------------------------------------
+Section 2.2
+
+a)
+
+ The core sentence is hard to understand because it does not spell out the
+implication of the alternatives:
+
+ At the
+ lowest security levels the MASA server can indiscriminately issue
+ vouchers.  At the highest security levels issuance of vouchers can be
+ integrated with complex sales channel integrations that are beyond
+ the scope of this document.
+
+Would suggest amending like this:
+
+ At the lowest security levels the MASA server can indiscriminately issue
+ vouchers AND LOG CLAIMS OF OWNERSHIP BY DOMAINS.  At the highest security
+ levels issuance of vouchers can be integrated with complex sales channel
+ integrations that are beyond the scope of this document BUT THAT WOULD
+ INTENT TO VERIFY ACTUAL (LEGAL) OWNERSHIP OF THE PLEDGE BY THE DOMAIN.
+
+b) 
+
+"Vouchers provide a signed but non-encrypted communication channel
+   between the Pledge, the MASA, and the Registrar."
+
+Why is this  mentioned ? If there is a conclusion of this statement that
+is relevant to BRSKI it should be spelled out, otherwise its a detail 
+belonging into voucher. I do not see how the following sentence is that
+relevant conclusion. But maybe i am too confused by the sentence structure.
+
+Do you mean something like this:
+
+| Vouchers are signed but not encrypted. This allows registars to maintain
+| better control over pledges attached to the domains network by examining
+| and filtering Vouchers received from a MASA before sending them to the pledge.
+
+If thats the idea, i suggest to use language like i suggested because it's
+more explicit and simpler (not having to think what the relevance of 
+"communication channel" is etc..).
+
+Also may warrant a note that this control does not necessarily apply to the
+case of a Cloud Registrar (see section 2.6).
+
+-----------------------------------------------------------------------------
+Section 2.3)
+
+a)
+
+The first paragraph is too terse and not very explanatory arguing why BRSKI
+mandates and how it uses the IDevID. I would suggest a bulleted list
+with explained reasons: 
+
+- Uniquely identifying the pledge by parameters in the IDevID. The unique
+  identification of a pledge in the voucher objects are derived from
+  those parameters as described below.
+  
+- Securely authentating the pledges identity via TLS connection to registrar. 
+  This provides protection against cloned/fake pledged.
+
+- Secure auto-discovery of the pledges MASA by the registrar via the MASA URI
+  in IDevID as explained below.
+
+- (Optional) Signing of voucher-request by the pledges IDevID to enable MASA
+   to generate voucher only to a registrar that has a connection to the pledge.
+
+- (Optional) authorizing pledge (by registrar) to receive certificate from local CA. 
+
+I am unclear about the "authenticating the Pledge during subsequent protocol exchanges ...".
+Does this refer to the TLS exchange or others ? If others, then please list
+accordingly maybe as a separate bullet point which those are.
+
+Please keep the "There is no requirement for a common root PKI hierarchy.
+Each device vendor can generate their own root certificate."
+
+-----------------------------------------------------------------------------
+Section 2.3 2)
+
+a) Please put the description of identification of the pledge into a subsection
+2.3.1 "Identification of the Pledge"
+
+b) I am confused about the first MUST (serialNumber) and following SHOULD (HardwareModuleName).
+
+The conversion rules make it clear that you want the device to be uniquely identified
+via the serialNumber, but if that is not in the certificate, then you would use the
+HardwareModuleName. Therefore the conversion rules contradict the MUST for serialNumber.
+Or else you wouldn't define a fallback if it does not exist.
+
+c) The MUST/SHOULD bullet points are IMHO a duplication of the conversion rules,
+so maybe just drop them.
+
+d) I would start the section with a sentence clearly describing what is done here:
+
+In the context of BRSKI, pledges are uniquely identified by a "serial-number". This
+serial-number is used both in the "serial-number" field of Voucher or Voucher requests
+(see section 3.) and in local policies on Registrar or MASA (see section 5.).  
+
+The serial-number is derived from the IDevID as follows:
+
+... then add the three bullet-points.
+
+e) I do not see "serialNumber" attribute mentioned in rfc4514 nor rfc4108. You mention
+   "previously defined". Could you provide a reference where "serialNumber" was defined ?
+
+f) Please provide example of each of the three fields and how they convert into
+   serial-number. This is especially important because for the average reader who has
+   never seen a certificate (and with no actual reference to e.g.: serialNumber format
+   thats easily readable), it may be hard to understand if or how something called 
+   "serialNumber" can unique identify  a device - aka: that it includes also the
+   device-type (unless a company only produces one type of device and somehow even
+   the name of the company can be implied).
+
+   e.g.: if i take the Cisco device IDevID format i used on the anima mailing list before:
+
+   serialNumber=PID:C819HWD-A-K9 SN:FXXXXFZ
+
+   That "PID/SN" format makes it clear how a device can be uniquely be identified, so
+   it would be a great example if it was not just a Cisco speciality (hence the ask for
+   any reference for the definition). Could be anonymized accordingly:
+
+   serialNumber=PID:MEGAROUTER1 SN:12345
+
+   I also think the examples would be good to explain what otherwise would likely be
+   hard to figure out from references (assuming there would be references):
+
+   - To uniquely identify a device, the certificate field choosen needs to contain some
+     form of at least a product identifier and an actual serial number of that product
+     identifier.
+   -  Note that the certificate field itself does not need to identify the manufacturer/brand
+      of the product as long as the field is unique within the scope of the IDevIDs root of
+      trust. For example both the EXAMPLE and the ACME manufacturer/brands could have a
+      MEGAROUTER1 product as long as they use different root of trusts for their IDevIDs.
+   - Product that have a unique root of trust may have a certificate field that
+     is only containing an actual serial number but no product identifier.
+
+   I have no examples of HardwareModuleName. If there is a specific set of devices or
+   industries that prefers/mandated HardwareModuleName instead of serialNumber, then
+   an explanatory sentence would be good.
+
+   I only have a non-working example of the "common name" , e.g.: in the  
+   cisco example it was:
+
+       cn=C819HWD-A-K9
+
+   which would be insufficient. So any explanation of known cases where the common name
+   would actually be used (absence of serialNumber/HardwareModuleName) AND sufficient
+   would be great to describe (not necessarily referring to specific vendor/manufacturers
+   but rather product types if possible).
+
+g) Please change the examples "JADA123456789" in the remainder of the document to
+   the example choosen here.
+
+h) Probably need to end the section with "Device types whose above mentioned IDevID attributes
+   do not allow for unique identification of devices are outside the scope of this
+   specification. ". Unless you are sure this case can not exist.
+
+-----------------------------------------------------------------------------
+Section 2.3 2)
+
+a) Please put the description of MASA URI into a subsection 2.3.2 "MASA URI"
+
+b) If the following statements are correct, i would suggest to integrate them into the
+section text to make it clearer and more explicit. If not then i did not understand
+how it is meant to work and the explanations could be approved accordingly to make it
+clearer:
+
+- The type and format of the MASA URI indicates the protocol supported by the MASA.
+- If a MASA supports multiple protocols, multiple instances of the new MASA URI
+  can be put into the certificate.
+- This document defines the BRSKI-MASA protocol. It is indicated through a URI of
+  the form 
+
+   MASA URI is "https:// authority "./well-known/est".
+
+  see section 5 for more explanations. (this would replace the current sentence
+  mentioning section 5).
+
+c) We discussed the risk of introducing new certificate fields and potential
+compatibility issues with existing code parsing such a certificate. Which is why we
+went for the obfuscated email encoding of the ACP information in the LDevID. It would
+therefore be good to have an explaining sentence why the new MASA URI extension
+is a better solution than encoding into existing attributes and safe to deploy into
+devices.
+
+I am not sure about the full extent of the answer, but probably IDevIDs are meant to
+and actually used in a far smaller and newer set of software than that processing
+arbitrary LDevIDs. Therefore the risk is smaller and the clean encoding outweights
+the risk of compatibility issues with badly written old software.
+
+-----------------------------------------------------------------------------
+Section 2.4.1) 1)
+
+  "it does has network" -> "it does have network"
+
+But better: "it does only require subnet (link) local connectivity to the
+circuit proxy but no routeable IPv6/IPv6 address (exception: see section 2.6)".
+
+-----------------------------------------------------------------------------
+Section 2.4.2) 1)
+
+  "The proxy mechanism" -> "The circuit proxy mechanism"
+
+  " optional stateless mechanism" -> "optional stateless proxy mechanism"
+
+  add: The registrar (likely?) also needs manual configuration of per-MASA credentials to 
+  contact them (see section 5.3).
+
+  Q: Any case where unauthenticated BRSKI-MASA connections make sense ?
+
+
+-----------------------------------------------------------------------------
+
+Section 2.4.3) 1)
+
+  Suggest to clarify roles:
+  separate functions: the MANDATORY ...MASA including audit log, and an ADDITIONAL
+  OPTIONAL Ownership Tracker providing sales channel integration. 
+
+  Aka: reuse same terminology so readers are not confused. Maybe go through text
+  to check only "ownership tracker" and "sales channel integration" are used for that part.
+
+-----------------------------------------------------------------------------
+Section 2.4.3) 1)
+
+a)  Expand CMC.
+  "authenticate any pledge" -> "authenticate (the IDevID of) any pledge"
+
+b) The document is still very vague on terminology to distinguish between the
+initial bootstrap and the (optional) EST server role. Please come up with
+a clear terminology and clearly summarize the functionality required to be
+supported by the roles.
+
+Here is my suggested text. If any explanation to cover this information is
+felt to be too long for 2.4.3, please find another place but make 2.4.3 refer to
+that place. 
+
+| A "Domain Join Registar and CMC" (abbreviated Domain Registrar in most of the document)
+| serves two roles: BRSKI Bootstrap Service and BRSKI enhanced EST Enrollment Service.
+| 
+| The "BRSKI Bootstrap Service" role is newly defined in this document. It performs
+| the bootstrapping of Pledges with a "pinned-domain-cert" called trust anchor.
+| The BRSKI Bootstrap Service communicates with the Pledge and the MASA. It does
+| not need to communicate with the Key Infrastructure (as long as it can support
+| cacerts from locally stored information). As a HTTPS/REST server it supports the
+| following REST services under /.well-known/est/ newly defined in this document:
+|         /voucher-request, /cacerts, /status-telemetry
+| As a HTTPS/REST client, it support the following REST service under /.well-known/est
+| to request vouchers from MASAs:
+|         requestvoucher, requestauditlog
+| 
+| The "BRSKI enhanced EST Enrollment Service" is an enhanced version of the RFC7030 
+| defined EST-Server to support automated enrollment of Pledges with certificates. This
+| role does not need to support certificate renewal or other services not related to initial
+| enrollment. This role communicates with Pledges and Key Infrastructure. It does not
+| communicate with MASA.  As a HTTPS/REST server it supports (at least) the following
+| RFC7030 defined servervices under /.well-known/est/:
+|          /cacerts, /fullcmc, /csrattrs, /simpleenroll, /serverkeygen
+| This document does add new requirements against the details required to be supported
+| in the /csrattr service.
+| In addition, it supports the new service under /.well-known/est defined in this document
+| (which makes it a "BRSKI enhanced" EST Enrollment Service):
+|          /enrollstatus
+
+[Here is where i wonder:]
+
+| While not recommended, BRSKI Bootstrap Server and BRSKI enhanced EST-Server can
+|be provided by separate servers. In this case, the BRSKI Bootstrap Server must
+| support redirection of the Pledge after a successfull requestauditlog to the
+| URI of a BRSKI enhanced EST-Server.
+
+[I am not sure if this is true, or how else it would work, but if that separation
+ is meant to be supported that level of detail needs to be written, otherwise
+ the opposite:]
+
+| This document does not cover cases where BRSKI Bootstrap Server and BRSKI enhanced EST
+| Enrollment Server are separated onto two servers. It also does not define what
+| (additional) functionality might be required on Pledges to support this.
+
+IMHO with the current design decisions, one would even need to write something like this: 
+
+| The design choosen in BRSKI does not always allow to use common modular design
+| choices of HTTP(S)/REST servers to separate the Bootstrap Service from the enhanced
+| EST enrollment service without operating them on separate transport locators:
+| When using a single transport locator, REST request can only be demultiplexed
+| by the request path and both Boothstrap Service and EST enrollment service do not
+| only share the /.well-known/est/ prefix but even the same /cacerts command.
+
+c) The document must include a statment such as:
+
+| An ANI "Domain Join Registar and CMC" MUST support both BRSKI Bootstrap Service
+| and BRSKI enhanced EST Enrollment Service roles.
+
+[or whatever terms you choose to use]
+
+
+-----------------------------------------------------------------------------
+
+Section 2.4.4)
+
+a) It would be IMHO good to move the (mayority of the) initial paragraph of 5.4 into
+this section to explain what the scope of the MASA functionality is by listing the
+interface services requestvoucher and requestauditlog here - similar to how i
+proposed to summarize the interfaces of the Domain Registrar above for section 2.4.3.
+
+5.4 is not a good place to do that because it's only about requestvoucher, and
+then after another non-maza intermezzo 5.6 requestauditlog is again about the
+MASA. So no single place summarizing the MASA functionality at this level. 
+
+More details see comments about 5.4 below.
+
+-----------------------------------------------------------------------------
+
+Section 2.4.x)
+
+a) Please add subsection "Architectural Component: Key Infrastructure (PKI)"
+
+Suggested text (as in: this is the type of information i would like to see
+explained here, whatever language you use):
+
+| The Key Infrastructure (PKI) administers certificates for the domain of concerns,
+| providing the trust anchor(s) for it and allowing enrollment of Pledges
+| with domain certificates.
+|
+| The Domain Registrar ('s BRSKI Bootstrap service role) uses a Trust Anchor (TE)
+| from the PKI in the BRSKI Voucher  pinned-domain-cert to authenticate itself to the
+| Pledge with the help of MASA.
+|
+| The Domain Registrar ('s BRSKI enhanced EST enrollment service) acts as an
+| EST Server and request certificates for Pledges from the Key Infrastructure.
+| 
+| The requirements and expectations against the Key Infrastructure are unchanged
+| from RFC7030: There are no BRSKI specific features defined or required for
+| the Key Infrastructure - only for the Domain Registrar.
+
+Would especially like to see something like the last paragraph because its IMHO
+the key part of being able to deploy BRSKI and right now it's hidden in explanations
+in specific explanation in section 5.
+
+b) Figure 1 labels the path to the PKI with "EST" and i remember Max to repeatedly
+state that CAs could support EST. Nevertheless, i read in RFC7030: 
+
+"The nature of communication between an EST server and a CA is not described in this document".  
+
+But then it defines the term "EST CA". So i am confused if there is an actual
+spec stating the EST profile? of an EST CA.
+
+Aka: Can we write here:
+
+| It is recommended but not required that the Domain Registrar ('s BRSKI enhanced EST
+| Enrollment service) also uses RFC7030 to talk to the PKI, e.g.: a CA or subordinate
+| CA supporting EST. Nevertheless, the Domain Registrar may choose any standardized
+| or non-standardized protocol to talk to the PKI.
+
+If we can not make the first part of that statement here, then also remove "EST" label
+from picture 2 and replace with something like "Any CMC? protocol" ?
+
+-----------------------------------------------------------------------------
+
+Section 2.5) 1)
+
+a)  If the following sentence is functionally correct, please add text accordingly:
+
+  Bootstrapping Pledges that have a Realtime Clock (RTC), SHOULD use it to verify
+  certificate validity.
+
+b) And from my own experience, it should add:
+
+  but they MUST be prepared to recognize local time failure and revert to the above
+  described mechanisms. For example when RTC battery failure leads to a well-known
+  default-time (e.g.: Jan 1 1970).
+
+-----------------------------------------------------------------------------
+
+Section 2.5) 2)
+
+a) Please move the bullet about the registrar behavior out of the bullet list, maybe at
+   the end of the section.  Even better:
+   - rename 2.5 to "Certificate Validity"
+   - 2.5.1 "Lack of Realtime Clock in Pledges
+   - 2.5.2 "Infinite Lifetime of IDevID"
+     (move text into 2.5.1)
+
+b) Its hard to comprehend what the pargraph means to say. I think its something like:
+
+   According to RFC5280, IDevIDs are examples of certificates that should have
+   no well-defined expiration date. This is indicated through the 
+   GeneralizedTime value of 99991231235959Z". Registrars SHOULD have a configuration
+   option to ignore IDevID lifetime values if they do not conform to this recommendation.
+
+   As expected, i always like an explicit example to bring it to the point:
+
+   For example, IDevID may have incorrect lifetime of N <= 3 years, rendering replacement
+   Pledges from storage useless after N years unless registrars support this option.
+
+-----------------------------------------------------------------------------
+Section 2.6)
+
+IMHO, without further text, it is unclear a) what a cloud registrar is,
+b) why we care and c) how a solution using a cloud registrar would have to be built
+to work.
+
+To resolve a), b) better i suggest to replace first paragraph with something like this:
+
+Local Registrars are those for which proxies can be discovered by means under control
+ of the network to which the pledge connects, such as GRASP or mDNS (see <appropriate sections>).
+When a pledge connects to a network connection not under the control of the
+domain claiming to own the pledge or if the Pledge's target use
+cases want to simply deployments by avoiding the use of proxies, local Registrars and/or
+network methods to discover proxies, then the pledge can only connect to a so called
+Cloud Registrar via a URL well-known to the non-bootstrapped pledge.
+
+c) If i understand it correctly, then the explanation for c) would be something like this:
+
+When a cloud registrar is used, it must be assumed that it is not operated by the
+owner of the pledge. Instead, it would be operated by or on behalf of the manufacturer
+similar to the MASA. Such a Cloud Registrar can provide a Voucher to the Pledge,
+but that Vouchers pinned-domain-cert could not help the Pledge to authenticate the
+BRSKI EST connection because the Cloud Registrar does not belong to a domain of the
+owner which the pinned-domain-cert is used for. Therefore trust for the Cloud Registrar
+must be provided by the Plede itself:
+
+[add existing second paragraph of 2.6 here]
+
+[I am not sure exactly how you thought about answering c). Here is what i guess could work:,
+so this would have to go at the end of 2.6 ]
+
+A Cloud Registrar may operate in different ways:
+
+III) It can answer the Pledges Voucher request with a redirect response to cloud based BRSKI
+ Registrar oeperarted by or on behalf of the Pledges domain owner. We call this service
+of a Cloud Registrar the "redirect-only" model. When the Pledge connects to that BRSKI
+server after the redirect, it would again have to perform delayed authentication
+of the Registrar after it receives a Voucher from it.
+
+
+II) Alternatively, the Cloud registrar could provide the pledge with a Voucher and 
+respond with a redirect response to a successful Voucher Status Telementry,
+redirecting the Pledge to a potentially cloud based EST server operated by the owner
+of the pledge to complete the Pledge enrollment with a domain certificate. When the
+pledge connects to that EST server, it can authenticate it using the pinned-domain-cert
+from the Voucher. The pledge would not need to repeat the Voucher request/Status
+telemetry transactions.
+
+II) Finally, the Cloud Registrar could provide Voucher AND EST enrolment to the Pledge
+directly without any redirect. The mutual trust models for this (between the domain owner
+and Cloud Registrar operator) are outside the scope of this specification.
+
+Finally, most crazy (but i know how customers had to do this with pre-BRSKI methods,
+so it might make sense):
+
+Pledges MAY support a model in which domain operators could redirect URI connections
+from a cloud registrar to a domain operated Registrar because this can be a lightweight
+Registrar discovery mechanism - assuming the pledge connects to a network under control
+of the domain operator. This can be done by overriding the DNS resolution for the
+URI or transport layer redirection. In this case the above decribed implicit TA check by
+the client for the TLS connection to the Cloud Registrar fails, but the Pledge falls
+back to the delayed authentication after receipt of a voucher as it does for non-Cloud
+Registrars.
+
+If you feel this is overall too much, then maybe delete the whole section 2.6
+and put it into a followup document. Borderline to me. If its "just" what i sugested
+above, its fine, if there is more to it to make it work, maybe better in separate document.
+
+-----------------------------------------------------------------------------
+Section 2.7 1)
+
+a)
+
+> Note that the Registrar can only select the configured MASA URL based on the
+> trust anchor -- so vendors can only leverage this approach if they
+> ensure a single MASA URL works for all Pledge's associated with each
+> trust anchor.
+
+I do not think this is true. A registrar could have configuration policy
+mapping from IDevID serial-number patterns to MASA URI.
+
+Rewrite accordingly ? Let me know if you hate this approach, i had had to brainstorm it
+for my planned yang model for ANI.
+
+b) I also think it might be necessary for Registrars to allow policies that
+override MASA URIs learned from the IDevID because the longevity of URIs can
+not always be guaranteed and the MASA may move (merger & aquisitions etc.. ).
+
+c) I am unclear from the document whether registrars may require configuration
+to know what specific options for voucher-requests a MASA supports.
+
+ - If i understand it correctly, a registrar may use a voucher-request to request a
+   voucher in the absence of the pledge (stage the voucher). This certainly is something
+   not every MASA must support, so that would need to be configured.
+ - It is not clear to me if the REgistrar can correctly fill out all Registrar
+   voucher-requests in the presence of the pledge (aka: after receiving the Pledge
+   voucher-request). See also discussion for Section 3. If this is not fully automatic,
+   but may rquire Registrar configuration, this counfig should be mentionedhere.
+
+-----------------------------------------------------------------------------
+Setion 3. 1)
+
+So... I guess Registrars can request Vouchers for pledges before being in contact
+with that pledge, right ?
+
+If correct, the following would be less confusing to read for me:
+
+| Voucher-requests are how vouchers are requested.
+| 
+| A Pledge send "Pledge voucher-requests" and submit them to the Registrar.
+| The Registrar in turn submits a voucher-request to the MASA server. The
+| "proximity-registrar-cert" leaf may be used in these Pledge voucher-requests.
+| The "prior-signed-voucher-request" leaf may be used in Registrar voucher-requests
+| that include a Pledge voucher-request. See [XXX] for a description of the
+| semantics of these leafs.
+| 
+| An addition, Registrars may retrieve (nonceless) vouchers by sending 
+| Pledge voucher-requests to the MASA. The "prior-signed-voucher-request" leaf
+| is never used in these voucher-requests. 
+
+
+In any case, you need at least a forward reference for those leaf types if
+you want to mention them without other explanations.
+
+-----------------------------------------------------------------------------
+Setion 3. 1)
+
+
+a) Even with above concern Section 3. 1) fixed the section still does not provide a
+good taxonomy of the different type of voucher-requests and how to fully identify
+them because of the "may be used"...
+
+b) There is no text here explaning how a registrar transforms a Pledge
+Voucher request to a Registrar voucher request. If explained later, insert 
+a forward reference. Else. pls add text to explain.
+
+b) I have my doubts that the flow of the document is ideal with all the
+yang formalisms thrown into section 3. If this is what other documents do as
+well, fine. I for once would like it better if it was put into a separate section
+towards the end of the document.
+
+"nah, not going to happen" is an acceptable answer ;-)
+
+-----------------------------------------------------------------------------
+Setion 3.2 1)
+
+ "provides voucher examples" -> "provides voucher-request examples"
+
+-----------------------------------------------------------------------------
+Section 4. 1)
+
+a.1) Suggest to change title to "Proxying Details (Plege - Proxy - Registrar)"
+because the section does not only discuss the proxy but also the aspects/reqirements
+of proxying relevant to Client and Registrar. 
+
+a.2) paragraph 1: "configured on the Proxy" append:
+ "or automatically discoverded (e.g.: via GRASP, see below).
+
+b) Add: This section defines a statefu proxy which is therefore called a "circuit" proxy.
+
+c) Simplify whole paragraph with  "(In a completely autonomic network...)" - this
+discussion is not specific to AN. E.g.:
+
+Registrars are assumed to have logically a locally integrated Proxy to support directly
+(subnet) connected Pledges - because Registrars themself does not define any functions
+for Pledges to discover them. Such a logical local proxy does not need to provide actual
+TCP proxying (just discovery) as long as the Registrar can operate with subnet (link)
+local addresses on the interfaces where Pledges may connect to.
+
+d) "to discovery the" -> "to discover the"
+
+e) Paragraph starting with: "If the Proxy joins an Autonomic Control Plane"
+   Suggest following replacement:
+
+   In the ANI, the Autonomic Control Plane (ACP) secured instance of GRASP (<ref>)
+   MUST be used for discovery of ANI Registrar ACP addresses  and ports by ANI Proxies.
+   The TCP leg of the proxy connection between ANI Proxy and ANI Registrar therefore
+   also runs across the ACP.
+
+   (separate because it would apply for any GRASP learning, not only ACP):
+
+   If GRASP is used by proxies for discovery of Registrars (ACP or not),
+   the proxy can also learn the proxy mechanism (Circuit Proxy vs. IPIP encapsulation
+   or other)
+
+   (there is no negotiation in GRASP, therefore "agreed" as in current text is not
+    a good choice of word).
+
+f) "SHOULD be the same as on the registrar in order for the proxy to remain stateless".
+Does such a proxy makes sense when it is not stateless ? Aka: should this not be a MUST
+instead of a SHOULD ? 
+
+-----------------------------------------------------------------------------
+Section 4. 2)
+
+"In order to permit the proxy functionality to be implemented on the
+ maximum variety of devices...
+ with available capabilities for the proxy function similar to many class 2 IoT devices"
+
+This IMHO is an incorrect assumption. I am not aware of any network device in
+ANIMAs "well managed network" charter" that would today fall into class 2. I was
+and am often extremely annoyed how underpowered control plane of multi-terrabit
+switches are but those too don't get down to that level. Even OpenWRT small home
+rotuers (outside scope of ANIMA) don't go below 4 MByte these days.
+
+Here are statements i could support/recommend:
+
+- Registrars must support the proxy method supportable by the type of proxies it
+  needs to support. If pledges could be IoT class 2, then IPIP would be a better
+  solution for them than a CP circuit proxy. Note that in ANI adopted to class 2 IoT
+  or similar "mesh network" solutions, Plege become proxies proxy and therefore IoT
+  class 2 pledges imply also the need to support IoT class 2 proxies.
+
+
+-----------------------------------------------------------------------------
+Section 4.1 1)
+
+a) "[RFC4941] temporary addresses is encouraged...."
+   Please remove or add text explaining why. Given how a pledge is happy to spill it's
+   IDevID to everyone claiming to be a proxy i am not sure what benefit privacy
+   addresses have, and they are additional implementation work for pledges, whereas
+   link-local (permanent) addresses are always required. And changing addresses
+   makes diagnostics harder.
+
+   I also am not even sure if RFC4941 is even creating additional link-local (temporary)
+   addresses. I don't even think so. And all the concerns RFC4941 discusses about
+   correlating traffic is hardly applicable to what the link-local address is used for.
+   link local GASP discovery, BRSKI-TCP, maybe later some ACP tunnell..
+
+
+b) IMHO the text should express the following reuirements:
+
+   - ANI Plegdes and ANI Proxies MUST , other Pledges/Proxies SHOULD obtain
+    link-local scope IPv6 addresses according to [RFC4862] ...
+
+   (RFC4862 also specifies global addresses, so text needs to be specifica about just
+    the link-local scope IPv6 addresses).
+
+   - Pledges MAY use RFC4941... if you can figure out some text explaining why.
+
+   - ANI Pleges/Proxies MUST, other Pledges/Proxies SHOULD use DULL GRASP announcements 
+     of the objective ...
+
+-----------------------------------------------------------------------------
+Section 4.1 2)
+
+> Methods SHOULD be run in parallel to avoid head of queue problems
+> wherein an attacker running a fake proxy or registrar can operate
+> protocol actions intentionally slowly.
+
+methods == circuit proy, IPIP, ... ?
+would also be recommended to try different proxies in parallel, right ?
+
+> Once a connection to a Registrar is established (e.g. establishment
+> of a TLS session key) there are expectations of more timely
+> responses, see Section 5.2.
+
+not clear what the pointer to 5.2 is good for. Does not explain
+how establishment of TLS session key helps. IMHO, you need to finish
+authentication of TLS connection before you can trust registrar and
+expect timely responses.
+
+But thats not where the problem of trusting the connection ends...
+
+Suggested text fixes:
+
+| Pleges SHOULD attempt bootstrapping via multiple discovered proxies and/or
+| methods supported by them (TLS circuit proxy, IPinIP,..) in parallel ...
+| [continue with existing paragraph text]
+|
+| Only once the Pledge has completed authention of the provisional bootstrap TLS
+| connection (received & authenticated a voucher), can it expect to talk to a
+| legitimate Registrar, and from then on there SHOULD be an expectation of
+| more timely responses by the Proxy. 
+|
+| To achieve this, Registrars need to ensure that only legitimate Proxies can
+| build connections to them. ANI Registrars for example only permit ANI Proxies to
+| connect to them because they must use the ACP. In addition deployments of
+| legitimate Proxies SHOULD | take measures that prohibit fake proxies to become
+| Men-In-The-Middle attackers between them and Pledges - such as filtering of 
+| (GRASP) discovery | messages from user (fake attacker) ports on access layer 2 switches.
+
+-----------------------------------------------------------------------------
+Section 4.1 1)
+
+a) The requirement to do proxy discovery via GRASP was already written in 4.1. Please
+remove. Please use term DULL GRASP instead of just GRASP.
+
+>   proxy-objective = ["AN_Proxy", [ O_IPv6_LOCATOR, ipv6-address,
+>   transport-proto, port-number ] ]
+>
+>   ipv6-address       - the v6 LL of the proxy
+>   transport-proto    - 6, for TCP 17 for UDP
+>   port-number        - the TCP or UDP port number to find the proxy
+
+That text does not use correct GRASP syntax. It is IMHO highly useful to also have
+an example - to understand where address, port number etc. are.
+
+I would also suggest to revisit the name of the objective. The objective
+name suggested in the following proposed text would be aligned with the mDNS names
+i would suggest:
+  - It is IMHO counterproductive to have "AN" in the name. BRSKI should be able to
+    be adopted without other ANI/AN components, and whoever adopts it should have
+    to change as little as possible.
+  - bootstrapks for mDNS is IMHO not ideal. The mechanism is known by the name brski.
+    Thats like using "enrollmentst" instead of "est"  (luckily "est" was registerd with
+    IANA!).
+  - Want to be able to announce/discover both registrar and proxy, therefore
+    IANA service-names should be (IMHO) brski-proxy, brski-registrar.
+
+Here is suggested text:
+
+  Example:
+       [M_FLOOD, 12340815, h'fe80000000000000c0011001FEEF0000, 180000,
+           [ ["SRV.brski-proxy", 4, 1, "https" ],
+             [O_IPv6_LOCATOR,
+                h'fe80000000000000c0011001FEEF0000, TCP, 15000]
+           ] ,
+           [ ["SRV.brski-proxy", 4, 1, "coap" ],
+             [O_IPv6_LOCATOR,
+                h'fe80000000000000c0011001FEEF0000, UDP, 13000]
+           ] ,
+           ... optionally more objectives, such as ACP as described above
+       ]
+
+  The formal CDDL definition is:
+
+           flood-message = [M_FLOOD, session-id, initiator, ttl,
+                            +[objective, (locator-option / [])]]
+
+           objective = ["SRV.brski-proxy", objective-flags, loop-count,
+                                                  objective-value]
+
+           objective-flags = sync-only ; as in the GRASP specification
+           sync-only =  4    ; M_FLOOD only requires synchronization
+           loop-count = 1    ; limit to link-local operation
+           objective-value = method
+           method = "https"  ; or future methods
+                             ; CoAP not considered yet, see below
+
+   The objective-flags field is set to indicate synchronization.
+
+   The loop-count is fixed at 1 since this is a link-local operation.
+
+   It is recommended to send these M_FLOOD messages every 60 seconds, the TTL
+   in the above example is 180 seconds (18000 msec).
+
+   The session-id is a random number used for loop prevention,
+   distinguishing a message from a prior instance of the same message.
+   In DULL this field is irrelevant but must still be set according to
+   the GRASP specification.
+
+   The initiator address MUST be the IPv6 link local address of the 
+   originating Proxy node on the sending interface.
+
+   The method parameter is a string indicating the Proxy
+   method at the specified locator. It only needs to distinguish
+   methods distinguishable by the Pledge: TCP circuit proxy and IPIP
+   (stateless) proxy are indistinguishable to the proxy, so the above
+   example "https" method announcement could come from either a TCP
+   circuit proxy or IPIP proxy. CoAP on the other hand would require
+   a different transport protocol stack also on the Pledge and therefore
+   require a different method.
+
+-----------------------------------------------------------------------------
+Section 4.2) 1)
+
+a) Append: Therefore the "coap" method in the previous section was only
+used for the example but is not included in the CDDL definition of the
+GRASP objective above.
+
+-----------------------------------------------------------------------------
+Section 4.3) 1)
+
+a) I would suggest removing this section and putting the requirement into 4.1
+together with the rest of the requirments.
+
+Wherever the requirements are written into, it must include this sentence for ANI.
+
+ANI Proxies MUST support a TLS circuit proxy to support the "https" method,
+they MAY also support the IPIP proxy method to support the https method.
+
+For non-ANI i suggest the following (or we don't even mention them and leave
+it up to followup work to define non-ANI profiles):
+
+Non ANI Proxies are free to choose their proxy option as long as that guarantees
+interopeability with Pledges and Registrars in their target deployments.
+
+-----------------------------------------------------------------------------
+
+Section 4.3) 1)
+
+a) Suggest to move the first paragraph with requirements to section 4.1
+
+b) Requirements must include:
+
+ANI Registrars MUST announce their Registrar service via the ACP instance of
+GRASP. They MUST support ANI TLS circuit Proxy and therefore BRSKI across
+HTTPS/TLS native across the ACP. ANI Registrars MAY support the IPIP proxy
+method by implementing IPIP tunneling for their HTTPS/TLS traffic across the ACP.
+ANI Proxies MUST support GRASP discovery of Registrars .
+
+c) The following is fixed up text for the remainder of 4.3 to solve the following issues:
+ - change of GRASP objective-name (SRV.brski-registrar) and methods
+   ("https", "https-ipip" as well as coap for examples sake).
+ - changed address of registrar to be an actual ACP address
+ - GRASP example was cut off/incomplete
+ - also modified example to show both methods (circuit, ipip)
+ - Fixed text to not refer to EST server but Registrars.
+ - Fixed text to give timing recommendations only for ANI.
+
+ - See discussion after following proposed text for the open issues.
+
+
+   The registrar announces itself using GRASP M_FLOOD messages.  The
+   M_FLOOD is formatted as follows:
+
+   Example:
+
+       [M_FLOOD, 12340815, h'fd89b714f3db00000200000064000001, 180000,
+           [ ["SRV.brski-registrar", 4, 255, "https" ],
+             [O_IPv6_LOCATOR,
+                h'fd89b714f3db00000200000064000001, TCP, 15000]
+           ] ,
+           [ ["SRV.brski-registrar", 4, 255, "ipip" ],
+             [O_IPv6_LOCATOR,
+                h'fe80::1234, 41, 0]
+           ] ,
+           [ ["SRV.brski-registrar", 4, 255, "coap" ],
+             [O_IPv6_LOCATOR,
+                h'fd89b714f3db00000200000064000001, UDP, 13000]
+           ] 
+       ]
+
+
+   The formal CDDL definition is:
+
+        flood-message = [M_FLOOD, session-id, initiator, ttl,
+                            +[objective, (locator-option / [])]]
+
+           objective = ["SRV.brski-proxy", objective-flags, loop-count,
+                                                  objective-value]
+
+           objective-flags = sync-only ; as in the GRASP specification
+           sync-only =  4    ; M_FLOOD only requires synchronization
+           loop-count = 1    ; limit to link-local operation
+
+           transport-proto /= 41
+
+           objective-value = method
+           method = "https" / "ipip"  ; or future methods
+                                      ; CoAP not considered yet
+
+
+   The M_FLOOD message MUST be sent periodically.  The period is subject
+   to network administrator policy (for example configuration on Registrars).
+   It must be so low that the aggregate amount of periodic M_FLOODs from
+   Registrars is negligible for the network. for ANI Registrars, the
+   recommended defaults are to send messages periodically every 60
+   seconds and use a TTL of 180000 milliseconds (as in the example).
+
+   The example shows the type of locators used for each of the discussed
+   methods. For IPIP, the port is always 0, and the IPv6 address of its
+   locator option is not the address used by the registrar but instead
+   the virtual link-local address that IPIP Proxies need to use on their
+   network to receive/send packets from/to Pledges when performing IPIP
+   proxying. The Registrar supports IPIP tunneling for the other methods
+   indicated in the same M_FLOOD. In the example above, the registrar
+   support IPIP for both https and coap. Proxies MUST constrain 
+   IPIP tunneled traffic to the protocols and port numbers announced
+   by the Registrar (TCP port 15000 and UDP port 13000 in the above example).
+
+Discussion: 
+
+  I would strongly advise to move IPIP out of this document and write it
+  into a separate follow-on standards track rfc. That should be easily adoptable as a
+  WG document within the current charter, but it requires some significant
+  additional work that IMHO could further delay current BRSKI draft:
+
+  a) The above "transport-proto /= 41" is technically an update to GRASP RFC
+    which allows only UDP / TCP. There is some process around updating another
+    RFC. We could avoid this by just putting "UDP" in there and decribe
+    that "ipip" always means 41 even if the locator says UDP. That would be
+    just like DNS-SD only having _udp for any non-tcp protocol. But thats
+    a longer discussion.
+
+  b) The use of the virtual link-local address in the locator-option is
+     also not in-line with GRASP AFAIK , so i fear that too would require a GRASP update. 
+
+    We could avoid this by not using the locator-option (which is specified by
+    GRASP) by IPIP, but by putting the info into the objective-value, e.g.:
+
+       [ ["SRV.brski-registrar", 4, 255, 
+         [ "ipip", h'fe80::1234, [ h'fd89b714f3db00000200000064000100, 265]  ]
+       ] ,
+
+    This would tell proxies that they can build IPIP tunnels using locally just a
+    single ACP address, but remotely on the registrar they hae 265 addresses available,
+    so they use a different one for every local inerface they have.
+    h'fd89b714f3db00000200000064000100 ... h'fd89b714f3db000002000000640001ff
+
+  c) I am not sure how we solve the problem of multiple IPIP Proxies on a single
+     LAN fighting to own h'fe80::1234. It seems to me we would have to figure out
+     if/how those proxies could use VRRP to decide which one should be active.
+     (assuming VRRP has the same virtual address mechanisms as HSRP, i've never
+      looked into it in detail. And it would need to support link-local addresses).
+
+   d) Appendix C discusses some additional GRASP signaling that seems to be
+      mandatory?/desirable? to tell the Registrar upfront which tunnels it should
+      build up. But that GRASP signaling is not specified:
+
+      "The Join Proxy SHOULD do a GRASP M_NEG_SYN for
+       each interface which they wish to relay traffic, as this allows the
+       Registrar to do any static tunnel configuration that may be required"
+
+      Please insert implementable GRASP objective specifications for this step here...
+
+   Let me know how BRSKI authors feel about proceeding on IPIP. If they want to keep
+   it in the current BRSKI spec, i am happy to help, but i have not completely
+   tried to analyze appendix C, so i am not sure if/what other issues than the ones
+   above there might be.
+
+-----------------------------------------------------------------------------
+
+Section 5)
+
+a) Suggest changing the title to "Protocol Details (Pledge - Registrar - MASA / CA)"
+to distinguish from Section 4. Might consider also to move up section 5.8 as a
+new section 6 so that you have a clearer separation between the core of BRSKI
+(this section 5), and the (optional) EST integration (then of course the titles
+would be (Plege - Registrar - MASA) for section 5 and (Pledge - Registrar - CA) for new section 6.
+
+b) MASA URI is "https:// authority "./well-known/est".
+                       ^
+missing a " ?
+
+  MASA URI is "https://" authority "./well-known/est".
+
+c) BRSKI-EST connections SHOULD use persistent connections
+   The intention of this guidance is to ensure the provisional TLS
+   authentication occurs only once and is properly managed.
+
+This is not clear to me, please rephrase.
+
+  - What does "properly managed" mean ?
+  - Why would provisional TLS authentication have to occur more than once without
+    persistent connection ?
+
+    The first connection only retrieves the voucher, but then lets say the Pledge
+    closes the connection and builds a new one for EST enrollment. On that second one
+    it would not need to do provisional authentication. /cacerts after /requestvoucher ?
+
+  - Btw: 5.8 says "As noted above, use of HTTP 1.1 persistent connections simplifies
+    the Pledge state machine" and only this section 5 mentions persistent connections,
+    but it doesn't mention siplification of pledge state machinery. Is that what
+    section 5. should say instead of "properly managed" ? Not sure though how the
+    state machinery actually does get simplified either.
+
+d)  Q: How would BRSKI work in the absence of persistent connections or in the presence
+    of failures ? I guess each request from the pledge is a standalone transaction and
+    the pledge would just repeat them until it succeeds or until a return code would
+    indicate that the Registrar does not support this step and the pledge has to terminate.
+
+    Is this something that each reader is assumed to understand because the magical
+    term "BRSKI REST" is used but not explained ? "Ah, rest, stateless transactions... etc."
+    or should BRSKI readers deserve a written explanation ?
+
+    Aka: The way i see it, the reason for persistent connections is really just
+    avoiding unnecessary repeated (expensive) TLS connection setup...
+
+
+e)  "If the Registrar responds with a redirection to other web origins"
+
+    A reason for this rule should be written into that paragraph.
+    ... This is to minimize attacks by fake registrars trying to indefinitely redirect 
+    a pledge.
+
+f)  "It should proceed to other discovered Registrars if there are any"
+
+    Pledes don't discover Registrars, the discover Proxies. 
+    the Proxy can see a couple redundant Registrars.
+
+    Possible solution:
+
+    - "proceed to other discovered Proxy locators (that are being mapped to different
+       Registrars, see XXXX), if there are more"
+    
+    - And then in an appropriate XXX subsection of  section 4:
+
+      To allow Pledges to avoid stalling on a faulty Registrar (see  section 5),
+      proxies MAY announce via GRASP for multiple discovered Registrars the SRV.brski-proxy
+      objective, each with a locator option using a different port and mapping
+      Pledge connection requests for each such port to a different discovered Registar.
+      Pledges MUST treat multiple SRV.brski-proxy announcements from the same 
+      proxy address accordingly as representing different Registrars (see section 5).
+
+f.1) "If necessary the Pledge calls the EST defined /cacerts method to
+      obtain the domain owners' CA certificate."
+
+     Please add an explanation when/why this is necessary. This seems to contradict
+     the statement in 5.8.1 about not doing /cacerts,/fullcmc during Bootstrap but only
+     during enrollment: "Although these limitations are acceptable during initial bootstrapping"
+     (aka: "no need for /cacerts during bootstrap").
+
+g)  After "This moves the BRSKI-EST TLS connection out of the provisional state." add:
+
+    - Afterwards the Pledge trusts this and other Registrars using the same trust anchor.
+      It MAY permit more than one redirects, but it MAY still time out the registrar for
+      further REST operations and revert to another one.
+
+    - Mandatory boostrap steps conclude with Voucher Status Telementry (see XXX)
+
+    - Move "Optionally, the BRSKI- EST TLS connection can now be used for EST enrollment."
+      out of the bullet list merge wi next sentence ("The extensions...").
+      
+h)  "In the language of RFC6125 this provides for a SERIALNUM-ID category of identifier.."
+
+    RFC6125 does not use the term SERIALNUM-ID and BRSKI does not use this term outside
+    of this paragraph either, so it seems redundant. The whole paragraph is also quite dense,
+    so maybe rewrite/simplify the language.
+
+    Would suggest to also move any details o the whitelist logic desccription to 5.1,
+    5.0 is just overview. And in 5.1 you mention TLS setup uses RFC7030 mechanisms
+    while in 5.0 it refers to RFC6125, so i think it would become easier to write & read
+    if tht 5.0 whitelisting stuff was moved into 5.1 paragraphs refering to EST TLS
+    setup.
+
+-----------------------------------------------------------------------------
+Section 5.1) 1)
+
+Suggested append if you agree with it (whatever wording you like):
+
+A Registrar could recognize from the IDevID presented by the Pledge that it is not
+interested in it, but it SHOULD not immediately close the connection to the pledge
+after connection setup but instead wait for the Voucher Request, provide an
+appropriate error reply to it and then close the BRSKI connection. This allows for
+better error diagnostics on the Pledge (that could be presented via local interfaces
+and/or captured in logs). Connection close during TLS setup on the other hand can have
+various third-party causes (firewall etc. pp.). The approach also allows Registrars to distinguish
+between actual Pledge connection attempts and other connection attempts which is
+especially useful when the Registrar also acts as an EST Server. Pled
+
+-----------------------------------------------------------------------------
+Section 5.2 1)
+
+a) "nonce:  The Pledge voucher-request MUST contain" ...
+   ..."Doing so ensures Section 2.5 functionality"
+   
+   If one just follows the reference to section 2.5, it looks contradictory:
+   "_If_ the voucher contains a nonce then the Pledge MUST confirm "
+
+   Please clarify, this is confusing:
+   - If the nonce is a MUST because of section 2.5, then the MUST would only have to
+     apply to RTCless Pledges. But its not clear to me why... (forgot our discussions,
+     and readers where never part of them, so explanation would be nice).
+   - If the nonce MUST is in your opinion valid with/without RTC, don't refer to 2.5,
+     but provide explanation accordingly why MUST.
+   - Add "See section 6.2 for reduced security Pledge options".
+
+   - fix to "MUST NOT be reused for _MULTIPLE_ bootstrapping attempts
+     IMHO also: (especially not across repeated first bootstrap attempts  after power cycling).
+
+-----------------------------------------------------------------------------
+Section 5.3 1)
+
+a) "The Registrar initiates the connection and uses the MASA URL obtained
+    as described in Section 2.7 for RFC6125 authentication of the MASA server."
+
+   Q: Does this mean:
+   "The Registrar initiates the connection and uses the DNS name of the MASA URL obtained
+    as described in Section 2.7 for (RFC6125) authentication of the MASA server certificate."
+
+   Aka: for the less PKIX/Websecurity initiated readers like me, writing out
+   what is actually implied could make the sentence easier to parse (instead of having to
+   read more of RFC6125.
+
+-----------------------------------------------------------------------------
+Section 5.4 
+
+a) See comment for section 5.4.4  for where i think the first paragraph description should be.
+   (aka: make this paragrap a summary of what the MASA interface is, mentioning both
+    requestvoucher and requestauditlog and move to 2.4.4).
+
+b) The paragraph is difficult to parse and has IMHO wrong pieces.
+   - What does "simplicity" mean ?
+   - "the Registrar is not required to make use of any other EST functionality when
+     communicating with the MASA service"... what does that mean.. ? Not required =
+     but could optionally do it ?
+   - "is defined as an optional EST message" - requestvoucher is NOT optional for MASA,
+     and i don't think its in-profile for other roles supported by EST (Registrar, CA,...).
+
+   Eg: i would suggest the following for the first paragraph:
+
+     e.g.: The MASA uses EST (RFC7030) REST calls with the EST prefix "/.well-known/est/"
+     to allow reuse of existing EST server code to implement a MASA service. The 
+     MASA service requirs only two new operations: requestvoucher and requestauditlog.
+     If a shared code basis is used for MASA and other EST/BRSKI defined service roles
+     (Domain Registrar, CA,...), the MASA service MUST properly reject any EST functionality
+     requests it does not wish to service; a requirement that holds for any REST interface.
+
+ "To allow the reuse of existing EST server code basis for MASA
+     functionality," 
+   If you where thinking of other types of "simplicity", please refer to the most
+   important one because without any explanation, simplicity is hollow.
+
+c) If you agree to above and moved first paragraph out to 2.4.4, just reword second
+   paragraph to something like: Domain Registrars requests vouchers from a MASA
+   with an HTTP POST ...
+
+d) An example (in parenthesis is fine) for a "future media type" would be useful to justify
+   to readers more easily the paragraph mentioning a SHOULD against them.
+
+e) "request a Voucher when the Pledge is offline" ->
+   "request a Voucher when the Pledge is unable to connect to the Registar" ??
+   (i hope thats whats meant with "offline").
+
+   "when the Registrar is expected to be offline" ->
+   "when the Registrar is expected to be unable to connect to a MASA"
+
+   Offline can be confusing because it does not explain who is not able to talk with
+   whom, and i think in both cases two of the three are still expected to talk
+   with each other (or at least that part does not matter).
+
+   I am still confused about the "Pledge is unable to connect to the Registrar" case.
+   Is this a case where BRSKI-EST does not happen but something else (e.g.: sneakernet)
+   between Registrar and Plege ? Please add a sentence explaining what this case means.
+   
+f) "since the registrar is not known to the MASA server in advance"
+
+   Given how the HTTPS connection requires authentication, there is some knowledge
+   about the registrar from that, so the above sentence is confusing. Whats the
+   correct statement to be made here thats takes the existance of the HTTPS
+   authentication of the Registrar to the MASA into account ?
+   
+g) Registrar revocation consistency:
+
+   Maybe change the lead in in this section to something like: "If the Registrar
+   uses a CA known to the MASA to make certificate revocation information available
+   to the MASA, MASA SHOULD check ... of the Registrar Certificate. MASA MAY
+   limit service to Registrar where this applies to provide owners protection against
+   impacted registrar (e.g.: stolen).
+
+   In any case a short reasoning why to do this step would be helpfull.
+
+h) Pledge proximity assertion:
+
+   Sentence summarizing one most important attack vector reducet by this. Or pointer
+   to reference where this is explained.
+  
+-----------------------------------------------------------------------------
+Section 5.5
+
+a) "immediately complete authentication of the provisional"
+
+   This sounds contradictory to the potential need to perform /cacerts first as
+   described in section 5. Add something like (potentially after performing /cacerts,
+   see section 5.) ?
+
+-----------------------------------------------------------------------------
+Section 5.5.1
+
+a) "which is an additional justification
+   for the recommendation to proceed with EST key management operations.
+   Once a full CA Certificate Response is obtained it is more
+   authoritative for the domain than the limited 'pinned-domain-cert'
+   response."
+
+   This sounds contradicting to the statement in section 5., where it sounds as if
+   provisional state is completes only after the (optional /cacerts) and cacerts
+   is part of bootstrap, whereas here it sounds as if its part of enrollment only.
+
+b) If /cacerts is not required for finish provisional state or voucher telementry,
+   maybe the Pledge would ask for cacerts after voucher telemetry, and then
+   a REgistrar that does not want to be a full EST (enrolment) servdr, would reply
+   with a redirect to an actual enrolment server in the same domain. That would
+   eliminate the "discovery" part discussed in the last paragraph of this section.
+
+Still confused why/where cacerts needs to happen and why exactly there in the flow...
+
+-----------------------------------------------------------------------------
+Section 5.6)
+
+a) "The domain is expected to provide indications to the system
+    administrators concerning device lifecycle status.  To facilitate
+    this it needs telemetry information concerning the device's status."
+
+    Nice language.
+
+    Whats missing is the IMHO quite relevant recommendation to go beyond that
+    and provide diagnostics / suggestions that could go as much as 
+
+    "actionable recommendations in support of expedient resolution of the failure".
+
+    Aka:
+       (Failure) Reason: "voucher certificate not valid yet".
+       Suggestion:      "Replace empty RTC battery "
+
+    Can we add something like Suggestion to the structure ?
+    Not sure if "suggestion" is the best word, but it would be great if we can put a
+    stake in the ground adding this to the structure. I have seen too many times
+    where it took eternities to find the magic offline manual mapping from a range
+    of crazy error codes (reasons) to the suggestions what to do next.
+
+b)  Recommendations for how to mitigate the potential security issues of diagnostics
+    would be great:
+
+    - Reasons could be per-device encoded, requiring vendor for further insight:
+      Reason: "error 23498y354AZRFF"
+      Suggestion: "call manufacturer"
+    - Operations after errors can be slowed down to reduce/eliminate brute force attacks
+    
+c)  "message is being sent" -> "message may be sent" (above example of non-attack issue).
+
+-----------------------------------------------------------------------------
+Section 5.7)
+
+a) Paragraph 1: Did we not discuss the option that the Registrar might want to
+   examine the authorization log before even forwarding the voucher to the Pledge ?
+   I do not remember what the outcome is but it would be good to mention why or
+   why not this should be an option. o
+
+b) It is recommended put to put some
+                     ^^^^^^^^^^
+
+   And not even clear what it would mean if the sentence was fixed.
+   Does it mean something like: Cacheable object name could be large randomn number ?
+   
+-----------------------------------------------------------------------------
+Section 5.7)
+
+a) The current described examples of the Audit Log are all somewhat scary,
+   a bit like "The doctor told me something bad... should i ignore it".
+   Or worse: This audit log stuff is made up by Vendors to scare us into buying
+   only manufacturer refurbished gear with a clean history bill.
+
+   Can we mention some simple positive examples o better sell the value of the audit log,
+   E.g.:
+
+   Audit logs can not only help to identify candidate security risks, but
+   Audit Logs can also help to identify mislocated devices, for example in office parks
+   connected to the wrong network connector. Audit logs can help tracking history
+   of devices re-deployed in large companies - which department originally bought
+   this equipment,.
+
+   The biggest concern i think we will see from privacy advocats is that
+   vouchers/audit-logs are a big-brother initiative from vendors. This too might
+   be something to document counter arguments for:
+
+   The amount of traceability of audit-log information is highly flexible.
+   The PKI for pinned-domain-certs used to identify owners do not have to be public,
+   and if the authentication of Registrars with MASA is set up to be non-traceable
+   (or the MASA is operated by a trusted third party providing privacy protection
+    of authentication data), audit-logs can provide similar privacy options to block-chains
+    - you can only identify another party (in the audit-log) if you can trace the
+   pinned-domain-cert to an owner.
+
+-----------------------------------------------------------------------------
+Section 5.8)
+
+a) "The Pledge is also RECOMMENDED to implement the following EST automation extensions"
+   add: An ANI Pledge MUST implement them.
+
+b) Last paragraph: It looks as if this is in answer of my question about
+enrolling multiple certificates. Thanks!
+
+  - Please put at the end of 5.8 (eg: new subsection before CoAP - "enrolling multiple
+    certificates). No need to derail the core track what BRSKI does with
+    consideratations of what it can not do.
+  - The text reads as if its a fault of BRSKI/CSR-attributes that its impossible
+    to get multiple certificates and reads in a way as if "RFC7030 alone without
+    BRSKI wouldn't be a problem". Maybe i am overinterpreting.
+
+  - How about adding a sentence like:
+
+    Enrolling with additional trust-anchor/certificate pairs for additional services/roles
+    for which the primary TA/certificate are not useable is subject to future
+    specifications. It could for example simply be achieved by performing
+    EST operations for an additional <service> via URIS of the form
+      /.well-known/est/<service>/{cacerts,csrattrs,simpleenroll,...}
+
+    Unless i misunderstood the "arbitrarylabel" examples in RFC7030.
+
+-----------------------------------------------------------------------------
+Section 5.8.2) 
+
+a) The wording of the first paragraph makes it somewhat hard to understand what point
+it is trying to make:
+
+| In some deployments its plausible that the Pledge generates a certificate
+| request containing only identity information known to the Pledge (essentially
+| the X.509 IDevID  information) specific identity information
+
+"in other deployments the pledge magically generates a certificate request
+including information not known to the pledge"  ???
+
+First two paragraphs text is somewhat confusing and incomplete.  Suggest to reword
+with the following bullet items as goals to describe: 
+
+   - BRSKI Cert model:
+     - no BRSKI specific CA requirements - Any CA, Registrar<->CA protocol support.
+     - Registrar is policy decision point for what should be in the certificate:
+       - operation model: Registrar in responsibility of department running service
+         and know what needs to be in cert, CA more often simple "security department"
+     - Example service attribute: ACP information field for ANI Pledges.
+
+   - IDevID attributes specific service case: 
+     - Want to have them in LDevID to avoid weakening-of/attacks-against LDevID
+       keying material (can not be renewed on IDevID but can be renewed in LDevID).
+     - For uniformity and better control, Registrar also determines which IDevID
+       attributes are put how into LDevID.
+
+-----------------------------------------------------------------------------
+Section 5.8.4)
+
+a) "The EST protocol assumes an end user" -> "RFC7030 assumes an end user"
+
+b) There seems to be text missing after second paragraph (before discussing success/failure):
+
+   -If the /simpleenroll or other RFC7030 4.2 enrolment fails due to problems
+    locally to the Pledge (and therefore not known without telemetry by the Registrar),
+    the Pledge logs an app FAILURE via enrollment status telemetry.
+   -If enrollment succeeded and once the pledge has managed to re-establish the TLS
+    connection with its LDevID, it logs an /enrollstatus SUCCESS.
+   - If enrollment succeeded, but re-establishment of the TLS
+    connection fails, the Pledge reverts to re-establish a TLS connection with its IDevID
+    and logs an appropriate FAILURE enrollment status telemetry. It then attempts
+    to re-enroll a new certificate with exponentially increasing delay to allow
+    operations to overcome any possible problems in the CA/Registrar setup
+    that could have caused the problem.
+
+Or similar if i didn't get it right.
+
+c) " This allows for clients that wish to minimize their crypto operations
+   to simply POST this response without renegotiating the TLS session -
+   at the cost of the server not being able to accurately verify that
+   enrollment was truly successful."
+
+   Bullocks. First you scare off readers with "diagnostics bad" (5.6), and
+   now Pleges SHOULD just do good diagnostics (try new LDevID to see it works) ?
+   
+   Please make the SHOULD re-negotiate a MUST and delete this last paragraph.
+   If a plege can not afford a single validation of a BRSKI certificate, its not
+   worth receiving one. 
+
+
+-----------------------------------------------------------------------------
+Section 6)
+
+a) Suggest Change title to eg: "Additional security options"
+
+  - Some text (eg. first paragraph mentioning NEA) talks also about additional/higher
+    security, so lower is not necessarily always true.
+
+b) Need to be more specific about how text in this section relates to BRSKI compliance:
+
+   It seems as if the intent of this section targets to be part of the BRSKI standards
+   specification as well and any implementations that match the MUST/SHOULD in this
+   section are still compliant with BRSKI. I hope i understand this correctly. I think
+   this should be written out explicity. E.g.:
+   
+   This section is part of BRSKIs standard specification. Implementations
+   following the MUST/SHOULD in this section will still be compliant with BRSKI.
+   All lowered security options in this section are explicit manufacturer 
+   choices and operators MUST be made well aware of of these choices reduced 
+   security achievable under those choices through appropriate documentation/labelling
+   (e.g.: "Device with/without IDevID").
+
+-----------------------------------------------------------------------------
+Section 6.2)
+
+a)  fix to "not involved in security considerations in this chapter"
+
+   Remember text in earlier sections where you claimed that yu do expect
+   fewer attacks after completion of TLS/provisional and how having trusted
+   Plege/Registar-Pledge path achieves this.
+  
+-----------------------------------------------------------------------------
+Section 6.3)
+
+a) MASA server -> MASA service (i may have said that in before, but you can ignore
+   me on these stylistics. You'll just get them later from RFC editor, pretty good
+   spotting inconsistent terminology.
+   proxy involved in security cond
+
+b) "Trust on first Use" for physical ports: suggest to modify to:
+   "trust on first use" for methods with a strong dependency on physcial posession,
+   such as taking ownership via configuration on a serial console.
+
+-----------------------------------------------------------------------------
+
+Section 7)
+
+a) This document is extending the .well-known "est" definition. We need to
+   determine how to correctly handle this and have started to inquire.
+
+   I suggest to add the following text to the IANA section for this:
+
+| This document extends the definitions of "est" (so far defined via RFC7030) in
+| the "https://www.iana.org/assignments/well-known-uris/well-known-uris.xhtml" registry
+| as follows:
+| 
+|   - add /.well-known/est/requestvoucher (see section 5.4)
+|   - add /.well-known/est/requestauditlog (see section 5.7)
+
+We can then let the IETF review, IANA review etc. decide whether / how this
+will ultimately be handled, e.g.: having to add "updates RFC7030" to the
+document and/or adding BRSKI RFC to the registry.
+
+b) It would be good to create subsections for each registray mentioned so
+that one can see from the table of content what registries are impacted.
+
+c) Probably need a summary of updates this document makes to RFC7030, the
+easiest way would IMHO be to create a short section "Updates to RFC7030",
+saying that all REST services introduced in this document are extensions ot
+RFC7030 ESTE because they use the EST well-known prefix, and then point to
+section 2.4 which with the text i proposed provides IMHO a good summary
+of those services as used by each role (Pledge, Registrar, MASA).
+
+RFC 7030 has these nice tables with service URIs and properties. Some of
+those would be nice for BRSKI extension/used-RFC7030, but lots of work...
+
+d) Add section to request brksi-proxy and brski-registrar to
+   IANA service name registry.
+
+-----------------------------------------------------------------------------
+Section 8)
+
+a) First paragraph: Unvailable MASA is not a security but an operational consideration.
+Feel free to add "Operational considerations" section before security
+considerations and move it there. Might want to add some more considerations around
+MASA to set context: Suggest something like:
+
+- Operationally main novelty of BRSKI is dependency against vendor/cloud operated
+  security service (MASA). Main point of discussion in this section.
+
+- Operationally, BRSKI is most easily a fit for solutions in which other part of
+  operations are already in the cloud so that the main operational issues of
+  cloud connectivity for MASA is not novel. For example, SD-WAN equipment, services
+  or in general solutions where already part of a (SDN-) OAM management plane
+  are moved into the cloud (management products as a service, cloud-only managed
+  service equipment, ...).
+
+- Even if active OAM/SDN/Management elements of a network are still "on-premises",
+  dependency against cloud/Internet reachability exists more and more on the user/
+  application side. In this respect too, BRSKI/MASA does not increase the need for
+  cloud/Internet reachability beyond pre-existing requirements in many networks
+  (most Enterprises, Service Providers).
+
+- There are nevertheless many evolving areas / industries (such as IoT, industrial
+  OT networks) where cloud dependency is more novel and variations of MASA options as
+  defined in this document (or through future add-on work) need to be explored to match
+  the operational requirements AND provide the required level of security.
+
+- A variety of those deployments can be handled through a variety of the Section 7
+  decscribed altered/reduced security option.
+
+  [ insert existing paragraph here ]
+
+- Not described but an example of modified operational model: Very large customers
+  that already often receive often customer specialized equipment like defense
+  networks/solution may hav unique "offline" requirements. These might simply partner
+  with manufacturers to the extend of being able to run MASA services themselves for
+  the vendor equipment they use or receive custom equipment versions with IDevID using a 
+  (potentially secondary) trust anchor of the customer so that registrar co-located MASA
+  can create vouchers.
+
+b) Possible lead in to security session:
+
+- With the focus of BRSKI on strong security, the main considerations in this section
+  are attack attempts against this security infrastructure, above described
+  (section 7) reduced security options and implementation risks.
+
+c) "The MASA authorization log..."
+
+   Not security consideration either IMHO.  Suggest to move into a new "Privacy considerations"
+   section. Cut into two or more paragraps (too long now). 
+   Also Point to the text i suggested above for section 5.7.
+
+   Add note that privacy considertins can equally be mitigated through options
+   mentioned in operational consideration section (what i suggested to add with eg:
+   defense customer example).
+
+-----------------------------------------------------------------------------
+Appendix A)
+
+a) Would change title to non-IPv6 or non-ANI operations:
+
+b) Initial explanation:
+
+Specification of BRSKI in Section 4. only covered the mechanisms for an IP6
+Pledge (link-local IPv6 address) and Proxy options necessary for IPv6 and ANI.
+It does not cover the options for non-IPv6 Pledge or non-ANI Proxies (IPv4 or IPv6).
+
+-----------------------------------------------------------------------------
+Appendix A.2)
+
+a) Replace with:
+
+A.2.  Use of DHCP
+
+   A non-ANI Plege MAY obtain a (non-link-local-scope) IP address via DHCP [RFC2131]
+   IPv4 and/or DHCPv6 [RFC3315] instead of or after proxy discovery via link-local
+   address(es).
+
+   DHCP needs to be set up to not only provide an IP address, but for DNS information
+   (DNS server, DNS prefix) to make unicast DNS-SD lookups as described in following section B.
+
+
+-----------------------------------------------------------------------------
+Appendix B)
+
+a) Use suggested service name of "_brski-proxy" in all caes where "_bootstrapks"
+   is used. (see comment for section 4.1.1 for why that name is better).
+
+b) After "The Pledge MAY perform DNS-based Service Discovery", new paragraph:
+
+   A non-ANI Proxy MAY perform DNS-based Service Discovery using unicast DNS
+   to discover Registrars searching for searching for the service
+   "_brski-registrar._tcp.local.".
+
+c) "To prevent unaccceptable levels of network traffic" -> add ", when using mDNS"
+  
+d) "received a useable IPv4 address via DHCPv4 as suggested in Appendix A" ->
+   "received a useable IP address via DHCP/DHCPv6 as suggested in Appendix A.2"
+
+e) "If no local bootstrapks service": Add at end of paragraph: See Section 2.6
+   (Cloud Registrar).
+ 
+-----------------------------------------------------------------------------
+
+Appendix C)
+
+a) See discussion for section 4.3 above for the issues i see with current IPIP
+  specification and suggestion to maybe move out of BRSKI to resolve with more time.
+
+-----------------------------------------------------------------------------
+Appendix E)
+
+a) Please add a sentence how to decode Hex Certs (not keys) with utility
+   at the very top of the appendix (right now its further down in the text).
+
+b) E.1.4: which element in the cert would become the serial-number ?
+
+c) There are no ASN1 decodings of the artefacts, Please fix.
+   If this is subject to IANA assignments, please add RFC editor note to
+   block draft progressing.
+
+   [RFC-Editor: There is text missing here that can only be inserted
+    after finishing mandator IANA assignment. Do not publish version of 
+    this draft before this is resolved.]
+
+-----------------------------------------------------------------------------
+
+X) Applicability outside BRSKI
+
+If i am not mistaken, BRSKI-MASA should be one option how a bootstrap
+server in "draft-ietf-netconf-zerotouch" could obtain a voucher from a
+MASA (if i understand it correctly, the mean by which such a bootstrap
+server obtains a voucher is left open). If that is correct, then it would
+be great to mention this in a sentence or two in an appropriate section
+of BRSKI as a very explicit example how BRSKI can be reused outside the
+ complete ANIMA scope (also add draft-ietf-netconf-zerotouch as an informational
+reference).
