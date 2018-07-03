@@ -1,0 +1,615 @@
+   WEEKLY INVITE, SEE ANIMA BOOTSTRAP WIKI:
+   [1]https://trac.tools.ietf.org/wg/anima/trac/wiki/Bootstrap  draft is
+   always at:
+   [2]https://tools.ietf.org/html/draft-ietf-anima-bootstrapping-keyinfra-
+   04
+   NOTE NOTE NOTE: BRSKIEtherpad
+   Current and most recent meeting notes are added to the BOTTOM of this
+   document.
+   The reason for this is so that we can consistently refer to line number
+   and have them stay (mostly) the same as we add newlines. If Etherpad
+   offered a feature for numbering from the bottom we could dispense with
+   the pain of scrolling to the bottom of the document but:
+
+       PLEASE SCROLL TO THE BOTTOM OF THIS DOCUMENT TO START/ENGAGE IN THE
+   CURRENT MEETING
+       PLEASE SCROLL TO THE BOTTOM OF THIS DOCUMENT TO START/ENGAGE IN THE
+   CURRENT MEETING
+       PLEASE SCROLL TO THE BOTTOM OF THIS DOCUMENT TO START/ENGAGE IN THE
+   CURRENT MEETING
+       History can now be found at:
+   [3]https://github.com/anima-wg/anima-bootstrap/blob/concise/minutes/ani
+   ma-20170502/anima-bootstrap.txt
+   Pre IETF99 notes removed from etherpad.
+   2017-07-25:
+       present: kent, mcr, max, toerless,
+
+       BRSKI will import the YANG voucher model, and will refine it to
+   produce a voucherrequest.
+       Discussion about whether or not YANG 1.1 deprecated/discouraged use
+   of refine.
+       No, this was "deviation", not refine. [see
+   [4]https://tools.ietf.org/html/draft-ietf-netmod-rfc6087bis-13]
+       ACTION: Kent to produce some suggested text for the 'voucher
+   request' so we can evaluate
+       Voucher request dsicussion is targeted for BRSKI document. If it is
+   unweildy/complex beyond reason then we would make the voucher doc
+   address. But generally: our goal is to allow voucher document to
+   proceed (not hold it up!) and get BRSKI
+       finalized asap afterward. This may not be globally ideal but it is
+   a local ideal.
+
+       [DEL: TOPIC from MCR: freshness in nonce and PoP in voucherrequest.
+   :DEL]
+     *     concern that nonce in voucher request may be "stale" --- that
+       it could be captured and then repeated.
+
+     *   proximity tries to assert that the registry and pledge are near
+       each other.
+
+          We believe that the VR being signed by the same identity as the
+   TLS Client Certificate.
+
+     * The MASA verifies that the Registrar making the claim is the same
+       registrar that the pledge sees. This ensures that the asokan etc
+       attack is not occuring. It is not a freshness check.
+     * What is verified is: The pledge and the MASA are seeing the same
+       registrar.
+     * ACTION: mcr to write up concern for security considerations, and to
+       explain why the above solves the problem.
+     * "   pinned-domain-cert:  In a Pledge voucher request this is the
+     *       Registrar certificate as extracted from the TLS handshake
+       (for
+     *       example the first certificate in the TLS 'certificate_list'
+     *       sequence (see [RFC5246]).  This MUST be populated in a
+       Pledge's
+     *       voucher request if the "proximity" assertion is populated."
+
+       TOPIC from Max: lets discuss 'proxy' and Lp (as per thread)
+     *
+       [5]https://www.ietf.org/mail-archive/web/anima/current/msg02857.htm
+       l
+     *
+       [6]https://www.ietf.org/mail-archive/web/anima/current/msg02862.htm
+       l
+     *     ACTION: mcr to write up the Proxy tells the Registrar what the
+       LxX is
+     *               vs:  the Registrar tells the Proxy what LxR to use
+     *               vs:  the Registrar has multiple addresses and all
+       tunnels are unique.
+     *
+
+   2017-08-01:
+       present: mcr, max, kent
+     *     additional discussion for proxy discussion:
+
+     * As indicated in Discover 3.1 the Pledge:
+
+      a.  MUST: Obtains a local address using IPv6 methods as described in
+          [RFC4862] IPv6 Stateless Address AutoConfiguration.  [RFC7217]
+   is
+          encouraged.  Pledges will generally prefer use of IPv6
+   Link-Local
+          addresses, and discovery of Proxy will be by Link-Local
+          mechanisms.  IPv4 methods are described in Appendix A
+
+          Add text ref RFC4941 temporary addresses (s3.3):
+
+                       Use of <xref target="RFC4941" /> temporary
+   addresses is
+                       encouraged.  A new temporary address SHOULD be
+   allocated
+                       whenever the discovery process is forced to restart
+   due
+                       to failures.
+
+     * Content-Type: application/voucher[request]; format=jwt  <- not well
+       defined.
+     *
+     * Content-Type: application/voucher[request]+cms
+     *
+
+   We agree do the iana for the media types currently defined in the
+   document:
+   application/voucherrequest
+   application/unsignedvoucherrequest
+   etc
+   With the additional iana for the "+cms" and "+jwt" to be defined IN THE
+   FUTURE as well (its just iana cookie cutter for now). These types are
+   not used for mandatory to implement but doing the iana work now to
+   prepare for future in one shot.
+   "Future voucher documents MAY use other +xxx formats, relying parties
+   are encouraged to fail gracefully for unknown formats."
+   ACTION: Max to produce the diffs for this
+   Update address for:
+   For "Bjarnason, Steinthor" <sbjarnason@arbor.net>
+   sbjarnason@arbor.net
+   module ietf-voucher-request {
+     yang-version 1.1;
+     namespace
+       "urn:ietf:params:xml:ns:yang:ietf-voucher-request";
+     prefix "vch";
+     import ietf-yang-types {
+       prefix yang;
+       reference "RFC 6991: Common YANG Data Types";
+     }
+     import ietf-restconf {
+       prefix rc;
+       description
+         "This import statement is only present to access
+          the yang-data extension defined in RFC 8040.";
+       reference "RFC 8040: RESTCONF Protocol";
+     }
+     import ietf-voucher {
+       prefix v;
+       description
+         "";
+       reference "";
+     }
+     organization
+      "IETF ANIMA Working Group";
+     contact
+      "WG Web:   <[7]http://tools.ietf.org/wg/anima/>
+       WG List:  <[8]mailto:anima@ietf.org>
+       Author:   Kent Watsen
+                 <[9]mailto:kwatsen@juniper.net>
+       Author:   Max Pritikin
+                 <[10]mailto:pritikin@cisco.com>
+       Author:   Michael Richardson
+                 <[11]mailto:mcr+ietf@sandelman.ca>
+       Author:   Toerless Eckert
+                 <[12]mailto:tte+ietf@cs.fau.de>";
+     description
+      "This module... FIXME
+       The key words 'MUST', 'MUST NOT', 'REQUIRED', 'SHALL', 'SHALL NOT',
+       'SHOULD', 'SHOULD NOT', 'RECOMMENDED', 'MAY', and 'OPTIONAL' in
+       the module text are to be interpreted as described in RFC 2119.
+       Copyright (c) 2017 IETF Trust and the persons identified as
+       authors of the code. All rights reserved.
+       Redistribution and use in source and binary forms, with or without
+       modification, is permitted pursuant to, and subject to the license
+       terms contained in, the Simplified BSD License set forth in Section
+       4.c of the IETF Trust's Legal Provisions Relating to IETF Documents
+       ([13]http://trustee.ietf.org/license-info).
+       This version of this YANG module is part of RFC XXXX; see the RFC
+       itself for full legal notices.";
+     revision "YYYY-MM-DD" {
+       description
+        "Initial version";
+       reference
+        "RFC XXXX: Voucher Profile for Bootstrapping Protocols";
+     }
+     //rc:yang-data voucher-request-artifact {
+     container voucher-request-artifact {
+       // YANG data template for a voucher-request.
+       uses v:voucher-artifact-grouping {
+         augment "voucher"  {
+           leaf prior-signed-voucher2 {
+             type binary;
+           }
+         }
+         refine "voucher/created-on" {
+           mandatory false;
+         }
+       }
+     }
+   }
+   A current example from the draft, modified to be a request would look
+   like:
+      {
+        "ietf-voucher-request:voucher": {
+          "nonce": "62a2e7693d82fcda2624de58fb6722e5",
+   [DEL:        "created-on": "2017-01-01T00:00:00.000Z", :DEL]
+          "assertion": "proximity",
+          "pinned-domain-cert2": "<base64 encoded certificate>"
+        }
+      }
+
+
+
+   Kent: to create a high level section (between 2 and 3) that details
+   this. We'll review the new outline/toc and ensure we like it.
+   2017-08-08:
+       present: mcr, max, kent
+
+
+   COMPLETE: max to respond to ipr discussion
+   COMPLETE: max to describe initial mime-type changes
+     *
+     * [14]https://github.com/anima-wg/anima-bootstrap/commit/2e6d4669d89e
+       75a06bcb7dc4cf281543eb24cb66
+     * [15]https://www.iana.org/assignments/media-type-sub-parameters/medi
+       a-type-sub-parameters.xhtml
+
+   smime-type Value Reference certs-only[RFC5751, Section
+   3.2.2]CMC-Request[RFC5273, Section 3]CMC-Response[RFC5273, Section
+   3]compressed-data[RFC5751, Section 3.2.2]enveloped-data[RFC5751,
+   Section 3.2.2]enveloped-x400[RFC3854, Section
+   3.3.1]server-generated-key[RFC7030, Section 4.4.2]signed-data[RFC5751,
+   Section 3.2.2]signed-receipt[RFC2634, Section 2.4]signed-x400[RFC3854,
+   Section 3.2.1]
+      HTTP/1.1 200 OK
+      Status: 200 OK
+      Content-Type: application/pkcs7-mime; smime-type=voucher
+   OPEN QUESTION: do what do we say about the 'content-transfer-encoding'?
+      Content-Transfer-Encoding: base64
+   For application/json the transfer encoding is text
+   raw from my notes:
+   smime-type is originally defined in RFC3851 but the more recent
+   reference is RFC5751, RFC7030, 3851 etc. But RFC7114 defines the IANA
+   registry.
+   For raw JSON info, e.g. status we use:
+         <section title="Voucher Status Telemetry ">
+   [snip]
+           <t>The posted data media type: application/json</t>
+   We could then do application/json for the unsigned voucher request and
+   it would be consistent with this.
+   RESOLUTION: use application/json ; max to update text to reflect this
+   {
+     "ietf-voucher-request:voucher": {
+       "nonce": "62a2e7693d82fcda2624de58fb6722e5",
+       "created-on": "2017-01-01T00:00:00.000Z",
+       "assertion": "proximity"
+       "idevid-issuer": "<base64 encoded Authority Key Identifier>"
+       "serial-number": "JADA123456789"
+       "prior-signed-voucher": "<base64 encode prior voucher request>"
+     }
+   }
+   application/jwt
+   [16]https://tools.ietf.org/html/rfc7519
+   kent failed to do his action items  :(
+       mcr also is behind on actions.
+
+       [17]https://github.com/anima-wg/anima-bootstrap/issues/18
+
+   2017-08-15:
+       present: max, kent, toerless
+     *     mcr sent notice that he will miss this and the next meeting.
+
+
+   $ pyang -f tree --tree-print-groupings ietf-voucher\@2017-08-15.yang
+   module: ietf-voucher
+     groupings:
+     voucher-artifact-grouping
+         +---- voucher
+            +---- created-on                       yang:date-and-time
+            +---- expires-on?                      yang:date-and-time
+            +---- assertion                        enumeration
+            +---- serial-number                    string
+            +---- idevid-issuer?                   binary
+            +---- pinned-domain-cert               binary
+            +---- domain-cert-revocation-checks?   boolean
+            +---- nonce?                           binary
+            +---- last-renewal-date?               yang:date-and-time
+   $ pyang -f tree --tree-print-groupings
+   ietf-voucher-request\@2017-08-15.yang
+   module: ietf-voucher-request
+     groupings:
+     voucher-request-grouping
+         +---- voucher
+            +---- created-on?                      yang:date-and-time
+            +---- expires-on?                      yang:date-and-time
+            +---- assertion                        enumeration
+            +---- serial-number                    string
+            +---- idevid-issuer?                   binary
+            +---- pinned-domain-cert               binary
+            +---- domain-cert-revocation-checks?   boolean
+            +---- nonce?                           binary
+            +---- last-renewal-date?               yang:date-and-time
+            +---- prior-signed-voucher-request?    binary
+   {
+     "ietf-voucher-request:voucher": {
+       "nonce": "62a2e7693d82fcda2624de58fb6722e5",
+       "created-on": "2017-01-01T00:00:00.000Z",
+       "assertion": "proximity"
+       "idevid-issuer": "base64encodedvalue=="
+       "serial-number": "JADA123456789"
+       "prior-signed-voucher": "base64encodedvalue=="
+     }
+   }
+   Action item for Kent
+     * 1) check in the voucher-request .yang
+     * 2) create /ref directory with gen-trees.sh
+     *
+
+   Action item for Max
+     * 1) update makefile to be like 'voucher'; goal: automatically build
+       .yang for inclusion and gen-tree.sh output etc
+     * 2) update base64 examples to use "base64encodedvalue==" (COMPLETE)
+     * 3) move .json example out of the xml into /refs/*json examples
+     *
+
+   open: to perform 'validate-all.sh' but since this doesn't work it isn't
+   a priority. And it isn't being done today either.
+   On the question of renewal of certificates current language is in:
+       [18]https://tools.ietf.org/html/rfc7030#section-3.3.2
+       4th paragraph, which references
+       [19]https://tools.ietf.org/html/rfc5280#section-6.1.3
+
+       PKIX normative is that certs can't be used after they expire.
+       Note: In products this is often configurable as a policy rule.
+       Potential solutions include:
+   1) mandate clients renew before their cert expires. Painful. IOS uses
+   the 70% rule to trigger renewal (configurable).
+     * Difficult to ensure this occurs. Not clear what the final failure
+       state is. Does the client give up?
+     *
+
+   2) relying party can support expired certificates (this is common but
+   not normative).
+     * Requires a normative statement of: "EST server SHOULD support
+       expired client certificates as a policy option".
+
+     * could have a normative statement of: "BRSKI client SHOULD start
+       requesting before lifetime expires but MAY continue requesting
+       using expired certs". NOTE: need a signal to indicate that client
+       should 'get lost' and stop bugging the server. Wouldn't want
+       clients to think they can always bug the server forever. Perhaps a
+       time limit on how long expired certs can be used.
+     * QUESTION: How much is the BRSKI proxy used for ongoing certificate
+       management.
+
+   3) clearly define that enroll falls back on IDevID for client
+   authentication if the LDevID does finally expire.
+     * This relies on IDevID for many future uses. Bad practice.
+     *
+     *
+     *
+
+   2017-08-22:
+     *     present: mcr (may no mic), max, kent,
+     *
+     * 1) Discussion about voucher-request yang model
+     * 2) Issue #20 ---
+       [20]https://github.com/anima-wg/anima-bootstrap/issues/20  how does
+       the pledge know what to ask for in the certificate.
+     *
+     * [21]https://tools.ietf.org/html/draft-ietf-netconf-keystore-02#sect
+       ion-2.3  (scroll down to page 16 for
+     * generate-certificate-signing-request)
+     *
+     * mcr asks if attributes need to be generically described such that
+       the pledge does not need to know new attributes. max says that this
+       probably leads to disaster, so new attributes will need to be known
+       by pledge.
+     * mcr suggests that ACPinfo structure should be broken down into
+       pieces, so let's solve this for the ANIMA subjectAltName, and then
+       push back on the PKI people to fix this.
+     * mcr fell off at 10:55, couldn't get back on.  Kent, please commit
+       with the container-less version.
+     *
+
+   2017-08-29:
+       present: mcr, max, kent (reluctantly ;)
+
+               <t>The Pledge SHOULD follow the BRSKI operations with an
+   EST enrollment.</t>
+               MAX: insert into BRSKI-07, s3.8 at second to last
+   paragraph. This thus allows the '0' enrollment case
+
+     *     but recommends the '1' enrollment case.
+
+
+           <t>
+             Although EST allows clients to obtain multiple certificates
+   by sending
+             multiple CSR requests BRSKI mandates use of the CSR
+   Attributes request
+             and mandates that the Registrar validate the CSR against the
+   expected
+             attributes. This implies that client requests will "look the
+   same" and
+             therefore result in a single logical certificate being issued
+   even if
+             the client were to make multiple requests. Registrars MAY
+   contain
+             more complex logic but doing so is out-of-scope of this
+   specification.
+             BRSKI does not signal any enhancement or restriction to this
+             capability. Pledges that require multiple certificates could
+   establish
+             direct EST connections to the Registrar.
+           </t>
+
+           The current text actually does restrict slightly:
+
+            A Pledge that properly implements s3.8.2 (CSR attributes)
+   would
+             be expected to request a certificate with the same attributes
+   each time. The
+             PKI infrastructure handling of this is underdefined, and this
+   specification does
+             not add clarity.
+
+           s3.8.2 indicates "The Registar MUST also confirm the resulting
+   CSR is formatted as
+           indicated before forwarding the request to a CA."
+   2017-09-05
+     * present: max, toerless, mcr,
+     *
+     *
+     * reviewed result of YANG integration of voucher-request.
+     * sorting:
+     *    RFC7159: The JavaScript Object Notation (JSON) Data Interchange
+       Format
+     *    RFC7951: JSON Encoding of Data Modeled with YANG
+     *
+     *
+
+   2017-09-12
+     * present: max, kent (can't hear max)
+     *
+     * would like to resolve this pull request:
+     * [22]https://github.com/anima-wg/anima-bootstrap/commit/d294e13e686f
+       741f11181bb330c2a1c4808e4e33
+     *
+     * [23]https://github.com/anima-wg/anima-bootstrap/blob/voucher-reques
+       t-yang/dtbootstrap-anima-keyinfra-08.txt
+     *
+
+   addressing asymetric insertion of the Registrar's cert into the
+   pledge's request:
+     *
+       [24]https://github.com/anima-wg/anima-bootstrap/tree/proximity-doma
+       in-mumble
+
+   [25]https://github.com/anima-wg/anima-bootstrap/commit/bec6d97207aa8faa
+   a600d60622c9b4650ee04934
+   [26]https://github.com/ietf-roll/6tisch-secure-join/blob/master/ietf-cw
+   t-voucher.yang
+   \
+     // Grouping defined for future usage
+     grouping voucher-request-grouping {
+       description
+         "Grouping to allow reuse/extensions in future work.";
+       uses v:voucher-artifact-grouping {
+         refine "voucher/created-on" {
+           mandatory false;
+         }
+
+         refine "voucher/pinned-domain-cert" {
+           mandatory false;
+         }
+         augment "voucher"  {
+           description
+             "Adds leaf nodes appropriate for requesting vouchers.";
+   2017-09-19:
+     * present: max, mcr
+     * regrets: kent
+     *
+     * * discussed plan to close loop with list on recent concerns that
+       resulted in addition of: proximity-registrar-cert to the
+       voucher-request.
+     *
+     * [27]https://github.com/anima-wg/anima-bootstrap/network
+
+   MiTM dicsussion:
+       p<--->Ra<--->M
+
+       p<--->MiTM<---Ra--->M
+       results in:
+       p (voucher to Rb)<--->Ra<--->M
+
+     * this is detected via pinned cert and is blocked by the pledge
+     * IF pledge signs request, and includes proximity-registrar-cert then
+       M will fail this
+
+   p<--->MiTM<---RB---->M
+     * Will succeed. Detected with logs.
+     * pledge has been stolen. we expect this.
+     *
+
+   p<----MiTM---->Rm, pledge is NOT signing request
+
+     * , M offers a voucher to Rm
+
+
+   p<--->[DEL: MiTM :DEL] <---Ra---->M (expected)
+          \                                (actual: the request is FORKED)
+           \---->Rm---->M
+   resulting in multple claims at 'M'. Which show up in the logs. Rm has
+   control of the log sequence (which comes first).
+   mcr: What if MITM strips out the nonce?
+   2017-09-26:
+       present: mcr, toerless, max, kent
+
+       1) recap of MiTM attack.
+   BRSKI uses EST message formats for existing operations, uses JSON <ref>
+   for all new operations defined here, and voucher formats.
+   p<------------Ra---->M (expected)
+          \                (actual: the request is FORKED)
+           \---->Rm---->M
+
+   Ordering: p/Ra proceeds as normal and gets to provisional state slowly.
+
+     *
+
+             p/Rm proceeds at faster pace, gets voucher from M.
+
+   The audit log issues must be "up-to-date" at the time it is requested
+   (after the telemetry update).
+   So the MASA must issue vouchers "slow enough" (or with enough locks) so
+   that the audit log is always correct.
+   conclusion:
+       section 4.5 becomes mandatory, this indicates that the pledge has
+   accepted a voucher
+       R verifies log after 4.5 occurs (may need statemachine to explain)
+     *
+     * section 2.3 protocol flow needs to indicate status telemetry
+     *
+
+       MASA 'MAY' limit log responses to only entities in the log itself
+   (privacy protection discussion)
+     *     this is not broken by our fix for Rm.
+
+   2017-10-03:
+       present: mcr, toerless, max
+
+       updated diff for mitm:
+
+   [28]https://github.com/anima-wg/anima-bootstrap/commit/bdeb75def1301eb0
+   3cb2aadfc412e114d5f65296
+
+   [29]https://github.com/anima-wg/anima-bootstrap/blob/master/dtbootstrap
+   -anima-keyinfra.txt#L2977
+
+   Proxy:
+     * Action: insert section betweeen 2.4 and 2.5 that indicates the
+       proxy is part of the architecture
+     *                  if you are going to implement a proxy then you
+       should support a circuit proxy so that it works with all registrars
+     *        add a high level section between s5 and s6 that details
+       proxy discussion
+     *
+     * Action: update figure 1 from "dead branch"
+     * Action: move 4.1.2 to new section.
+     *
+     * Moving on in appendix D:
+     * [30]https://github.com/anima-wg/anima-bootstrap/blob/master/dtboots
+       trap-anima-keyinfra.txt#L3341
+     *
+     * Maybe add section 2.0 about MASA to section 2, protocol overview.
+     * Move section D.1.4 to section 1.3, with reference to ACP.
+     *
+     * TBD: Toerless suggesting text for 1.0 architecture overview.
+       Include eg: notion that proxy<->registar network can be ACP and
+       role of proxy is to support simplifying pledge initial network
+       stack.
+     *
+     * names from DNSSD -> become objective names   foo._tcp -> AN_foo?
+
+   [31]JavaScript license information
+
+References
+
+   1. https://trac.tools.ietf.org/wg/anima/trac/wiki/Bootstrap
+   2. https://tools.ietf.org/html/draft-ietf-anima-bootstrapping-keyinfra-04
+   3. https://github.com/anima-wg/anima-bootstrap/blob/concise/minutes/anima-20170502/anima-bootstrap.txt
+   4. https://tools.ietf.org/html/draft-ietf-netmod-rfc6087bis-13
+   5. https://www.ietf.org/mail-archive/web/anima/current/msg02857.html
+   6. https://www.ietf.org/mail-archive/web/anima/current/msg02862.html
+   7. http://tools.ietf.org/wg/anima/
+   8. mailto:anima@ietf.org
+   9. mailto:kwatsen@juniper.net
+  10. mailto:pritikin@cisco.com
+  11. mailto:mcr+ietf@sandelman.ca
+  12. mailto:tte+ietf@cs.fau.de
+  13. http://trustee.ietf.org/license-info)
+  14. https://github.com/anima-wg/anima-bootstrap/commit/2e6d4669d89e75a06bcb7dc4cf281543eb24cb66
+  15. https://www.iana.org/assignments/media-type-sub-parameters/media-type-sub-parameters.xhtml
+  16. https://tools.ietf.org/html/rfc7519
+  17. https://github.com/anima-wg/anima-bootstrap/issues/18
+  18. https://tools.ietf.org/html/rfc7030#section-3.3.2
+  19. https://tools.ietf.org/html/rfc5280#section-6.1.3
+  20. https://github.com/anima-wg/anima-bootstrap/issues/20
+  21. https://tools.ietf.org/html/draft-ietf-netconf-keystore-02#section-2.3
+  22. https://github.com/anima-wg/anima-bootstrap/commit/d294e13e686f741f11181bb330c2a1c4808e4e33
+  23. https://github.com/anima-wg/anima-bootstrap/blob/voucher-request-yang/dtbootstrap-anima-keyinfra-08.txt
+  24. https://github.com/anima-wg/anima-bootstrap/tree/proximity-domain-mumble
+  25. https://github.com/anima-wg/anima-bootstrap/commit/bec6d97207aa8faaa600d60622c9b4650ee04934
+  26. https://github.com/ietf-roll/6tisch-secure-join/blob/master/ietf-cwt-voucher.yang
+  27. https://github.com/anima-wg/anima-bootstrap/network
+  28. https://github.com/anima-wg/anima-bootstrap/commit/bdeb75def1301eb03cb2aadfc412e114d5f65296
+  29. https://github.com/anima-wg/anima-bootstrap/blob/master/dtbootstrap-anima-keyinfra.txt#L2977
+  30. https://github.com/anima-wg/anima-bootstrap/blob/master/dtbootstrap-anima-keyinfra.txt#L3341
+  31. file:///javascript

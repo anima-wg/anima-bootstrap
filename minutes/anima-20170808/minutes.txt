@@ -1,0 +1,377 @@
+This set of minutes covers design team meetings from: 2017-03-09,
+and includes discussions from IETF98 (and hackathon) and IETF99.
+The previous (draft) minutes are at:
+     https://www.ietf.org/mail-archive/web/anima-bootstrap/current/msg00474.html
+
+Raw minutes can be found at:
+     https://github.com/anima-wg/anima-bootstrap/blob/concise/minutes/anima-20170502/anima-bootstrap.txt
+and
+
+We had best results using appear.in/anima-boostrap, but at times it did not
+work, but Max's personal webex was sufficiently webrtc to compensate.
+
+Meetings occured on:
+     2017-03-14: max, kent, mcr, m.behringer
+     2017-03-21: mcr, kent,max
+     2017-03-25: Hackathon
+     2017-04-18: mcr, max, (others, unrecorded)
+     2017-04-25: mcr, peter, mbehringer, kent
+     2017-05-02: mcr, Michael Behringer
+     2017-05-09: max, Michael Behringer, mcr, kent
+     2017-05-16: mcr, max (joining), peter,
+     2017-05-23: mcr, toerless, kent, peter, max
+     2017-05-30: mcr, toerless, max
+     2017-06-02: mcr, toerless
+     2017-06-06: mcr, toerless, max, michaelbehringer, kent
+     2016-06-13: not sure if we met
+     2017-06-20: mcr, toerless, kent (joining)
+     2017-06-27: mcr, kent, max (coming in), toerless, peter
+     prep for IETF99
+     2017-07-25: kent, mcr, max, toerless,
+     2017-08-01: mcr, max, kent
+     2017-08-08: mcr, max, kent, toerless
+
+Executive summary:
+   1) no more discussion about revocation of vouchers; preference for
+      short-expiry vouchers with easy renewals.
+   2) Enumeration attack against the MASA audit log is not protected against
+
+* there was a hackathon on vouchers at the IETF98 (Chicago) Hackathon.
+  We had minimal interaction between a voucher request and a voucher among a
+  Registrar and a MASA using pkcs7 signed JSON.
+
+
+* Pledge and Registrar (really all) SHOULD be tolerant (ignore) PEM headers
+     * around base64 encoded certificates?
+     * Base64 decoding SHOULD be tolerant (ignore) line breaks and white space.
+     * Is there a normative reference for this that we can point to to ensure this works?
+
+* The Pledge voucher response validation needs to explicitely state that the
+  nonce MAY be empty (removed by the Registrar).
+
+* Clarify that the voucher request is just anything that is parsable as a voucher
+  according to the voucher document. every single field in it is a *request* by the registrar
+  and the server MUST NOT simply sign the request and return it. The MASA MAY read the values
+  in the request to inform the MASA of policy requests by the client.
+
+* Max experiemented post-hackathon with JWT, and found that it was rather
+  easy to do/use (2017-04-18).
+
+* 2017-04-18, around this time it became clear that:
+     The Registrar then signs this and sends it to the MASA to be turned into a voucher.
+        see [35]https://tools.ietf.org/html/draft-ietf-anima-bootstrapping-keyinfra-05#section-7.1
+      A voucher request is a voucher that is not signed by the MASA.
+      A voucher request MUST be signed by the Registrar. This is equivalent
+        to the current pkcs7 signing mandate.
+      A new thing: A voucher request MAY be signed by the Pledge.
+        * con: additional crypto operation by the pledge
+        * pro: proof to the masa of physical possession
+        * An option to be discussed.
+
+* Another new thing: A voucher MAY include a "previous form of the voucher
+   request" sub-field. e.g. a JSON of the full previously signed
+   voucher. e.g. we add to the YANG model a field that could be a full JSON
+   etc voucher; which itself might have been signed. Thus:
+
+* SIDE NOTE: verification of the TLS client cert as being the same as the
+  voucher request might be(!?) assumed in the current 7.2 text. Two reasons for
+  this:
+     * - we avoid having to deal with replay attacks
+     * - and the domain CA cert isn't sent in the TLS handshake but is sent
+         in the signature header ("pkcs7" or "x5c").
+
+* Max: recap of list is that we need a definitive form for the voucher request.... "it's just a voucher" ,
+  Max: signed certificate requests mean that the registrar can not change it,
+  and this has caused a mess.
+
+* https://tools.ietf.org/html/rfc7950#section-11 (updating a yang module)
+      o  A "mandatory" statement may be removed or changed from "true" to
+         "false".
+
+   ACTIONs from 2017-04-25:
+     * 1) add version field to the voucher
+     * 2) define voucher request in BRSKI (as a voucher)
+     * 3) define any additional fields in BRSKI:
+
+* 2017-05-02, mbehringer and (maybe max) mcr go through EDNOTES together
+
+  Discussion/Question:
+     * Is there a relationship between the TLS Server Certificate of the
+       MASA, and the Issuer Certificate from the IDevID.
+     * Cases:
+     *  - pledge contains URL of MASA
+     *  - step 1: registrar follows URL (default)
+     *  - option 1: redirect: should it be allowed? (if not, cannot deploy anti-DDOS re-direct)
+     *  - option 2: manual override of URL: should it be allowed?
+
+     * Tentatively: Neither option 1 or 2 have an impact on security ("stealing" a device).
+     * HTTP/2, TLS upgrade.
+     * Can/should the registrar connect to MASA, online to the TLS connection
+       to the Pledge, to get the certificate chain to validate the pledge?
+
+* 2017-05-09
+     ACTION: Need normative language that the registrar<->MASA
+   communication is secured using a "web pki"
+
+* Going to JWT discussion. Discussion of Kent's email from may2:
+  about JWS and the like.
+
+* 2017-05-16: we dealt with email/review from Sheng of the voucher document,
+  and acted on many items.    There are emails on the list dealing with the
+  results.
+
+  **Continued on 2017-05-19 (Friday) using Max's personal webex.**
+
+* 2017-05-23: continued to edit voucher document.
+
+* we then began to deal with unsolicited rewrite from Toerless.
+   For Toerless:
+   [20]http://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=draft-ietf-an
+   ima-bootstrapping-keyinfra-05&url2=https://raw.githubusercontent.com/an
+   ima-wg/anima-bootstrap/concise/dtbootstrap-anima-keyinfra.txt
+
+
+* 2017-05-30: max, Michael Behringer, Toerless Eckert
+  We continued to deal with the rewrite, absorbing as much text as we could
+  until we ran into technical protocol changes in the middle.
+  We Dealt with many of the questions marked "Qx" below.
+
+  As the rewrite changed how the protocol was presented, back to how it was
+  before -04, and we had just rewritten it to be different the rest of the
+  changes were not accepted.
+
+   Q1: Is there any statement that the MASA can be optional, eg: is it
+   clear what would
+       need to be implemented on pledge and registrar for pledges that do
+        not require a MASA ?
+
+   " A Registrar MAY be configured to
+      ignore the history of the device but it is RECOMMENDED that this
+   only
+      be configured if hardware assisted NEA [RFC5209] is supported."
+   and
+   4.2.  New Entity security reductions
+   "   The Pledge MAY have an operational mode where it skips Voucher
+      validation one time.  For example if a physical button is depressed
+      during the bootstrapping operation.  This can be useful if the
+   vendor
+      service is unavailable.  This behavior SHOULD be available via local
+      configuration or physical presence methods to ensure new entities
+   can
+      always be deployed even when autonomic methods fail.  This allows
+   for
+      unsecured imprint.
+      It is RECOMMENDED that this only be available if hardware assisted
+      NEA [RFC5209] is supported."
+
+   Q2: Is there any statement how a device without an IDevID could be
+   used, pledge/registrar ?
+   4.3.  Registrar security reductions
+      2.  A registrar MAY choose to accept devices that claim a unique
+          identity without the benefit of authenticating that claimed
+          identity.  This could occur when the Pledge does not include an
+          X.509 IDevID factory installed credential.  New Entities without
+          an X.509 IDevID credential MAY form the Section 3.2 request
+   using
+          the Section 3.3 format to ensure the Pledge's serial number
+          information is provided to the Registar (this includes the
+          IDevIDAuthorityKeyIdentifier value which would be statically
+          configured on the Pledge).  The Pledge MAY refuse to provide a
+          TLS client certificate (as one is not available).  The Pledge
+          SHOULD support HTTP-based or certificate-less TLS authentication
+          as described in EST RFC7030 section 3.3.2.  A Registrar MUST NOT
+          accept unauthenticated New Entities unless it has been
+   configured
+          to do so by an administrator that has verified that only
+   expected
+          new entities can communicate with a Registrar (presumably via a
+          physically secured perimeter).
+
+   Q3: Is there a list of assignments needed ?
+       Page 13: id-mod-MASAURLExtn2016 - who assigns this ?
+   5.  IANA Considerations
+   5.1.  PKIX Registry
+      This document requests a number for id-mod-MASAURLExtn2016(TBD) from
+      the pkix(7) id-mod(0) Registry.  [[EDNOTE: fix names]]
+      This document requests a number from the id-pe registry for id-pe-
+      masa-url.  XXX
+
+   ---------------------------------
+   N2: "storing an X.509 root certificate".
+   Does this need to be a "root" certificate ?
+   Consider the most likely simple enterprise or SP deployment of BRSKI.
+   Organization has some root-CA. for the purpose of a particular ANI, a
+   sub-CA is created, which
+   becomes the assigning CA that the registrar uses. The root-CA itself is
+   likely never online
+   except when both Data Centers with the asigning CAs burn down.
+   In these environments, it is not suffficient to only store on the
+   pledge the root-CA, because
+   that root-CA will also assign other subCA that create certificates, and
+   those certificates
+   would not be valid for our ANI.
+   So, the pledge could either just store the assigning-CA, which becomes
+   a virtual root CA,
+   and if it burns down the ANI is frozen (no new pledges possible,
+   re-enroll whole ANI with
+   new CA), or the pledges need to store the CA-chain with root-CA and
+   assigning CA. WHich is the
+   best solution because it allows revocation/renewal of assigning CA in
+   desaster cases.
+   I did not modify any text, but i am worried about this problem for
+   actual deployments so i would
+   like to make sure we have documented an actual working solution.
+   Agreed: Remove the word "root".
+   TBD: Move example of root CA and assigning CA into voucher document
+   The current text of the voucher document is (description of the
+   relevant field in the yang module):
+         leaf-list pinned-domain-cert {
+           type binary;
+           min-elements 1;
+           description
+             "An X.509 v3 certificate structure as specified by RFC 5280,
+              Section 4 encoded using the ASN.1 distinguished encoding
+              rules (DER), as specified in ITU-T X.690.
+              This certificate is used by a pledge to trust a public key
+              infrastructure, in order to verify a domain certificate.
+
+   In BRSKI terms: "in order to verify that the registrar is a member of
+   the domain by verifying it has a certificate that can be verified using
+   pinned-domain-cert".
+
+  In BRSKI -06 it indicates:
+   "The maximum
+      lifetime of the voucher issued SHOULD NOT exceed the lifetime of the
+      Registrar's revocation validation (for example if the Registrar
+      revocation status is indicated in a CRL that is valid for two weeks
+      then that is an appropriate lifetime for the voucher)."
+
+   I think this is ok. The voucher document doesn't include this because
+   it is a MASA behavior discussion.
+
+   --------------------------------
+   N3: The intro says "and local access control lists. The Pledge
+   actions"...
+   What "and local access control lists" does this talk about ? If nobody
+   knows, maybe delete ?
+   Suggest: (eg: whitelist or blacklist on registrar).
+     *
+     * -      lists. The Pledge actions derive from a cryptographically
+       protected
+     * +      lists (administratively defined white or black lists). The
+       Pledge actions derive from a cryptographically protected
+     *
+
+   --------------------------------
+   N4: I think the "Other Bootstrapping Approaches" is also a level of
+   brackground information that
+   hurts the "ease of digestion" flow for the reader, so i have moved it
+   into an appendix and left
+   a breadcrump in the intro section. Otherwise unchanged.
+   Not clear if we want to accept this change at all. MCR made it less
+   destructive by moving it to the last appendix in Toerless's suggested
+   XML.
+   Here the git best practices of individual commits (via pull requests)
+   would be helpful.
+   --------------------------------
+   N5: "In many target applications, the systems involved are ".... this
+   section
+   in secion 1.3 is i think quite crucial and one of the biggest benefits
+   of BRSKI
+   and a great reasoning why we have new complex elements like proxy and
+   MASA, but i
+   think it is more suggestive than descriptive and raises more questions
+   than
+   it answers. And even tthat is already divesting the readers attention
+   by being
+   in the beginning of the document. This topic IMHO deserves a more
+   thorough explanation.
+   I have suggested an appendix section "Flexible SKU management" that
+   tries to do this.
+   I think it is appropriate for an appendix, because it seems that to
+   enable this functionality,
+   we would need some more functionality eg: across ACP, in MASA and so
+   on.
+   TODO: Change text to indicate the overall property is an ANIMA feature
+   where both BRSKI and ACP need to collaborate to improbe ove existing
+   bootstraps.
+   --------------------------------
+   N6: The "Scope of the solution" section is really a discussion about
+   the applicability to
+   constrained environments. This IMHO also is not necessary to be at the
+   top, so i also moved
+   it into an appendix and left a breadcrump in the introduction. Also
+   changed the name
+   to "Applicability to constrained environments" as this is more
+   descriptive of the actual content.
+
+This diff shows the text being changed/absorbed:
+   [28]https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=draft-ietf-a
+   nima-bootstrapping-keyinfra-06&url2=https://raw.githubusercontent.com/a
+   nima-wg/anima-bootstrap/toerless_review_20170530/dtbootstrap-anima-keyi
+   nfra.txt
+
+   at end of 2017-06-02:
+   [29]https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=draft-ietf-a
+   nima-bootstrapping-keyinfra-06&url2=https://raw.githubusercontent.com/a
+   nima-wg/anima-bootstrap/toerless_review_20170530/dtbootstrap-anima-keyi
+   nfra.txt
+   at the end of 2017-06-06:
+
+   [30]https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=https://raw.
+   githubusercontent.com/anima-wg/anima-bootstrap/toerless_review_20170530
+   /dtbootstrap-anima-keyinfra.txt&url2=https://raw.githubusercontent.com/
+   anima-wg/anima-bootstrap/toerless_review_section3_20160606/dtbootstrap-
+   anima-keyinfra.txt
+   [31]https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=draft-ietf-a
+   nima-bootstrapping-keyinfra-06&url2=https://raw.githubusercontent.com/a
+   nima-wg/anima-bootstrap/toerless_review_section3_20160606/dtbootstrap-a
+   nima-keyinfra.txt
+
+* Pushed voucher document to address last call comments.
+
+post-IETF99
+   ACTION: max to write up description of proposed voucher and BRSKI
+   changes to WGLC thread.
+     * - discussion about proximity
+
+*  BRSKI will import the YANG voucher model, and will refine it to produce a voucherrequest.
+   Will use "deviation", not refine. [see
+    [39]https://tools.ietf.org/html/draft-ietf-netmod-rfc6087bis-13
+    ]
+
+   ACTION: Kent to produce some suggested text for the 'voucher
+      request' so we can evaluate
+
+* We believe that the VR being signed by the same identity as the
+  TLS Client Certificate.
+
+     * The MASA verifies that the Registrar making the claim is the same
+       registrar that the pledge sees. This ensures that the asokan etc
+       attack is not occuring. It is not a freshness check.
+     * What is verified is: The pledge and the MASA are seeing the same
+       registrar.
+
+* ACTION: mcr to write up concern for security considerations, and to
+       explain why the above solves the problem.
+
+* Added text ref RFC4941 temporary addresses (s3.3):
+
+* Found final resolution for Content-Type in Auguest,
+  will be application/pkcs7-mime; smime-type=voucher
+  (voucher is new definition for IANA)
+
+     see https://www.iana.org/assignments/media-type-sub-parameters/media-type-sub-parameters.xhtml
+
+   OPEN QUESTION: do what do we say about the 'content-transfer-encoding'?
+      Content-Transfer-Encoding: base64
+
+   smime-type is originally defined in RFC3851 but the more recent
+   reference is RFC5751, RFC7030, 3851 etc. But RFC7114 defines the IANA
+   registry.
+
+   For unsigned vouchers, we discussed if we should be using
+   application/json, or something else.  We concluded that we'd use
+   application/json.
+
+

@@ -1,0 +1,46 @@
++--------+         +---------+    +------------+     +------------+
+| Pledge |         | Circuit |    | Domain     |     | Vendor     |
+|        |         | Join    |    | Registrar  |     | Service    |
+|        |         | Proxy   |    |  (JRC)     |     | (MASA)     |
++--------+         +---------+    +------------+     +------------+
+  |                     |                   |           Internet |
+  |<-RFC4862 IPv6 addr  |                   |                    |
+  |<-RFC3927 IPv4 addr  | Appendix A        |  Legend            |
+  |-------------------->|                   |  C - circuit       |
+  | optional: mDNS query| Appendix B        |      join proxy    |
+  | RFC6763/RFC6762     |                   |  P - provisional   |
+  |<--------------------|                   |    TLS connection  |
+  | GRASP M_FLOOD       |                   |                    |
+  |   periodic broadcast|                   |                    |
+  |<------------------->C<----------------->|                    |
+  |              TLS via the Join Proxy     |                    |
+  |<--Registrar TLS server authentication---|                    |
+[PROVISIONAL accept of server cert]         |                    |
+  P---X.509 client authentication---------->|                    |
+  P                     |                   |                    |
+  P---Voucher Request (include nonce)------>|                    |
+  P                     |       /--->       |                    |
+  P                     |       |      [accept device?]          |
+  P                     |       |      [contact Vendor]          |
+  P                     |       |           |--Pledge ID-------->|
+  P                     |       |           |--Domain ID-------->|
+  P                     |       |           |--optional:nonce--->|
+  P                     |       |           |     [extract DomainID]
+  P                     |    optional:      |     [update audit log]
+  P                     |       |can        |                    |
+  P                     |       |occur      |                    |
+  P                     |       |in         |                    |
+  P                     |       |advance    |                    |
+  P                     |       |if         |                    |
+  P                     |       |nonceless  |                    |
+  P                     |       |           |<- voucher ---------|
+  P                     |       \---->      |                    |
+  P<------voucher---------------------------|                    |
+[verify voucher , [verify provisional cert| |                    |
+  |---------------------------------------->|                    |
+  |      [voucher status telemetry]         |<-device audit log--|
+  |                     |       [verify audit log and voucher]   |
+  |<--------------------------------------->|                    |
+  | Continue with RFC7030 enrollment        |                    |
+  | using now bidirectionally authenticated |                    |
+  | TLS session.        |                   |                    |
