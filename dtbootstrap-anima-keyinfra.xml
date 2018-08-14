@@ -1854,6 +1854,58 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         </section>
       </section>
 
+      <section anchor="pledgeauthorization" title="Registrar Authorization of
+                                                   Pledge">
+        <t>
+          In a fully automated network all devices must be securely identified
+          and authorized to join the domain.
+        </t>
+        <t>
+          A Registrar accepts or declines a request to join the domain, based
+          on the authenticated identity presented.  Automated acceptance
+          criteria include:<list>
+          <t>allow any device of a specific type (as determined by the X.509
+          IDevID),</t>
+          <t>allow any device from a specific vendor (as determined by the
+          X.509 IDevID),</t>
+          <t>allow a specific device from a vendor (as determined by the X.509
+          IDevID) against a domain white list.  (The mechanism for checking
+          a shared white list potentially used by multiple Registrars is out
+          of scope).</t>
+        </list>
+        </t>
+
+        <t>
+          To look
+          the Pledge up in a domain white list a consistent method for
+          extracting device identity from the X.509 certificate is required.
+          <xref target="RFC6125" /> describes Domain-Based Application Service identity but here
+          we require Vendor Device-Based identity.  The subject field's DN
+          encoding MUST include the "serialNumber" attribute with the device's
+          unique serial number.  In the language of <xref target="RFC6125" />
+          this provides for a SERIALNUM-ID category of identifier that can be
+          included in a certificate and therefore that can also be used for matching
+          purposes.  The SERIALNUM-ID whitelist is collated according to vendor
+          trust anchor since serial numbers are not globally unique.
+        </t>
+        
+        <t>
+          The Registrar MUST use the vendor
+          provided MASA service to verify that the device's history log does
+          not include unexpected Registrars.  If a device had previously
+          registered with another domain, a Registrar of that domain would show
+          in the log.
+        </t>
+        <t>
+          The authorization
+          performed during BRSKI MAY be used for EST enrollment requests by
+          proceeding with EST enrollment using the authenticated and authorized
+          TLS connection.  This minimizes the number of cryptographic and
+          protocol operations necessary to complete bootstrapping of the local
+          key infrastructure.
+        </t>
+      </section>
+
       <section anchor="VoucherResponse" title="MASA and Registrar Voucher Response">
         <t>The MASA voucher response to the registrar is forwarded
           without changes to the pledge; therefore this section applies
