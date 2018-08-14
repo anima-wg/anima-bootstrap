@@ -2209,11 +2209,18 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
      "assertion":"<the value from the voucher assertion leaf>"
     }
   ],
-  "truncation": {
-    "nonced duplicates": <number of entries truncated>,
-    "nonceless duplicates": <number of entries truncated>,
-    "arbitrary": <number of entries trucated>
-    }
+  "truncation": [
+    {
+     "nonced duplicates": <number of entries truncated>,
+     "nonceless duplicates": <number of entries truncated>,
+     "arbitrary": <number of entries truncated>,
+    },
+    {
+     "nonced duplicates": <number of entries truncated>,
+     "nonceless duplicates": <number of entries truncated>,
+     "domainID": <the domainID that this truncation refers to>
+     },
+   ]
 }]]></artwork>
           </figure></t>
 
@@ -2223,12 +2230,24 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           most recent nonced or nonceless entry. The log SHOULD NOT be further
           reduced but there could exist operational situation where maintaining
           the full log is not possible. In such situations the log MAY be
-          arbitrarily truncated for length. The trunctation method(s) used MUST
-          be indicated in the JSON truncation dictionary using "nonced
-          duplicates", "nonceless duplicates", and "arbitrary" where the
-          number of entries that have been truncation is indicated. If
-          the truncation count exceeds 1024 then the MASA
-          MAY use this value without further incrementing it.</t>
+          arbitrarily truncated for length.
+          </t>
+          <t>
+            The truncation method(s) used MUST
+            be indicated in the JSON truncation dictionary using "nonced
+            duplicates", and "nonceless duplicates". When a truncation event
+            applies to different domainIDs, then the number of events is
+            counted with the "arbitrary" attribute.  When a truncation event
+            applies to a single domainID, then it is indicated with the
+            "domainID" attribute.
+            Truncation events are unique and counts are not cumulative.
+          </t>
+
+          <t>
+            If
+            the truncation count exceeds 1024 then the MASA
+            MAY use this value without further incrementing it.
+          </t>
 
           <t>A log where duplicate entries for the same domain have
             been truncated ("nonced duplicates" and/or "nonceless duplicates)
