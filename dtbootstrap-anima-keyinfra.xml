@@ -2201,6 +2201,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
      "domainID":"<domainID extracted from voucher-request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
      "assertion":"<the value from the voucher assertion leaf>"
+     "truncated":"<the number of entries for this domainID that were truncated>"
     },
     {
      "date":"<date/time of the entry>",
@@ -2209,38 +2210,24 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
      "assertion":"<the value from the voucher assertion leaf>"
     }
   ],
-  "truncation": [
-    {
-     "nonced duplicates": <number of entries truncated>,
-     "nonceless duplicates": <number of entries truncated>,
-     "arbitrary": <number of entries truncated>,
-    },
-    {
-     "nonced duplicates": <number of entries truncated>,
-     "nonceless duplicates": <number of entries truncated>,
-     "domainID": <the domainID that this truncation refers to>
-     },
-   ]
+  "truncation": {
+     "nonced duplicates": "<total number of entries truncated>",
+     "nonceless duplicates": "<total number of entries truncated>",
+     "arbitrary": "<number of domainID entries removed entirely>"
+     }
 }]]></artwork>
           </figure></t>
 
           <t>Distribution of a large log is less than ideal. This structure can
           be optimized as follows: Nonced or Nonceless entries for the
           same domainID MAY be truncated from the log leaving only the single
-          most recent nonced or nonceless entry. The log SHOULD NOT be further
+          most recent nonced or nonceless entry for that domainID. In the case of
+          truncation the 'event' truncation value SHOULD contain a count of the number of events for this
+          domainID that were truncated. The log SHOULD NOT be further
           reduced but there could exist operational situation where maintaining
           the full log is not possible. In such situations the log MAY be
-          arbitrarily truncated for length.
-          </t>
-          <t>
-            The truncation method(s) used MUST
-            be indicated in the JSON truncation dictionary using "nonced
-            duplicates", and "nonceless duplicates". When a truncation event
-            applies to different domainIDs, then the number of events is
-            counted with the "arbitrary" attribute.  When a truncation event
-            applies to a single domainID, then it is indicated with the
-            "domainID" attribute.
-            Truncation events are unique and counts are not cumulative.
+          arbitrarily truncated for length, with the number of removed
+          entries indicated as 'arbitrary'.
           </t>
 
           <t>
