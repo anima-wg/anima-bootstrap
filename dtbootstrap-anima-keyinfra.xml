@@ -2769,11 +2769,43 @@ Reference: [This document]
     </section>
 
     <section anchor="securityconsiderations" title="Security Considerations">
+      <t>To facilitate logging and administrative oversight, in addition
+          to triggering Registration verification of MASA logs, the pledge reports
+      on voucher parsing status to the registrar. In the case of a
+      failure, this information is informative to a potentially malicious
+      registrar. This is mandated anyway because of the operational
+      benefits of an informed administrator in cases where the failure is
+      indicative of a problem. The registrar is RECOMMENDED to verify MASA logs
+      if voucher status telemetry is not received.</t>
+
+      <t>To facilitate truely limited clients EST RFC7030 section 3.3.2
+      requirements that the client MUST support a client authentication model
+      have been reduced in <xref target="reducedsecuritymodes"></xref> to a
+      statement that the registrar "MAY" choose to accept devices
+      that fail cryptographic authentication. This reflects
+      current (poor) practices in shipping devices without a cryptographic
+      identity that are NOT RECOMMENDED.</t>
+
+        <t>During the provisional period of the connection the pledge MUST treat all HTTP header and
+        content data as untrusted data. HTTP libraries are
+        regularly exposed to non-secured HTTP traffic: mature libraries
+        should not have any problems.
+        </t>
+
+      <t>Pledges might chose to engage in protocol operations with
+      multiple discovered registrars in parallel. As noted above they
+      will only do so with distinct nonce values, but the end result
+      could be multiple vouchers issued from the MASA if all registrars
+      attempt to claim the device. This is not a failure and the pledge
+      choses whichever voucher to accept based on internal logic. The
+      registrars verifying log information will see multiple entries
+      and take this into account for their analytics purposes.</t>
+      <section title="DoS against MASA">
         <t>There are uses cases where the MASA could be unavailable or
-        uncooperative to the Registrar. They include planned and unplanned
+        uncooperative to the Registrar. They include active DoS attacks, planned and unplanned
         network partitions, changes to MASA policy, or other instances where
         MASA policy rejects a claim. These introduce an operational risk to the
-        Registrar owner that MASA behavior might limit the ability to
+        Registrar owner in that MASA behavior might limit the ability to
         bootstrap a pledge device. For example this might be an issue during
         disaster recovery. This risk can be mitigated by Registrars that
         request and maintain long term copies of "nonceless" vouchers. In
@@ -2799,40 +2831,10 @@ Reference: [This document]
         registrar in the prior-signed-voucher-request field of the registrar voucher-request, significantly
         reduce this risk by ensuring the MASA can confirm proximity
         between the pledge and the registrar making the request. This
-        mechanism is optional to allow for constrained devices.</t>
-
-      <t>To facilitate logging and administrative oversight in addition
-          to triggering Registration verification of MASA logs the pledge reports
-      on voucher parsing status to the registrar. In the case of a
-      failure, this information is informative to a potentially malicious
-      registrar but this is mandated anyway because of the operational
-      benefits of an informed administrator in cases where the failure is
-      indicative of a problem. The registrar is RECOMMENDED to verify MASA logs
-      if voucher status telemetry is not received.</t>
-
-      <t>To facilitate truely limited clients EST RFC7030 section 3.3.2
-      requirements that the client MUST support a client authentication model
-      have been reduced in <xref target="reducedsecuritymodes"></xref> to a
-      statement that the registrar "MAY" choose to accept devices
-      that fail cryptographic authentication. This reflects
-      current (poor) practices in shipping devices without a cryptographic
-      identity that are NOT RECOMMENDED.</t>
-
-        <t>During the provisional period of the connection the pledge MUST treat all HTTP header and
-        content data as untrusted data. HTTP libraries are
-        regularly exposed to non-secured HTTP traffic: mature libraries
-        should not have any problems.
-        </t>
-
-      <t>Pledges might chose to engage in protocol operations with
-      multiple discovered registrars in parallel. As noted above they
-      will only do so with distinct nonce values, but the end result
-      could be multiple vouchers issued from the MASA if all registrars
-      attempt to claim the device. This is not a failure and the pledge
-      choses whichever voucher to accept based on internal logic. The
-      registrar's verifying log information will see multiple entries
-      and take this into account for their analytics purposes.</t>
-
+        mechanism is optional to allow for constrained devices. Supply
+        chain integration ("know your customer") is an additional 
+        step that MASA providers and device vendors can explore.</t>
+      </section>
       <section title="Freshness in Voucher-Requests">
         <t>
           A concern has been raised that the pledge voucher-request should contain some content (a nonce) provided by the registrar and/or MASA
