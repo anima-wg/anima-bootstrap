@@ -12,7 +12,7 @@
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 ]>
 
-<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-16"
+<rfc category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-17"
     ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -456,6 +456,16 @@
         this protocol with network access control, perhaps as an
         Extensible Authentication Protocol (EAP) method
         (see <xref target="RFC3748"></xref>), is out-of-scope.</t>
+        </section>
+        
+        <section title="Bootstrapping is not Booting">
+        <t>This document describes "bootstrapping" as the protocol
+        used to obtain a local trust anchor. It is expected that this 
+        trust anchor, along with any additional configuration 
+        information subsequently installed, is persisted on the device 
+        across system restarts ("booting"). Bootstrapping occurs only 
+        infrequently such as when a device is transfered to a new 
+        owner or has been reset to factory default settings.</t> 
         </section>
       </section>
 
@@ -2201,7 +2211,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
      "domainID":"<domainID extracted from voucher-request>",
      "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
      "assertion":"<the value from the voucher assertion leaf>"
-     "truncated":"<the number of entries for this domainID that were truncated>"
+     "truncated":"<the number of domainID entries truncated>"
     },
     {
      "date":"<date/time of the entry>",
@@ -2563,12 +2573,12 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         always be deployed even when autonomic methods fail. This allows for
         unsecured imprint.</t></list></t>
 
-        <t>It is RECOMMENDED that "trust on first use" or skipping voucher
-        validation only be available if hardware assisted Network Endpoint
+        <t>It is RECOMMENDED that "trust on first use" or any method of skipping voucher
+        validation (including use of craft serial console) only be available if hardware assisted Network Endpoint
         Assessment [RFC5209]
         is supported. This recommendation ensures that domain network monitoring
         can detect innappropriate use of offline or emergency
-        deployment procedures.</t>
+        deployment procedures when voucher-based bootstrapping is not used.</t>
       </section>
 
       <section title="Registrar security reductions">
@@ -2759,45 +2769,20 @@ Reference: [This document]
     </section>
 
     <section anchor="securityconsiderations" title="Security Considerations">
-        <t>There are uses cases where the MASA could be unavailable or
-        uncooperative to the Registrar. They include planned and unplanned
-        network partitions, changes to MASA policy, or other instances where
-        MASA policy rejects a claim. These introduce an operational risk to the
-        Registrar owner that MASA behavior might limit the ability to
-        re-boostrap a pledge device. For example this might be an issue during
-        disaster recovery. This risk can be mitigated by Registrars that
-        request and maintain long term copies of "nonceless" vouchers. In
-        that way they are guaranteed to be able to repeat bootstrapping for
-        their devices.</t>
-
-        <t>The issuance of nonceless vouchers themselves creates a security
-        concern. If the Registrar of a previous domain can intercept protocol
-        communications then it can use a previously issued nonceless voucher to
-        establish management control of a pledge device even after having sold
-        it. This risk is mitigated by recording the issuance of such vouchers
-        in the MASA audit log that is verified by the subsequent Registrar.
-        This reduces the resale value of the equipment because future owners
-        will detect the lowered security inherent in the existence of a
-        nonceless voucher that would be trusted by their pledge. This
-        reflects a balance between partition resistant recovery and
-        security of future bootstrapping. Registrars take the pledge's audit
-        history into account when applying policy to new devices.</t>
-
-        <t>The MASA is exposed to DoS attacks wherein attackers claim
-        an unbounded number of devices. Ensuring a registrar is
-        representative of a valid manufacturer customer, even without validating
-        ownership of specific pledge devices, helps to mitigate this. Pledge
-        signatures on the pledge voucher-request, as forwarded by the
-        registrar in the prior-signed-voucher-request field of the registrar voucher-request, significantly
-        reduce this risk by ensuring the MASA can confirm proximity
-        between the pledge and the registrar making the request. This
-        mechanism is optional to allow for constrained devices.</t>
-
-      <t>To facilitate logging and administrative oversight in addition
-          to triggering Registration verification of MASA logs the pledge reports
+      <t>This document details a protocol for bootstrapping that balances
+        operational concerns against security concerns. As detailed in the introduction, 
+        and touched on again in <xref target="reducedsecuritymodes"></xref>,
+        the protocol allows for reduced security modes. 
+        These attempt to deliver additional
+        control to the local administrator and owner in cases where
+        less security provides operational benefits. This
+        section goes into more detail about a variety of specific 
+        considerations.</t>
+      <t>To facilitate logging and administrative oversight, in addition
+          to triggering Registration verification of MASA logs, the pledge reports
       on voucher parsing status to the registrar. In the case of a
       failure, this information is informative to a potentially malicious
-      registrar but this is mandated anyway because of the operational
+      registrar. This is mandated anyway because of the operational
       benefits of an informed administrator in cases where the failure is
       indicative of a problem. The registrar is RECOMMENDED to verify MASA logs
       if voucher status telemetry is not received.</t>
@@ -2822,9 +2807,43 @@ Reference: [This document]
       could be multiple vouchers issued from the MASA if all registrars
       attempt to claim the device. This is not a failure and the pledge
       choses whichever voucher to accept based on internal logic. The
-      registrar's verifying log information will see multiple entries
+      registrars verifying log information will see multiple entries
       and take this into account for their analytics purposes.</t>
+      <section title="DoS against MASA">
+        <t>There are uses cases where the MASA could be unavailable or
+        uncooperative to the Registrar. They include active DoS attacks, planned and unplanned
+        network partitions, changes to MASA policy, or other instances where
+        MASA policy rejects a claim. These introduce an operational risk to the
+        Registrar owner in that MASA behavior might limit the ability to
+        bootstrap a pledge device. For example this might be an issue during
+        disaster recovery. This risk can be mitigated by Registrars that
+        request and maintain long term copies of "nonceless" vouchers. In
+        that way they are guaranteed to be able to bootstrap their devices.</t>
 
+        <t>The issuance of nonceless vouchers themselves creates a security
+        concern. If the Registrar of a previous domain can intercept protocol
+        communications then it can use a previously issued nonceless voucher to
+        establish management control of a pledge device even after having sold
+        it. This risk is mitigated by recording the issuance of such vouchers
+        in the MASA audit log that is verified by the subsequent Registrar
+        and by Pledges only bootstrapping when in a factory default state. This
+        reflects a balance between enabling MASA independence during 
+        future bootstrapping and the security of bootstrapping itself. 
+        Registrar control over requesting and auditing nonceless vouchers
+        allows device owners to choose an appropriate balance.</t>
+
+        <t>The MASA is exposed to DoS attacks wherein attackers claim
+        an unbounded number of devices. Ensuring a registrar is
+        representative of a valid manufacturer customer, even without validating
+        ownership of specific pledge devices, helps to mitigate this. Pledge
+        signatures on the pledge voucher-request, as forwarded by the
+        registrar in the prior-signed-voucher-request field of the registrar voucher-request, significantly
+        reduce this risk by ensuring the MASA can confirm proximity
+        between the pledge and the registrar making the request. This
+        mechanism is optional to allow for constrained devices. Supply
+        chain integration ("know your customer") is an additional 
+        step that MASA providers and device vendors can explore.</t>
+      </section>
       <section title="Freshness in Voucher-Requests">
         <t>
           A concern has been raised that the pledge voucher-request should contain some content (a nonce) provided by the registrar and/or MASA
@@ -2869,13 +2888,10 @@ Reference: [This document]
         <t>
           This flow is mitigated by the intended registrar verifying the audit
           logs available from the MASA as described in
-          <xref target="authzLogRequest" ></xref>. Rm might chose to wait
-          until after the intended registrar completes the authorization
-          process before submitting the now-stale pledge voucher-request. The Rm
-          would need to remove the pledge's nonce.
-        </t>
+          <xref target="authzLogRequest" ></xref>. Rm might chose to collect
+          a voucher-request but wait until after the intended registrar completes the authorization process before submitting it. This pledge voucher-request would be 'stale' in that it has a nonce that no longer matches the internal state of the pledge. In order to successfully use any resulting voucher the Rm would need to remove the stale nonce or anticipate the pledge's future nonce state. Reducing the possibility of this is why the pledge is mandated to generate a strong random or pseudo-random number nonce.</t>
         <t>
-          In order to successfully use the resulting "stale voucher" Rm
+          Additionally, in order to successfully use the resulting voucher the Rm
           would have to attack the pledge and return it to a bootstrapping
           enabled state. This would require wiping the pledge of current
           configuration and triggering a re-bootstrapping of the pledge.
@@ -2886,7 +2902,7 @@ Reference: [This document]
         <t><list style="symbols">
           <t>Ongoing network monitoring for unexpected bootstrapping attempts by pledges.</t>
           <t>Retreival and examination of MASA log information upon the occurance
-              of any such unexpected events. Rm will be listed in the logs.</t>
+              of any such unexpected events. Rm will be listed in the logs along with nonce information for analysis.</t>
         </list></t>
       </section>
       <section title="Trusting manufacturers">
