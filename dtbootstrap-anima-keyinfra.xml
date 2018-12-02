@@ -2781,6 +2781,93 @@ Reference: [This document]
         characteristics provided by Registrar based audit log inspection.
       </t>
       </section>
+
+      <section title="Used, Stolen or Grey Market equipment">
+        <t>
+          The so-called "call-home" mechanism that occurs as part of the
+          BRSKI-MASA connection standardizes what has been deemed by some as
+          a sinister mechanism for corporate oversight of individuals.
+          (<xref target="livingwithIoT" /> and <xref
+          target="IoTstrangeThings" /> for a small sample).
+        </t>
+        <t>
+          As the Autonomic Control Plane (ACP) usage of BRSKI is not
+          targetted at individual usage of IoT devices, but rather at the
+          Enterprise and ISP creation of networks in a zero-touch fashion,
+          the "call-home" represents a different kind of concern.
+        </t>
+        <t>
+          First, it needs to be re-iterated that the BRSKI-MASA mechanism
+          only occurs once during the comissioning of the device.  It is
+          well defined, and although encrypted with TLS, it could in theory
+          be made auditable as the contents are well defined.
+        </t>
+        <t>
+          This connection does
+          not occur when the device powers on or is restarted for normal
+          routines.  It is possible with low-quality implementations that
+          it might occur after certain firmware upgrades, for instance if the
+          upgrade requires repartitoning of firmware space and this affects
+          the credential storage.   The usage of a Trusted Platform Module
+          (TPM) to store credentials should completely eliminate this fault,
+          however.  Therefore this situation is clearly a quality of
+          implementation issue, and even in the worse case, it results in
+          additional enrollments being recorded when the significant firmware
+          update occurs.
+        </t>
+        <t>
+          (Some manufacturers might regard such an additional call-home a
+          significant feature as it might tell them how many of their
+          customers have performed this major upgrade, and therefore how many
+          are still vulnerable to some serious issue)
+        </t>
+        <t>
+          Second, the BRSKI call-home mechanism is mediated via the owner's
+          Registrar, and the information that is transmitted is directly
+          auditable by the device owner.    This is in stark constrast to
+          many "call-home" protocols where the device autonomously calls
+          home and uses an undocumented protocol.
+          While the contents of the signed part of the pledge voucher request
+          can not be changed, they are not encrypted at the registrar.  
+          The contents of an unsigned voucher request are, however,
+          completely changeable by the Registrar.   Both are, to re-iterate,
+          encrypted by TLS while in transit.
+        </t>
+        <t>
+          The BRSKI-MASA exchange reveals the following information to the
+          manufacturer:  the identity of the device being enrolled (down to
+          the serial-number!), the domain owner (digitally signed by a Domain
+          Owner certificate), the time the device is activated, and the IP
+          address of the domain Owner's Registrar.
+        </t>
+        <t>
+          For ISPs and Enterprises, the IP address provides very clear
+          geolocation of the owner.  No amount of IP address privacy
+          extensions (<xref target="RFC4941"/>) can do anything about this,
+          as a simple whois lookup likely identifies the ISP or Enterprise
+          from the upper bits anyway.  A passive attacker who observes the
+          connection definitely may conclude that the given enterprise/ISP is
+          a customer of the particular equipment vendor.  The precise model
+          that is being enrolled will remain private.
+        </t>
+        <t>
+          The above situation is to be distinguished from a
+          residential/individual person who registers a device from a
+          manufacturer: that an enterprise/ISP purchases routing products is
+          hardly worth mentioning.  Deviations would, however, be notable.
+        </t>
+        <t>
+          The situation is not improved by the enterprise/ISP using
+          anonymization services such as 
+          <xref target="Dingledine2004">ToR</xref>, as a TLS 1.2 connection
+          will reveal the ClientCertificate used, clearly identifying
+          the enterprise/ISP involved.  TLS 1.3 is better in this regard,
+          but an active attacker can still discover the parties involved by
+          performing a Man-In-The-Middle-Attack on the first attempt
+          (breaking/killing it with a TCP RST), and then letting subsequent
+          connection pass through.
+        </t>
+      </section>
     </section>
 
     <section anchor="securityconsiderations" title="Security Considerations">
@@ -3111,6 +3198,30 @@ Reference: [This document]
         </front>
       </reference>
 
+      <reference anchor="IoTstrangeThings"
+                 target="https://www.welivesecurity.com/2017/03/03/internet-of-things-security-privacy-iot-update/">
+        <front>
+          <title>IoT of toys stranger than fiction: Cybersecurity and data
+          privacy update (accessed 2018-12-02)</title>
+
+          <author surname="Internet"></author>
+          <date month="March" year="2017" />
+        </front>
+      </reference>
+
+      <reference anchor="livingwithIoT"
+                 target="https://www.siliconrepublic.com/machines/iot-smart-devices-reality">
+        <front>
+          <title>What is it actually like to live in a house filled with IoT
+          devices? (accessed 2018-12-02)</title>
+
+          <author surname="Internet"></author>
+          <date month="February" year="2018" />
+        </front>
+      </reference>
+
+
+
       <reference anchor="Stajano99theresurrecting"
                  target="https://www.cl.cam.ac.uk/~fms27/papers/1999-StajanoAnd-duckling.pdf">
         <front>
@@ -3124,6 +3235,23 @@ Reference: [This document]
           <date year="1999" />
         </front>
       </reference>
+
+<reference anchor="Dingledine2004" target="https://spec.torproject.org/tor-spec">
+  <front>
+    <title>Tor: the second-generation onion router</title>
+    <author initials="R." surname="Dingledine">
+      <organization></organization>
+    </author>
+    <author initials="N." surname="Mathewson">
+      <organization></organization>
+    </author>
+    <author initials="P." surname="Syverson">
+      <organization></organization>
+    </author>
+    <date year="2004"/>
+  </front>
+</reference>
+      
     </references>
 
     <section anchor="IPv4operations" title="IPv4 and non-ANI operations">
