@@ -2783,90 +2783,235 @@ Reference: [This document]
       </section>
 
       <section title="Used, Stolen or Grey Market equipment">
-        <t>
-          The so-called "call-home" mechanism that occurs as part of the
-          BRSKI-MASA connection standardizes what has been deemed by some as
-          a sinister mechanism for corporate oversight of individuals.
-          (<xref target="livingwithIoT" /> and <xref
-          target="IoTstrangeThings" /> for a small sample).
-        </t>
-        <t>
-          As the Autonomic Control Plane (ACP) usage of BRSKI is not
-          targetted at individual usage of IoT devices, but rather at the
-          Enterprise and ISP creation of networks in a zero-touch fashion,
-          the "call-home" represents a different kind of concern.
-        </t>
-        <t>
-          First, it needs to be re-iterated that the BRSKI-MASA mechanism
-          only occurs once during the comissioning of the device.  It is
-          well defined, and although encrypted with TLS, it could in theory
-          be made auditable as the contents are well defined.
-        </t>
-        <t>
-          This connection does
-          not occur when the device powers on or is restarted for normal
-          routines.  It is possible with low-quality implementations that
-          it might occur after certain firmware upgrades, for instance if the
-          upgrade requires repartitoning of firmware space and this affects
-          the credential storage.   The usage of a Trusted Platform Module
-          (TPM) to store credentials should completely eliminate this fault,
-          however.  Therefore this situation is clearly a quality of
-          implementation issue, and even in the worse case, it results in
-          additional enrollments being recorded when the significant firmware
-          update occurs.
-        </t>
-        <t>
-          (Some manufacturers might regard such an additional call-home a
-          significant feature as it might tell them how many of their
-          customers have performed this major upgrade, and therefore how many
-          are still vulnerable to some serious issue)
-        </t>
-        <t>
-          Second, the BRSKI call-home mechanism is mediated via the owner's
-          Registrar, and the information that is transmitted is directly
-          auditable by the device owner.    This is in stark constrast to
-          many "call-home" protocols where the device autonomously calls
-          home and uses an undocumented protocol.
-          While the contents of the signed part of the pledge voucher request
-          can not be changed, they are not encrypted at the registrar.  
-          The contents of an unsigned voucher request are, however,
-          completely changeable by the Registrar.   Both are, to re-iterate,
-          encrypted by TLS while in transit.
-        </t>
-        <t>
-          The BRSKI-MASA exchange reveals the following information to the
-          manufacturer:  the identity of the device being enrolled (down to
-          the serial-number!), the domain owner (digitally signed by a Domain
-          Owner certificate), the time the device is activated, and the IP
-          address of the domain Owner's Registrar.
-        </t>
-        <t>
-          For ISPs and Enterprises, the IP address provides very clear
-          geolocation of the owner.  No amount of IP address privacy
-          extensions (<xref target="RFC4941"/>) can do anything about this,
-          as a simple whois lookup likely identifies the ISP or Enterprise
-          from the upper bits anyway.  A passive attacker who observes the
-          connection definitely may conclude that the given enterprise/ISP is
-          a customer of the particular equipment vendor.  The precise model
-          that is being enrolled will remain private.
-        </t>
-        <t>
-          The above situation is to be distinguished from a
-          residential/individual person who registers a device from a
-          manufacturer: that an enterprise/ISP purchases routing products is
-          hardly worth mentioning.  Deviations would, however, be notable.
-        </t>
-        <t>
-          The situation is not improved by the enterprise/ISP using
-          anonymization services such as 
-          <xref target="Dingledine2004">ToR</xref>, as a TLS 1.2 connection
-          will reveal the ClientCertificate used, clearly identifying
-          the enterprise/ISP involved.  TLS 1.3 is better in this regard,
-          but an active attacker can still discover the parties involved by
-          performing a Man-In-The-Middle-Attack on the first attempt
-          (breaking/killing it with a TCP RST), and then letting subsequent
-          connection pass through.
-        </t>
+        <section title="What BRSKI-MASA reveals to the manufacturer">
+          <t>
+            The so-called "call-home" mechanism that occurs as part of the
+            BRSKI-MASA connection standardizes what has been deemed by some as
+            a sinister mechanism for corporate oversight of individuals.
+            (<xref target="livingwithIoT" /> and <xref
+            target="IoTstrangeThings" /> for a small sample).
+          </t>
+          <t>
+            As the Autonomic Control Plane (ACP) usage of BRSKI is not
+            targetted at individual usage of IoT devices, but rather at the
+            Enterprise and ISP creation of networks in a zero-touch fashion,
+            the "call-home" represents a different kind of concern.
+          </t>
+          <t>
+            First, it needs to be re-iterated that the BRSKI-MASA mechanism
+            only occurs once during the comissioning of the device.  It is
+            well defined, and although encrypted with TLS, it could in theory
+            be made auditable as the contents are well defined.
+          </t>
+          <t>
+            This connection does
+            not occur when the device powers on or is restarted for normal
+            routines.  It is possible with low-quality implementations that
+            it might occur after certain firmware upgrades, for instance if the
+            upgrade requires repartitoning of firmware space and this affects
+            the credential storage.   The usage of a Trusted Platform Module
+            (TPM) to store credentials should completely eliminate this fault,
+            however.  Therefore this situation is clearly a quality of
+            implementation issue, and even in the worse case, it results in
+            additional enrollments being recorded when the significant firmware
+            update occurs.
+          </t>
+          <t>
+            (Some manufacturers might regard such an additional call-home a
+            significant feature as it might tell them how many of their
+            customers have performed this major upgrade, and therefore how many
+            are still vulnerable to some serious issue)
+          </t>
+          <t>
+            Second, the BRSKI call-home mechanism is mediated via the owner's
+            Registrar, and the information that is transmitted is directly
+            auditable by the device owner.    This is in stark constrast to
+            many "call-home" protocols where the device autonomously calls
+            home and uses an undocumented protocol.
+            While the contents of the signed part of the pledge voucher request
+            can not be changed, they are not encrypted at the registrar.  
+            The contents of an unsigned voucher request are, however,
+            completely changeable by the Registrar.   Both are, to re-iterate,
+            encrypted by TLS while in transit.
+          </t>
+          <t>
+            The BRSKI-MASA exchange reveals the following information to the
+            manufacturer:  the identity of the device being enrolled (down to
+            the serial-number!), the domain owner (digitally signed by a Domain
+            Owner certificate), the time the device is activated, and the IP
+            address of the domain Owner's Registrar.
+          </t>
+          <t>
+            For ISPs and Enterprises, the IP address provides very clear
+            geolocation of the owner.  No amount of IP address privacy
+            extensions (<xref target="RFC4941"/>) can do anything about this,
+            as a simple whois lookup likely identifies the ISP or Enterprise
+            from the upper bits anyway.  A passive attacker who observes the
+            connection definitely may conclude that the given enterprise/ISP is
+            a customer of the particular equipment vendor.  The precise model
+            that is being enrolled will remain private.
+          </t>
+          <t>
+            The above situation is to be distinguished from a
+            residential/individual person who registers a device from a
+            manufacturer: that an enterprise/ISP purchases routing products is
+            hardly worth mentioning.  Deviations would, however, be notable.
+          </t>
+          <t>
+            The situation is not improved by the enterprise/ISP using
+            anonymization services such as 
+            <xref target="Dingledine2004">ToR</xref>, as a TLS 1.2 connection
+            will reveal the ClientCertificate used, clearly identifying
+            the enterprise/ISP involved.  TLS 1.3 is better in this regard,
+            but an active attacker can still discover the parties involved by
+            performing a Man-In-The-Middle-Attack on the first attempt
+            (breaking/killing it with a TCP RST), and then letting subsequent
+            connection pass through.
+          </t>
+        </section>
+        <section title="Manufacturers and Used or Stolen Equipment">
+          <t>
+            As explained above, the manufacturer receives information each
+            time that a device which is in factory-default mode does a
+            zero-touch bootstrap, and attempts to enroll into a domain
+            owner's registrar.
+          </t>
+          <t>
+            The manufacturer is therefore in a position to decline to issue a
+            voucher if it detects that the new owner is not the same as
+            the previous owner.
+          </t>
+          <t>
+            This can be seen as a feature if the equipment is believed to
+            have been stolen.  If the legitimate owner notifies the
+            manufacturer of the theft, then when the new owner brings the
+            device up, if they use the zero-touch mechanism, the new
+            (illegitimate) owner reveals their location and identity.
+          </t>
+          <t>
+            In the case of Used equipment, the initial owner could inform
+            the manufacturer of the sale, or the manufacturer may just
+            permit resales unless told otherwise.  In which case, the
+            transfer of ownership simply occurs.
+          </t>
+          <t>
+            A manufacturer could however decide not to issue a new voucher.
+            This is essentially the same as the stolen case, with the
+            manufacturer having decided that the sale was not legitimate.
+          </t>
+          <t>
+            There is a fourth case: the equipment was not stolen, but the
+            manufacturer was fraudulently lead to believe that it was,
+            and some time later if the device undergoes a deep factory reset
+            (for instance, replacement of a damaged component) the device
+            will not bootstrap.
+          </t>
+          <t>
+            Finally, there is a fifth case: the manufacturer has decided to
+            end-of-line the device, or the owner has not paid a yearly
+            support amount, and the manufacturer refuses to issue new
+            vouchers at that point.  This last case is not new to the
+            industry: many license systems are already deployed that have
+            significantly worse effect.  A manufacturer that attempted to
+            enforce license terms via vouchers would find it rather
+            ineffective as the terms would only be enforced when the device
+            is enrolled, and this is not (to repeat), a daily or even monthly
+            occorance.
+          </t>
+        </section>
+        <section title="Manufacturers and Grey market equipment">
+          <t>
+            Manufacturers of devices often sell different products into
+            different regional markets.  Which product is available in which
+            market can be driven by price differentials, support issues (some
+            markets may require manuals and tech-support to be done in the
+            local language), government export regulation (such as whether
+            strong crypto is permitted to be exported, or permitted to be
+            used in a particular market).  When an domain owner obtains a
+            device from a different market (they can be new) and transfers it
+            to a different location, this is called a Grey Market.
+          </t>
+          <t>
+            A manufacturer could decide not to issue a voucher to an
+            enterprise/ISP based upon their location.  There are a number of
+            ways which this could be determined: from the geolocation of the
+            registrar, from sales channel knowledge about the customer, and
+            what products are (un-)available in that market.  If the device
+            has a GPS the coordinates of the device could even be placed into
+            an extension of the voucher.
+          </t>
+          <t>
+            The above actions are not illegal, and not new.  Many
+            manufacturers have shipped crypto-weak (exportable) versions of
+            firmware as the default on equipment for decades.  The first task
+            of an enterprise/ISP has always been to login to a manufacturer
+            system, show one's "entitlement" (country informatin, proof that
+            support payments have been made), and receive either a new
+            updated firmware, or a license key that will activate the correct
+            firmware.
+          </t>
+          <t>
+            BRSKI permits the above process to automated (in an autonomic
+            fashion), and therefore perhaps encourages this kind of
+            differentiation by reducing the cost of doing it.
+          </t>
+          <t>
+            An issue that manufacturers will need to deal with in the above
+            automated process is when a device is shipped to one country
+            with one set of rules (or laws or entitlements), but the domain
+            registry is in another one.  Which rules apply is something
+            will have to be worked out: the manufacturer could come to
+            believe they are dealing with Grey market equipment, when it
+            is simply dealing with a global enterprise.
+          </t>
+        </section>
+        <section title="Some mitigations for meddling by manufacturers">
+          <t>
+            The most obvious mitigation is not to buy the product.
+            Pick manufacturers that are up-front about their policies, who do
+            not change them gratutiously.
+          </t>
+          <t>
+            A manufacturer could design their device so that it is possible
+            to replace the IDevID present after a full factury reset with
+            an IDevID of the domain owner's choosing.  Note that during the
+            EST-based enrollment process it is the LDevID which is usually
+            updated, and the LDevID which is used for day-to-day operations
+            of the device.  The 802.1AR specification permits a device
+            to optionally support replacing the IDevID.
+          </t>
+          <t>
+            IDevID replacement SHOULD only be done after establishing a
+            trusted relationship with the device.  In addition to replacing
+            the IDevID, the new owner must also replace the trust anchor
+            used to verify the vouchers with.  It is really this latter
+            trust anchor which is critical, but as the IDevID points to
+            the MASA, it's replacement facilities seamless operation.
+          </t>
+          <t>
+            Once the IDevID is replaced, then the device will no longer
+            belong to the manufacturer in any way.  When a new owner
+            performs a bootstrap, the device will point to a MASA
+            that has been chosen, and will validate vouchers from this
+            new entity.
+          </t>
+          <t>
+            This replacement facilitiates a few new operatonal modes without
+            making any changes to any protocols.  Those modes include:
+            offline modes where the domain owner operates an internal
+            MASA for all devices, resell modes where the first domain owner
+            becomes the MASA for the next (resold-to) domain owner,
+            and services where an aggregator acquires a large variety
+            of devices, and then acts as a pseudonymized MASA for a variety
+            of devices from a variety of manufacturers.
+          </t>
+          <t>
+            Some manufacturers may wish to consider replacement of the IDevID
+            as an indication that the device's warantee is terminated. For
+            others, the privacy requiments of some deployments might consider
+            this a standard operating practice.
+          </t>
+        </section>
       </section>
     </section>
 
