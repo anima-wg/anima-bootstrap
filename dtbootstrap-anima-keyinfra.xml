@@ -1666,13 +1666,32 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>All other fields MAY be omitted in the pledge voucher-request.</t>
 
         <t>An example JSON payload of a pledge voucher-request is in
-            <xref target="voucher-request-examples"/> Example 1.</t>
+            <xref target="voucher-request-examples"/> Example 1.
+        </t>
 
-        <t>The registrar validates the client identity as described in EST
-        <xref target="RFC7030"/> section 3.3.2. If the request is signed the
-        registrar confirms that the
-        'proximity' asserion and associated 'proximity-registrar-cert' are
-        correct.
+        <t>
+          The registrar validates the client identity as described in EST
+          <xref target="RFC7030"/> section 3.3.2.  This involves validating
+          the signatory of the TLS Client Certificate.   As described in the
+          next section, there are different models for authorizing accepted
+          devices.
+        </t>
+        <t>
+          If the request is signed the registrar confirms that the
+          voucher-request is signed by the same key as terminates the TLS
+          connection.
+        </t>
+        <t>
+          The Registrar extracts the serial-number of the pledge from the TLS
+          Client Certificate.  It uses this serial-number to form it's
+          voucher-request.
+        </t>
+        <t>
+          The Registrar examines the pledge's voucher-request (verifying the
+          signature, if the request is signed) and extracts any nonce present
+          to include in it's voucher-request.  In addition, any
+          'proximity' assertion and associated 'proximity-registrar-cert'
+          need to be verified to be correct.
         </t>
       </section>
 
