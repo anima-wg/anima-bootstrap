@@ -2922,27 +2922,44 @@ Reference: [This document]
             many "call-home" protocols where the device autonomously calls
             home and uses an undocumented protocol.
             While the contents of the signed part of the pledge voucher request
-            can not be changed, they are not encrypted at the registrar.  
+            can not be changed, they are not encrypted at the registrar.
             The contents of an unsigned voucher request are, however,
             completely changeable by the Registrar.   Both are, to re-iterate,
             encrypted by TLS while in transit.
           </t>
           <t>
             The BRSKI-MASA exchange reveals the following information to the
-            manufacturer:  the identity of the device being enrolled (down to
-            the serial-number!), the domain owner (digitally signed by a Domain
-            Owner certificate), the time the device is activated, and the IP
-            address of the domain Owner's Registrar.
-          </t>
-          <t>
-            For ISPs and Enterprises, the IP address provides very clear
-            geolocation of the owner.  No amount of IP address privacy
-            extensions (<xref target="RFC4941"/>) can do anything about this,
-            as a simple whois lookup likely identifies the ISP or Enterprise
-            from the upper bits anyway.  A passive attacker who observes the
-            connection definitely may conclude that the given enterprise/ISP is
-            a customer of the particular equipment vendor.  The precise model
-            that is being enrolled will remain private.
+            manufacturer:
+            <list style="symbols">
+              <t>
+                the identity of the device being enrolled (down to the
+                serial-number!).
+              </t>
+              <t>
+                an identity of the domain owner in the form of the domain
+                trust anchor.  However, this is not a global PKI anchored
+                name within the WebPKI, so this identity could be
+                pseudonymous.  If there is sales channel integration, then
+                the MASA will have authenticated the domain owner, either via
+                pinned certificate, or perhaps another HTTP authentication
+                method, as per <xref target="MASAauthenticationOfRegistrar" />.
+              </t>
+              <t>
+                the time the device is activated,
+              </t>
+              <t>
+                the IP address of the domain Owner's Registrar.
+                For ISPs and Enterprises, the IP address provides very clear
+                geolocation of the owner.  No amount of IP address privacy
+                extensions (<xref target="RFC4941"/>) can do anything about
+                this, as a simple whois lookup likely identifies the ISP or
+                Enterprise from the upper bits anyway.  A passive attacker
+                who observes the connection definitely may conclude that the
+                given enterprise/ISP is a customer of the particular
+                equipment vendor.  The precise model that is being enrolled
+                will remain private.
+              </t>
+            </list>
           </t>
           <t>
             The above situation is to be distinguished from a
@@ -2952,7 +2969,7 @@ Reference: [This document]
           </t>
           <t>
             The situation is not improved by the enterprise/ISP using
-            anonymization services such as 
+            anonymization services such as
             <xref target="Dingledine2004">ToR</xref>, as a TLS 1.2 connection
             will reveal the ClientCertificate used, clearly identifying
             the enterprise/ISP involved.  TLS 1.3 is better in this regard,
@@ -2986,46 +3003,58 @@ Reference: [This document]
             owner's registrar.
           </t>
           <t>
-            The manufacturer is therefore in a position to decline to issue a
-            voucher if it detects that the new owner is not the same as
-            the previous owner.
+            The manufacturer is therefore in a position to decline to
+            issue a voucher if it detects that the new owner is not the
+            same as the previous owner.
+            <list style="numbers">
+              <t>
+                This can be seen as a feature if the equipment is believed to
+                have been stolen.  If the legitimate owner notifies the
+                manufacturer of the theft, then when the new owner brings the
+                device up, if they use the zero-touch mechanism, the new
+                (illegitimate) owner reveals their location and identity.
+              </t>
+              <t>
+                In the case of Used equipment, the initial owner could inform
+                the manufacturer of the sale, or the manufacturer may just
+                permit resales unless told otherwise.  In which case, the
+                transfer of ownership simply occurs.
+              </t>
+              <t>
+                A manufacturer could however decide not to issue a new
+                voucher in response to a transfer of ownership.
+                This is essentially the same as the stolen case, with the
+                manufacturer having decided that the sale was not legitimate.
+              </t>
+              <t>
+                There is a fourth case, if the manufacturer is providing
+                protection against stolen devices.  The manufacturer then
+                has a responsability to protect the legitimate owner against
+                fraudulent claims that the the equipment was stolen.
+                Such a claim would cause the manufacturer to refuse
+                to issue a new voucher. Should the device go through
+                a deep factory reset (for instance, replacement of a damaged
+                main board component, the device would not bootstrap.
+              </t>
+              <t>
+                Finally, there is a fifth case: the manufacturer has decided to
+                end-of-line the device, or the owner has not paid a yearly
+                support amount, and the manufacturer refuses to issue new
+                vouchers at that point.  This last case is not new to the
+                industry: many license systems are already deployed that have
+                significantly worse effect.
+              </t>
+            </list>
           </t>
           <t>
-            This can be seen as a feature if the equipment is believed to
-            have been stolen.  If the legitimate owner notifies the
-            manufacturer of the theft, then when the new owner brings the
-            device up, if they use the zero-touch mechanism, the new
-            (illegitimate) owner reveals their location and identity.
-          </t>
-          <t>
-            In the case of Used equipment, the initial owner could inform
-            the manufacturer of the sale, or the manufacturer may just
-            permit resales unless told otherwise.  In which case, the
-            transfer of ownership simply occurs.
-          </t>
-          <t>
-            A manufacturer could however decide not to issue a new voucher.
-            This is essentially the same as the stolen case, with the
-            manufacturer having decided that the sale was not legitimate.
-          </t>
-          <t>
-            There is a fourth case: the equipment was not stolen, but the
-            manufacturer was fraudulently lead to believe that it was,
-            and some time later if the device undergoes a deep factory reset
-            (for instance, replacement of a damaged component) the device
-            will not bootstrap.
-          </t>
-          <t>
-            Finally, there is a fifth case: the manufacturer has decided to
-            end-of-line the device, or the owner has not paid a yearly
-            support amount, and the manufacturer refuses to issue new
-            vouchers at that point.  This last case is not new to the
-            industry: many license systems are already deployed that have
-            significantly worse effect.  A manufacturer that attempted to
+            This section has outlined five situations in which a manufacturer
+            could use the voucher system to enforce what are clearly
+            license terms.
+            A manufacturer that attempted to
             enforce license terms via vouchers would find it rather
             ineffective as the terms would only be enforced when the device
             is enrolled, and this is not (to repeat), a daily or even monthly
-            occorance.
+            occurrance.
           </t>
         </section>
         <section title="Manufacturers and Grey market equipment">
@@ -3165,7 +3194,7 @@ Reference: [This document]
       choses whichever voucher to accept based on internal logic. The
       registrars verifying log information will see multiple entries
       and take this into account for their analytics purposes.</t>
-      <section title="DoS against MASA">
+      <section anchor="dosmasa" title="DoS against MASA">
         <t>There are uses cases where the MASA could be unavailable or
         uncooperative to the Registrar. They include active DoS attacks, planned and unplanned
         network partitions, changes to MASA policy, or other instances where
