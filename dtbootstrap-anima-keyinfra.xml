@@ -949,125 +949,28 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
       <section anchor="certificatevalidaty" title="Certificate Time Validation">
         <section anchor="timeunknown" title="Lack of realtime clock">
           <t>
-            This section describes a series of heuristics that a pledge
-            that is uncertain about the time can perform to narrow it's
-            estimate.
-          </t>
-
-          <t>
             Many devices when bootstrapping do not have knowledge of the
             current time. Mechanisms such as Network Time Protocols cannot be
             secured until bootstrapping is complete. Therefore bootstrapping is
             defined in a method that does not require knowledge of the current
-            time.  A pledge MAY ignore all time stamps in the voucher if
-            it has no idea about the current time.
+            time.  A pledge MAY ignore all time stamps in the voucher and
+            in the certificate validity periods if it does not know
+            the current time.
           </t>
 
           <t>
-            Unfortunately there are moments during bootstrapping when
-            certificates are verified, such as during the TLS handshake, where
-            validity periods are confirmed. This paradoxical "catch-22" is
-            resolved by the pledge maintaining a concept of the current "window"
-            of presumed time validity that is continually refined throughout the
-            bootstrapping process as follows:
+            The pledge is exposed to dates in the following five places:
+            registrar certificate notBefore, registrar certificiate
+            notAfter,
+            voucher created-on, and voucher expires-on.
+            Additionally, CMS signatures contain a signingTime.
           </t>
 
-          <t><list style="symbols">
-              <t>Initially the pledge does not know the current time.</t>
-
-              <t>
-                Bootstrapping pledges that have a Realtime Clock (RTC), should use it
-                to verify certificate validity.  However, they must be
-                prepared for the recognize that the RTC might be
-                completely wrong when a RTC battery fails and resets to an
-                origin time (e.g., Jan. 1, 1970)
-              </t>
-
-              <t>
-                If the pledge has any stable storage (such as from where
-                firmware is loaded) then it should assume that the clock
-                can not be before the date at which the firmware or the the
-                storage was last time stamped.  The pledge should not update
-                the timestamps in any file systems until it has a secure
-                time source.
-                This provides an earliest date which is reasonable.  Call
-                this the current reasonable date (CRD).
-                This value must not be used for any future Registration attempt.
-                The current reasonable date (CRD) may only increase during
-                a single attempt.
-              </t>
-
-              <t>
-                The pledge is exposed to dates in the following five places
-                (registrar certificate, notBefore and notAfter. Voucher
-                created-on, and expires-on. Additionally, CMS signatures
-                contain a signingTime)
-              </t>
-              <t>
-                During the initial connection with the registrar, the
-                pledge sees the registrar's Certificate. It has an inception
-                date (notBefore) and an expiry date (notAfter).
-                It is reasonable that the notBefore date be after the
-                pledge's current working reasonable date.
-                It is however, suspicious for the notAfter date to be
-                before the pledge's current reasonable date. No action is
-                recommended, other than an internal audit entry for this.
-              </t>
-
-              <t>
-                If the notBefore date of the registrar's certificate is
-                newer than the pledge's reasonable date, then it MAY
-                update it's current reasonable date to the notBefore value.
-              </t>
-
-              <t>
-                After the voucher request process, the pledge will have
-                a voucher.  It can validate the signature on the voucher,
-                as it has been (by literal construction) provided with the
-                MASA's key as a trust anchor.
-                The time values (created-on, expires-on) in the voucher
-                can not in general be validated as the pledge has no certain
-                real time clock.  There are some reasonable assumptions
-                that can be made:  the voucher's expires-on time can not
-                be prior to the pledge's current reasonable date.
-                For nonceless vouchers, the voucher's created-on time could
-                be earlier than the pledge's notion of the time,
-                such as if a long-lived voucher was
-                obtained some time in the past, and the pledge has since
-                gone through a firmware update and factory reset.
-              </t>
-
-              <t>
-                If the voucher contains a nonce
-                then the pledge MUST confirm the nonce matches the original
-                pledge voucher-request. This ensures the voucher is fresh.
-                See <xref target="RequestVoucherFromRegistrar" />.
-                In that case, the voucher's created-on date must not be
-                prior to the pledge's current reasonable date.
-                In addition, when there is a valid nonce, the current
-                reasonable date may be incremented to that of the CMS
-                signingTime.
-              </t>
-
-              <t>
-                Once the voucher is accepted the validity period of the
-                pinned-domain-cert in the voucher now serves as a valid time
-                window. As explained in <xref target="revocationcheck" />, the MASA has
-                checked the registrar's certificate against real clocks , the
-                endorsement of the MASA allows the
-                pledge to treat the notBefore and notAfter dates as being
-                constraints on any subsequent certificate validity periods
-                that may need to be checked: for instance, validating
-                peer certificates during ANIMA ACP setup.
-              </t>
-
-              <t>
-                When accepting an enrollment certificate the validity period
-                within the new certificate is assumed to be valid by the pledge.
-                The pledge is now willing to use this credential for client
-                authentication.
-              </t>
-          </list>
+          <t>
+            If the voucher contains a nonce
+            then the pledge MUST confirm the nonce matches the original
+            pledge voucher-request. This ensures the voucher is fresh.
+            See <xref target="RequestVoucherFromRegistrar" />.
           </t>
         </section>
         <section anchor="infinitelifetime"
