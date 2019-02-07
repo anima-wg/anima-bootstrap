@@ -606,8 +606,8 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
 | Bad MASA   +------+-------+
 | response          |  send Voucher Status Telemetry
 |            +------v-------+
-|            | (5) Enroll   |<---202 /simpleenroll
-^------------+              |\___/
+|            | (5) Enroll   |<---+ (non-error HTTP codes  )
+^------------+              |\___/ (e.g. 201 'Retry-After')
 | Enroll     +------+-------+
 | Failure           |
 |            +------v-------+
@@ -1883,14 +1883,15 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           feedback (blinked LED etc) during this wait cycle if mechanisms for this
           are available. To prevent an attacker registrar from significantly
           delaying bootstrapping the pledge MUST limit the 'Retry-After' time to
-          60 seconds.   Ideally the pledge would keep track of the
+          60 seconds. Ideally the pledge would keep track of the
           appropriate Retry-After header values for any number of
           outstanding registrars but this would involve a state table
           on the pledge.  Instead the
           pledge MAY ignore the exact Retry-After value in favor of a single hard
-          coded value.   A registrar that is unable
-          to complete the transaction the first time due to timing reasons will
-          have future chances.
+          coded value (a registrar that is unable
+          to complete the transaction after the first 60 seconds has another chance a minute later). A pledge SHOULD only maintain a 202 retry-state 
+          for up to 4 days, which is longer than a long weekend, after which 
+          time the enrollment attempt fails and the pledge returns to discovery state.
         </t>
 
         <t>
