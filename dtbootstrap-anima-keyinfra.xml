@@ -1101,23 +1101,25 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
       </t>
 
       <t>
-        A registrar MAY also retrieve nonceless vouchers by sending
-        nonceless voucher-requests to the MASA in order to obtain
-        vouchers for use when the registrar does not have connectivity to the
-        MASA.
-        No "prior-signed-voucher-request" leaf
-        would be included.  The registrar will also need to know the serial number of
-        the pledge. This document does not provide a mechanism for the
-        registrar to learn that in an automated fashion. Typically this will
-        be done via scanning of bar-code or QR-code on packaging, or via
-        some sales channel integration.
-      </t>
-
-      <t>
         Unless otherwise signaled (outside the voucher-request artifact), the signing
         structure is as defined for vouchers, see
         <xref target="RFC8366"/>.
       </t>
+
+        <section title="Nonceless Voucher Requests" anchor="noncelessVoucherRequest">
+          <t>
+            A registrar MAY also retrieve nonceless vouchers by sending
+            nonceless voucher-requests to the MASA in order to obtain
+            vouchers for use when the registrar does not have connectivity to the
+            MASA.
+            No "prior-signed-voucher-request" leaf
+            would be included.  The registrar will also need to know the serial number of
+            the pledge. This document does not provide a mechanism for the
+            registrar to learn that in an automated fashion. Typically this will
+            be done via scanning of bar-code or QR-code on packaging, or via
+            some sales channel integration.
+          </t>
+        </section>
 
         <section title="Tree Diagram" anchor="voucher-request-tree-diagram">
             <t>The following tree diagram illustrates a high-level view of a
@@ -1613,7 +1615,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             cryptographically strong random or pseudo-random number
             nonce. Doing so ensures <xref target="timeunknown"/>
             functionality. The nonce MUST NOT be reused for multiple
-            bootstrapping attempts.
+            bootstrapping attempts. (The registrar voucher-request MAY omit
+            the nonce as per <xref target="noncelessVoucherRequest" />)
+
             </t>
 
             <t hangText="assertion:">
@@ -1736,7 +1740,10 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <t><list style="hanging">
         <t hangText="created-on:">Registrars are RECOMMENDED to populate this field. This provides additional information to the MASA.</t>
-        <t hangText="nonce:">The optional nonce value from the pledge request if desired (see below).</t>
+        <t hangText="nonce:">This is the value from the pledge
+            voucher-request. The registrar voucher-request MAY omit
+            the nonce as per <xref target="noncelessVoucherRequest" />)
+        </t>
         <t hangText="serial-number:">The serial number of the pledge the registrar would like a voucher for. The registrar
         determines this value by parsing the authenticated pledge IDevID certificate. See <xref target="IDevIDextension"></xref>.
         The registrar MUST verify that the serial number field it parsed matches the serial number field the pledge
