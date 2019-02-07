@@ -812,17 +812,41 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
         <section anchor="MASAURL"
                  title="MASA URI extension">
 
-          <t>The following newly defined field SHOULD be in the PKIX IDevID
-          certificate: A PKIX non-critical certificate extension that
-          contains a single Uniform Resource Identifier (URI) that points
-          to an on-line Manufacturer Authorized Signing Authority. The URI is
-          represented as described in Section 7.4 of [RFC5280].</t>
+          <t>
+            The following newly defined field SHOULD be in the PKIX IDevID
+            certificate: A PKIX non-critical certificate extension that
+            contains a string that can be used to build a single Uniform
+            Resource Identifier (URI) that points
+            to an on-line Manufacturer Authorized Signing Authority. The URI is
+            represented as described in Section 7.4 of <xref target="RFC5280" />.
+          </t>
 
-          <t>Any Internationalized Resource Identifiers (IRIs) MUST be mapped to
-          URIs as specified in Section 3.1 of [RFC3987] before they are placed
-          in the certificate extension. The URI provides the authority information.
-          The BRSKI "/.well-known" tree (<xref target="RFC5785" />) is
-          described in <xref target="ProtocolDetails"></xref>.</t>
+          <t>
+            Any Internationalized Resource Identifiers (IRIs) MUST be mapped to
+            URIs as specified in Section 3.1 of [RFC3987] before they are placed
+            in the certificate extension. The URI provides the authority information.
+            The BRSKI "/.well-known" tree (<xref target="RFC5785" />) is
+            described in <xref target="ProtocolDetails"></xref>.
+          </t>
+
+          <t>
+            As explained in <xref target="RFC5280" /> section 7.4, a complete
+            IRI SHOULD be in this extension, including the scheme, iauthority, and ipath.
+            As a consideration to constrained
+            systems, this MAY be reduced to only the iauthority, in which
+            case a scheme of "https://" and ipath of "/.well-known/est" is to be
+            assumed, as explained in section <xref target="ProtocolDetails"></xref>.
+          </t>
+          <t>
+            The registrary can assume that only the iauthority is present in
+            the extension, if there are no slash ("/") characters in the
+            extension.
+          </t>
+          <t>
+            Section 7.4 of <xref target="RFC5280" /> calls out various
+            schemes that MUST be supported, including ldap, http and ftp.
+            However, the registrar MUST use https for the BRSKI-MASA connection.
+          </t>
 
           <t>The new extension is identified as follows:</t>
 
@@ -1434,7 +1458,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <t>The communication channel between the registrar and MASA is similarly described as extensions to EST within the same "/.well-known" tree. For clarity this channel is referred to as "BRSKI-MASA". (See Figure 1).</t>
 
-        <t>MASA URI is "https://" authority "/.well-known/est".</t>
+        <t>MASA URI is "https://" iauthority "/.well-known/est".</t>
 
         <t>BRSKI uses existing CMS message formats for existing EST
         operations.  BRSKI uses JSON
