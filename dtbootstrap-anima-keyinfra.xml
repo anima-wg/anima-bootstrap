@@ -1488,12 +1488,15 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>Summarized automation extensions for the BRSKI-EST flow are:</t>
 
         <t><list style="symbols">
-            <t>The pledge provisionally accepts the registrar certificate during
-            the TLS handshake as detailed in <xref target="brskiesttls"></xref>.</t>
+            <t>
+              The pledge either attempts concurrent connections via each
+              discovered proxy, or it times out quickly and tries connections
+              in series, as explained at the end of <xref target="brskiesttls" />.
+            </t>
 
             <t>
-              The pledge either attempts concurrent connections, or it
-              times out quickly and tries connections in series.
+              The pledge provisionally accepts the registrar certificate during
+              the TLS handshake as detailed in <xref target="brskiesttls"></xref>.
             </t>
 
             <t>
@@ -1566,15 +1569,22 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             target="CompletingAuthenticationBootstrapping"></xref></t>
 
             <t>
-              To avoid blocking on a single erroneous registrar the pledge
-              MUST drop the connection after 5 seconds in which there has
-              been no progress on the TCP connection.
-              It should proceed to
-                connect to any other registrar's via any other discovered
-                proxies if there are any.  If there were no
-                other proxies discovered, the pledge MAY continue to wait,
-                as long as it is concurrently listening for new proxy
-                announcements.
+              A Pledge that can connect to multiple registries concurrently,
+              SHOULD do so.  Some devices may be unable to do so for lack of
+              threading, or resource issues.   Concurrent connections defeat
+              atttempts by a malicious proxy from causing a TCP Slowloris-like
+              attack (see <xref target="slowloris" />).
+            </t>
+            <t>
+              A pledge that can not maintain as many connections as there are
+              eligible proxies.  If no connection is making process after 5
+              seconds then the pledge SHOULD drop the oldest connection and
+              go on to a different proxy: the proxy that has been
+              communicated with least recently.
+              If there were no
+              other proxies discovered, the pledge MAY continue to wait,
+              as long as it is concurrently listening for new proxy
+              announcements.
             </t>
 
 
@@ -1931,8 +1941,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           on the pledge.  Instead the
           pledge MAY ignore the exact Retry-After value in favor of a single hard
           coded value (a registrar that is unable
-          to complete the transaction after the first 60 seconds has another chance a minute later). A pledge SHOULD only maintain a 202 retry-state 
-          for up to 4 days, which is longer than a long weekend, after which 
+          to complete the transaction after the first 60 seconds has another chance a minute later). A pledge SHOULD only maintain a 202 retry-state
+          for up to 4 days, which is longer than a long weekend, after which
           time the enrollment attempt fails and the pledge returns to discovery state.
         </t>
 
