@@ -4,6 +4,7 @@
 |        |         | Proxy   |    |  (JRC)     |     | (MASA)     |
 +--------+         +---------+    +------------+     +------------+
   |                     |                   |           Internet |
+[discover]              |                   |                    |
   |<-RFC4862 IPv6 addr  |                   |                    |
   |<-RFC3927 IPv4 addr  | Appendix A        |  Legend            |
   |-------------------->|                   |  C - circuit       |
@@ -12,11 +13,13 @@
   |<--------------------|                   |    TLS connection  |
   | GRASP M_FLOOD       |                   |                    |
   |   periodic broadcast|                   |                    |
+[identity]              |                   |                    |
   |<------------------->C<----------------->|                    |
   |         TLS via the Join Proxy          |                    |
   |<--Registrar TLS server authentication---|                    |
 [PROVISIONAL accept of server cert]         |                    |
   P---X.509 client authentication---------->|                    |
+[request join]                              |                    |
   P---Voucher Request(w/nonce for voucher)->|                    |
   P                  /-------------------   |                    |
   P                  |                 [accept device?]          |
@@ -30,11 +33,13 @@
   P                  |                      |<- voucher ---------|
   P                  \-------------------   | w/nonce if provided|
   P<------voucher---------------------------|                    |
-[verify voucher,verify provisional cert]    |                    |
+[imprint]                                   |                    |
   |-------voucher status telemetry--------->|                    |
   |                                         |<-device audit log--|
   |                             [verify audit log and voucher]   |
   |<--------------------------------------->|                    |
+[enroll]                                    |                    |
   | Continue with RFC7030 enrollment        |                    |
   | using now bidirectionally authenticated |                    |
   | TLS session.                            |                    |
+[enrolled]                                  |                    |
