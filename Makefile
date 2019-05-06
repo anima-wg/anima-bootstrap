@@ -21,10 +21,10 @@ EXTRA_FILES+=examples/parboiled_vr-00-D0-E5-F2-00-02.json
 EXTRA_FILES+=examples/voucher_00-D0-E5-F2-00-02.pkcs
 EXTRA_FILES+=examples/voucher_00-D0-E5-F2-00-02.asn1.txt
 EXTRA_FILES+=examples/voucher_00-D0-E5-F2-00-02.json
-EXTRA_FILES+=examples/idevid_00-D0-E5-F2-00-02.crt
-EXTRA_FILES+=examples/idevid_00-D0-E5-F2-00-02.txt
-EXTRA_FILES+=examples/idevid_00-D0-E5-F2-00-02.asn1.txt
-EXTRA_FILES+=examples/idevid_00-D0-E5-F2-00-02.key
+EXTRA_FILES+=examples/idevid_00-D0-E5-02-00-2D.crt
+EXTRA_FILES+=examples/idevid_00-D0-E5-02-00-2D.txt
+EXTRA_FILES+=examples/idevid_00-D0-E5-02-00-2D.asn1.txt
+EXTRA_FILES+=examples/idevid_00-D0-E5-02-00-2D.key
 
 ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt ${DRAFT}.html
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
