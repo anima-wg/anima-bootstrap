@@ -1614,11 +1614,12 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>This is done with an HTTPS POST using the operation path value of
         "/.well-known/est/requestvoucher".</t>
 
-        <t>The request media types are:</t>
+        <t>The pledge voucher-request Content-Types are:</t>
         <t><list style="hanging">
           <t hangText="application/voucher-cms+json">The request is a
            "YANG-defined JSON document that has been signed using a CMS structure" as described in
-          <xref target="voucher-request"/> using the JSON encoding described in <xref target="RFC7951"/>.
+           <xref target="voucher-request"/> using the JSON encoding described in <xref target="RFC7951"/>. This voucher media type is defined in
+           <xref target="RFC8366" /> and is also used for the pledge voucher-request.
           The pledge SHOULD sign the request using the <xref target="IDevIDextension"/> credential.
           </t>
           <t hangText="application/json">The request is the "YANG-defined JSON document"
@@ -1627,9 +1628,11 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           This reduces the cryptographic requirements on the pledge.</t>
         </list></t>
 
-        <t>For simplicity the term 'voucher-request' is used to refer to either of these media types. Registrar
+        <t>For simplicity the term 'voucher-request' is used to refer to any of these media types. Registrar
         impementations SHOULD anticipate future media types but of course will simply fail the request if those
         types are not yet known.</t>
+        
+        <t>The pledge SHOULD include an <xref target="RFC7231" /> section 5.3.2 "Accept" header indicating the acceptable media type for the voucher response. The  "application/voucher-cms+json" media type is defined in <xref target="RFC8366" /> but constrained voucher formats are expected in the future. Registrar's and MASA's are expected to be flexible in what they accept.</t>
 
         <t>The pledge populates the voucher-request fields as follows:</t>
 
@@ -1743,10 +1746,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>This is done with an HTTP POST using the operation path value of
         "/.well-known/est/requestvoucher".</t>
 
-        <t>
-          The request media type is defined in
-          <xref target="RFC8366" /> and is
-          application/voucher-cms+json. It is a JSON document that has been
+        <t>The voucher media type "application/voucher-cms+json" is defined in
+          <xref target="RFC8366" /> and is also used for the registrar voucher-request. It is a JSON document that has been
           signed using a CMS structure.
           The registrar MUST sign the registrar voucher-request. The entire registrar certificate chain,
           up to and including the Domain CA, MUST be included in the CMS structure.
@@ -1754,6 +1755,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <t>MASA impementations SHOULD anticipate future media
             types but of course will simply fail the request if those types are not yet known.</t>
+        
+        <t>The Registrar SHOULD include an <xref target="RFC7231" /> section 5.3.2 "Accept" header indicating the response media types that are acceptable. This list SHOULD be the entire list presented to the Registrar in the Pledge's original request (see <xref target="RequestVoucherFromRegistrar" />) but MAY be a subset. MASA's are expected to be flexible in what they accept.</t>
 
         <t>The registrar populates the voucher-request fields as follows:</t>
 
@@ -1787,7 +1790,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           MASA
           while the pledge is being deployed. Some use cases require the
           registrar to learn the
-          appropriate IDevID SerialNumber field from the physical device
+          appropriate IDevID SerialNumber field and appropriate 'Accept header' field values from the physical device
           labeling or from the sales channel (out-of-scope for this
           document).
         </t>
@@ -1923,7 +1926,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           applies to both the MASA and registrar responses. A
           registrar either caches prior MASA responses or dynamically requests
           a new voucher based on local policy (it does not generate or sign
-          a voucher).</t>
+          a voucher). Registrar evaluation of the voucher itself is purely for transparency and audit purposes to further inform log verification (see <xref target="auditLogVerification" />) and therefore a registrar could accept future voucher formats that are opaque to the registrar.</t>
 
         <t>If the voucher-request is successful, the server (MASA responding
         to registrar or registrar responding to pledge) response MUST
@@ -1978,21 +1981,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         the pledge is unacceptable due to inventory control, MASA audit logs, or
         any other reason.</t>
         <t>A 415 (Unsupported Media Type) response is approriate for a
-        request that has a voucher encoding that is not understood.</t>
+        request that has a voucher-request or accept encoding that is not understood.</t>
 
-        <t>The response media type is:</t>
-        <t><list style="hanging">
-          <t hangText="application/voucher-cms+json">
-            The response is a "YANG-defined JSON document that has been
-            signed using a CMS structure" as described in <xref
-            target="RFC8366"/>
-            using the JSON encoded described in <xref target="RFC7951"/>.
-          The MASA MUST sign the response.</t>
-        </list></t>
-
-        <t>
-          The syntactic details of vouchers are described in detail in
-          <xref target="RFC8366"/>. For example, the voucher
+        <t>The voucher response format is as indicated in the submitted accept header or based on the MASA's prior understanding of proper format for this Pledge. Only the <xref target="RFC8366"/> "application/voucher-cms+json" media type is defined at this time. The syntactic details of vouchers are described in detail in <xref target="RFC8366"/>. For example, the voucher
           consists of:
         </t>
 
@@ -2177,7 +2168,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>
           The registrar SHOULD HTTP POST the same registrar voucher-request
           as it did when requesting a
-          voucher. It is posted to the /requestauditlog URI instead.
+          voucher (using the same Content-Type). It is posted to the /requestauditlog URI instead.
           The "idevid-issuer" and "serial-number" informs the MASA
           which log is requested so the appropriate log can be prepared
           for the response.
@@ -2216,20 +2207,6 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>
           A MASA that returns a code 200 MAY also include a Location: header
           for future reference by the registrar.
-        </t>
-
-        <t>The request media type is:</t>
-        <t>
-          <list style="hanging">
-            <t hangText="application/voucher-cms+json">The request is a
-            "YANG-defined JSON document that has been signed using a CMS
-            structure" as described in <xref target="voucher-request"/> using
-            the JSON encoded described in <xref target="RFC7951"/>. The
-            registrar MUST sign the request. The entire registrar certificate
-            chain, up to and including the Domain CA, MUST be included in the
-            CMS structure.
-            </t>
-          </list>
         </t>
 
         <section anchor="MASAauditlog" title="MASA audit log response">
@@ -2660,6 +2637,11 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             entries. This could occur when used equipment is purchased with a
             valid history being deployed in air gap networks that required
             permanent vouchers.</t>
+            
+            <t>A registrar MAY accept voucher formats of future types that
+              can not be parsed by the Registrar. This reduces the Registrar's
+              visibility into the exact voucher contents but does not change
+              the protocol operations.</t>
           </list></t>
       </section>
 
