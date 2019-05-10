@@ -1085,26 +1085,11 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
 
       <t>
         The "prior-signed-voucher-request" leaf is used in registrar
-        voucher-requests. If present, it is the encoded (signed form)
-        of the pledge voucher-request. This provides a method for
+        voucher-requests. If present, it is the signed pledge voucher-request. This provides a method for
         the registrar to forward the pledge's signed request to the
         MASA. This completes transmission of the signed
         "proximity-registrar-cert" leaf.
       </t>
-
-      <t>
-        A registrar MAY also retrieve nonceless vouchers by sending
-        nonceless voucher-requests to the MASA in order to obtain
-        vouchers for use when the registrar does not have connectivity to the
-        MASA.
-        No "prior-signed-voucher-request" leaf
-        would be included.  The registrar will also need to know the serial number of
-        the pledge. This document does not provide a mechanism for the
-        registrar to learn that in an automated fashion. Typically this will
-        be done via scanning of bar-code or QR-code on packaging, or via
-        some sales channel integration.
-      </t>
-
       <t>Unless otherwise signaled (outside the voucher-request artifact), the signing
       structure is as defined for vouchers, see
       <xref target="RFC8366"/>.
@@ -1158,8 +1143,7 @@ INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-proximity.json END
             <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a registrar voucher-request.
                 The 'prior-signed-voucher-request' leaf is populated with the pledge's
                 voucher-request (such as the prior example).  The pledge's
-                voucher-request, if a signed artifact with a CMS format
-                signature is a binary object.  In the JSON encoding used
+                voucher-request is a binary object.  In the JSON encoding used
                 here it must be base64 encoded. The nonce, created-on and
                 assertion is carried forward. The serial-number is extracted from
                 the pledge's Client Certificate from the TLS connection. See
@@ -1182,17 +1166,6 @@ INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-prior.json END
 <figure>
 INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-offline.json END
 </figure>
-
-            <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a registrar voucher-request.
-                The 'prior-signed-voucher-request' leaf is not populated with the pledge
-                voucher-request because the pledge did not sign its own request. This form
-                might be used when more constrained pledges are being deployed. The
-                nonce is populated from the pledge's request.   See
-                <xref target="RequestVoucherFromMASA"/>.</t></list></t>
-<figure>
-INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-constrained.json END
-</figure>
-
         </section>  <!-- examples -->
 
         <section title="YANG Module" anchor="voucher-request-yang-module">
@@ -1624,7 +1597,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>This is done with an HTTPS POST using the operation path value of
         "/.well-known/est/requestvoucher".</t>
 
-        <t>The pledge voucher-request Content-Types are:</t>
+        <t>The pledge voucher-request Content-Type is:</t>
         <t><list style="hanging">
           <t hangText="application/voucher-cms+json">The request is a
            "YANG-defined JSON document that has been signed using a CMS structure" as described in
@@ -1634,7 +1607,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
         </list></t>
 
-        <t>For simplicity the term 'voucher-request' is used to refer to any of these media types. Registrar
+        <t>Registrar
         impementations SHOULD anticipate future media types but of course will simply fail the request if those
         types are not yet known.</t>
         
@@ -1719,7 +1692,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>
           The MASA and the registrars SHOULD be prepared to support TLS client
           certificate authentication and/or HTTP Basic or Digest authentication as
-          described in RFC7030 for EST clients.  This connection MAY also have no
+          described in <xref target="RFC7030" /> for EST clients.  This connection MAY also have no
           client authentication at all (<xref target="masasecurityreductions" />)
         </t>
         <t>
@@ -1779,8 +1752,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         not certified.</t>
         <t hangText="idevid-issuer:">The idevid-issuer value from the pledge certificate
         is included to ensure a statistically unique identity.</t>
-        <t hangText="prior-signed-voucher-request:">If a signed pledge voucher-request was received
-        then it SHOULD be included in the registrar voucher-request.
+        <t hangText="prior-signed-voucher-request:">The signed pledge voucher-request SHOULD be included in the registrar voucher-request.
         (NOTE: what is included is the complete pledge voucher-request, inclusive of the
         'assertion', 'proximity-registrar-cert', etc wrapped by the pledge's
         original signature). If a signed voucher-request was not recieved from the pledge
