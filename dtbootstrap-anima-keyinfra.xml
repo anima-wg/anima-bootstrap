@@ -2101,41 +2101,69 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         status.</t>
 
         <t>To indicate pledge status regarding the voucher, the pledge
-        MUST post a status message.</t>
+        MUST post a status message to the Registrar.</t>
 
         <t>The posted data media type: application/json</t>
 
         <t>The client HTTP POSTs the following to the server at the EST well
-        known URI "/voucher_status". The Status field indicates if the voucher
-        was acceptable. If it was not acceptable the Reason string indicates
-        why. In the failure case this message may be sent to an
-        unauthenticated, potentially malicious registrar and therefore the
-        Reason string SHOULD NOT provide information beneficial to an
-        attacker. The operational benefit of this telemetry information is
-        balanced against the operational costs of not recording that an
-        voucher was ignored by a client the registrar expected to continue
-        joining the domain.</t>
+        known URI "/voucher_status".</t>
 
-        <t><figure>
-            <artwork><![CDATA[{
-  "version":"1",
-  "Status":FALSE /* TRUE=Success, FALSE=Fail"
-  "Reason":"Informative human readable message"
-  "reason-context": { additional JSON }
-}]]></artwork>
-          </figure>The server SHOULD respond with an HTTP 200 but MAY simply
-        fail with an HTTP 404 error. The client ignores any response. Within
-        the server logs the server SHOULD capture this telemetry
-        information.</t>
+        <t>
+          The format and semantics described below are for version 1.
+          A version field is included to permit significant changes to this
+          feedback in the future.  A Registrar that receives a status
+          message with a version larger than it knows about SHOULD log the
+          contents and alert a human.
+        </t>
+
+        <t>The Status field indicates if the voucher was acceptable.
+        Boolean values are acceptable.
+        </t>
+
+        <t>
+          If the voucher was not acceptable the Reason string indicates
+          why. In the failure case this message may be sent to an
+          unauthenticated, potentially malicious registrar and therefore the
+          Reason string SHOULD NOT provide information beneficial to an
+          attacker. The operational benefit of this telemetry information is
+          balanced against the operational costs of not recording that an
+          voucher was ignored by a client the registrar expected to continue
+          joining the domain.
+        </t>
+
         <t>
           The reason-context attribute is an arbitrary JSON object (literal
           value or hash of values) which provides additional information
           specific to this pledge.  The contents of this field are not
           subject to standardization.
         </t>
+
+        <t>
+          The version, and status fields MUST be present.
+          The Reason field SHOULD be present whenever the status field
+          is negative.  The Reason-Context field is optional.
+        </t>
+        <t>
+          The keys to this JSON hash are case-insensitive.
+        </t>
+
+        <t><figure>
+            <artwork><![CDATA[{
+  "version":"1",
+  "status":FALSE /* TRUE=Success, FALSE=Fail"
+  "reason":"Informative human readable message"
+  "reason-context": { additional JSON }
+}]]></artwork>
+          </figure>
+          The server SHOULD respond with an HTTP 200 but MAY simply
+          fail with an HTTP 404 error. The client ignores any response. Within
+          the server logs the server SHOULD capture this telemetry
+          information.
+        </t>
         <t>
           Additional standard JSON fields in this POST MAY be added, see
-          <xref target="pledgestatustelemetryregistry" />.
+          <xref target="pledgestatustelemetryregistry" />.  A server that
+          sees unknown fields should log them, but otherwise ignore them.
         </t>
       </section>
 
