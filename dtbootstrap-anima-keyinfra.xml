@@ -2178,12 +2178,7 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
         </t>
 
         <t><figure anchor="telemetryexample" title="Example Status Telemetry">
-            <artwork><![CDATA[{
-  "version":"1",
-  "status":FALSE,
-  "reason":"Informative human readable message",
-  "reason-context": { additional JSON }
-}]]></artwork>
+INSERT_TEXT_FROM_FILE example-telemetry.json END
           </figure>
           The server SHOULD respond with an HTTP 200 but MAY simply
           fail with an HTTP 404 error. The client ignores any response. Within
@@ -2255,48 +2250,25 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
         <section anchor="MASAauditlog" title="MASA audit log response">
           <t>A log data file is returned consisting of all log entries
           associated with the device selected by the IDevID presented in
-          the request.  The audit log may be truncated of old or repeated
+          the request.  The audit log may be abridged by removal of old or repeated
           values as explained below.
           The returned data is in JSON format (<xref target="RFC7951"/>),
           and the Content-Type SHOULD be "application/json".
           For example:</t>
 
-          <t><figure>
-            <artwork><![CDATA[
-{
-  "version":"1",
-  "events":[
-    {
-     "date":"<date/time of the entry>",
-     "domainID":"<domainID extracted from voucher-request>",
-     "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
-     "assertion":"<the value from the voucher assertion leaf>"
-     "truncated":"<the number of domainID entries truncated>"
-    },
-    {
-     "date":"<date/time of the entry>",
-     "domainID":"<anotherDomainID extracted from voucher-request>",
-     "nonce":"<any nonce if supplied (or the exact string 'NULL')>"
-     "assertion":"<the value from the voucher assertion leaf>"
-    }
-  ],
-  "truncation": {
-     "nonced duplicates": "<total number of entries truncated>",
-     "nonceless duplicates": "<total number of entries truncated>",
-     "arbitrary": "<number of domainID entries removed entirely>"
-     }
-}]]></artwork>
+          <t><figure anchor="example-auditlog" title="Example of audit-log response">
+INSERT_TEXT_FROM_FILE example-auditlog.json END
           </figure></t>
 
           <t>Distribution of a large log is less than ideal. This structure can
           be optimized as follows: Nonced or Nonceless entries for the
-          same domainID MAY be truncated from the log leaving only the single
+          same domainID MAY be abridged from the log leaving only the single
           most recent nonced or nonceless entry for that domainID. In the case of
           truncation the 'event' truncation value SHOULD contain a count of the number of events for this
-          domainID that were truncated. The log SHOULD NOT be further
+          domainID that were omitted. The log SHOULD NOT be further
           reduced but there could exist operational situation where maintaining
           the full log is not possible. In such situations the log MAY be
-          arbitrarily truncated for length, with the number of removed
+          arbitrarily abridged for length, with the number of removed
           entries indicated as 'arbitrary'.
           </t>
 
@@ -2307,7 +2279,7 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
           </t>
 
           <t>A log where duplicate entries for the same domain have
-            been truncated ("nonced duplicates" and/or "nonceless duplicates)
+            been omitted ("nonced duplicates" and/or "nonceless duplicates)
             could still be acceptable for informed decisions. A log that
             has had "arbitrary" truncations is less acceptable but manufacturer
             transparency is better than hidden truncations.</t>
@@ -2507,14 +2479,10 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
           <t>The client HTTP POSTs the following to the server at the new EST
           well known URI /enrollstatus.</t>
 
-          <t><figure>
-              <artwork><![CDATA[{
-  "version":"1",
-  "Status":TRUE,
-  "Reason":"Informative human readable message",
-  "reason-context": "Additional information"
-}]]></artwork>
-            </figure></t>
+          <t><figure anchor="example-enrollstatus" title="Example of
+                                                          enrollment status POST">
+INSERT_TEXT_FROM_FILE example-enrollstatus.json END
+          </figure></t>
 
           <t>The server SHOULD respond with an HTTP 200 but MAY simply fail
           with an HTTP 404 error.</t>
