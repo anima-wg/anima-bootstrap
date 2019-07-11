@@ -25,7 +25,7 @@ idevid_${EXAMPLE1}.txt: idevid_${EXAMPLE1}.crt
 	openssl asn1parse -inform pem -in $? | cut -c1-72 >$@
 
 %.json: %.pkcs
-	openssl cms -verify -noverify -in $? -inform pem > $@
+	openssl cms -verify -noverify -in $? -inform pem | fold -60 > $@
 
 update:
 	cp /ssw/projects/pandora/reach/spec/files/product/00-D0-E5-02-00-2D/device.crt idevid_${EXAMPLE1}.crt
