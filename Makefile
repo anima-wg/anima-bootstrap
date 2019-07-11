@@ -57,6 +57,7 @@ ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
 	cat ${DRAFT}.xml | ./insert-figures > ALL-${DRAFT}.xml
 
 %.txt: ALL-%.xml
+	./validate-json
 	@echo PROCESSING: $(subst ALL-,,$@)
 	unset DISPLAY; XML_LIBRARY=$(XML_LIBRARY):./src xml2rfc --text -o $(subst ALL-,,$@) $?
 
