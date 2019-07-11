@@ -5,7 +5,6 @@
 <!ENTITY RFC5246 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
 <!ENTITY RFC5280 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml">
 <!ENTITY RFC5652 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5652.xml">
-<!ENTITY RFC7159 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7159.xml">
 <!ENTITY RFC7575 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7575.xml">
 <!ENTITY RFC7950 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml">
 <!ENTITY RFC7951 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7951.xml">
@@ -616,7 +615,7 @@ INSERT_TEXT_FROM_FILE component-diagram.txt END
 | response          |  send Voucher Status Telemetry
 |            +------v-------+
 |            | (5) Enroll   |<---+ (non-error HTTP codes  )
-^------------+              |\___/ (e.g. 201 'Retry-After')
+^------------+              |\___/ (e.g. 202 'Retry-After')
 | Enroll     +------+-------+
 | Failure           |
 |              -----v------
@@ -1480,7 +1479,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <t>BRSKI uses existing CMS message formats for existing EST
         operations.  BRSKI uses JSON
-        <xref target="RFC7159" /> for all new operations defined here, and
+        <xref target="RFC8259" /> for all new operations defined here, and
         voucher formats.
         </t>
 
@@ -1578,7 +1577,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
                operations are complete the pledge could be communicating
                with an attacker.</t>
             <t>
-              A pledge that can connect to multiple registries concurrently,
+              A pledge that can connect to multiple registries concurrently
               SHOULD do so.  Some devices may be unable to do so for lack of
               threading, or resource issues.   Concurrent connections defeat
               attempts by a malicious proxy from causing a TCP Slowloris-like
@@ -1623,7 +1622,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         implementations SHOULD anticipate future media types but of course will simply fail the request if those
         types are not yet known.</t>
 
-        <t>The pledge SHOULD include an <xref target="RFC7231" /> section 5.3.2 "Accept" header indicating the acceptable media type for the voucher response. The  "application/voucher-cms+json" media type is defined in <xref target="RFC8366" /> but constrained voucher formats are expected in the future. Registrar's and MASA's are expected to be flexible in what they accept.</t>
+        <t>
+          The pledge SHOULD include an <xref target="RFC7231" /> section 5.3.2
+          "Accept" header field indicating the acceptable media type for the voucher
+          response. The  "application/voucher-cms+json" media type is defined
+          in <xref target="RFC8366" /> but constrained voucher formats are
+          expected in the future. Registrar's and MASA's are expected to be
+          flexible in what they accept.
+        </t>
 
         <t>The pledge populates the voucher-request fields as follows:</t>
 
@@ -1757,7 +1763,14 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>MASA impementations SHOULD anticipate future media
             types but of course will simply fail the request if those types are not yet known.</t>
 
-        <t>The Registrar SHOULD include an <xref target="RFC7231" /> section 5.3.2 "Accept" header indicating the response media types that are acceptable. This list SHOULD be the entire list presented to the Registrar in the Pledge's original request (see <xref target="RequestVoucherFromRegistrar" />) but MAY be a subset. MASA's are expected to be flexible in what they accept.</t>
+        <t>
+          The Registrar SHOULD include an <xref target="RFC7231" /> section
+          5.3.2 "Accept" header field indicating the response media types that are
+          acceptable. This list SHOULD be the entire list presented to the
+          Registrar in the Pledge's original request (see <xref
+          target="RequestVoucherFromRegistrar" />) but MAY be a subset. MASA's
+          are expected to be flexible in what they accept.
+        </t>
 
         <t>The registrar populates the voucher-request fields as follows:</t>
 
@@ -1794,7 +1807,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           MASA
           while the pledge is being deployed. Some use cases require the
           registrar to learn the
-          appropriate IDevID SerialNumber field and appropriate 'Accept header' field values from the physical device
+          appropriate IDevID SerialNumber field and appropriate 'Accept header field' values from the physical device
           labeling or from the sales channel (out-of-scope for this
           document).
         </t>
@@ -1952,7 +1965,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           are available. To prevent an attacker registrar from significantly
           delaying bootstrapping the pledge MUST limit the 'Retry-After' time to
           60 seconds. Ideally the pledge would keep track of the
-          appropriate Retry-After header values for any number of
+          appropriate Retry-After header field values for any number of
           outstanding registrars but this would involve a state table
           on the pledge.  Instead the
           pledge MAY ignore the exact Retry-After value in favor of a single hard
@@ -1979,7 +1992,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         device that is not known to the MASA.</t>
         <t>A 406 (Not Acceptable) response is appropriate if a voucher of the
         desired type or using the desired algorithms (as indicated by the
-        Accept: headers, and algorithms used in the signature) cannot be
+        Accept: header fields, and algorithms used in the signature) cannot be
         issued such as because the MASA knows the pledge cannot process
         that type. The registrar SHOULD use this response if it determines
         the pledge is unacceptable due to inventory control, MASA audit logs, or
@@ -1988,7 +2001,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         request that has a voucher-request or accept encoding that is not understood.</t>
 
         <t>The voucher response format is as indicated in the submitted
-        accept header or based on the MASA's prior understanding of proper
+        Accept header fields or based on the MASA's prior understanding of proper
         format for this Pledge. Only the <xref target="RFC8366"/>
         "application/voucher-cms+json" media type is defined at this
         time. The syntactic details of vouchers are described in detail in
@@ -2229,7 +2242,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>
           Rather than returning the audit log as a response to the POST (with
           a return code 200), the MASA MAY instead return a 201 ("Created")
-          RESTful response (<xref target="RFC7231" /> section 7.1) containing
+          RESTful response (<xref target="RFC7231" /> sections 6.3.2 and 7.1) containing
           a URL to the prepared (and easily cachable) audit response.
         </t>
         <t>
@@ -3484,8 +3497,7 @@ Reference: [This document]
       &RFC5280;
 
       <?rfc include="reference.RFC.5272" ?>
-
-      &RFC7159;
+      <?rfc include="reference.RFC.8259" ?>
 
       &RFC7950;
 
