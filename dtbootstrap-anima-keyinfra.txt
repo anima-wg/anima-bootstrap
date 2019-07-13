@@ -960,8 +960,9 @@ Internet-Draft                    BRSKI                        July 2019
    As explained in [RFC5280] section 7.4, a complete IRI SHOULD be in
    this extension, including the scheme, iauthority, and ipath.  As a
    consideration to constrained systems, this MAY be reduced to only the
-   iauthority, in which case a scheme of "https://" and ipath of
-   "/.well-known/est" is to be assumed, as explained in Section 5.
+   iauthority, in which case a scheme of "https://" ([RFC7230] section
+   2.7.3) and ipath of "/.well-known/est" is to be assumed, as explained
+   in Section 5.
 
    The registrar can assume that only the iauthority is present in the
    extension, if there are no slash ("/") characters in the extension.
@@ -971,7 +972,6 @@ Internet-Draft                    BRSKI                        July 2019
    use HTTPS for the BRSKI-MASA connection.
 
    The new extension is identified as follows:
-
 
 
 
@@ -1649,7 +1649,7 @@ Internet-Draft                    BRSKI                        July 2019
    which the Join Proxy and Registrar have in common.
 
    In order to permit the proxy functionality to be implemented on the
-   maximum variety of devices the chosen mechanism SHOULD use the
+   maximum variety of devices the chosen mechanism should use the
    minimum amount of state on the proxy device.  While many devices in
    the ANIMA target space will be rather large routers, the proxy
    function is likely to be implemented in the control plane CPU of such
@@ -1911,10 +1911,11 @@ Internet-Draft                    BRSKI                        July 2019
    voucher formats.
 
    While EST section 3.2 does not insist upon use of HTTP 1.1 persistent
-   connections, BRSKI-EST connections SHOULD use persistent connections.
-   The intention of this guidance is to ensure the provisional TLS state
-   occurs only once, and that the subsequent resolution of the provision
-   state is not subject to a MITM attack during a critical phase.
+   connections, ([RFC7230] section 6.3) BRSKI-EST connections SHOULD use
+   persistent connections.  The intention of this guidance is to ensure
+   the provisional TLS state occurs only once, and that the subsequent
+   resolution of the provision state is not subject to a MITM attack
+   during a critical phase.
 
    Summarized automation extensions for the BRSKI-EST flow are:
 
@@ -1956,7 +1957,6 @@ Internet-Draft                    BRSKI                        July 2019
 
 
 
-
 Pritikin, et al.        Expires January 14, 2020               [Page 35]
 
 Internet-Draft                    BRSKI                        July 2019
@@ -1981,9 +1981,10 @@ Internet-Draft                    BRSKI                        July 2019
    certificate, and the EST server (the registrar) is provisionally
    authenticated with an unverified server certificate.
 
-   The pledge maintains a security paranoia concerning the provisional
-   state, and all data received, until a voucher is received and
-   verified as specified in Section 5.6.1
+   The pledge performs input validation of all data received until a
+   voucher is verified as specified in Section 5.6.1 and the TLS
+   connection leaves the provisional state.  Until these operations are
+   complete the pledge could be communicating with an attacker.
 
    A pledge that can connect to multiple registries concurrently SHOULD
    do so.  Some devices may be unable to do so for lack of threading, or
@@ -2009,7 +2010,6 @@ Internet-Draft                    BRSKI                        July 2019
    "/.well-known/est/requestvoucher".
 
    The pledge voucher-request Content-Type is:
-
 
 
 
@@ -2197,7 +2197,7 @@ Internet-Draft                    BRSKI                        July 2019
       request as that field is claimed but not certified.
 
    idevid-issuer:  The idevid-issuer value from the pledge certificate
-      is included to ensure a statistically unique identity.
+      is included to ensure a unique identity.
 
    prior-signed-voucher-request:  The signed pledge voucher-request
       SHOULD be included in the registrar voucher-request.  (NOTE: what
@@ -2639,7 +2639,7 @@ Internet-Draft                    BRSKI                        July 2019
    After receiving the pledge status telemetry Section 5.7, the
    registrar SHOULD request the MASA audit log from the MASA service.
 
-   This is done with an HTTP GET using the operation path value of
+   This is done with an HTTP POST using the operation path value of
    "/.well-known/est/requestauditlog".
 
    The registrar SHOULD HTTP POST the same registrar voucher-request as
