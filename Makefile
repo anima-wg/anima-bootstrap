@@ -4,7 +4,7 @@ IETFUSER=mcr+ietf@sandelman.ca
 YANGDATE=2018-02-14
 DRAFT=dtbootstrap-anima-keyinfra
 VRDATE=yang/ietf-voucher-request@${YANGDATE}.yang
-MUDDATE=yang/ietf-mud-extension@${YANGDATE}.yang
+MUDDATE=yang/ietf-mud-brski-masaurl-extension@${YANGDATE}.yang
 EXTRA_FILES+=ietf-voucher-request-tree.txt
 EXTRA_FILES+=${VRDATE} ${MUDDATE}
 EXTRA_FILES+=time-sequence-diagram.txt
@@ -38,8 +38,8 @@ ietf-voucher-request-tree.txt: ${VRDATE}
 ${VRDATE}: ietf-voucher-request.yang
 	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-voucher-request.yang > ${VRDATE}
 
-${MUDDATE}: ietf-mud-extension.yang
-	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-mud-extension.yang > ${MUDDATE}
+${MUDDATE}: ietf-mud-brski-masaurl-extension.yang
+	sed -e"s/YYYY-MM-DD/${YANGDATE}/" ietf-mud-brski-masaurl-extension.yang > ${MUDDATE}
 
 examples/%.txt: examples/%.crt
 	openssl x509 -noout -text -in $? | fold -w 60 >$@
