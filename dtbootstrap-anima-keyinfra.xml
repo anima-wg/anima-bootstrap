@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="US-ASCII"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY RFC2119 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC7030 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7030.xml">
@@ -914,7 +914,59 @@ END
 INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
         </figure>
 
-        <t>XXX insert overview here.</t>
+        <t>
+          On initial bootstrap, a new device (the pledge) uses a local service
+          autodiscovery (GRASP or mDNS) to locate a join proxy.  The
+          join proxy connects the pledge to a local registrar (the JRC).
+        </t>
+        <t>
+          Having found a candidate registrar, the fledgling pledge sends a
+          some information about itself to the registrar, including its
+          serial number and device identity certificate (IDevID) in the form
+          of a voucher request.
+        </t>
+        <t>
+          The registrar can determine whether it expected such a device to
+          appear, and locates a MASA.  The MASA is usually found in
+          an extension in the IDevID.  Having determined that the MASA is
+          suitable, the entire information from the initial voucher request
+          (including device serial number) is transmitted over the internet in a
+          TLS protected channel to the manufacturer, along with information about
+          the registrar/owner.
+        </t>
+        <t>
+          The manufacturer can then apply policy based on the provided
+          information and other sources of information, to decide whether
+          to approve the claim  by the registrar to own the device; if the claim
+          is accepted, a voucher is issued that directs the device to accept its
+          new owner.
+        </t>
+        <t>
+          The voucher is returned to the registrar, but not immediately to
+          the device -- the registrar has an opportunity to examine the
+          voucher, the MASA's audit logs, and other sources of information to
+          determine whether the device has been tampered with, and whether
+          the bootstrap should be accepted, etc.
+        </t>
+        <t>
+          No filtering of information is possible in the signed voucher, so
+          this is a binary accept-or-not decision.  If the registrar accepts
+          the voucher as a proper one for its device, the voucher is returned
+          to the pledge for imprinting.
+        </t>
+        <t>
+          The voucher also includes a trust anchor that the pledge uses as
+          representing the owner, successfully bootstrapping from an environment
+          where only the manufacturer has some (limited) level of trust by the
+          device into an environment where an owner has a PKI footprint on the
+          device.
+        </t>
+        <t>
+          When BRSKI is followed with EST this single footprint is further
+          leveraged into the full owner's PKI and a LDevID for the
+          device. Subsequent reporting steps provide flows of  information to
+          indicate success/failure of the process.
+        </t>
 
     </section>
     <section title="Architectural Components">
@@ -3477,6 +3529,11 @@ Reference: [This document]
       <t>
         This document started it's life as a two-page idea from Steinthor
         Bjarnason.
+      </t>
+      <t>
+        In addition, significant review comments were receives by IESG
+        members Adam Roach, Alexey Melnikov, Alissa Cooper, Benjamin Kaduk, Éric Vyncke, Roman
+        Danyliw, and Magnus Westerlund.
       </t>
     </section>
   </middle>
