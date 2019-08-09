@@ -1274,7 +1274,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       <t>
         The role of the proxy is to facilitate communications. The proxy
         forwards packets between the pledge and a registrar that has been
-        provisioned to the proxy via GRASP discovery.
+        provisioned to the proxy via full GRASP ACP discovery.
       </t>
       <t>
         This section defines a stateful proxy mechanism which is referred
@@ -1284,7 +1284,8 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
       <t>
         The proxy does not terminate the TLS handshake: it passes streams
         of bytes onward without examination.
-        A proxy MUST NOT assume any specific TLS version.
+        A proxy MUST NOT assume any specific TLS version.  Please see
+        {{RFC8446}} section 9.3 for details on TLS invariants.
       </t>
 
       <t>
@@ -1330,7 +1331,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
               The result of discovery is a logical communication with a
               registrar, through a proxy.
               The proxy is transparent to the pledge.  The communication
-              between the pledge is over IPv6 Link-Local addresses.
+              between the pledge and Join Proxy is over IPv6 Link-Local addresses.
             </t>
 
             <t>To discover the proxy the pledge performs the following
@@ -1369,11 +1370,11 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
               While the GRASP M_FLOOD mechanism is passive for the pledge,
               the optional other methods (mDNS, and IPv4 methods) are active.
               The pledge SHOULD run those methods in parallel with listening
-              to for the M_FLOOD.  The active methods SHOULD exponentially
-              back-off to a maximum of one hour to avoid overloading the
+              to for the M_FLOOD.  The active methods SHOULD
+              back-off by doubling to a maximum of one hour to avoid overloading the
               network with discovery attempts.  Detection of change of
               physical link status (Ethernet carrier for instance) SHOULD
-              reset the exponential back off.
+              reset the back off timers.
             </t>
 
             <t>
@@ -1417,7 +1418,7 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
             <t>
               Once all discovered services are attempted (assuming that none
               succeeded) the device MUST return to listening for GRASP M_FLOOD.
-              It SHOULD periodically retry the manufacturer specific mechanisms.
+              It SHOULD periodically retry any manufacturer-specific mechanisms.
               The pledge MAY prioritize selection order as
               appropriate for the anticipated environment.
             </t>
@@ -1430,11 +1431,6 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
                announcement detailed in
                <xref target="I-D.ietf-anima-autonomic-control-plane" />.
 
-               The M_FLOOD is formatted as follows:
-<figure anchor="proxy_discovery_mflood"
-        title="Example of Proxy Discovery message">
-INSERT_TEXT_FROM_FILE proxygrasp-example.txt END
-</figure>
              </t>
 
              <t>
@@ -1444,6 +1440,15 @@ INSERT_TEXT_FROM_FILE proxygrasp-example.txt END
 INSERT_TEXT_FROM_FILE proxygrasp-cddl.txt END
 </figure>
              </t>
+
+             <t>
+               Here is an example M_FLOOD announcing a proxy at fe80::1,
+               on TCP port 4443.
+<figure anchor="proxy_discovery_mflood"
+        title="Example of Proxy Discovery message">
+INSERT_TEXT_FROM_FILE proxygrasp-example.txt END
+</figure>
+            </t>
              <t>
                On a small network the Registrar MAY include the GRASP
                M_FLOOD announcements to locally connected networks.
