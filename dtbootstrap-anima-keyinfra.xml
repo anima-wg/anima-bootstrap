@@ -263,7 +263,7 @@
         <t><list style="hanging">
             <t hangText="domainID:">The domain IDentity is the
             160-bit SHA-1 hash of the BIT STRING of the subjectPublicKey
-            of the pinned-domain-cert leaf, i.e. the Registrars' certificate.
+            of the 'pinned-domain-cert" attribute, i.e. the Registrars' certificate.
             This is consistent with the subject key identifier (<xref target="RFC5280">Section 4.2.1.2</xref>).
             </t>
 
@@ -1031,7 +1031,7 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
                  title="Public Key Infrastructure (PKI)">
           <t>
             The Public Key Infrastructure (PKI) administers certificates for the
-            domain of concerns, providing the trust anchor(s) for it and
+            domain of concern, providing the trust anchor(s) for it and
             allowing enrollment of pledges with domain certificates.
           </t>
           <t>
@@ -1059,7 +1059,7 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
             Many devices when bootstrapping do not have knowledge of the
             current time. Mechanisms such as Network Time Protocols cannot be
             secured until bootstrapping is complete. Therefore bootstrapping is
-            defined in a method that does not require knowledge of the current
+            defined with a framework that does not require knowledge of the current
             time.  A pledge MAY ignore all time stamps in the voucher and
             in the certificate validity periods if it does not know
             the current time.
@@ -1099,12 +1099,15 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
       </section>
       <section anchor="cloudregistrar" title="Cloud Registrar">
         <t>
-          There exist operationally open network wherein devices gain
+          There exist operationally open networks wherein devices gain
           unauthenticated access to the Internet at large.
           In these use cases the
           management domain for the device needs to be discovered within the
-          larger Internet. These are less likely within the anima scope but may
-          be more important in the future.
+          larger Internet. The case where a device can boot and get access to
+          larger Internet are less likely within the ANIMA ACP scope but may
+          be more important in the future.  In the ANIMA ACP scope, new
+          devices will be quarantined behind a Join Proxy.
+
         </t>
 
         <t>
@@ -1122,7 +1125,7 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
               cases do not include a local registrar.</t>
           <t>If the pledge uses a well known URI for contacting a cloud registrar
               an Implicit Trust Anchor database (see <xref target="RFC7030"/>) MUST
-              be used to authenticate service as described in <xref
+              be used to authenticate that service as described in <xref
               target="RFC6125" />. This is
               consistent with the human user configuration of an EST server URI in
               <xref target="RFC7030"/> which also depends on RFC6125.</t>
@@ -1227,7 +1230,7 @@ INSERT_TEXT_FROM_FILE refs/ex-file-voucher-request-proximity.json END
             <t><list style="format Example (%d)" counter="examples"><t>The following example illustrates a registrar voucher-request.
                 The 'prior-signed-voucher-request' leaf is populated with the pledge's
                 voucher-request (such as the prior example).  The pledge's
-                voucher-request is a binary object.  In the JSON encoding used
+                voucher-request is a binary CMS signed object.  In the JSON encoding used
                 here it must be base64 encoded. The nonce, created-on and
                 assertion is carried forward. The serial-number is extracted from
                 the pledge's Client Certificate from the TLS connection. See
@@ -1289,8 +1292,10 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
         described below, in which case the
         announced port can point directly to the Registrar itself.  In this
         scenario the pledge is unaware that there is no proxing occurring.
-        This is useful for Registrars servicing pledges on directly connected networks.
+        This is useful for Registrars which are servicing pledges on directly
+        connected networks.
       </t>
+
 
       <t>
         As a result of the proxy Discovery process in <xref target="brskigrasp" />,
