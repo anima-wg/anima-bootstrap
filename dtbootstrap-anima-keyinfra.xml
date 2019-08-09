@@ -1270,7 +1270,14 @@ INSERT_TEXT_FROM_FILE ietf-voucher-request@DATE.yang END
 
 </section>  <!-- yang module -->
     </section>   <!-- voucher-request artifact -->
-    <section anchor="proxydetails" title="Proxying details (Pledge - Proxy - Registrar)">
+    <section anchor="proxydetails" title="Proxying details (Pledge - Proxy -
+                                          Registrar)">
+      <t>
+        This section applies is normative for uses with an ANIMA ACP.
+        The use of GRASP mechanism part of the ACP.
+        Other users of BRSKI will need to define an equivalent proxy
+        mechanism, and an equivalent mechanism to configure the proxy.
+      </t>
       <t>
         The role of the proxy is to facilitate communications. The proxy
         forwards packets between the pledge and a registrar that has been
@@ -1569,7 +1576,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
         <t>The communication channel between the registrar and MASA is similarly described as extensions to EST within the same "/.well-known" tree. For clarity this channel is referred to as "BRSKI-MASA". (See <xref target="architecturefigure" />).</t>
 
-        <t>MASA URI is "https://" authority "/.well-known/est".</t>
+        <t>The MASA URI is "https://" authority "/.well-known/est".</t>
 
         <t>BRSKI uses existing CMS message formats for existing EST
         operations.  BRSKI uses JSON
@@ -1587,6 +1594,15 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           resolution of the provision state is not subject to a MITM attack
           during a critical phase.
         </t>
+        <t>
+          If non-persistent connections are used, then both the pledge and
+          the registrar MUST remember the certificates seen, and also sent
+          for the first connection.  They MUST check each subsequent
+          connections for the same certificates, and each end MUST use
+          the same certificates as well.  This places a difficult restriction
+          on rolling certificates on the Registrar.
+        </t>
+
 
         <t>Summarized automation extensions for the BRSKI-EST flow are:</t>
 
@@ -1658,13 +1674,32 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
                 the client is authenticated with the IDevID certificate, and the
                 EST server (the registrar) is provisionally authenticated with an unverified
             server certificate.</t>
+            <t>
+              The signatures in the certificate MUST be validated even if a
+              signing key can not (yet) be validated.  The certificate (or
+              chain) MUST be retained for later validation.
+            </t>
+            <t>
+              A self-signed
+              certificate for the Registrar is acceptable as the voucher
+              will validate it.
+            </t>
 
             <t>The pledge performs input validation of all data received
                until a voucher is verified as specified in <xref
                target="CompletingAuthenticationBootstrapping"></xref> and
                the TLS connection leaves the provisional state. Until these
                operations are complete the pledge could be communicating
-               with an attacker.</t>
+               with an attacker.
+            </t>
+            <t>
+              The pledge code needs to be written with the assumption that
+              all data is being transmitted at this point to an
+              unauthenticated peer, and that received data, while inside a
+              TLS connection, MUST be considered untrusted.  This
+              particularly applies to HTTP headers and CMS structures that
+              make up the voucher.
+            </t>
             <t>
               A pledge that can connect to multiple registries concurrently
               SHOULD do so.  Some devices may be unable to do so for lack of
