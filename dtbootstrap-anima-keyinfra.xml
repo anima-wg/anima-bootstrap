@@ -1850,28 +1850,28 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           <xref target="RFC6125" /> SHOULD be used authentication of the
           MASA.  Some vendors will establish explicit (or private) trust
           anchors for validating their MASA; this will typically done as
-          part of a sales channel integration.  Registars SHOULD permit
-          trust anchors to be pre-configured on a per-vendor basis.
+          part of a sales channel integration.
+        </t>
+
+        <t>
+          As described in <xref target="RFC7030" />, the MASA and the
+          registrars SHOULD be prepared to support TLS client
+          certificate authentication and/or HTTP Basic or Digest authentication.
+          This connection MAY also have no client authentication at all.
         </t>
         <t>
-          The primary method of registrar "authentication" by the MASA is
-          detailed in <xref target="RequestVoucherFromMASA"></xref>. As
-          detailed in <xref target="securityconsiderations"></xref> the MASA
-          might find it necessary to request additional registrar
-          authentication.
-        </t>
-        <t>
-          The MASA and the registrars SHOULD be prepared to support TLS client
-          certificate authentication and/or HTTP Basic or Digest authentication as
-          described in <xref target="RFC7030" /> for EST clients.  This connection MAY also have no
-          client authentication at all (<xref target="masasecurityreductions" />)
+          Registars SHOULD permit
+          trust anchors to be pre-configured on a per-vendor(MASA) basis.
+          Registrars SHOULD include the ability to configure a TLS
+          ClientCertificate on a per-MASA basis, or to use no client
+          certificate.  Registrars SHOULD also permit an HTTP Basic and
+          Digest authentication to be configured.
         </t>
         <t>
           The authentication of the BRSKI-MASA
-          connection does not affect the voucher-request process, as
+          connection does not change the voucher-request process, as
           voucher-requests are already signed by the registrar.
-          Instead, this authentication provides access control to the audit
-          log.
+          Instead, this authentication provides access control to the audit log.
         </t>
         <t>
           Implementors are advised that
@@ -1882,6 +1882,53 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           logs in the advent of unexpected HTTP 401 (Unauthorized) responses
           from the MASA.
         </t>
+
+        <section anchor="masaauthentication" title="MASA authentication of
+                                                    customer Registrar">
+          <t>
+            Providing per-customer options requires that the customer's
+            registrar be uniquely identified.  This can be done by any stateless
+            method that HTTPS supports: such as with HTTP Basic
+            or Digest authentication (that is using a password), but the use
+            of TLS Client Certificate authentication is RECOMMENDED.
+          </t>
+          <t>
+            Stateful methods involving API tokens, or HTTP Cookies are not
+            recommended.
+          </t>
+          <t>
+            It is expected that the setup and configuration of per-customer
+            Client Certificates is done as part of a sales ordering process.
+          </t>
+          <t>
+            The use of public PKI (i.e. WebPKI) End-Entity Certificates to
+            identify the Registrar is reasonable, and if done universally
+            this would permit a MASA to identify a customers' Registrar simply by a
+            FQDN.
+          </t>
+          <t>
+            The use of DANE records in DNSSEC signed zones would also permit use of
+            a FQDN to identify customer Registrars.
+          </t>
+          <t>
+            A third (and simplest, but least flexible) mechanism would be for
+            the MASA to simply store the Registrar's certificate pinned in a
+            database.
+          </t>
+          <t>
+            A MASA without any supply chain integration can simply accept
+            Registrars without any authentication, or can accept them on a
+            blind Trust-on-First-Use basis as described in <xref target="masasecurityreduction_tofu" />.
+          </t>
+          <t>
+            This document does not make a specific recommendation as there is
+            likely different trade offs in different environments and product
+            values. Even within the ANIMA ACP applicability, there is a
+            significant difference between supply chain logistics for $100
+            CPE devices and $100,000 core routers.
+          </t>
+        </section>
+
     </section>
 
     <!-- section 5.4 -->
@@ -2827,14 +2874,19 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
       </section>
 
       <section anchor="masasecurityreductions" title="MASA security reductions">
-        <t>Lower security modes chosen by the MASA service affect all device
-        deployments unless bound to the specific device identities. In which
-        case these modes can be provided as additional features for specific
-        customers. The MASA service can choose to run in less secure modes
-        by:</t>
+        <t>
+          Lower security modes chosen by the MASA service affect all device
+          deployments unless bound to the specific device identities.
+          The modes described below can be applied to specific devices
+          via knowledge of what devices were sold.  They can also be
+          bound to specific customers (independent of the device identity) by
+          authenticating  the customer's Registrar.
+        </t>
 
-        <t><list style="numbers">
-            <t>Not enforcing that a nonce is in the voucher. This
+        <section anchor="masasecurityreduction_nonce" title="Issuing Nonceless vouchers">
+          <t>
+            A MASA has the option of not including a nonce is in the voucher,
+            and/or not requiring one to be present in the voucher-request. This
             results in distribution of a voucher that never expires and in
             effect makes the Domain an always trusted entity to the pledge
             during any subsequent bootstrapping attempts. That this occurred
@@ -2849,11 +2901,17 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
             functionality only in concert with an enhanced level of ownership
             tracking (out-of-scope.) If the pledge device is known to have
             a real-time-clock that is set from the factory, use of a voucher
-            validity period is RECOMMENDED.</t>
+            validity period is RECOMMENDED.
+          </t>
+        </section>
 
-            <t>Not verifying ownership before responding with a
-            voucher. This is expected to be a common operational model because
-            doing so relieves the manufacturer providing MASA services from having
+        <section anchor="masasecurityreduction_tofu" title="Trusting Owners on First Use">
+          <t>
+            A MASA has the option of not verifying ownership before
+            responding with a voucher.
+            This is expected to be a common operational model because
+            doing so relieves the manufacturer providing MASA services from
+            having
             to track ownership during shipping and supply chain and allows
             for a very low overhead MASA service. A registrar uses the audit
             log information as a defense in depth strategy to ensure that this
@@ -2862,8 +2920,18 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
             information is reported.) The MASA SHOULD verify the
             'prior-signed-voucher-request' information for pledges that support
             that functionality. This provides a proof-of-proximity
-            check that reduces the need for ownership verification.</t>
-          </list></t>
+            check that reduces the need for ownership verification.
+          </t>
+          <t>
+            A MASA that practices Trust-on-First-Use (TOFU) for Registrar
+            identity may wish to annotate the origin of the connection
+            by IP address or netblock, and restrict future use of that
+            identity from other locations.  A MASA that does this SHOULD
+            take care to not create nuissance situations for itself when
+            a customer has multiple registrars, or uses outgoing IPv6 NAT44
+            connections that change frequently.
+          </t>
+        </section>
       </section>
     </section>
 
