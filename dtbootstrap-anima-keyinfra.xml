@@ -2140,10 +2140,24 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>The MASA voucher response to the registrar is forwarded
           without changes to the pledge; therefore this section applies
           to both the MASA and the registrar. The HTTP signaling described
-          applies to both the MASA and registrar responses. A
-          registrar either caches prior MASA responses or dynamically requests
-          a new voucher based on local policy (it does not generate or sign
-          a voucher). Registrar evaluation of the voucher itself is purely for transparency and audit purposes to further inform log verification (see <xref target="auditLogVerification" />) and therefore a registrar could accept future voucher formats that are opaque to the registrar.</t>
+          applies to both the MASA and registrar responses.
+        </t>
+
+        <t>
+          When a voucher request arrives at the registrar, if it has a cached
+          response from the MASA for the corresponding registrar
+          voucher-request, that cached response can be used according to
+          local policy; otherwise the registrar constructs a new registrar
+          voucher-request and sends it to the MASA.
+        </t>
+
+        <t>
+          Registrar evaluation of the voucher itself is purely for
+          transparency and audit purposes to further inform log verification
+          (see <xref target="auditLogVerification" />) and therefore a
+          registrar could accept future voucher formats that are opaque to
+          the registrar.
+        </t>
 
         <t>If the voucher-request is successful, the server (MASA responding
         to registrar or registrar responding to pledge) response MUST
@@ -2173,6 +2187,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           to complete the transaction after the first 60 seconds has another chance a minute later). A pledge SHOULD only maintain a 202 retry-state
           for up to 4 days, which is longer than a long weekend, after which
           time the enrollment attempt fails and the pledge returns to discovery state.
+        </t>
+
+        <t>
+          A pledge that retries a request after receiving a 202 message MUST
+          resend the same voucher-request.  It MUST NOT sign a new
+          voucher-request each time, and in particular, it MUST NOT change
+          the nonce value.
         </t>
 
         <t>
