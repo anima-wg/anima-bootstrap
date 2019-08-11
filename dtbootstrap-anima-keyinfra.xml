@@ -2759,12 +2759,11 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
           <t>The server SHOULD respond with an HTTP 200 but MAY simply fail
           with an HTTP 404 error.</t>
 
-          <t>Within the server logs the server MUST capture if this message
-          was received over an TLS session with a matching client certificate.
-          This allows for clients that wish to minimize their crypto
-          operations to simply POST this response without renegotiating the TLS
-          session - at the cost of the server not being able to accurately
-          verify that enrollment was truly successful.</t>
+          <t>
+            Within the server logs the server MUST capture if this message
+            was received over an TLS session with a matching client
+            certificate.  
+          </t>
         </section>
 
         <section title="Multiple certificates">
@@ -2860,7 +2859,7 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
             know which devices are associated with which domains. These claims
             could be strengthened by using cryptographic log techniques to
             provide append only, cryptographic assured, publicly auditable
-            logs. Current text provides only for a trusted manufacturer.</t>
+            logs. </t>
 
             <t hangText="Vendor Service, Ownership Validation:">This form of
             manufacturer service is trusted to accurately know which device is owned
@@ -2961,7 +2960,8 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
       <section anchor="masasecurityreductions" title="MASA security reductions">
         <t>
           Lower security modes chosen by the MASA service affect all device
-          deployments unless bound to the specific device identities.
+          deployments unless the lower-security behavior is tied to specific
+          device identities. 
           The modes described below can be applied to specific devices
           via knowledge of what devices were sold.  They can also be
           bound to specific customers (independent of the device identity) by
@@ -2978,13 +2978,35 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
             is captured in the log information so that the registrar
             can make appropriate security decisions when a pledge joins the
             Domain. This is useful to support use cases where registrars might
-            not be online during actual device deployment. Because this
-            results in a long lived voucher and does not require the proof
-            that the device is online, this is only accepted when the registrar
-            is authenticated by the MASA and authorized to provide this
-            functionality. The MASA is RECOMMENDED to use this
+            not be online during actual device deployment.
+          </t>
+          <t>
+            While a nonceless voucher may include an expiry date, a typical
+            use for a nonceless voucher is for it to be long-lived.  If
+            the device can be trusted to have an accurate clock (the MASA
+            will know), then a nonceless voucher CAN be issued with a limited
+            lifetime.
+          </t>
+          <t>
+            A more typical case for a nonceless voucher is for use with
+            offline onboarding scenarios where it is not possible to pass
+            a fresh voucher-request to the MASA.  The use of a long-lived
+            voucher also eliminates concern about the availability of the
+            MASA many years in the future.  Thus many nonceless vouchers
+            will have no expiry dates.
+          </t>
+          <t>
+            Thus, the long lived nonceless voucher does not require the proof
+            that the device is online.  Issuing such a thing is only accepted
+            when the registrar is authenticated by the MASA and the
+            MASA is authorized to provide this functionality to this
+            customer. 
+            The MASA is RECOMMENDED to use this
             functionality only in concert with an enhanced level of ownership
-            tracking (out-of-scope.) If the pledge device is known to have
+            tracking (out-of-scope.) 
+          </t>
+          <t>
+            If the pledge device is known to have
             a real-time-clock that is set from the factory, use of a voucher
             validity period is RECOMMENDED.
           </t>
