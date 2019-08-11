@@ -2720,11 +2720,19 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
             insufficient for automated use cases.
           </t>
 
-          <t>To indicate successful enrollment the client SHOULD re-negotiate
-          the EST TLS session using the newly obtained credentials. This
-          occurs by the client closing the existing TLS connection, and
-          starting a new one. The server MUST support either
-          model.</t>
+          <t>
+            In order to communicate this indicator, the client HTTP POSTs the
+            following to the server at the new EST endpoint at
+            "/.well-known/est/enrollstatus".
+          </t>
+
+          <t>
+            To indicate successful enrollment the client SHOULD first
+            re-negotiate the EST TLS session using the newly obtained
+            credentials. TLS 1.2 supports doing this in-band, but
+            TLS 1.3 does not.  The client SHOULD therefore close the existing
+            TLS connection, and start a new one. 
+          </t>
 
           <t>In the case of a FAIL, the Reason string indicates why the most
           recent enrollment failed. The SubjectKeyIdentifier field MUST be
@@ -2732,14 +2740,16 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
           known to the client. If EST /serverkeygen was used and failed then
           the field is omitted from the status telemetry.</t>
 
-          <t>In the case of a SUCCESS the Reason string is omitted. The
-          SubjectKeyIdentifier is included so that the server can record
-          the successful certificate distribution.</t>
+          <t>
+            In the case of a SUCCESS the Reason string is omitted. The
+            SubjectKeyIdentifier is included so that the server can record
+            the successful certificate distribution.
+          </t>
 
-          <t>Status media type: application/json</t>
-
-          <t>The client HTTP POSTs the following to the server at the new EST
-          well known URI /enrollstatus.</t>
+          <t>
+            An example status report can be seen below.  It is sent with
+            with the media type: application/json
+          </t>
 
           <t><figure anchor="example-enrollstatus" title="Example of
                                                           enrollment status POST">
