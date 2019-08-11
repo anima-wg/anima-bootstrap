@@ -1077,6 +1077,12 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
           </t>
 
           <t>
+            A pledge with a real time clock in which it has confidence in,
+            MUST check the above time fields in all certificates and
+            signatures that ir processes.
+          </t>
+
+          <t>
             If the voucher contains a nonce
             then the pledge MUST confirm the nonce matches the original
             pledge voucher-request. This ensures the voucher is fresh.
@@ -2218,8 +2224,11 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         that type. The registrar SHOULD use this response if it determines
         the pledge is unacceptable due to inventory control, MASA audit logs, or
         any other reason.</t>
-        <t>A 415 (Unsupported Media Type) response is appropriate for a
-        request that has a voucher-request or accept encoding that is not understood.</t>
+        <t>
+          A 415 (Unsupported Media Type) response is appropriate
+          for a request that has a voucher-request or Accept: value that is
+          not understood.
+        </t>
 
         <t>The voucher response format is as indicated in the submitted
         Accept header fields or based on the MASA's prior understanding of proper
@@ -2239,7 +2248,8 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
         <t><list style="hanging">
         <t hangText="nonce:">The nonce from the pledge if available. See <xref
           target="MASAnoncehandling"/>.</t>
-        <t hangText="assertion:">The method used to verify assertion. See <xref
+        <t hangText="assertion:">The method used to verify the relationship
+        between pledge and registrar. See <xref
           target="MASAassertion"/>.</t>
         <t hangText="pinned-domain-cert:">The domain CA cert. See <xref
           target="MASApinned"/>. This figure is illustrative, for an example,
@@ -2294,9 +2304,14 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
           and matches the nonce the pledge submitted to this registrar, or
           that the voucher is nonceless (see <xref target="pledgeReductions"/>).</t>
 
-        <t>The pledge MUST be prepared to parse and fail gracefully from
-        a voucher response that does not contain a 'pinned-domain-cert' field. The
-        pledge MUST be prepared to ignore additional fields that it does not recognize.
+        <t>
+          The pledge MUST be prepared to parse and fail gracefully from
+          a voucher response that does not contain a 'pinned-domain-cert'
+          field.  Such a thing indicates a failure to enroll in this domain,
+          and the pledge MUST attempt joining with other available Join Proxy.
+        </t>
+        <t>
+          The pledge MUST be prepared to ignore additional fields that it does not recognize.
         </t>
         </section>
         <section title="Pledge authentication of provisional TLS connection">
@@ -2312,7 +2327,7 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
             telemetry (described below) before closing the TLS connection.
             The pledge MUST attempt to enroll using any other proxies
             it has found.  It SHOULD return to the same proxy again after
-            attempting with other proxies.  Attempts should be attempted in
+            unsuccessful attempts with other proxies.  Attempts should be attempted in
             the exponential backoff described earlier.
             Attempts SHOULD be repeated as failure may be the result of a
             temporary inconsistently (an inconsistently rolled registrar key,
