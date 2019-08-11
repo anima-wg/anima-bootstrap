@@ -261,10 +261,13 @@
         <t>The following terms are defined for clarity:</t>
 
         <t><list style="hanging">
-            <t hangText="domainID:">The domain IDentity is the
-            160-bit SHA-1 hash of the BIT STRING of the subjectPublicKey
-            of the 'pinned-domain-cert" attribute, i.e. the Registrars' certificate.
-            This is consistent with the subject key identifier (<xref target="RFC5280">Section 4.2.1.2</xref>).
+            <t hangText="domainID:">The domain IDentity is a unique hash
+            based upon a Registrar's certificate.  If the certificate
+            includes the SubjectKeyIdentifier (<xref target="RFC5280">Section
+            4.2.1.2</xref>), then it is to be used as the domainID.  If not,
+            then the 160-bit SHA-1 hash as described in that section is to be
+            used.  This value needs to be calculated by both MASA (to
+            populate the audit log), and by the Registrar (to recognize itself).
             </t>
 
             <t hangText="drop-ship:">The physical distribution of equipment
@@ -1683,6 +1686,15 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
               A self-signed
               certificate for the Registrar is acceptable as the voucher
               will validate it.
+            </t>
+
+            <t>
+              <xref target="RFC5280" /> section 4.2.1.2 does not mandate that the
+              SubjectKeyIdentifier extension be present in non-CA certificates.
+              It is RECOMMENDED that Registrar certificates (even if
+              self-signed), always include the SubjectKeyIdentifier to be
+              used as a DomainID, and that a hash stronger than SHA-1 be
+              used.
             </t>
 
             <t>The pledge performs input validation of all data received
