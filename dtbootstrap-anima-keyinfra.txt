@@ -2766,11 +2766,11 @@ Internet-Draft                    BRSKI                      August 2019
    status telemetry (described below) before closing the TLS connection.
    The pledge MUST attempt to enroll using any other proxies it has
    found.  It SHOULD return to the same proxy again after unsuccessful
-   attempts with other proxies.  Attempts should be attempted in the
-   exponential backoff described earlier.  Attempts SHOULD be repeated
-   as failure may be the result of a temporary inconsistently (an
-   inconsistently rolled registrar key, or some other mis-
-   configuration).  The inconsistently could also be the result an
+   attempts with other proxies.  Attempts should be made repeated at
+   intervals according to the backoff timer described earlier.  Attempts
+   SHOULD be repeated as failure may be the result of a temporary
+   inconsistently (an inconsistently rolled registrar key, or some other
+   mis-configuration).  The inconsistently could also be the result an
    active MITM attack on the EST connection.
 
    The registrar MUST use a certificate that chains to the pinned-
@@ -3070,10 +3070,10 @@ Internet-Draft                    BRSKI                      August 2019
    A relatively simple policy is to white list known (internal or
    external) domainIDs.  To require all vouchers to have a nonce.
    Alternatively to require that all nonceless vouchers be from a subset
-   (e.g. only internal) domainIDs.  A simple action is to revoke any
-   locally issued credentials for the pledge in question or to refuse to
-   forward the voucher.  A registrar MAY be configured to ignore the
-
+   (e.g. only internal) domainIDs.  If the policy is violated a simple
+   action is to revoke any locally issued credentials for the pledge in
+   question or to refuse to forward the voucher.  The Registrar MUST
+   then refuse any EST actions, and SHOULD inform a human via a log.  A
 
 
 
@@ -3082,8 +3082,10 @@ Pritikin, et al.        Expires February 12, 2020              [Page 55]
 Internet-Draft                    BRSKI                      August 2019
 
 
-   history of the device but it is RECOMMENDED that this only be
-   configured if hardware assisted NEA [RFC5209] is supported.
+   registrar MAY be configured to ignore (i.e. override the above
+   policy) the history of the device but it is RECOMMENDED that this
+   only be configured if hardware assisted (i.e.  TPM anchored) Network
+   Endpoint Assessment (NEA) [RFC5209] is supported.
 
 5.9.  EST Integration for PKI bootstrapping
 
@@ -3096,8 +3098,9 @@ Internet-Draft                    BRSKI                      August 2019
    connections simplifies the pledge state machine.
 
    Although EST allows clients to obtain multiple certificates by
-   sending multiple CSR requests BRSKI mandates use of the CSR
-   Attributes request and mandates that the registrar validate the CSR
+   sending multiple CSR requests; BRSKI does not support this mechanism
+   directly.  This is because BRSKI pledges MUST use the CSR Attributes
+   request ([RFC7030] section 4.5).  The registrar MUST validate the CSR
    against the expected attributes.  This implies that client requests
    will "look the same" and therefore result in a single logical
    certificate being issued even if the client were to make multiple
@@ -3111,7 +3114,7 @@ Internet-Draft                    BRSKI                      August 2019
    Certificates message.  See RFC7030, section 4.1.
 
    This ensures that the pledge has the complete set of current CA
-   certificates beyond the pinned-domain-cert (see Section 5.6.1 for a
+   certificates beyond the pinned-domain-cert (see Section 5.6.2 for a
    discussion of the limitations inherent in having a single certificate
    instead of a full CA Certificates response.)  Although these
    limitations are acceptable during initial bootstrapping, they are not
@@ -3127,9 +3130,6 @@ Internet-Draft                    BRSKI                      August 2019
    domain specific identity information.  Conceptually the CA has
    complete control over all fields issued in the end entity
    certificate.  Realistically this is operationally difficult with the
-   current status of PKI certificate authority deployments, where the
-   CSR is submitted to the CA via a number of non-standard protocols.
-   Even with all standardized protocols used, it could operationally be
 
 
 
@@ -3138,6 +3138,9 @@ Pritikin, et al.        Expires February 12, 2020              [Page 56]
 Internet-Draft                    BRSKI                      August 2019
 
 
+   current status of PKI certificate authority deployments, where the
+   CSR is submitted to the CA via a number of non-standard protocols.
+   Even with all standardized protocols used, it could operationally be
    problematic to expect that service specific certificate fields can be
    created by a CA that is likely operated by a group that has no
    insight into different network services/protocols used.  For example,
@@ -3158,9 +3161,9 @@ Internet-Draft                    BRSKI                      August 2019
    this functionality.
 
    In networks using the BRSKI enrolled certificate to authenticate the
-   ACP (Autonomic Control Plane), the EST attributes MUST include the
-   "ACP information" field.  See
-   [I-D.ietf-anima-autonomic-control-plane] for more details.
+   ACP (Autonomic Control Plane), the EST CSR attributes MUST include
+   the ACP Domain Information Fields defined in
+   [I-D.ietf-anima-autonomic-control-plane] section 6.1.2.
 
    The registrar MUST also confirm that the resulting CSR is formatted
    as indicated before forwarding the request to a CA.  If the registrar
@@ -3182,9 +3185,6 @@ Internet-Draft                    BRSKI                      August 2019
    include information concerning attempted bootstrapping messages seen
    by the client, MASA provides logs and status of credential
    enrollment.  [RFC7030] assumes an end user and therefore does not
-   include a final success indication back to the server.  This is
-   insufficient for automated use cases.
-
 
 
 
@@ -3193,6 +3193,9 @@ Pritikin, et al.        Expires February 12, 2020              [Page 57]
 
 Internet-Draft                    BRSKI                      August 2019
 
+
+   include a final success indication back to the server.  This is
+   insufficient for automated use cases.
 
    To indicate successful enrollment the client SHOULD re-negotiate the
    EST TLS session using the newly obtained credentials.  This occurs by
@@ -3237,9 +3240,6 @@ Internet-Draft                    BRSKI                      August 2019
 
    Pledges that require multiple certificates could establish direct EST
    connections to the registrar.
-
-
-
 
 
 
