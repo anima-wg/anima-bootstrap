@@ -3760,14 +3760,202 @@ Reference: [This document]
           were possible (while the device was in a warehouse), updates to
           trust anchors would also be done at the same time.
         </t>
-      </section>
-      <section title="Compromise of MASA signing keys">
         <t>
           The set of standard operating proceedures for maintaining
           high value private keys is well documented. For instance,
           the WebPKI provides a number of options for audits at
-          {{cabforumaudit}}, and 
+          {{cabforumaudit}}, and the DNSSEC root operations are well
+          documented at {{dnssecroot}}.
         </t>
+        <t>
+          It is not clear if Manufacturers will take this level of
+          precaution, or how strong the economic incentives are to maintain
+          an appropriate level of security.
+        </t>
+        <t>
+          This next section examines the risk due to a compromised MASA key.
+          This is followed by examination of the risk of a compromised
+          manufacturer IDevID signing key.  The third section
+          sections below examines the situation where MASA web server itself
+          is under attacker control, but that the MASA signing key itself
+          is safe in a not-directly connected hardware module.
+        </t>
+        
+        <section title="Compromise of Manufacturer IDevID signing keys">
+          <t>
+            An attacker that has access to the key that the manufacturer uses
+            to sign IDevID certificates can create counterfeit devices.
+            Such devices can claim to be from a particular manufacturer,
+            but be entirely different devices: Trojan horses in effect.
+          </t>
+          <t>
+            As the attacker controls the MASA URL in the certificate,
+            the registrar can be convinced to talk to the attackers' MASA.
+            The Registrar does not need to be in any kind of promiscuous mode
+            to be vulnerable.
+          </t>
+          <t>
+            In addition to creating fake devices, the attacker may also
+            be able to issue revocations for existing certificates if the
+            IDevID certificate process relies upon CRL lists that are
+            distributed.
+          </t>
+          <t>
+            There does not otherwise seem to be any risk from this compromise
+            to devices which are already deployed, or which are sitting
+            locally in boxes waiting for deployment (local spares).
+            The issue is that operators will be unable to trust devices
+            which have been in an uncontrolled warehouse as they do not know
+            if those are real devices.
+          </t>
+        </section>
+        
+        <section title="Compromise of MASA signing keys">
+          <t>
+            There are two periods of time in which to consider: when the MASA
+            key has fallen into the hands of an attacker, and after the MASA
+            recognizes that the key has been compromised.
+          </t>
+          <section title="Attacker opportunties with compromised MASA key">
+            <t>
+              An attacker that has access to the MASA signing key could create
+              vouchers.  These vouchers could be for existing deployed
+              devices, or for devices which are still in a warehouse.
+              In order to exploit these vouchers two things need to occur:
+              the device has to go through a factory default boot cycle, and the
+              registrar has to be convinced to contact the attacker's MASA.
+            </t>
+            <t>
+              If the attacker controls a Registrar which is visible to the
+              device, then there is no difficulty in delivery of the false
+              voucher.  A possible practical example of an attack like this
+              would be in a data center, at an ISP peering point (whether a
+              public IX, or a private peering point).  In such a situation,
+              there are already cables attached to the equipment that lead
+              to other devices (the peers at the IX), and through those
+              links, the false voucher could be delivered.  The difficult
+              part would be get the device put through a factory reset.
+              This might be accomplished through social engineering of data
+              center staff.  Most locked cages have ventilation holes, and
+              possibly a long "paperclip" could reach through to depress a
+              factory reset button.  Once such a piece of ISP equipment has
+              been compromised, it could be used to compromise equipment that
+              was connected to (through long haul links even), assuming that
+              those pieces of equipment could also be forced through a
+              factory reset.
+            </t>
+            <t>
+              The above scenario seems rather unlikely as it requires some
+              element of physical access; but were there a remote exploit
+              that did not cause a direct breach, but rather a fault that
+              resulted in a factory reset, this could provide a reasonable
+              path. 
+            </t>
+            <t>
+              The above deals with ANI uses of BRSKI.  For cases where 802.11
+              or 802.15.4 is involved, the need to connect directly to the
+              device is eliminated, but the need to do a factory reset is
+              not.  Physical possession of the device is not required as
+              above, provided that there is some way to force a factory
+              reset.  With some consumers devices with low overall
+              implementation quality, the end users might be familiar with
+              needing to reset the device regularly.
+            </t>
+            <t>
+              The authors are unable to come up with an attack scenario where
+              a compromised voucher signature enables an attacker to
+              introduce a compromised pledge into an existing operator's
+              network.  This is the case because the operator controls the
+              communication between Registrar and MASA, and there is no
+              opportunity to introduce the fake voucher through that conduit.
+            </t>
+          </section>
+          
+          <section title="Risks after key compromise is known">
+            <t>
+              Once the operator of the MASA realizes that the voucher signing
+              key has been compromised it has to do a few things.
+            </t>
+            <t>
+              First, it MUST issue a firmware update to all devices that
+              had that key as a trust anchor, such that they will no longer
+              trust vouchers from that key.  This will affect devices in the
+              field which are operating, but those devices, being in
+              operation, are not performing onboarding operations, so this
+              is not a critical patch.
+            </t>
+            <t>
+              Devices in boxes (in warehouses) are vulnerable, and remain
+              vulnerable until patched.   An operator would be prudent to
+              unbox the devices, onboard them in a safe environment, and
+              then perform firmware updates.  This does not have to be
+              done by the end-operator; it could be done by a distributor
+              that stores the spares.  A recommended practice for high value
+              devices (which typically have a &lt;4hr service window) may be to 
+              validate the device operation on a regular basis anyway.
+            </t>
+            <t>
+              If the onboarding process includes attestations about firmware
+              versions, then through that process the operator would be
+              advised to upgrade the firmware before going into production.
+              Unfortunately, this does not help against situations where the
+              attacker operates their own Registrar (as listed above).
+            </t>
+            <t>
+              <xref target="RFC8366" /> section 6.1 explains the need 
+              for short-lived vouchers.  The nonce guarantees freshness,
+              and the short-lived nature of the voucher means that the window
+              to deliver a fake voucher is very short.  A nonceless,
+              long-lived voucher would be the only option for the attacker,
+              and devices in the warehouse would be vulnerable to such a
+              thing. 
+            </t>
+            <t>
+              A key operational recommendation is for manufacturers to sign
+              nonceless, long-lived vouchers with a different key that they
+              sign short-lived vouchers. That key needs significantly better
+              protection.  If both keys come from a common trust-anchor
+              (the manufacturer's CA), then a compromise of the
+              manufacturer's CA would be a bigger problem.
+            </t>
+          </section>
+        </section>
+        <section title="Compromise of MASA web service">
+          <t>
+            An attacker that takes over the MASA web service has a number of
+            attacks.  The most obvious one is simply to take the database
+            listing customers and devices and to sell this data to other
+            attackers who will now know where to find potentially vulnerable
+            devices. 
+          </t>
+          <t>
+            The second most obvious thing that the attacker can do is to
+            kill the service, or make it operate unreliably, making 
+            customers frustrated.  This could have a serious affect on
+            ability to deploy new services by customers, and would be a
+            significant issue during disaster recovery.
+          </t>
+          <t>
+            While the compromise of the MASA web service may lead to the
+            compromise of the MASA voucher signing key, if the signing occurs
+            offboard (such as in a hardware signing module, HSM), then the
+            key may well be safe, but control over it resides with the attacker.
+          </t>
+          <t>
+            Such an attacker can issue vouchers for any device presently in
+            service.  Said device still needs to be convinced to do through a
+            factory reset process before an attack.
+          </t>
+          <t>
+            If the attacker has access to a key that is trusted for
+            long-lived nonceless vouchers, then they could issue vouchers for
+            devices which are not yet in service.  This attack may be very
+            hard to verify and as it would involve doing firmware updates
+            on every device in warehouses (a potentially ruinously expensive
+            process), a manufacturer might be reluctant to admit this
+            possibility. 
+          </t>
+        </section>
       </section>
     </section>
 
@@ -3869,7 +4057,17 @@ Reference: [This document]
           <date month="August" year="2019" />
         </front>
       </reference>
+      
+      <reference anchor="dnssecroot"
+                 target="https://www.iana.org/dnssec/dps/zsk-operator/dps-zsk-operator-v2.0.pdf">
+        <front>
+          <title>DNSSEC Practice Statement for the Root Zone ZSK Operator</title>
+          <author surname="Verisign"></author>
+          <date month="December" year="2017" />
+        </front>
+      </reference>
 
+      
       
     </references>
 
