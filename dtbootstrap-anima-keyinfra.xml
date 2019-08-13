@@ -264,12 +264,8 @@
 
         <t><list style="hanging">
             <t hangText="domainID:">The domain IDentity is a unique hash
-            based upon a Registrar's certificate.  If the certificate
-            includes the SubjectKeyIdentifier (<xref target="RFC5280">Section
-            4.2.1.2</xref>), then it is to be used as the domainID.  If not,
-            then the 160-bit SHA-1 hash as described in that section is to be
-            used.  This value needs to be calculated by both MASA (to
-            populate the audit log), and by the Registrar (to recognize itself).
+            based upon the Registrar's certificate.  <xref target="MASApinned" />
+            specifies how it is calculated.
             </t>
 
             <t hangText="drop-ship:">The physical distribution of equipment
@@ -1699,15 +1695,6 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
               will validate it.
             </t>
 
-            <t>
-              <xref target="RFC5280" /> section 4.2.1.2 does not mandate that the
-              SubjectKeyIdentifier extension be present in non-CA certificates.
-              It is RECOMMENDED that Registrar certificates (even if
-              self-signed), always include the SubjectKeyIdentifier to be
-              used as a DomainID, and that a hash stronger than SHA-1 be
-              used.
-            </t>
-
             <t>The pledge performs input validation of all data received
                until a voucher is verified as specified in <xref
                target="CompletingAuthenticationBootstrapping"></xref> and
@@ -2139,9 +2126,31 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             method. The chain includes the domain CA certificate
             as specified in <xref target="MASAsignatureconsistency"/>. This
             certificate is used to populate the
-            "pinned-domain-cert" of the voucher being issued. The
-            domainID (e.g., hash of the root public key) is determined from the
-            pinned-domain-cert and is used to update the audit log.
+            "pinned-domain-cert" of the voucher being issued. 
+          </t>
+
+          <t>
+            If the "pinned-domain-cert" certificate
+            includes the SubjectKeyIdentifier (<xref target="RFC5280">Section
+            4.2.1.2</xref>), then it is to be used as the domainID.  If not,
+            then it is the SPKI Fingerprint as described in
+            <xref target="RFC7469" /> section 2.4 is to be used.
+            This value needs to be calculated by both MASA (to
+            populate the audit log), and by the Registrar (to recognize
+            itself).
+          </t>
+          
+          <t>
+            <xref target="RFC5280" /> section 4.2.1.2 does not mandate that the
+            SubjectKeyIdentifier extension be present in non-CA certificates.
+            It is RECOMMENDED that Registrar certificates (even if
+            self-signed), always include the SubjectKeyIdentifier to be
+            used as a domainID.  
+          </t>
+
+          <t>
+            The domainID is determined 
+            from the pinned-domain-cert and is used to update the audit log.
           </t>
         </section>
         <section anchor="MASAnoncehandling" title="MASA nonce handling">
@@ -2532,7 +2541,14 @@ INSERT_TEXT_FROM_FILE example-telemetry.json END
 INSERT_TEXT_FROM_FILE example-auditlog.json END
           </figure></t>
 
-          <t>Distribution of a large log is less than ideal. This structure can
+          <t>
+            The domainID is a binary value from the SubjectKeyIdentifier.
+            It is encoded once in base64 in order to be transported in this
+            JSON container.
+          </t>
+
+          <t>
+            Distribution of a large log is less than ideal. This structure can
           be optimized as follows: Nonced or Nonceless entries for the
           same domainID MAY be abridged from the log leaving only the single
           most recent nonced or nonceless entry for that domainID. In the case of
@@ -3250,7 +3266,7 @@ Reference: [This document]
     <section anchor="privacyconsiderations" title="Privacy Considerations">
       <section title="MASA audit log">
       <t>
-        The MASA audit log includes a hash of the domainID for each
+        The MASA audit log includes the domainID for each
         Registrar a voucher has been issued to. This information is closely
         related to the actual domain identity.  A MASA may need additional
         defenses against Denial of Service attacks (<xref target="dosmasa" />),
