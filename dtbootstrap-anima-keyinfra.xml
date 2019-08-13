@@ -264,7 +264,7 @@
 
         <t><list style="hanging">
             <t hangText="domainID:">The domain IDentity is a unique hash
-            based upon the Registrar's certificate.  <xref target="MASApinned" />
+            based upon the Registrar's certificate.  <xref target="domainID" />
             specifies how it is calculated.
             </t>
 
@@ -1047,7 +1047,7 @@ INSERT_TEXT_FROM_FILE time-sequence-diagram.txt END
             the Key Infrastructure.
           </t>
           <t>
-            The expectations of the PKI are unchanged from EST [<xref target="RFC7030" />].  This document does
+            The expectations of the PKI are unchanged from EST <xref target="RFC7030" />.  This document does
             not place any additional architectural requirements on the Public Key
             Infrastructure.
           </t>
@@ -2036,7 +2036,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             As described in
             <xref target="RFC8366"/> vouchers
             are normally short lived to avoid revocation issues. If the request
-            is for a previous (expired) voucher using the same registrar then the request for
+            is for a previous (expired) voucher using the same registrar
+            (that is, a Registrar with the same Domain CA)
+            then the request for
             a renewed voucher SHOULD be automatically authorized. The MASA has
             sufficient information to determine this by examining the request, the registrar
             authentication, and the existing audit-log. The issuance of a renewed voucher is
@@ -2127,30 +2129,6 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             as specified in <xref target="MASAsignatureconsistency"/>. This
             certificate is used to populate the
             "pinned-domain-cert" of the voucher being issued. 
-          </t>
-
-          <t>
-            If the "pinned-domain-cert" certificate
-            includes the SubjectKeyIdentifier (<xref target="RFC5280">Section
-            4.2.1.2</xref>), then it is to be used as the domainID.  If not,
-            then it is the SPKI Fingerprint as described in
-            <xref target="RFC7469" /> section 2.4 is to be used.
-            This value needs to be calculated by both MASA (to
-            populate the audit log), and by the Registrar (to recognize
-            itself).
-          </t>
-          
-          <t>
-            <xref target="RFC5280" /> section 4.2.1.2 does not mandate that the
-            SubjectKeyIdentifier extension be present in non-CA certificates.
-            It is RECOMMENDED that Registrar certificates (even if
-            self-signed), always include the SubjectKeyIdentifier to be
-            used as a domainID.  
-          </t>
-
-          <t>
-            The domainID is determined 
-            from the pinned-domain-cert and is used to update the audit log.
           </t>
         </section>
         <section anchor="MASAnoncehandling" title="MASA nonce handling">
@@ -2315,8 +2293,13 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
         </t>
         </list></t>
 
-        <t>Whenever a voucher is issued the MASA MUST update the audit log appropriately.
-          The internal state requirements to maintain the audit log are out-of-scope. See <xref target="MASAauditlog"/> for a discussion of reporting the log to a registrar.</t>
+        <t>
+          Whenever a voucher is issued the MASA MUST update the 
+          audit-log sufficiently to generate the response as described in
+          <xref target="MASAauditlog" />.
+          The internal state requirements to maintain the audit-log 
+          are out-of-scope. 
+        </t>
 
         <section anchor="CompletingAuthenticationBootstrapping"
                  title="Pledge voucher verification">
@@ -2542,7 +2525,8 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
           </figure></t>
 
           <t>
-            The domainID is a binary value from the SubjectKeyIdentifier.
+            The domainID is a binary value calculated SubjectKeyIdentifier
+            according to <xref target="domainID" />.
             It is encoded once in base64 in order to be transported in this
             JSON container.
           </t>
@@ -2595,6 +2579,37 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
             unknown responses.
           </t>
         </section>
+        
+        <section anchor="domainID" title="Calculation of domainID">
+          <t>
+            The domainID is a binary value (a BIT STRING) that uniquely
+            identifies a Registrar by the "pinned-domain-cert"
+          </t>
+          <t>
+            If the "pinned-domain-cert" certificate
+            includes the SubjectKeyIdentifier (<xref target="RFC5280">Section
+            4.2.1.2</xref>), then it is to be used as the domainID.  If not,
+            then it is the SPKI Fingerprint as described in
+            <xref target="RFC7469" /> section 2.4 is to be used.
+            This value needs to be calculated by both MASA (to
+            populate the audit-log), and by the Registrar (to recognize
+            itself).
+          </t>
+          
+          <t>
+            <xref target="RFC5280" /> section 4.2.1.2 does not mandate that the
+            SubjectKeyIdentifier extension be present in non-CA certificates.
+            It is RECOMMENDED that Registrar certificates (even if
+            self-signed), always include the SubjectKeyIdentifier to be
+            used as a domainID.  
+          </t>
+
+          <t>
+            The domainID is determined 
+            from the pinned-domain-cert and is used to update the audit-log.
+          </t>
+      </section>
+      
         <section anchor="auditLogVerification" title="Registrar audit log verification">
           <t>
             Each time the Manufacturer Authorized Signing Authority (MASA)
