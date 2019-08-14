@@ -264,8 +264,8 @@
 
         <t><list style="hanging">
             <t hangText="domainID:">The domain IDentity is a unique hash
-            based upon the Registrar's certificate.  <xref target="domainID" />
-            specifies how it is calculated.
+            based upon the Registrar CA's certificate.  
+            <xref target="domainID" /> specifies how it is calculated.
             </t>
 
             <t hangText="drop-ship:">The physical distribution of equipment
@@ -2108,15 +2108,11 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             voucher-request serial-number leaf MUST match the pledge
             serial-number that the MASA extracts from the signing certificate
             of the prior-signed-voucher-request.
-          </t>
-          <t>
-            The consistency check described above is the same 
-            process as described in <xref target="RFC7469" /> section 2.6.
-            Regardless of how the consistency check was done, the MASA MUST
-            use the serialized value from the 
-            proximity-registrar-cert (in the prior-signed-voucher-request)
-            when forming the voucher, as that is the only value that
-            the Pledge will have.
+            The consistency check described above is checking that the
+            'proximity-registrar-cert' SPKI fingerprint exists within the
+            registrar voucher-request CMS signature's certificate chain.
+            This is substantially the same as the pin validation described in
+            in <xref target="RFC7469" /> section 2.6, paragraph three.
           </t>
           <t>If these checks succeed the MASA updates
             the voucher and audit-log assertion leafs with the "proximity" assertion.</t>
@@ -2606,7 +2602,8 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
 
           <t>
             The domainID is determined 
-            from the pinned-domain-cert and is used to update the audit-log.
+            from the certificate chain associated with the 
+            pinned-domain-cert and is used to update the audit-log.
           </t>
       </section>
       
