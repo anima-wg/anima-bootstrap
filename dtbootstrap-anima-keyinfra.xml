@@ -2028,8 +2028,43 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             authorizations (details are out-of-scope of this document).</t>
         </section>
 
-        <!-- 5.5.6 -->
-        <section anchor="MASAsignatureconsistency" title="MASA verification of voucher-request signature consistency">
+        <section anchor="MASApinned" title="MASA pinning of registrar">
+          <t>
+            The registrar's certificate chain is extracted from the signature
+            method. The chain includes the domain CA certificate
+            as specified in <xref target="domainID"/>. This
+            certificate will be used to populate the
+            "pinned-domain-cert" of the voucher being issued.
+          </t>
+          <t>
+            If this domain CA is unknown to the MASA, then it is to be
+            considered a temporary trust anchor for the rest of the steps
+            in this section.
+          </t>
+        </section>
+
+        <section anchor="revocationcheck"
+                 title="MASA checking of voucher request signature">
+          <t>
+            Normal PKIX revocation
+            checking is assumed during voucher-request signature validation.
+          </t>
+          <t>
+            As described in <xref target="domainID" />, the MASA has
+            extracted Registrar's domain CA.  This CA certificate MAY have
+            Certificate Revocation List distribution points, or Online
+            Certificate Status Protocol (OCSP) information (<xref
+            target="RFC6960" />).  If they are present, the MASA MUST
+            be able to reach the relevant servers belonging to the
+            Registrar's domain CA to perform the revocation checks.
+          </t>
+          <t>
+            The use of OCSP Stapling is preferred.
+          </t>
+        </section>
+
+        <section anchor="MASAsignatureconsistency"
+                 title="MASA verification of voucher-request signature consistency">
           <t>
             The MASA MUST verify that the registrar voucher-request is signed
             by a registrar. This is confirmed by verifying that the
@@ -2043,7 +2078,6 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             Registration Authorities of the domain.</t>
         </section>
 
-        <!-- 5.4.3 -->
         <section anchor="MASAauthenticationOfRegistrar" title="MASA authentication of registrar (certificate)">
           <t>
             If a nonceless voucher-request is submitted the MASA MUST
@@ -2064,23 +2098,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
         </section>
 
-        <section anchor="revocationcheck" title="MASA revocation checking of registrar (certificate)">
-          <t>As noted in <xref target="MASAauthenticationOfRegistrar"/> the MASA
-            performs registrar authentication in a subset of
-            situations (e.g. nonceless voucher requests). Normal PKIX revocation
-            checking is assumed during either EST client authentication or
-            voucher-request signature validation. Similarly, as noted in
-            <xref target="MASAsignatureconsistency"/>, the MASA performs normal PKIX revocation checking during signature consistency
-            checks (a signature by a registrar certificate that has been revoked is
-            an inconsistency).</t>
-        </section>
         <section anchor="MASAassertion" title="MASA verification of pledge prior-signed-voucher-request">
           <t>
             The MASA MAY verify that the registrar voucher-request
             includes the 'prior-signed-voucher-request' field. If so the
             prior-signed-voucher-request MUST include a
             'proximity-registrar-cert' that is consistent with to the
-            certificate used to sign the registrar voucher-request. 
+            certificate used to sign the registrar voucher-request.
             Additionally the
             voucher-request serial-number leaf MUST match the pledge
             serial-number that the MASA extracts from the signing certificate
@@ -2095,15 +2119,6 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             the voucher and audit-log assertion leafs with the "proximity" assertion.</t>
         </section>
 
-        <section anchor="MASApinned" title="MASA pinning of registrar">
-          <t>
-            The registrar's certificate chain is extracted from the signature
-            method. The chain includes the domain CA certificate
-            as specified in <xref target="MASAsignatureconsistency"/>. This
-            certificate is used to populate the
-            "pinned-domain-cert" of the voucher being issued. 
-          </t>
-        </section>
         <section anchor="MASAnoncehandling" title="MASA nonce handling">
           <t>
             The MASA does not verify the nonce itself.
@@ -2117,7 +2132,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
           <t>
             The MASA populates the audit-log with the nonce that was
-            verified. If a nonceless voucher is issued, then the 
+            verified. If a nonceless voucher is issued, then the
             audit-log is to be populated with the JSON value "null".
           </t>
         </section>
@@ -2267,11 +2282,11 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
         </list></t>
 
         <t>
-          Whenever a voucher is issued the MASA MUST update the 
+          Whenever a voucher is issued the MASA MUST update the
           audit-log sufficiently to generate the response as described in
           <xref target="MASAauditlog" />.
-          The internal state requirements to maintain the audit-log 
-          are out-of-scope. 
+          The internal state requirements to maintain the audit-log
+          are out-of-scope.
         </t>
 
         <section anchor="CompletingAuthenticationBootstrapping"
