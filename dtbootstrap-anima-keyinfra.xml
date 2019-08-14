@@ -2039,7 +2039,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           <t>
             If this domain CA is unknown to the MASA, then it is to be
             considered a temporary trust anchor for the rest of the steps
-            in this section.
+            in this section.  The intention is not to authenticate the
+            message as having come from a fully validated origin, but
+            to establish the consistency of the domain PKI.
           </t>
         </section>
 
@@ -2063,8 +2065,8 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
         </section>
 
-        <section anchor="MASAsignatureconsistency"
-                 title="MASA verification of voucher-request signature consistency">
+        <section anchor="MASAauthenticationOfRegistrar"
+                 title="MASA verification of domain registrar">
           <t>
             The MASA MUST verify that the registrar voucher-request is signed
             by a registrar. This is confirmed by verifying that the
@@ -2075,16 +2077,15 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             domain CA intended the voucher-request signer to be a registrar. Performing this check
             provides value to the domain PKI by assuring the domain administrator
             that the MASA service will only respect claims from authorized
-            Registration Authorities of the domain.</t>
-        </section>
+            Registration Authorities of the domain.
+          </t>
 
-        <section anchor="MASAauthenticationOfRegistrar" title="MASA authentication of registrar (certificate)">
           <t>
             If a nonceless voucher-request is submitted the MASA MUST
             authenticate the registrar as described in either
             EST <xref target="RFC7030"/> section 3.2.3, section 3.3.2,
             or by validating the registrar's certificate used to
-            sign the registrar voucher-request.
+            sign the registrar voucher-request using configured trust anchor.
             Any of these methods reduce the risk of DDoS attacks
             and provide an authenticated identity as an input to
             sales channel integration and authorizations
@@ -2329,7 +2330,7 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
             telemetry (described below) before closing the TLS connection.
             The pledge MUST attempt to enroll using any other proxies
             it has found.  It SHOULD return to the same proxy again after
-            unsuccessful attempts with other proxies.  Attempts should be 
+            unsuccessful attempts with other proxies.  Attempts should be
             made repeated at intervals according to the backoff timer
             described earlier.
             Attempts SHOULD be repeated as failure may be the result of a
@@ -2553,7 +2554,7 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
             versions; should an incompatible change be desired in the future,
             then a new HTTP end point will be used.
           </t>
-          
+
           <t>This document
             specifies a simple log format as provided by the
             MASA service to the registrar. This format could be improved by
