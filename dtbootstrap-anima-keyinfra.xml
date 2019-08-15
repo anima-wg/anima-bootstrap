@@ -3147,6 +3147,65 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
             connections that change frequently.
           </t>
         </section>
+        
+        <section anchor="masasecurityreduction_newanchor" 
+                 title="Updating or extending voucher trust anchors">
+          <t>
+            A manufacturer could offer a management mechanism that allows the
+            list of voucher verification trust anchors to be extended.
+            <xref target="I-D.ietf-netconf-keystore" /> is one such interface
+            that could be implemented using YANG.  Pretty much any
+            configuration mechanism used today could be extended to
+            provide the needed additional update.
+            A manufacturer could even decide to install the domain CA
+            trust anchors received during the EST "cacerts" step as voucher
+            verification anchors. Some additional signals will be needed to
+            clearly identify which keys have voucher validation authority from
+            among those signed by the domain CA. This is future work.
+          </t>
+          <t>
+            With the above change to the list of anchors, vouchers can be
+            issued by an alternate MASA.  This could be the previous owner
+            (the seller), or some other trusted third party who is mediating
+            the sale.  If it was a third party, then the seller would need
+            to have taken steps to introduce the third party configuration to
+            the device prior disconnection.  The third party
+            (e.g. a wholesaler of used equipment) could however
+            use a mechanism described in <xref target="pledgeReductions" />
+            to take control of the device after receiving it physically.
+            This would permit the third party to act as the MASA for future
+            onboarding actions.  As the IDevID certificate probably can not
+            be replaced, the new owner's Registrar would have to support
+            an override of the MASA URL.
+          </t>
+          <t>
+            To be useful for resale or other transfers of ownership one of
+            two situations will need to occur.  The simplest is that the
+            device is not put through any kind of factory default/reset
+            before going through onboarding again.  Some other secure, physical
+            signal would be needed to initiate it.  This is most suitable for
+            redeploying a device within the same Enterprise.  This would
+            entail having previous configuration in the system until entirely
+            replaced by the new owner, and represents some level of risk.
+          </t>
+          <t>
+            The second mechanism is that there would need to be two levels
+            of factory reset.  One would take the system back entirely to
+            manufacturer state, including removing any added trust anchors,
+            and the second (more commonly used) one would just restore the
+            configuration back to a known default without erasing trust
+            anchors.  This weaker factor reset might leave valuable
+            credentials on the device and this may be unacceptable to
+            some owners.
+          </t>
+          <t>
+            As a third option, the manufacturer's trust anchors could be
+            entirely overwitten with local trust anchors.  A factory default
+            would never restore those anchors.  This option comes with a lot
+            of power, but also a lot of responsability: if the new anchors
+            are lost the manufacturer may be unable to help.
+          </t>
+        </section>
       </section>
     </section>
 
@@ -4228,6 +4287,7 @@ Reference: [This document]
       <?rfc include="reference.I-D.ietf-anima-stable-connectivity" ?>
       <?rfc include="reference.I-D.richardson-anima-state-for-joinrouter" ?>
       <?rfc include="reference.I-D.ietf-anima-constrained-voucher" ?>
+      <?rfc include="reference.I-D.ietf-netconf-keystore" ?>
       <?rfc include="reference.RFC.8520" ?>
       <?rfc include="reference.RFC.8572" ?>
 
