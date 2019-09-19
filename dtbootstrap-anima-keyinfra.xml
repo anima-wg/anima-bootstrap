@@ -2571,11 +2571,23 @@ INSERT_TEXT_FROM_FILE example-telemetry.json END
           values as explained below.
           The returned data is in JSON format (<xref target="RFC8259"/>),
           and the Content-Type SHOULD be "application/json".
-          For example:</t>
 
-          <t><figure anchor="example-auditlog" title="Example of audit-log response">
+          </t>
+          <t>
+            The following CDDL (<xref target="RFC8610" />) explains the
+            structure of the JSON format audit-log response:
+            <figure anchor="cddl-auditlog" title="CDDL for audit-log response">
+INSERT_TEXT_FROM_FILE cddl-auditlog.txt END
+            </figure>
+          </t>
+
+
+
+          <t>As an abstract example:
+          <figure anchor="example-auditlog" title="Example of audit-log response">
 INSERT_TEXT_FROM_FILE example-auditlog.json END
-          </figure></t>
+          </figure>
+          </t>
 
           <t>
             The domainID is a binary value calculated SubjectKeyIdentifier
@@ -2590,6 +2602,12 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
           </t>
 
           <t>
+            The truncation structure MAY be omitted if all values are zero.
+            Any counter missing from the truncation structure is the be
+            assumed to be zero.
+          </t>
+
+          <t>
             The nonce is a string, as provided in the voucher-request, and
             used in the voucher.   If no nonce was placed in the resulting
             voucher, then a value of null SHOULD be used in preference to
@@ -2600,20 +2618,19 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
 
           <t>
             Distribution of a large log is less than ideal. This structure can
-          be optimized as follows: Nonced or Nonceless entries for the
-          same domainID MAY be abridged from the log leaving only the single
-          most recent nonced or nonceless entry for that domainID. In the case of
-          truncation the 'event' truncation value SHOULD contain a count of the number of events for this
-          domainID that were omitted. The log SHOULD NOT be further
-          reduced but there could exist operational situation where maintaining
-          the full log is not possible. In such situations the log MAY be
-          arbitrarily abridged for length, with the number of removed
-          entries indicated as 'arbitrary'.
+            be optimized as follows: Nonced or Nonceless entries for the
+            same domainID MAY be abridged from the log leaving only the single
+            most recent nonced or nonceless entry for that domainID. In the case of
+            truncation the 'event' truncation value SHOULD contain a count of the number of events for this
+            domainID that were omitted. The log SHOULD NOT be further
+            reduced but there could exist operational situation where maintaining
+            the full log is not possible. In such situations the log MAY be
+            arbitrarily abridged for length, with the number of removed
+            entries indicated as 'arbitrary'.
           </t>
 
           <t>
-            If
-            the truncation count exceeds 1024 then the MASA
+            If the truncation count exceeds 1024 then the MASA
             MAY use this value without further incrementing it.
           </t>
 
@@ -4295,6 +4312,9 @@ Reference: [This document]
       <t>
         Significant reviews were done by Jari Arko, Christian Huitema and
         Russ Housley.
+      </t>
+      <t>
+        Henk Birkholz contributed the CDDL for the audit log response.
       </t>
       <t>
         This document started it's life as a two-page idea from Steinthor
