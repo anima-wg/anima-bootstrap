@@ -5,13 +5,14 @@
 ANIMA WG                                                     M. Pritikin
 Internet-Draft                                                     Cisco
 Intended status: Standards Track                           M. Richardson
-Expires: December 30, 2017                                           SSW
+Expires: February 9, 2018                                            SSW
                                                             M. Behringer
-                                                            S. Bjarnason
                                                                    Cisco
+                                                            S. Bjarnason
+                                                          Arbor Networks
                                                                K. Watsen
                                                         Juniper Networks
-                                                           June 28, 2017
+                                                          August 8, 2017
 
 
         Bootstrapping Remote Secure Key Infrastructures (BRSKI)
@@ -21,16 +22,16 @@ Abstract
 
    This document specifies automated bootstrapping of a remote secure
    key infrastructure (BRSKI) using vendor installed X.509 certificate,
-   in combination with a vendor's authorizing service, both online the
-   Internet, and offline.  Bootstrapping a new device can occur using a
-   routable address and a cloud service, or using only link-local
-   connectivity, or on limited/disconnected networks.  Support for lower
-   security models, including devices with minimal identity, is
-   described for legacy reasons but not encouraged.  Bootstrapping is
-   complete when the cryptographic identity of the new key
-   infrastructure is successfully deployed to the device but the
-   established secure connection can be used to deploy a locally issued
-   certificate to the device as well.
+   in combination with a vendor's authorizing service, both online and
+   offline.  Bootstrapping a new device can occur using a routable
+   address and a cloud service, or using only link-local connectivity,
+   or on limited/disconnected networks.  Support for lower security
+   models, including devices with minimal identity, is described for
+   legacy reasons but not encouraged.  Bootstrapping is complete when
+   the cryptographic identity of the new key infrastructure is
+   successfully deployed to the device but the established secure
+   connection can be used to deploy a locally issued certificate to the
+   device as well.
 
 Status of This Memo
 
@@ -47,15 +48,14 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 30, 2017.
+   This Internet-Draft will expire on February 9, 2018.
 
 
 
 
-
-Pritikin, et al.        Expires December 30, 2017               [Page 1]
+Pritikin, et al.        Expires February 9, 2018                [Page 1]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
 Copyright Notice
@@ -83,72 +83,73 @@ Table of Contents
      2.1.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  10
      2.2.  Initial Device Identifier . . . . . . . . . . . . . . . .  10
      2.3.  Protocol Flow . . . . . . . . . . . . . . . . . . . . . .  12
-     2.4.  Lack of realtime clock  . . . . . . . . . . . . . . . . .  13
-     2.5.  Cloud Registrar . . . . . . . . . . . . . . . . . . . . .  14
-   3.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  14
-     3.1.  Discovery . . . . . . . . . . . . . . . . . . . . . . . .  16
-       3.1.1.  Proxy Discovery Protocol Details  . . . . . . . . . .  17
-       3.1.2.  Registrar Discovery Protocol Details  . . . . . . . .  17
-     3.2.  Request Voucher from the Registrar  . . . . . . . . . . .  18
-     3.3.  Request Voucher from MASA . . . . . . . . . . . . . . . .  20
-     3.4.  Voucher Response  . . . . . . . . . . . . . . . . . . . .  21
+     2.4.  Lack of realtime clock  . . . . . . . . . . . . . . . . .  14
+     2.5.  Cloud Registrar . . . . . . . . . . . . . . . . . . . . .  15
+   3.  Protocol Details  . . . . . . . . . . . . . . . . . . . . . .  15
+     3.1.  Discovery . . . . . . . . . . . . . . . . . . . . . . . .  17
+       3.1.1.  Proxy Discovery Protocol Details  . . . . . . . . . .  18
+       3.1.2.  Registrar Discovery Protocol Details  . . . . . . . .  18
+     3.2.  Pledge Requests Voucher from the Registrar  . . . . . . .  19
+     3.3.  Registrar Requests Voucher from MASA  . . . . . . . . . .  21
+     3.4.  Voucher Response  . . . . . . . . . . . . . . . . . . . .  23
        3.4.1.  Completing authentication of Provisional TLS
-               connection  . . . . . . . . . . . . . . . . . . . . .  22
-     3.5.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  23
-     3.6.  MASA authorization log Request  . . . . . . . . . . . . .  24
-     3.7.  MASA authorization log Response . . . . . . . . . . . . .  24
-     3.8.  EST Integration for PKI bootstrapping . . . . . . . . . .  26
-       3.8.1.  EST Distribution of CA Certificates . . . . . . . . .  26
-       3.8.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  27
-       3.8.3.  EST Client Certificate Request  . . . . . . . . . . .  27
-       3.8.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  27
-       3.8.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  29
-   4.  Reduced security operational modes  . . . . . . . . . . . . .  29
-     4.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  29
-     4.2.  New Entity security reductions  . . . . . . . . . . . . .  30
+               connection  . . . . . . . . . . . . . . . . . . . . .  24
+     3.5.  Voucher Status Telemetry  . . . . . . . . . . . . . . . .  25
+     3.6.  MASA authorization log Request  . . . . . . . . . . . . .  26
+       3.6.1.  MASA authorization log Response . . . . . . . . . . .  26
+     3.7.  EST Integration for PKI bootstrapping . . . . . . . . . .  28
+       3.7.1.  EST Distribution of CA Certificates . . . . . . . . .  28
+       3.7.2.  EST CSR Attributes  . . . . . . . . . . . . . . . . .  28
+       3.7.3.  EST Client Certificate Request  . . . . . . . . . . .  29
+       3.7.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  29
+       3.7.5.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  31
+   4.  Reduced security operational modes  . . . . . . . . . . . . .  31
+     4.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  31
+     4.2.  Pledge security reductions  . . . . . . . . . . . . . . .  32
 
 
 
-Pritikin, et al.        Expires December 30, 2017               [Page 2]
+Pritikin, et al.        Expires February 9, 2018                [Page 2]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
-     4.3.  Registrar security reductions . . . . . . . . . . . . . .  30
-     4.4.  MASA security reductions  . . . . . . . . . . . . . . . .  31
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  32
-     5.1.  PKIX Registry . . . . . . . . . . . . . . . . . . . . . .  32
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  32
-   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  34
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  34
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  34
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  35
-   Appendix A.  IPv4 operations  . . . . . . . . . . . . . . . . . .  37
-     A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  37
-     A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  37
-   Appendix B.  mDNS / DNSSD proxy discovery options . . . . . . . .  37
-   Appendix C.  IPIP Join Proxy mechanism  . . . . . . . . . . . . .  38
-     C.1.  Multiple Join networks on the Join Proxy side . . . . . .  39
-     C.2.  Automatic configuration of tunnels on Registrar . . . . .  39
-     C.3.  Proxy Neighbor Discovery by Join Proxy  . . . . . . . . .  40
+     4.3.  Registrar security reductions . . . . . . . . . . . . . .  32
+     4.4.  MASA security reductions  . . . . . . . . . . . . . . . .  33
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  34
+     5.1.  PKIX Registry . . . . . . . . . . . . . . . . . . . . . .  34
+     5.2.  MIME  . . . . . . . . . . . . . . . . . . . . . . . . . .  34
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  35
+   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  37
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  37
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  37
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .  39
+   Appendix A.  IPv4 operations  . . . . . . . . . . . . . . . . . .  40
+     A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  40
+     A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  41
+   Appendix B.  mDNS / DNSSD proxy discovery options . . . . . . . .  41
+   Appendix C.  IPIP Join Proxy mechanism  . . . . . . . . . . . . .  41
+     C.1.  Multiple Join networks on the Join Proxy side . . . . . .  42
+     C.2.  Automatic configuration of tunnels on Registrar . . . . .  43
+     C.3.  Proxy Neighbor Discovery by Join Proxy  . . . . . . . . .  43
      C.4.  Use of connected sockets; or IP_PKTINFO for CoAP on
-           Registrar . . . . . . . . . . . . . . . . . . . . . . . .  40
-     C.5.  Use of socket extension rather than virtual interface . .  40
-   Appendix D.  To be deprecated: Consolidation remnants . . . . . .  41
-     D.1.  Functional Overview . . . . . . . . . . . . . . . . . . .  41
-       D.1.1.  Behavior of a Pledge  . . . . . . . . . . . . . . . .  44
-       D.1.2.  Behavior of a Join Proxy  . . . . . . . . . . . . . .  50
-       D.1.3.  Behavior of the Registrar . . . . . . . . . . . . . .  51
-       D.1.4.  Behavior of the MASA Service  . . . . . . . . . . . .  55
-       D.1.5.  Leveraging the new key infrastructure / next steps  .  56
-       D.1.6.  Interactions with Network Access Control  . . . . . .  56
-     D.2.  Domain Operator Activities  . . . . . . . . . . . . . . .  56
-       D.2.1.  Instantiating the Domain Certification Authority  . .  57
-       D.2.2.  Instantiating the Registrar . . . . . . . . . . . . .  57
-       D.2.3.  Accepting New Entities  . . . . . . . . . . . . . . .  57
-       D.2.4.  Automatic Enrollment of Devices . . . . . . . . . . .  58
-       D.2.5.  Secure Network Operations . . . . . . . . . . . . . .  58
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  59
+           Registrar . . . . . . . . . . . . . . . . . . . . . . . .  43
+     C.5.  Use of socket extension rather than virtual interface . .  44
+   Appendix D.  To be deprecated: Consolidation remnants . . . . . .  44
+     D.1.  Functional Overview . . . . . . . . . . . . . . . . . . .  44
+       D.1.1.  Behavior of a Pledge  . . . . . . . . . . . . . . . .  47
+       D.1.2.  Behavior of a Join Proxy  . . . . . . . . . . . . . .  53
+       D.1.3.  Behavior of the Registrar . . . . . . . . . . . . . .  54
+       D.1.4.  Behavior of the MASA Service  . . . . . . . . . . . .  58
+       D.1.5.  Leveraging the new key infrastructure / next steps  .  59
+       D.1.6.  Interactions with Network Access Control  . . . . . .  59
+     D.2.  Domain Operator Activities  . . . . . . . . . . . . . . .  59
+       D.2.1.  Instantiating the Domain Certification Authority  . .  60
+       D.2.2.  Instantiating the Registrar . . . . . . . . . . . . .  60
+       D.2.3.  Accepting New Entities  . . . . . . . . . . . . . . .  60
+       D.2.4.  Automatic Enrollment of Devices . . . . . . . . . . .  61
+       D.2.5.  Secure Network Operations . . . . . . . . . . . . . .  61
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  62
 
 1.  Introduction
 
@@ -160,15 +161,17 @@ Internet-Draft                    BRSKI                        June 2017
    o  Registrar authenticating the Pledge: "Who is this device?  What is
       its identity?"
 
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018                [Page 3]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    o  Registrar authorization the Pledge: "Is it mine?  Do I want it?
       What are the chances it has been compromised?"
-
-
-
-Pritikin, et al.        Expires December 30, 2017               [Page 3]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    o  Pledge authenticating the Registrar/Domain: "What is this domain's
       identity?"
@@ -214,17 +217,18 @@ Internet-Draft                    BRSKI                        June 2017
    o  using the Implicit Trust Anchor database (not an autonomic
       solution because the URL must be securely distributed),
 
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018                [Page 4]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    o  engaging a human user to authorize the CA certificate using out-
       of-band data (not an autonomic solution because the human user is
       involved),
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017               [Page 4]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    o  using a configured Explicit TA database (not an autonomic solution
       because the distribution of an explicit TA database is not
@@ -269,19 +273,20 @@ Internet-Draft                    BRSKI                        June 2017
       [RFC5280]) of the Domain CA's self signed root certificate.  (A
       string value bound to the Domain CA's self signed root certificate
       subject and issuer fields is often colloquially used as a
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018                [Page 5]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
       humanized identity value but during protocol discussions the more
       exact term as defined here is used).
 
    drop ship:  The physical distribution of equipment containing the
       "factory default" configuration to a final destination.  In zero-
-
-
-
-Pritikin, et al.        Expires December 30, 2017               [Page 5]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
       touch scenarios there is no staging or pre-configuration during
       drop-ship.
 
@@ -325,18 +330,19 @@ Internet-Draft                    BRSKI                        June 2017
    Join Registrar (and Coordinator):  A representative of the domain
       that is configured, perhaps autonomically, to decide whether a new
       device is allowed to join the domain.  The administrator of the
+
+
+
+Pritikin, et al.        Expires February 9, 2018                [Page 6]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
       domain interfaces with a Join Registrar (and Coordinator) to
       control this process.  Typically a Join Registrar is "inside" its
       domain.  For simplicity this document often refers to this as just
       "Registrar".  The term JRC is used in common with other bootstrap
       mechanisms.
-
-
-
-Pritikin, et al.        Expires December 30, 2017               [Page 6]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    Join Proxy:  A domain entity that helps the pledge join the domain.
       A Proxy facilitates communication for devices that find themselves
@@ -381,19 +387,18 @@ Internet-Draft                    BRSKI                        June 2017
    useable as-is by constrained devices operating on challenged networks
    (such as 802.15.4 LLNs).
 
+
+
+Pritikin, et al.        Expires February 9, 2018                [Page 7]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    In many target applications, the systems involved are large router
    platforms with multi-gigabit inter-connections, mounted in controlled
    access data centers.  But this solution is not exclusive to the
    large, it is intended to scale to thousands of devices located in
    hostile environments, such as ISP provided CPE devices which are
-
-
-
-Pritikin, et al.        Expires December 30, 2017               [Page 7]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
    drop-shipped to the end user.  The situation where an order is
    fulfilled from distributed warehouse from a common stock and shipped
    directly to the target location at the request of the domain owner is
@@ -426,7 +431,7 @@ Internet-Draft                    BRSKI                        June 2017
    802.11).  It could also be used by non-constrained devices across a
    non-energy constrained, but challenged network (such as 802.15.4).
    The certificate contents, and the process by which the four questions
-   above are resolved do apply to constained devices.  It is simply the
+   above are resolved do apply to constrained devices.  It is simply the
    actual on-the-wire imprint protocol which could be inappropriate.
 
    This document presumes that network access control has either already
@@ -437,18 +442,16 @@ Internet-Draft                    BRSKI                        June 2017
    alignment with 802.1X network access control methods, its use here is
    for Pledge authentication rather than network access control.
    Integrating this protocol with network access control, perhaps as an
+
+
+
+Pritikin, et al.        Expires February 9, 2018                [Page 8]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    Extensible Authentication Protocol (EAP) method (see [RFC3748]), is
    out-of-scope.
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017               [Page 8]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
 2.  Architectural Overview
 
@@ -476,7 +479,7 @@ Internet-Draft                    BRSKI                        June 2017
    |       |     .  |   Proxy    |       | Registrar |          .
    |       <-------->            <------->           |          .
    |       |     .  |            |       |           |          .
-   |       |     .  +------------+       +-----+-----+          .
+   |X.509  |     .  +------------+       +-----+-----+          .
    |IDevID |     .                             |                .
    |       |     .           +-----------------+----------+     .
    |       |     .           | Key Infrastructure         |     .
@@ -495,16 +498,16 @@ Internet-Draft                    BRSKI                        June 2017
    this document's specification, or an integrator could provide a
    generic service authorized by multiple vendors.  It is unlikely that
    an integrator could provide Ownership Tracking services for multiple
+
+
+
+Pritikin, et al.        Expires February 9, 2018                [Page 9]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    vendors due to the required sales channel integrations necessary to
    track ownership.
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017               [Page 9]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    The domain is the managed network infrastructure with a Key
    Infrastructure the Pledge is joining.  The a domain provides initial
@@ -534,6 +537,11 @@ Internet-Draft                    BRSKI                        June 2017
    either the currently defined claim mechanisms or to experiment with
    higher or lower security levels.
 
+   Vouchers provide a signed but non-encrypted communication channel
+   between the Pledge, the MASA, and the Registrar.  The Registrar
+   maintains control over the transport and policy decisions allowing
+   the local security policy of the domain network to be enforced.
+
 2.2.  Initial Device Identifier
 
    Pledge authentication is via an X.509 certificate installed during
@@ -546,22 +554,35 @@ Internet-Draft                    BRSKI                        June 2017
    The following previously defined fields are in the X.509 IDevID
    certificate:
 
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 10]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    o  The subject field's DN encoding MUST include the "serialNumber"
       attribute with the device's unique serial number.
 
    o  The subject-alt field's encoding SHOULD include a non-critical
       version of the RFC4108 defined HardwareModuleName.
 
+   In order to build the voucher "serial-number" field these IDevID
+   fields need to be converted into a serial-number of "type string".
+   The following methods is used depending on the first available IDevID
+   certificate field (attempted in this order):
+
+   o  An RFC4514 String Representation of the Distinguished Name
+      "serialNumber" attribute.
+
+   o  The HardwareModuleName hwSerialNum OCTET STRING base64 encoded.
+
+   o  The RFC4514 String Representation of the Distinguished Name
+      "common name" attribute.
+
    The following newly defined field SHOULD be in the X.509 IDevID
    certificate: An X.509 non-critical certificate extension that
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 10]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
    contains a single Uniform Resource Identifier (URI) that points to an
    on-line Manufacturer Authorized Signing Authority.  The URI is
    represented as described in Section 7.4 of [RFC5280].
@@ -572,6 +593,30 @@ Internet-Draft                    BRSKI                        June 2017
    information.  The BRSKI .well-known tree is described in Section 3
 
    The new extension is identified as follows:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 11]
+
+Internet-Draft                    BRSKI                      August 2017
+
 
    <CODE BEGINS>
 
@@ -609,15 +654,6 @@ Internet-Draft                    BRSKI                        June 2017
 
    The choice of id-pe is based on guidance found in Section 4.2.2 of
    [RFC5280], "These extensions may be used to direct applications to
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 11]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
    on-line information about the issuer or the subject".  The MASA URL
    is precisely that: online information about the particular subject.
 
@@ -630,6 +666,14 @@ Internet-Draft                    BRSKI                        June 2017
    |        |         | Proxy   |    | Registrar  |     | Service    |
    |        |         |         |    |            |     | (Internet  |
    +--------+         +---------+    +------------+     +------------+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 12]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
      |                     |                   |                    |
      |<-RFC3927 IPv4 adr   | Appendix A        |                    |
    or|<-RFC4862 IPv6 adr   |                   |                    |
@@ -648,7 +692,7 @@ Internet-Draft                    BRSKI                        June 2017
    [PROVISIONAL accept of server cert]         |                    |
      P---X.509 client authentication---------->|                    |
      P                     |                   |                    |
-     P---Request Voucher (include nonce)------>|                    |
+     P---Voucher Request (include nonce)------>|                    |
      P                     |                   |                    |
      P                     |       /--->       |                    |
      P                     |       |      [accept device?]          |
@@ -663,17 +707,9 @@ Internet-Draft                    BRSKI                        June 2017
      P                     |       |occur      |                    |
      P                     |       |in         |                    |
      P                     |       |advance    |                    |
-     P                     |       |           |                    |
-     P                     |       |           |<-device audit log--|
+     P                     |       |if         |                    |
+     P                     |       |nonceless  |<-device audit log--|
      P                     |       |           |<- voucher ---------|
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 12]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
      P                     |       \---->      |                    |
      P                     |                   |                    |
      P                     |       [verify audit log and voucher]   |
@@ -686,6 +722,14 @@ Internet-Draft                    BRSKI                        June 2017
      | Continue with RFC7030 enrollment        |                    |
      | using now bidirectionally authenticated |                    |
      | TLS session.        |                   |                    |
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 13]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
      |                     |                   |                    |
      |                     |                   |                    |
      |                     |                   |                    |
@@ -721,15 +765,6 @@ Internet-Draft                    BRSKI                        June 2017
       authentication the Pledge ignores certificate lifetimes (by
       necessity because it does not have a realtime clock).
 
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 13]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
    o  If the voucher contains a nonce then the Pledge MUST confirm the
       nonce matches the original voucher request.  This ensures the
       voucher is fresh.  See / (Section 3.2).
@@ -742,6 +777,15 @@ Internet-Draft                    BRSKI                        June 2017
 
    o  When accepting an enrollment certificate the validity period
       within the new certificate is assumed to be valid by the Pledge.
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 14]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
       The Pledge is now willing to use this credential for client
       authentication.
 
@@ -779,13 +823,6 @@ Internet-Draft                    BRSKI                        June 2017
    o  The Pledge provisionally accepts the Registrar certificate during
       the TLS handshake as detailed in EST.
 
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 14]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
    o  If the Registrar responds with a redirection to other web origins
       the Pledge MUST follow only a single redirection.  (EST supports
       redirection but does not allow redirections to other web origins
@@ -797,26 +834,39 @@ Internet-Draft                    BRSKI                        June 2017
       the client "MUST wait at least the specified 'retry-after' time
       before repeating the same request".  The Pledge is RECOMMENDED to
       provide local feed (blinked LED etc) during this wait cycle if
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 15]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
       mechanisms for this are available.  To prevent an attacker
       Registrar from significantly delaying bootstrapping the Pledge
-      MUST limit the 'retry-after' time to 60 seconds.  To avoid waiting
-      on a single erroneous Registrar the Pledge MUST drop the
-      connection after 5 seconds and proceed to other discovered
-      Registrars.  Ideally the Pledge could keep track of the
-      appropriate retry-after value for any number of outstanding
-      Registrars but this would involve a large state table on the
-      Pledge.  Instead the Pledge MAY ignore the exact retry-after value
-      in favor of a single hard coded value that takes effect between
-      discovery (Appendix D.1.1.1) attempts.  A Registrar that is unable
-      to complete the transaction the first time due to timing reasons
-      will have future chances.
+      MUST limit the 'retry-after' time to 60 seconds.  To avoid
+      blocking on a single erroneous Registrar the Pledge MUST drop the
+      connection after 5 seconds in which there has been no progress on
+      the TCP connection.  It should proceed to other discovered
+      Registrars if there are any.  If there were no other Registrars
+      discovered, the pledge MAY continue to wait, as long as it is
+      concurrently listening for new proxy announcements.
+
+   o  Ideally the Pledge could keep track of the appropriate retry-after
+      value for any number of outstanding Registrars but this would
+      involve a large state table on the Pledge.  Instead the pledge MAY
+      ignore the exact retry-after value in favor of a single hard coded
+      value that takes effect between discovery (Appendix D.1.1.1)
+      attempts.  A Registrar that is unable to complete the transaction
+      the first time due to timing reasons will have future chances.
 
    o  The Pledge requests and validates a voucher using the new REST
       calls described below.
 
    o  If necessary the Pledge calls the EST defined /cacerts method to
-      obtain the current CA certificate.  These are validated using the
-      Voucher.
+      obtain the domain owners' CA certificate.  The
+      pinnedDomainCertificate element from the voucher should validate
+      this certificate, or be identical to it.
 
    o  The Pledge completes authentication of the server certificate as
       detailed in Section 3.4.1.  This moves the TLS connection out of
@@ -834,20 +884,19 @@ Internet-Draft                    BRSKI                        June 2017
 
    o  Client authentication is automated using Initial Device Identity.
       The subject field's DN encoding MUST include the "serialNumber"
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 15]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
       attribute with the device's unique serial number.  In the language
       of RFC6125 this provides for a SERIALNUM-ID category of identifier
       that can be included in a certificate and therefore that can also
       be used for matching purposes.  The SERIALNUM-ID whitelist is
       collated according to vendor trust anchor since serial numbers are
       not globally unique.
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 16]
+
+Internet-Draft                    BRSKI                      August 2017
+
 
    o  The Registrar requests and validates the Voucher from the vendor
       authorized MASA service.
@@ -867,17 +916,18 @@ Internet-Draft                    BRSKI                        June 2017
    To discover the Registrar the Pledge performs the following actions:
 
    a.  MUST: Obtains a local address using IPv6 methods as described in
-       [RFC4862] IPv6 Stateless Address AutoConfiguration.  [RFC7217] is
-       encouraged.  Pledges will generally prefer use of IPv6 Link-Local
-       addresses, and discovery of Proxy will be by Link-Local
-       mechanisms.  [[EDNOTE: In some environments, a routable public
-       address may be obtained, should it be?  Should it be used?]] IPv4
-       methods are described in Appendix A
+       [RFC4862] IPv6 Stateless Address AutoConfiguration.  Use of
+       [RFC4941] temporary addresses is encouraged.  A new temporary
+       address SHOULD be allocated whenever the discovery process is
+       forced to restart due to failures.  Pledges will generally prefer
+       use of IPv6 Link-Local addresses, and discovery of Proxy will be
+       by Link-Local mechanisms.  IPv4 methods are described in
+       Appendix A
 
    b.  MUST: Listen for GRASP M_FLOOD ([I-D.ietf-anima-grasp])
-       announcements of the objective: "ACP+Proxy".  See section
-       Section 3.1.1 for the details of the the objective.  The Pledge
-       may listen concurrently for other sources of information, see
+       announcements of the objective: "AN_Proxy".  See section
+       Section 3.1.1 for the details of the objective.  The Pledge may
+       listen concurrently for other sources of information, see
        Appendix B.
 
    Once a proxy is discovered the Pledge communicates with a Registrar
@@ -889,15 +939,6 @@ Internet-Draft                    BRSKI                        June 2017
    infrastructure with discovery.  The back-off timer for each method
    MUST be independent of other methods.
 
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 16]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
    Methods SHOULD be run in parallel to avoid head of queue problems
    wherein an attacker running a fake proxy or registrar can operate
    protocol actions intentionally slowly.
@@ -905,6 +946,13 @@ Internet-Draft                    BRSKI                        June 2017
    Once a connection to a Registrar is established (e.g. establishment
    of a TLS session key) there are expectations of more timely
    responses, see Section 3.2.
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 17]
+
+Internet-Draft                    BRSKI                      August 2017
+
 
    Once all discovered services are attempted the device SHOULD return
    to listening for GRASP M_FLOOD.  It should periodically retry the
@@ -917,7 +965,7 @@ Internet-Draft                    BRSKI                        June 2017
    announcement is done with the same message as the ACP announcement
    detailed in [I-D.ietf-anima-autonomic-control-plane].
 
-    proxy-objective = ["Proxy", [ O_IPv6_LOCATOR, ipv6-address,
+    proxy-objective = ["AN_Proxy", [ O_IPv6_LOCATOR, ipv6-address,
     transport-proto, port-number ] ]
 
     ipv6-address       - the v6 LL of the proxy
@@ -944,16 +992,6 @@ Internet-Draft                    BRSKI                        June 2017
    The response from the registrar (or cache) will be a M_RESPONSE with
    the following parameters:
 
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 17]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
     response-message = [M_RESPONSE, session-id, initiator, ttl,
     (+locator-option // divert-option), ?objective)]
     initiator = ACP address of Registrar
@@ -962,6 +1000,15 @@ Internet-Draft                    BRSKI                        June 2017
     locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]
 
    Figure 7: Registrar Response
+
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 18]
+
+Internet-Draft                    BRSKI                      August 2017
+
 
    The set of locators is to be interpreted as follows.  A protocol of 6
    indicates that TCP proxying on the indicated port is desired.  A
@@ -986,7 +1033,7 @@ Internet-Draft                    BRSKI                        June 2017
    Registrars MAY accept DTLS/CoAP/EST traffic on the UDP in addition to
    TCP traffic.
 
-3.2.  Request Voucher from the Registrar
+3.2.  Pledge Requests Voucher from the Registrar
 
    When the Pledge bootstraps it makes a request for a Voucher from a
    Registrar.
@@ -994,21 +1041,41 @@ Internet-Draft                    BRSKI                        June 2017
    This is done with an HTTPS POST using the operation path value of
    "/requestvoucher".
 
-   The request is itself a voucher [I-D.ietf-anima-voucher].  The Pledge
-   populates the voucher fields as follows:
+   The request media types are:
+
+   application/pkcs7-mime; smime-type=voucher-request  The request is a
+      "YANG-defined JSON document that has been signed using a PKCS#7
+      structure" as described in [I-D.ietf-anima-voucher] using the JSON
+      encoded described in [RFC7951].  The Registrar MUST sign the
+      request.  The entire Registrar certificate chain, up to and
+      including the Domain CA, MUST be included in the PKCS#7 structure.
+      [EDNOTE: once/if voucher-requests are defined in this document
+      then the reference needs to be updated]
+
+   application/voucher-request  The request is the "YANG-defined JSON
+      document" as described in [I-D.ietf-anima-voucher] with exception
+      that it is not within a PKCS#7 structure.  It is protected only by
+      the TLS client authentication.  This reduces the cryptographic
+      requirements on the Pledge.  [EDNOTE: once/if voucher-requests are
+      defined in this document then the reference needs to be updated]
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 19]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
+   For simplicity the term 'voucher request' is used to refer to either
+   of these media types.  Registrar impementations SHOULD anticipate
+   future media types but of course will simply fail the request if
+   those types are not yet known.
+
+   The Pledge populates the voucher request fields as follows:
 
    created-on:  Pledges that have a realtime clock are RECOMMENDED to
       populate this field.  This provides additional information to the
       MASA.
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 18]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    nonce:  The voucher request MUST contain a cryptographically strong
       random or pseudo-random number nonce.  Doing so ensures
@@ -1024,11 +1091,9 @@ Internet-Draft                    BRSKI                        June 2017
       sequence (see [RFC5246]).  This MUST be populated in a Pledge's
       voucher request if the "proximity" assertion is populated.
 
-   All other fields MAY be ommitted in a voucher request.
+   All other fields MAY be ommitted in the voucher request.
 
-   Request media type: application/voucherrequest
-
-   An example JWS payload of the voucher request:
+   An example JSON payload of a voucher request from a Pledge:
 
    {
      "ietf-voucher:voucher": {
@@ -1039,59 +1104,87 @@ Internet-Draft                    BRSKI                        June 2017
      }
    }
 
-   [[EDNOTE: The move to JWT allows for relatively simple signing
-   operations.  One possibility here is to carry the original signed JWT
-   as an optional part of the payload sent to the MASA (e.g. "original
-   request"). this would be a BRSKI addition to the voucher?]]
-
-   Signing the request is RECOMMENDED if the Pledge has sufficient
-   processing to perform the crypto operations.  Doing so allows the
-   Registrar and MASA to confirm the 'proximity' assertion of the
-   Pledge.  If the request is signed the Registrar MAY confirm the
-   'proximity' asserion and associated 'pinned-domain-cert' are correct.
-   If these fields are not correct the Registrar SHOULD terminate the
-   bootstrapping attempt.
-
    The Registrar validates the client identity as described in EST
-   [RFC7030] section 3.3.2.  The registrar performs authorization as
-   detailed in Section 3.3.2.  If authorization is successful the
-   Registrar obtains an Voucher from the MASA service (see Section 3.3)
-   and returns that MASA signed voucher to the pledge as described in
-   Section 3.4.
+   [RFC7030] section 3.3.2.  If the request is signed the Registrar
+   confirms the 'proximity' asserion and associated 'pinned-domain-cert'
+   are correct.  The registrar performs authorization as detailed in
+   [[EDNOTE: UNRESOLVED.  See Appendix D "Pledge Authorization"]].  If
+   these validations fail the Registrar SHOULD respond with an
+   appropriate HTTP error code.
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 19]
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 20]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
-3.3.  Request Voucher from MASA
+   If authorization is successful the Registrar obtains a voucher from
+   the MASA service (see Section 3.3) and returns that MASA signed
+   voucher to the pledge as described in Section 3.4.
 
-   A Registrar requests a Voucher from the MASA service using a REST
-   interface.  For simplicity this is defined as an optional EST message
-   between a Registrar and an EST server running on the MASA service
-   although the Registrar is not required to make use of any other EST
-   functionality when communicating with the MASA service.  (The MASA
-   service MUST properly reject any EST functionality requests it does
-   not wish to service; a requirement that holds for any REST
-   interface).
+3.3.  Registrar Requests Voucher from MASA
+
+   when a Registrar receives a voucher request from a Pledge it in turn
+   requests a voucher from the MASA service.  For simplicity this is
+   defined as an optional EST message between a Registrar and an EST
+   server running on the MASA service although the Registrar is not
+   required to make use of any other EST functionality when
+   communicating with the MASA service.  (The MASA service MUST properly
+   reject any EST functionality requests it does not wish to service; a
+   requirement that holds for any REST interface).
 
    This is done with an HTTP POST using the operation path value of
    "/requestvoucher".
 
-   Request media type: application/voucherrequest+cms
+   The request media type is:
 
-   The request format is a JSON object optionally containing the nonce
-   value (as obtained from the Pledge voucher request) and the X.509
-   IDevID extracted serial number (the full certificate is not needed
-   and no proof-of-possession information for the device identity is
-   included).  The idevid-issuer value from the pledge certificate is
-   included to ensure a statistically unique identity.  The Pledge's
-   serial number is extracted from the X.509 IDevID.  See Section 2.2.
-   If the pledge provided a signed voucher request then this SHOULD be
-   included in the prior-signed-voucher field of the Registrar's voucher
-   request.
+   application/pkcs7-mime; smime-type=voucher-request  The request is a
+      "YANG-defined JSON document that has been signed using a PKCS#7
+      structure" as described in [I-D.ietf-anima-voucher] using the JSON
+      encoded described in [RFC7951].  The Registrar MUST sign the
+      request.  The entire Registrar certificate chain, up to and
+      including the Domain CA, MUST be included in the PKCS#7 structure.
+      [EDNOTE: once/if voucher-requests are defined in this document
+      then the reference needs to be updated]
+
+   For simplicity the term 'voucher request' is used.  MASA
+   impementations SHOULD anticipate future media types but of course
+   will simply fail the request if those types are not yet known.
+
+   The Registrar populates the voucher request fields as follows:
+
+   created-on:  Registrars are RECOMMENDED to populate this field.  This
+      provides additional information to the MASA.
+
+   nonce:  The optional nonce value from the Pledge request if desired
+      (see below).
+
+   serial-number:  The serial number of the Pledge the Registrar would
+      like a voucher for.
+
+   idevid-issuer:  The idevid-issuer value from the pledge certificate
+      is included to ensure a statistically unique identity.  The
+      Pledge's serial number is extracted from the X.509 IDevID.  See
+      Section 2.2.
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 21]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
+   prior-signed-voucher:  If the Pledge provided a signed voucher
+      request then it SHOULD be included in the voucher request built by
+      the Registrar.
+
+   All other fields MAY be ommitted in the voucher request.
+
+   An example JSON payload of a voucher request from a Registrar:
 
    {
      "ietf-voucher:voucher": {
@@ -1104,59 +1197,75 @@ Internet-Draft                    BRSKI                        June 2017
      }
    }
 
-   A Registrar MAY exclude the nonce from the request.  Doing so allows
-   the Registrar to request a Voucher when the Pledge is not online, or
-   when the target bootstrapping environment is not on the same network
-   as the MASA server (this requires the Registrar to learn the
-   appropriate DevIDSerialNumber field from the physical device labeling
-   or from the sales channel -- how this occurs is out-of-scope of this
-   document).  If a nonce is not provided the MASA server MUST
+   A Registrar MAY exclude the nonce from the voucher request it submits
+   to the MASA.  Doing so allows the Registrar to request a Voucher when
+   the Pledge is offline, or when the Registrar is expected to be
+   offline when the Pledge is being deployed.  These use cases require
+   the Registrar to learn the appropriate IDevID SerialNumber field from
+   the physical device labeling or from the sales channel (out-of-scope
+   of this document).  If a nonce is not provided the MASA server MUST
    authenticate the Registrar as described in EST [RFC7030] section
-   3.3.2 to reduce the risk of DDoS attacks and provide an authenticated
+   3.3.2 to reduce the risk of DDoS attacks and to provide an
+   authenticated identity as an input to sales channel integration and
+   authorizations (also out-of-scope of this document).
+
+   The MASA verifies that the voucher request is internally consistent
+   but does not authenticate the domain identity information since the
+   domain is not know to the MASA server in advance.  The MASA
+   validation checks before issuing a voucher are as follows:
+
+   Renew for expired voucher:  As described in [I-D.ietf-anima-voucher]
+      vouchers are normally short lived to avoid revocation issues.  If
+      the request is for a previous (expired) voucher using the same
+      Registrar (as determined by the Registrar pinned-domain-cert) and
+      the MASA has not been informed that the claim is invalid then the
+      request for a renewed voucher SHOULD be automatically authorized.
+
+   Voucher signature consistency:  The MASA MUST verify that the voucher
+      request is signed by a Registrar.  This is confirmed by verifying
+      that the id-kp-cmcRA extended key usage extension field (as
+      detailed in EST RFC7030 section 3.6.1) exists in the certificate
+      of the entity that signed the voucher request.  This verification
 
 
 
-
-Pritikin, et al.        Expires December 30, 2017              [Page 20]
+Pritikin, et al.        Expires February 9, 2018               [Page 22]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
-   identity as an input to sales channel integration and authorizations
-   (out-of-scope of this document).
+      is only a consistency check that the unauthenticated domain CA
+      intended this to be a Registrar.  Performing this check provides
+      value to domain PKI by assuring the domain administrator that the
+      MASA service will only respect claims from authorized Registration
+      Authorities of the domain.  (The requirement for the Registrar to
+      include the Domain CA certificate in the signature structure was
+      stated above).
 
-   As described in [I-D.ietf-anima-voucher] vouchers are normally short
-   lived to avoid revocation issues.  If the request is for a previous
-   (expired) voucher using the same Registrar (as determined by
-   Registrar's' domainID) and the MASA has not been informed that the
-   claim is invalid - the request for a renewed voucher SHOULD be
-   automatically authorized.  If authorization is successful the MASA
-   responds with a [I-D.ietf-anima-voucher] voucher.  The MASA SHOULD
-   check for revocation of the Registrar certificate.  The maximum
-   lifetime of the voucher issued SHOULD NOT exceed the lifetime of the
-   Registrar's revocation validation (for example if the Registrar
-   revocation status is indicated in a CRL that is valid for two weeks
-   then that is an appropriate lifetime for the voucher).
+   Registrar revocation consistency:  The MASA SHOULD check for
+      revocation of the Registrar certificate.  The maximum lifetime of
+      the voucher issued SHOULD NOT exceed the lifetime of the
+      Registrar's revocation validation (for example if the Registrar
+      revocation status is indicated in a CRL that is valid for two
+      weeks then that is an appropriate lifetime for the voucher).
+      Because the Registar certificate authority is unknown to the MASA
+      in advance this is only an extended consistency check and is not
+      required.  The maximum lifetime of the voucher issued SHOULD NOT
+      exceed the lifetime of the Registrar's revocation validation (for
+      example if the Registrar revocation status is indicated in a CRL
+      that is valid for two weeks then that is an appropriate lifetime
+      for the voucher).
 
-   The voucher request is signed by the Registrar as indicated in
-   [I-D.ietf-anima-voucher] voucher.  The entire certificate chain, up
-   to and including the Domain CA, MUST be included.  The MASA service
-   checks the internal consistency of the voucher request but does not
-   authenticate the domain identity information since the domain is not
-   know to the MASA server in advance.  The MASA server MUST verify that
-   the voucher request is signed by a Registrar certificate (by checking
-   for the cmc-idRA field) that was issued by the self signed root
-   certificate included in the request.  [[ EDNOTE: can we simplify the
-   above sentence? ]] This ensures that the Registrar making the claim
-   is an authorized Registrar of the unauthenticated domain.  The MASA
-   server MAY verify that the Registrar's signed voucher includes the
-   'prior-signed-voucher' field populated with a voucher, signed by the
-   Pledge, that includes a pinned-domain-cert that is consistent with
-   the Registrar certificate chain.  The MASA server is aware of which
-   Pledge's support signing of their voucher requests and can use this
-   information to confirm proximity of the Pledge with the Registrar.
+   Pledge proximity assertion:  The MASA server MAY verify that the
+      Registrar signed voucher includes the 'prior-signed-voucher' field
+      populated with a Pledge signed voucher that includes a pinned-
+      domain-cert that is consistent with the Registrar certificate
+      chain.  The MASA server is aware of which Pledge's support signing
+      of their voucher requests and can use this information to confirm
+      proximity of the Pledge with the Registrar.
 
-   The root certificate is extracted and used to populate the Voucher.
+   The root certificate is extracted from the signature method and used
+   to populate the "pinned-domain-cert" of the Voucher being issued.
    The domain ID (e.g. hash of the public key of the domain) is
    extracted from the root certificate and is used to update the audit
    log.
@@ -1168,22 +1277,28 @@ Internet-Draft                    BRSKI                        June 2017
    MASA responses or dynamically requests a new Voucher based on local
    policy.
 
-   If the the join operation is successful, the server response MUST
-   contain an HTTP 200 response code.  The server MUST answer with a
+   If the join operation is successful, the server response MUST contain
+   an HTTP 200 response code.  The server MUST answer with a suitable
+   4xx or 5xx HTTP [RFC2616] error code when a problem occurs.  The
+   response data from the MASA server MUST be a plaintext human-readable
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 21]
+
+Pritikin, et al.        Expires February 9, 2018               [Page 23]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
-   suitable 4xx or 5xx HTTP [RFC2616] error code when a problem occurs.
-   The response data from the MASA server MUST be a plaintext human-
-   readable (ASCII, english) error message containing explanatory
-   information describing why the request was rejected.
+   (ASCII, english) error message containing explanatory information
+   describing why the request was rejected.
 
-   Response media type: application/voucher+cms
+   The response media type is:
+
+   application/pkcs7-mime; smime-type=voucher  The response is a "YANG-
+      defined JSON document that has been signed using a PKCS#7
+      structure" as described in [I-D.ietf-anima-voucher] using the JSON
+      encoded described in [RFC7951].  The MASA MUST sign the request.
 
    The syntactic details of vouchers are described in detail in
    [I-D.ietf-anima-voucher].  For example, the voucher consists of:
@@ -1223,16 +1338,17 @@ Internet-Draft                    BRSKI                        June 2017
    with other proxies.  Attempts should be attempted in the exponential
    backoff described earlier.  Attempts SHOULD be repeated as failure
    may be the result of a temporary inconsistently (an inconsistently
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 24]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    rolled Registrar key, or some other mis-configuration).  The
    inconsistently could also be the result an active MITM attack on the
    EST connection.
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 22]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    The Registrar MUST use a certificate that chains to the pinned-
    domain-cert as its TLS server certificate.
@@ -1262,7 +1378,7 @@ Internet-Draft                    BRSKI                        June 2017
    administrators concerning device lifecycle status.  To facilitate
    this it needs telemetry information concerning the device's status.
 
-   To indicate Pledge status regarding the Voucher the client SHOULD
+   To indicate Pledge status regarding the Voucher, the pledge SHOULD
    post a status message.
 
    The posted data media type: application/json
@@ -1278,16 +1394,12 @@ Internet-Draft                    BRSKI                        June 2017
    Voucher was ignored by a client the registar expected to continue
    joining the domain.
 
-   [[EDNOTE: the server can know which pledge failed by the previous
-   voucher, I think.  Is this worth noting?]]
 
 
 
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 23]
+Pritikin, et al.        Expires February 9, 2018               [Page 25]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
    {
@@ -1309,9 +1421,9 @@ Internet-Draft                    BRSKI                        June 2017
    This is done with an HTTP GET using the operation path value of
    "/requestauditlog".
 
-   The client MUST HTTP POSTs the same Voucher Request as for requesting
-   a Voucher.  It is posted to the /requestauditlog URI instead.  The
-   IDevIDAuthorityKeyIdentifier and DevIDSerialNumber informs the MASA
+   The registrar MUST HTTP POSTs the same Voucher Request as when
+   requesting a Voucher.  It is posted to the /requestauditlog URI
+   instead.  The "idevid-issuer" and "serial-number" informs the MASA
    server which log is requested so the appropriate log can be prepared
    for the response.  Using the same media type and message minimizes
    cryptographic and message operations although it results in
@@ -1320,9 +1432,18 @@ Internet-Draft                    BRSKI                        June 2017
    original, and by now already validated, voucher request so as to
    avoid an extra crypto validation.
 
-   Request media type: application/voucherrequest+cms
+   The request media type is:
 
-3.7.  MASA authorization log Response
+   application/pkcs7-mime; smime-type=voucher-request  The request is a
+      "YANG-defined JSON document that has been signed using a PKCS#7
+      structure" as described in [I-D.ietf-anima-voucher] using the JSON
+      encoded described in [RFC7951].  The Registrar MUST sign the
+      request.  The entire Registrar certificate chain, up to and
+      including the Domain CA, MUST be included in the PKCS#7 structure.
+      [EDNOTE: once/if voucher-requests are defined in this document
+      then the reference needs to be updated]
+
+3.6.1.  MASA authorization log Response
 
    A log data file is returned consisting of all log entries.  For
    example:
@@ -1332,18 +1453,9 @@ Internet-Draft                    BRSKI                        June 2017
 
 
 
-
-
-
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 24]
+Pritikin, et al.        Expires February 9, 2018               [Page 26]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
   {
@@ -1376,10 +1488,9 @@ Internet-Draft                    BRSKI                        June 2017
    indicated domain to trigger a reset of the device and take over
    management of it.  Equipment that is purchased pre-owned can be
    expected to have an extensive history.  A Registrar MAY request logs
-   at future times [[EDNOTE: we need to ensure MASA server is not
-   slammed with too many requests]].  A Registrar MAY be configured to
-   ignore the history of the device but it is RECOMMENDED that this only
-   be configured if hardware assisted NEA [RFC5209] is supported.
+   at future times.  A Registrar MAY be configured to ignore the history
+   of the device but it is RECOMMENDED that this only be configured if
+   hardware assisted NEA [RFC5209] is supported.
 
    Log entries containing the Domain's ID can be compared against local
    history logs in search of discrepancies.
@@ -1397,45 +1508,43 @@ Internet-Draft                    BRSKI                        June 2017
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 25]
+
+Pritikin, et al.        Expires February 9, 2018               [Page 27]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
-3.8.  EST Integration for PKI bootstrapping
+3.7.  EST Integration for PKI bootstrapping
 
    This section describes EST extensions necessary to enable fully
    automated bootstrapping.  Although the Voucher request/response
-   structure members IDevIDAuthorityKeyIdentifier and DevIDSerialNumber
-   are specific to PKI bootstrapping these are the only PKI specific
-   aspects of the extensions and future work might replace them with
-   non-PKI structures.
+   structure members "idevid-issuer" and "pinned-domain-cert" are
+   specific to PKI bootstrapping these are the only PKI specific aspects
+   of the extensions and future voucher definitions might replace them
+   with non-PKI fields.
 
    Once the Voucher is received, as specified in this document, the
    client has sufficient information to leverage the existing
    communication channel with a Registrar to continue an EST RFC7030
-   enrollment.  The Pledge SHOULD use the existing current TLS
-   connection to proceed with EST enrollment, thus reducing the total
-   amount of cryptographic and round trip operations required during
-   bootstrapping (enrollment picks up after EST RFC7030 "Bootstrap
-   Distribution of CA Certificates" and the client continues with EST
-   enrollment operations including "CA Certificates Request", "CSR
-   Attributes" and "Client Certificate Request" or "Server-Side Key
-   Generation").
+   enrollment.  The voucher provides an automated mechanism for the
+   "Bootstrap Distribution of CA Certificates" described in [RFC7030]
+   section 4.1.1 wherein the Pledge "MUST [...]. engage a human user to
+   authorize the CA certificate using out-of-band" information".
+   Instead the Pledge now can automate this process using the voucher
+   provided "pinned-domain-cert".
+
+   The Pledge SHOULD use the existing current TLS connection to proceed
+   with EST enrollment, thus reducing the total amount of cryptographic
+   and round trip operations required during bootstrapping.  After
+   voucher verification the Pledge continues with EST enrollment
+   operations including "CA Certificates Request", "CSR Attributes" and
+   "Client Certificate Request" or "Server-Side Key Generation" etc.
 
    The Pledge is RECOMMENDED to implement the following EST automation
    extensions.  They supplement the RFC7030 EST to better support
    automated devices that do not have an end user.
 
-   [[EDNOTE:might be best to discuss in CSR attributes?]]For the
-   purposes of creating the ANIMA Autonomic Control Plane, the contents
-   of the new certificate MUST be carefully specified.
-   [I-D.ietf-anima-autonomic-control-plane] section 5.1.1 contains
-   details.  The Registrar MUST provide the the correct ACP information
-   to populate the subjectAltName / rfc822Name field in the "CSR
-   Attributes" step.
-
-3.8.1.  EST Distribution of CA Certificates
+3.7.1.  EST Distribution of CA Certificates
 
    The Pledge MUST request the full EST Distribution of CA Certificates
    message.  See RFC7030, section 4.1.
@@ -1447,46 +1556,50 @@ Internet-Draft                    BRSKI                        June 2017
    are not appropriate for ongoing PKIX end entity certificate
    validation.
 
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 26]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
-3.8.2.  EST CSR Attributes
+3.7.2.  EST CSR Attributes
 
    Automated bootstrapping occurs without local administrative
    configuration of the Pledge.  In some deployments its plausible that
    the Pledge generates a certificate request containing only identity
    information known to the Pledge (essentially the X.509 IDevID
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 28]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    information) and ultimately receives a certificate containing domain
    specific identity information.  Conceptually the CA has complete
    control over all fields issued in the end entity certificate.
    Realistically this is operationally difficult with the current status
    of PKI certificate authority deployments where the CSR is submitted
-   to the CA via a number of non-standard protocols.
+   to the CA via a number of non-standard protocols.  Even with all
+   standardized protocols used, it could operationally be problematic to
+   expect that service specific certificate fields can be created by a
+   CA that is likely operated by a group that has no insight into
+   different network services/protocols used.  For example, the CA could
+   even be outsourced.
 
-   To alleviate operational difficulty the Pledge MUST request the EST
-   "CSR Attributes" from the EST server.  This allows the local
-   infrastructure to inform the Pledge of the proper fields to include
-   in the generated CSR.
+   To alleviate these operational difficulties, the Pledge MUST request
+   the EST "CSR Attributes" from the EST server and the EST server needs
+   to be able to reply with the attributes necessary for use of the
+   certificate in its intended protocols/services.  This approach allows
+   for minimal CA integrations and instead the local infrastructure (EST
+   server) informs the Pledge of the proper fields to include in the
+   generated CSR.  This approach is beneficial to automated boostrapping
+   in the widest number of environments.
 
-   [[EDNOTE: The following is specific to anima purposes and should be
-   moved to an appropriate anima document so as to keep bootstrapping as
-   generic as possible: What we want are a 'domain name' stored in [TBD]
-   and an 'ACP IPv6 address' stored in the iPAddress field as specified
-   in RFC5208 s4.2.1.6. ref ACP draft where certificate verification
-   [TBD].  These should go into the subjectaltname in the [TBD]
-   fields.]].  If the hardwareModuleName in the X.509 IDevID is
-   populated then it SHOULD by default be propagated to the LDevID along
-   with the hwSerialNum.  The registar SHOULD support local policy
-   concerning this functionality.  [[EDNOTE: extensive use of EST CSR
-   Attributes might need an new OID definition]].]]
+   If the hardwareModuleName in the X.509 IDevID is populated then it
+   SHOULD by default be propagated to the LDevID along with the
+   hwSerialNum.  The EST server SHOULD support local policy concerning
+   this functionality.
+
+   In networks using the BRSKI enrolled certificate to authenticate the
+   ACP (Autonomic Control Plane), the EST attributes MUST include the
+   "ACP information" field.  See
+   [I-D.ietf-anima-autonomic-control-plane] for more details.
 
    The Registar MUST also confirm the resulting CSR is formatted as
    indicated before forwarding the request to a CA.  If the Registar is
@@ -1495,25 +1608,25 @@ Internet-Draft                    BRSKI                        June 2017
    mechanisms MAY be used even if the client ignores CSR Attribute
    guidance.
 
-3.8.3.  EST Client Certificate Request
+3.7.3.  EST Client Certificate Request
 
    The Pledge MUST request a new client certificate.  See RFC7030,
    section 4.2.
 
-3.8.4.  Enrollment Status Telemetry
+3.7.4.  Enrollment Status Telemetry
 
    For automated bootstrapping of devices the adminstrative elements
    providing bootstrapping also provide indications to the system
    administrators concerning device lifecycle status.  This might
-   include information concerning attempted bootstrapping messages seen
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 27]
+Pritikin, et al.        Expires February 9, 2018               [Page 29]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
+   include information concerning attempted bootstrapping messages seen
    by the client, MASA provides logs and status of credential
    enrollment.  The EST protocol assumes an end user and therefore does
    not include a final success indication back to the server.  This is
@@ -1564,24 +1677,22 @@ Internet-Draft                    BRSKI                        June 2017
 
 
 
-
-Pritikin, et al.        Expires December 30, 2017              [Page 28]
+Pritikin, et al.        Expires February 9, 2018               [Page 30]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
-3.8.5.  EST over CoAP
+3.7.5.  EST over CoAP
 
-   [[EDNOTE: In order to support smaller devices the above section on
-   Proxy behavior introduces mandatory to implement support for CoAP
-   support by the Proxy.  This implies similar support by the Pledge and
-   Registrar and means that the EST protocol operation encapsulation
-   into CoAP needs to be described.  EST is HTTP based and "CoaP is
-   designed to easily interface with HTTP for integration" [RFC7252].
-   Use of CoAP implies Datagram TLS (DTLS) wherever this document
-   describes TLS handshake specifics.  A complexity is that the large
-   message sizes necessary for bootstrapping will require support for
-   [draft-ietf-core-block].]]
+   This document describes extensions to EST for the purposes of
+   bootstrapping of remote key infrastructures.  Bootstrapping is
+   relevant for CoAP enrollment discussions as well.  The defintion of
+   EST and BRSKI over CoAP is not discussed within this document beyond
+   ensuring proxy support for CoAP operations.  Instead it is
+   anticipated that a definition of CoAP mappings will occur in
+   subsequent documents such as [I-D.vanderstok-ace-coap-est] and that
+   CoAP mappings for BRSKI will be discussed either there or in future
+   work.
 
 4.  Reduced security operational modes
 
@@ -1593,8 +1704,8 @@ Internet-Draft                    BRSKI                        June 2017
 4.1.  Trust Model
 
    +--------+         +---------+    +------------+     +------------+
-   | New    |         | Circuit |    | Domain     |     | Vendor     |
-   | Entity |         | Proxy   |    | Registrar  |     | Service    |
+   | Pledge |         | Circuit |    | Domain     |     | Vendor     |
+   |        |         | Proxy   |    | Registrar  |     | Service    |
    |        |         |         |    |            |     | (Internet  |
    +--------+         +---------+    +------------+     +------------+
 
@@ -1618,38 +1729,50 @@ Internet-Draft                    BRSKI                        June 2017
       accurately log all claim attempts and to provide authoritative log
       information to Registrars.  The MASA does not know which devices
       are associated with which domains.  These claims could be
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 29]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
       strengthened by using cryptographic log techniques to provide
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 31]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
       append only, cryptographic assured, publicly auditable logs.
       Current text provides only for a trusted vendor.
 
    Vendor Service, Ownership Validation:  This form of vendor service is
       trusted to accurately know which device is owned by which domain.
 
-4.2.  New Entity security reductions
+4.2.  Pledge security reductions
 
-   The Pledge MAY support "trust on first use" on physical interfaces
-   but MUST NOT support "trust on first use" on network interfaces.
-   This is because "trust on first use" permanently degrades the
-   security for all other use cases.
+   The Pledge can choose to accept vouchers using less secure methods.
+   These methods enable offline and emergency (touch based) deployment
+   use cases:
 
-   The Pledge MAY have an operational mode where it skips Voucher
-   validation one time.  For example if a physical button is depressed
-   during the bootstrapping operation.  This can be useful if the vendor
-   service is unavailable.  This behavior SHOULD be available via local
-   configuration or physical presence methods to ensure new entities can
-   always be deployed even when autonomic methods fail.  This allows for
-   unsecured imprint.
+   1.  The Pledge MUST accept nonceless vouchers.  This allows for
+       offline use cases.  Logging and validity periods address the
+       inherent security considerations of supporting these use cases.
 
-   It is RECOMMENDED that this only be available if hardware assisted
-   NEA [RFC5209] is supported.
+   2.  The Pledge MAY support "trust on first use" for physical
+       interfaces such as a local console port or physical user
+       interface but MUST NOT support "trust on first use" on network
+       interfaces.  This is because "trust on first use" permanently
+       degrades the security for all use cases.
+
+   3.  The Pledge MAY have an operational mode where it skips Voucher
+       validation one time.  For example if a physical button is
+       depressed during the bootstrapping operation.  This can be useful
+       if the vendor service is unavailable.  This behavior SHOULD be
+       available via local configuration or physical presence methods to
+       ensure new entities can always be deployed even when autonomic
+       methods fail.  This allows for unsecured imprint.
+
+   It is RECOMMENDED that "trust on first use" or skipping voucher
+   validation only be available if hardware assisted Network Endpoint
+   Assessment [RFC5209] is supported.  This recommendation ensures that
+   domain network monitoring can detect innappropriate use of offline or
+   emergency deployment procedures.
 
 4.3.  Registrar security reductions
 
@@ -1663,29 +1786,29 @@ Internet-Draft                    BRSKI                        June 2017
        occur when informing all Registrars of unique identifiers of new
        entities might be operationally difficult.
 
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 32]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    2.  A registrar MAY choose to accept devices that claim a unique
        identity without the benefit of authenticating that claimed
        identity.  This could occur when the Pledge does not include an
        X.509 IDevID factory installed credential.  New Entities without
        an X.509 IDevID credential MAY form the Section 3.2 request using
        the Section 3.3 format to ensure the Pledge's serial number
-       information is provided to the Registar (this includes the
-       IDevIDAuthorityKeyIdentifier value which would be statically
-       configured on the Pledge).  The Pledge MAY refuse to provide a
-       TLS client certificate (as one is not available).  The Pledge
-       SHOULD support HTTP-based or certificate-less TLS authentication
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 30]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
-       as described in EST RFC7030 section 3.3.2.  A Registrar MUST NOT
-       accept unauthenticated New Entities unless it has been configured
-       to do so by an administrator that has verified that only expected
-       new entities can communicate with a Registrar (presumably via a
+       information is provided to the Registar (this includes the IDevID
+       AuthorityKeyIdentifier value which would be statically configured
+       on the Pledge).  The Pledge MAY refuse to provide a TLS client
+       certificate (as one is not available).  The Pledge SHOULD support
+       HTTP-based or certificate-less TLS authentication as described in
+       EST RFC7030 section 3.3.2.  A Registrar MUST NOT accept
+       unauthenticated New Entities unless it has been configured to do
+       so by an administrator that has verified that only expected new
+       entities can communicate with a Registrar (presumably via a
        physically secured perimeter).
 
    3.  A Registrar MAY request nonce-less Vouchers from the MASA service
@@ -1719,6 +1842,14 @@ Internet-Draft                    BRSKI                        June 2017
        this results in long lived Voucher and does not require the proof
        that the device is online this is only accepted when the
        Registrar is authenticated by the MASA server and authorized to
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 33]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
        provide this functionality.  The MASA server is RECOMMENDED to
        use this functionality only in concert with an enhanced level of
        ownership tracking (out-of-scope).  If the Pledge device is known
@@ -1730,14 +1861,6 @@ Internet-Draft                    BRSKI                        June 2017
        relieves the vendor providing MASA services from having to track
        ownership during shipping and supply chain and allows for a very
        low overhead MASA service.  A Registrar uses the audit log
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 31]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
        information as a defense in depth strategy to ensure that this
        does not occur unexpectedly (for example when purchasing new
        equipment the Registrar would throw an error if any audit log
@@ -1748,6 +1871,17 @@ Internet-Draft                    BRSKI                        June 2017
 
 5.  IANA Considerations
 
+   This document requests the following Parameter Values for the smime-
+   type Parameters:
+
+   o  voucher-request
+
+   o  voucher
+
+   This document requests the following media types:
+
+   o  application/voucher-request"
+
 5.1.  PKIX Registry
 
    This document requests a number for id-mod-MASAURLExtn2016(TBD) from
@@ -1755,6 +1889,58 @@ Internet-Draft                    BRSKI                        June 2017
 
    This document requests a number from the id-pe registry for id-pe-
    masa-url.  XXX
+
+5.2.  MIME
+
+   Type name:
+
+   Subtype name:
+
+   Required parameters:
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 34]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
+   Optional parameters:
+
+   Encoding considerations:
+
+   Security considerations:
+
+   Interoperability considerations:
+
+   Published specification:
+
+   Applications that use this media type:
+
+   Fragment identifier considerations:
+
+   Additional information:
+
+   Deprecated alias names for this type:
+
+        Magic number(s):
+
+        File extension(s):
+
+        Macintosh file type code(s):
+
+      Person and email address to contact for further information:
+
+   Intended usage:  LIMITED USED
+
+   Restrictions on usage:
+
+   Author:
+
+   Change controller:
+
+   Provisional registration? (standards tree only):
 
 6.  Security Considerations
 
@@ -1769,6 +1955,13 @@ Internet-Draft                    BRSKI                        June 2017
    In that way they are guaranteed to be able to repeat bootstrapping
    for their devices.
 
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 35]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    The issuance of nonceless vouchers themselves create a security
    concern.  If the Registrar of a previous domain can intercept
    protocol communications then it can use a previously issued nonceless
@@ -1778,22 +1971,13 @@ Internet-Draft                    BRSKI                        June 2017
    subsequent Registrar.  This reduces the resale value of the equipment
    because future owners will detect the lowered security inherent in
    the existence of a nonceless voucher that would be trusted by their
-   Pledge.  This accurately reflects a balance between partition
-   resistant recovery and security of future bootstrapping.  Registrars
-   take the Pledge's audit history into account when applying policy to
-   new devices.
+   Pledge.  This reflects a balance between partition resistant recovery
+   and security of future bootstrapping.  Registrars take the Pledge's
+   audit history into account when applying policy to new devices.
 
    The MASA server is exposed to DoS attacks wherein attackers claim an
    unbounded number of devices.  Ensuring a Registrar is representative
    of a valid vendor customer, even without validating ownership of
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 32]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
    specific Pledge devices, helps to mitigate this.  Pledge signatures
    on the initial voucher request, as forwarded by the Registrar in the
    prior-signed-voucher field, significantly reduce this risk by
@@ -1823,9 +2007,19 @@ Internet-Draft                    BRSKI                        June 2017
 
    To facilitate truely limited clients EST RFC7030 section 3.3.2
    requirements that the client MUST support a client authentication
-   model have been reduced in Section 4 to a statement that clients only
-   "SHOULD" support such a model.  This reflects current (poor)
-   practices that are NOT RECOMMENDED.
+   model have been reduced in Section 4 to a statement that the
+   Registrar "MAY" choose to accept devices that fail cryptographic
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 36]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
+   authentication.  This reflects current (poor) practices in shipping
+   devices without a cryptographic identity that are NOT RECOMMENDED.
 
    During the provisional period of the connection all HTTP header and
    content data MUST treated as untrusted data.  HTTP libraries are
@@ -1841,15 +2035,6 @@ Internet-Draft                    BRSKI                        June 2017
    log information will see multiple entries and take this into account
    for their analytics purposes.
 
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 33]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
 7.  Acknowledgements
 
    We would like to thank the various reviewers for their input, in
@@ -1862,17 +2047,32 @@ Internet-Draft                    BRSKI                        June 2017
 
    [I-D.ietf-anima-autonomic-control-plane]
               Behringer, M., Eckert, T., and S. Bjarnason, "An Autonomic
-              Control Plane", draft-ietf-anima-autonomic-control-
-              plane-06 (work in progress), March 2017.
+              Control Plane (ACP)", draft-ietf-anima-autonomic-control-
+              plane-08 (work in progress), July 2017.
 
    [I-D.ietf-anima-voucher]
               Watsen, K., Richardson, M., Pritikin, M., and T. Eckert,
               "Voucher Profile for Bootstrapping Protocols", draft-ietf-
-              anima-voucher-03 (work in progress), June 2017.
+              anima-voucher-04 (work in progress), July 2017.
+
+   [I-D.vanderstok-ace-coap-est]
+              Kumar, S., Stok, P., Kampanakis, P., Furuhed, M., and S.
+              Raza, "EST over secure CoAP (EST-coaps)", draft-
+              vanderstok-ace-coap-est-02 (work in progress), June 2017.
 
    [IDevID]   IEEE Standard, , "IEEE 802.1AR Secure Device Identifier",
               December 2009, <http://standards.ieee.org/findstds/
               standard/802.1AR-2009.html>.
+
+
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 37]
+
+Internet-Draft                    BRSKI                      August 2017
+
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -1881,30 +2081,22 @@ Internet-Draft                    BRSKI                        June 2017
 
    [RFC3542]  Stevens, W., Thomas, M., Nordmark, E., and T. Jinmei,
               "Advanced Sockets Application Program Interface (API) for
-              IPv6", RFC 3542, DOI 10.17487/RFC3542, May 2003,
-              <http://www.rfc-editor.org/info/rfc3542>.
+              IPv6", RFC 3542, May 2003.
 
    [RFC3748]  Aboba, B., Blunk, L., Vollbrecht, J., Carlson, J., and H.
-              Levkowetz, Ed., "Extensible Authentication Protocol
-              (EAP)", RFC 3748, DOI 10.17487/RFC3748, June 2004,
-              <http://www.rfc-editor.org/info/rfc3748>.
+              Levkowetz, "Extensible Authentication Protocol (EAP)",
+              RFC 3748, June 2004.
 
    [RFC3927]  Cheshire, S., Aboba, B., and E. Guttman, "Dynamic
-              Configuration of IPv4 Link-Local Addresses", RFC 3927,
-              DOI 10.17487/RFC3927, May 2005,
-              <http://www.rfc-editor.org/info/rfc3927>.
+              Configuration of IPv4 Link-Local Addresses", RFC 3927, May
+              2005.
 
    [RFC4862]  Thomson, S., Narten, T., and T. Jinmei, "IPv6 Stateless
-              Address Autoconfiguration", RFC 4862,
-              DOI 10.17487/RFC4862, September 2007,
-              <http://www.rfc-editor.org/info/rfc4862>.
+              Address Autoconfiguration", RFC 4862, September 2007.
 
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 34]
-
-Internet-Draft                    BRSKI                        June 2017
-
+   [RFC4941]  Narten, T., Draves, R., and S. Krishnan, "Privacy
+              Extensions for Stateless Address Autoconfiguration in
+              IPv6", RFC 4941, September 2007.
 
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
               (TLS) Protocol Version 1.2", RFC 5246,
@@ -1919,16 +2111,24 @@ Internet-Draft                    BRSKI                        June 2017
 
    [RFC5386]  Williams, N. and M. Richardson, "Better-Than-Nothing
               Security: An Unauthenticated Mode of IPsec", RFC 5386,
-              DOI 10.17487/RFC5386, November 2008,
-              <http://www.rfc-editor.org/info/rfc5386>.
+              November 2008.
 
    [RFC5652]  Housley, R., "Cryptographic Message Syntax (CMS)", STD 70,
               RFC 5652, DOI 10.17487/RFC5652, September 2009,
               <http://www.rfc-editor.org/info/rfc5652>.
 
    [RFC5660]  Williams, N., "IPsec Channels: Connection Latching",
-              RFC 5660, DOI 10.17487/RFC5660, October 2009,
-              <http://www.rfc-editor.org/info/rfc5660>.
+              RFC 5660, October 2009.
+
+
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 38]
+
+Internet-Draft                    BRSKI                      August 2017
+
 
    [RFC6762]  Cheshire, S. and M. Krochmal, "Multicast DNS", RFC 6762,
               DOI 10.17487/RFC6762, February 2013,
@@ -1948,19 +2148,11 @@ Internet-Draft                    BRSKI                        June 2017
               DOI 10.17487/RFC7228, May 2014,
               <http://www.rfc-editor.org/info/rfc7228>.
 
+   [RFC7951]  Lhotka, L., "JSON Encoding of Data Modeled with YANG",
+              RFC 7951, DOI 10.17487/RFC7951, August 2016,
+              <http://www.rfc-editor.org/info/rfc7951>.
+
 8.2.  Informative References
-
-
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 35]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    [I-D.behringer-homenet-trust-bootstrap]
               Behringer, M., Pritikin, M., and S. Bjarnason,
@@ -1971,7 +2163,7 @@ Internet-Draft                    BRSKI                        June 2017
    [I-D.ietf-anima-grasp]
               Bormann, C., Carpenter, B., and B. Liu, "A Generic
               Autonomic Signaling Protocol (GRASP)", draft-ietf-anima-
-              grasp-13 (work in progress), June 2017.
+              grasp-15 (work in progress), July 2017.
 
    [I-D.ietf-netconf-zerotouch]
               Watsen, K., Abrahamsson, M., and I. Farrer, "Zero Touch
@@ -1984,6 +2176,16 @@ Internet-Draft                    BRSKI                        June 2017
               draft-lear-mud-framework-00 (work in progress), January
               2016.
 
+
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 39]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    [I-D.richardson-anima-state-for-joinrouter]
               Richardson, M., "Considerations for stateful vs stateless
               join router in ANIMA bootstrap", draft-richardson-anima-
@@ -1994,8 +2196,7 @@ Internet-Draft                    BRSKI                        June 2017
               <https://en.wikipedia.org/wiki/Imprinting_(psychology)>.
 
    [RFC2473]  Conta, A. and S. Deering, "Generic Packet Tunneling in
-              IPv6 Specification", RFC 2473, DOI 10.17487/RFC2473,
-              December 1998, <http://www.rfc-editor.org/info/rfc2473>.
+              IPv6 Specification", RFC 2473, December 1998.
 
    [RFC7217]  Gont, F., "A Method for Generating Semantically Opaque
               Interface Identifiers with IPv6 Stateless Address
@@ -2006,17 +2207,6 @@ Internet-Draft                    BRSKI                        June 2017
    [RFC7435]  Dukhovni, V., "Opportunistic Security: Some Protection
               Most of the Time", RFC 7435, DOI 10.17487/RFC7435,
               December 2014, <http://www.rfc-editor.org/info/rfc7435>.
-
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 36]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    [RFC7575]  Behringer, M., Pritikin, M., Bjarnason, S., Clemm, A.,
               Carpenter, B., Jiang, S., and L. Ciavaglia, "Autonomic
@@ -2042,6 +2232,16 @@ A.1.  IPv4 Link Local addresses
    bootstrap process would continue as in the IPv6 case by looking for a
    (circuit) proxy.
 
+
+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 40]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
 A.2.  Use of DHCPv4
 
    The Plege MAY obtain an IP address via DHCP [RFC2131].  The DHCP
@@ -2066,14 +2266,6 @@ Appendix B.  mDNS / DNSSD proxy discovery options
    operations.  The service searched for is
    "_bootstrapks._tcp.example.com".  In this case the domain
    "example.com" is discovered as described in [RFC6763] section 11.
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 37]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
    This method is only available if the host has received a useable IPv4
    address via DHCPv4 as suggested in Appendix A.
 
@@ -2099,6 +2291,13 @@ Appendix C.  IPIP Join Proxy mechanism
    Join Proxy for each connection that is relayed.  The Circuit Proxy
    can be considered a kind of Algorithm Gateway [FIND-good-REF].
 
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 41]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    An alternative to proxying at the TCP layer is to selectively forward
    at the IP layer.  This moves all per-connection to the Join
    Registrar.  The IPIP tunnel statelessly forwards packets.  This
@@ -2120,15 +2319,6 @@ Appendix C.  IPIP Join Proxy mechanism
    were present on that network using link-local (fe80::) addresses.
    The Join node is unaware that the traffic is being proxied through a
    tunnel, and does not need any special routing.
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 38]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    There are a number of considerations with this mechanism which
    require cause some minor amounts of complexity.  Note that due to the
@@ -2156,6 +2346,14 @@ C.1.  Multiple Join networks on the Join Proxy side
    each interface which they wish to relay traffic, as this allows the
    Registrar to do any static tunnel configuration that may be required.
 
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 42]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
 C.2.  Automatic configuration of tunnels on Registrar
 
    The Join Proxy is expected to do a GRASP negotiation with the proxy
@@ -2173,18 +2371,8 @@ C.2.  Automatic configuration of tunnels on Registrar
    A more sophisticated Registrar willing to modify the behaviour of
    it's TCP and UDP stack could note the IPIP traffic origination in the
    socket control block and make information available to the TCP layer
-   (for HTTPS connections), or to the the application (for CoAP
-   connections) via a proprietary extension to the socket API.
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 39]
-
-Internet-Draft                    BRSKI                        June 2017
-
+   (for HTTPS connections), or to the application (for CoAP connections)
+   via a proprietary extension to the socket API.
 
 C.3.  Proxy Neighbor Discovery by Join Proxy
 
@@ -2214,6 +2402,14 @@ C.4.  Use of connected sockets; or IP_PKTINFO for CoAP on Registrar
    A registrar application could, after receipt of an initial CoAP
    message from the Pledge, create a connected UDP socket (including the
    ifindex information).  The kernel would then take care of accurate
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 43]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
    demultiplexing upon receive, and subsequent transmission to the
    correct interface.
 
@@ -2231,16 +2427,6 @@ C.5.  Use of socket extension rather than virtual interface
    expose this extra information to the application as the UDP sockets
    are often not connected, and the application will need to specify the
    outgoing path on each packet send.
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 40]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
    Such an additional socket mechanism has not been standardized.
    Terminating L2TP connections over IPsec transport mode suffers from
@@ -2272,6 +2458,14 @@ D.1.  Functional Overview
    |        |         | Proxy   |    | Registrar  |     | Service    |
    |        |         |         |    |            |     | (Internet  |
    +--------+         +---------+    +------------+     +------------+
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 44]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
      |                     |                   |                    |
      |<-RFC3927 IPv4 adr   | Appendix A        |                    |
    or|<-RFC4862 IPv6 adr   |                   |                    |
@@ -2290,14 +2484,6 @@ D.1.  Functional Overview
    [PROVISIONAL accept of server cert]         |                    |
      P---X.509 client authentication---------->|                    |
      P                     |                   |                    |
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 41]
-
-Internet-Draft                    BRSKI                        June 2017
-
-
      P---Request Voucher (include nonce)------>|                    |
      P                     |                   |                    |
      P                     |       /--->       |                    |
@@ -2328,6 +2514,14 @@ Internet-Draft                    BRSKI                        June 2017
      | Continue with RFC7030 enrollment        |                    |
      | using now bidirectionally authenticated |                    |
      | TLS session.        |                   |                    |
+
+
+
+Pritikin, et al.        Expires February 9, 2018               [Page 45]
+
+Internet-Draft                    BRSKI                      August 2017
+
+
      |                     |                   |                    |
      |                     |                   |                    |
      |                     |                   |                    |
@@ -2337,22 +2531,6 @@ Internet-Draft                    BRSKI                        June 2017
    [[UNRESOLVED:need to restore some functional overview section for all
    these diagrams]]In order to obtain a Voucher and associated logs a
    Registrar contacts the MASA service Service using REST calls:
-
-
-
-
-
-
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 42]
-
-Internet-Draft                    BRSKI                        June 2017
-
 
               +-----------+ +----------+ +-----------+ +----------+
               | New       | | Circuit  | |           | |          |
@@ -2395,19 +2573,9 @@ Internet-Draft                    BRSKI                        June 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-Pritikin, et al.        Expires December 30, 2017              [Page 43]
+Pritikin, et al.        Expires February 9, 2018               [Page 46]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
               +-----------+ +----------+ +-----------+ +----------+
@@ -2461,9 +2629,9 @@ D.1.1.  Behavior of a Pledge
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 44]
+Pritikin, et al.        Expires February 9, 2018               [Page 47]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
                 +--------------+
@@ -2517,9 +2685,9 @@ Internet-Draft                    BRSKI                        June 2017
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 45]
+Pritikin, et al.        Expires February 9, 2018               [Page 48]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
    3.  Requests to Join the discovered Registrar.  A unique nonce
@@ -2573,9 +2741,9 @@ D.1.1.2.  Identity
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 46]
+Pritikin, et al.        Expires February 9, 2018               [Page 49]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
 D.1.1.2.1.  Concurrent attempts to join
@@ -2629,9 +2797,9 @@ D.1.1.5.  Lack of realtime clock APPENDIX
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 47]
+Pritikin, et al.        Expires February 9, 2018               [Page 50]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
    Many devices when bootstrapping do not have knowledge of the current
@@ -2685,9 +2853,9 @@ D.1.1.6.  Enrollment
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 48]
+Pritikin, et al.        Expires February 9, 2018               [Page 51]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
    Enrollment proceeds as described in [RFC7030].  Authentication of the
@@ -2710,8 +2878,8 @@ Internet-Draft                    BRSKI                        June 2017
    creating the ANIMA Autonomic Control Plane, the contents of the new
    certificate MUST be carefully specified.
    [I-D.ietf-anima-autonomic-control-plane] section 5.1.1 contains
-   details.  The Registrar MUST provide the the correct ACP information
-   to populate the subjectAltName / rfc822Name field in the "CSR
+   details.  The Registrar MUST provide the correct ACP information to
+   populate the subjectAltName / rfc822Name field in the "CSR
    Attributes" step.
 
 D.1.1.7.  Being Managed
@@ -2741,9 +2909,9 @@ D.1.1.7.  Being Managed
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 49]
+Pritikin, et al.        Expires February 9, 2018               [Page 52]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
 D.1.2.  Behavior of a Join Proxy
@@ -2797,9 +2965,9 @@ D.1.2.1.  CoAP connection to Registrar
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 50]
+Pritikin, et al.        Expires February 9, 2018               [Page 53]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
 D.1.2.2.  HTTPS proxy connection to Registrar
@@ -2853,9 +3021,9 @@ D.1.3.  Behavior of the Registrar
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 51]
+Pritikin, et al.        Expires February 9, 2018               [Page 54]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
    Contacted by Pledge
@@ -2909,9 +3077,9 @@ D.1.3.1.  Pledge Authentication
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 52]
+Pritikin, et al.        Expires February 9, 2018               [Page 55]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
 D.1.3.2.  Pledge Authorization
@@ -2965,14 +3133,14 @@ D.1.3.2.  Pledge Authorization
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 53]
+Pritikin, et al.        Expires February 9, 2018               [Page 56]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
-D.1.3.3.  Claiming the New Entity
+D.1.3.3.  Claiming the Pledge
 
-   Claiming an entity establishes an audit log at the MASA server and
+   Claiming an pledge establishes an audit log at the MASA server and
    provides a Registrar with proof, in the form of the Voucher, that the
    log entry has been inserted.  As indicated in Appendix D.1.1.4 a
    Pledge will only proceed with bootstrapping if a Voucher has been
@@ -2991,7 +3159,7 @@ D.1.3.3.  Claiming the New Entity
    service.  Claims from an unauthenticated Registrar are only serviced
    by the MASA resource if a nonce is provided.
 
-   The Registrar can claim a Pledge that is not online by forming the
+   The Registrar can claim a Pledge that is offline by forming the
    request using the entities unique identifier and not including a
    nonce in the claim request.  Vouchers obtained in this way do not
    have a lifetime and they provide a permanent method for the domain to
@@ -3021,9 +3189,9 @@ D.1.3.4.  Log Verification
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 54]
+Pritikin, et al.        Expires February 9, 2018               [Page 57]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
    o  Any nonce'd entries are older than when the domain is known to
@@ -3077,9 +3245,9 @@ D.1.4.  Behavior of the MASA Service
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 55]
+Pritikin, et al.        Expires February 9, 2018               [Page 58]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
 D.1.5.  Leveraging the new key infrastructure / next steps
@@ -3133,9 +3301,9 @@ D.2.  Domain Operator Activities
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 56]
+Pritikin, et al.        Expires February 9, 2018               [Page 59]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
 D.2.1.  Instantiating the Domain Certification Authority
@@ -3189,9 +3357,9 @@ D.2.3.  Accepting New Entities
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 57]
+Pritikin, et al.        Expires February 9, 2018               [Page 60]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
        that is not on the list of known devices, it can still be
@@ -3245,9 +3413,9 @@ D.2.5.  Secure Network Operations
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 58]
+Pritikin, et al.        Expires February 9, 2018               [Page 61]
 
-Internet-Draft                    BRSKI                        June 2017
+Internet-Draft                    BRSKI                      August 2017
 
 
 Authors' Addresses
@@ -3272,9 +3440,9 @@ Authors' Addresses
 
 
    Steinthor Bjarnason
-   Cisco
+   Arbor Networks
 
-   Email: sbjarnas@cisco.com
+   Email: sbjarnason@arbor.net
 
 
    Kent Watsen
@@ -3301,4 +3469,4 @@ Authors' Addresses
 
 
 
-Pritikin, et al.        Expires December 30, 2017              [Page 59]
+Pritikin, et al.        Expires February 9, 2018               [Page 62]
