@@ -3444,6 +3444,121 @@ Reference: [This document]
         connectivity requirements of said management systems are provided
         by the ACP.
       </t>
+      <section anchor="operationalrequirements" title="Operational Requirements">
+        <t>
+          This section collects operational requirements based upon the three
+          roles involved in BRSKI: The Manufacturer Authorized Signing
+          Authority (MASA), the (Domain) Owner and the Device.
+          It should be recognized that the manufacturer may be involved in two
+          roles, as it creates the software/firmware for the device, and also
+          may be the operator of the MASA.
+        </t>
+        <t>
+          The requirements in this section are presented using BCP14
+          (<xref target="RFC2119"></xref>, <xref target="RFC8174"></xref>)
+          language.  These do not represent new normative statements, just a
+          review of a few such things in one place by role.  They also apply
+          specifically to the the ANIMA ACP use case.  Other use cases likely
+          have similar, but MAY not have identical requirements.
+        </t>
+        <section anchor="masarequirements" title="MASA Operational Requirements">
+          <t>
+            The manufacturer MUST arrange for an online service to be available
+            called the MASA. It MUST be available at the URL which is encoded
+            in the IDevID certificate extensions described in <xref target="MASAURL"/>.
+          </t>
+          <t>
+            The online service MUST have access to a private key with which to
+            sign <xref target="RFC8366"/> format voucher artifacts.  The public
+            key, certificate, or certificate chain MUST be built in to the
+            device as part of the firmware.
+          </t>
+          <t>
+            It is RECOMMENDED that the manufacturer arrange for this signing
+            key (or keys) to be escrowed according to typical software source
+            code escrow practices <xref target="softwareescrow" />.
+          </t>
+          <t>
+            The MASA accepts voucher requests from Domain Owners according to
+            an operational practice appropriate for the device.  This can range
+            from any domain owner (first-come first-served, on a TOFU-like
+            basis), to full sales channel integration where Domain Owners need
+            to be positively identified by TLS Client Certicate pinned, or HTTP
+            Authentication process.  The MASA creates signed voucher artifacts
+            according to a it's internally defined policies.
+          </t>
+          <t>
+            The MASA MUST operate an audit log for devices that is accessible.
+            The audit log is designed to be easily cacheable and the MASA MAY
+            find it useful to put this content on a CDN.
+          </t>
+        </section>
+        <section anchor="domainownerrequirements" title="Domain Owner Operational Requirements">
+          <t>
+            The domain owner MUST operate an EST (<xref target="RFC7030" />)
+            server with the extensions described in this document.  This is
+            the JRC or Registrar.  This JRC/EST
+            server MUST announce itself using GRASP within the ACP.  This EST
+            server will typically reside with the Network Operations Center for
+            the organization.
+          </t>
+          <t>
+            The domain owner MAY operate an internal certifiate authority (CA) that
+            is seperate from the EST server, or it MAY combine all activities
+            into a single device.  The determination of the architecture
+            depends upon the scale and resiliency requirements of the
+            organization.  Multiple JRC instances MAY be announced into the ACP
+            from multiple locations to achieve an appropriate level of
+            redundancy.
+          </t>
+          <t>
+            In order to recognize which devices and which manufacturers are
+            welcome on the domain owner's network, the domain owner SHOULD
+            maintain a white list of manufacturers.  This MAY extend to
+            integration with purchasing departments to know the serial numbers
+            of devices.
+          </t>
+          <t>
+            The domain owner SHOULD use the resulting overlay ACP network to
+            manage devices, replacing legacy out-of-band mechanisms.
+          </t>
+          <t>
+            The domain owner SHOULD operate one or more EST servers which can
+            be used to renew the domain certificates (LDevIDs) which are
+            deployed to devices.  These servers MAY be the same as the JRC, or
+            MAY be a distinct set of devices, as approriate for resiliency.
+          </t>
+          <t>
+            The organization MUST take appropriate precautions against loss of
+            access to the certificate authority private key.  Hardware security
+            modules and/or secret splitting are appropriate.
+          </t>
+        </section>
+        <section anchor="devicerequirements" title="Device Operational Requirements">
+          <t>
+            Devices MUST come with built-in trust anchors that permit the device to
+            validate vouchers from the MASA.
+          </t>
+          <t>
+            Device MUST come with (unique, per-device) IDevID certificates that
+            include their serial numbers, and the MASA URL extension.
+          </t>
+          <t>
+            Devices are expected to Join Proxies using GRASP, and then connect
+            to the JRC using the protocol described in this document.
+          </t>
+          <t>
+            Once a domain owner has been validated with the voucher, devices
+            are expected to enroll into the domain using EST.  Devices are then
+            expected to form ACPs using IPsec over IPv6 Link-Local addresses as
+            described in  <xref target="I-D.ietf-anima-autonomic-control-plane" />
+          </t>
+          <t>
+            Devices are expected to renew their certificates before they
+            expire.
+          </t>
+        </section>
+      </section>
     </section>
     <section anchor="privacyconsiderations" title="Privacy Considerations">
       <section title="MASA audit log">
@@ -4510,6 +4625,17 @@ Reference: [This document]
           <author surname="Wikipedia"></author>
 
           <date month="July" year="2015" />
+        </front>
+      </reference>
+
+      <reference anchor="softwareescrow"
+                 target="https://en.wikipedia.org/wiki/Source_code_escrow">
+        <front>
+          <title>Wikipedia article: Software Escrow</title>
+
+          <author surname="Wikipedia"></author>
+
+          <date month="October" year="2019" />
         </front>
       </reference>
 
