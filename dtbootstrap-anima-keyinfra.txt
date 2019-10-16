@@ -25,16 +25,15 @@ Abstract
    bootstrapped.  This is done using manufacturer installed X.509
    certificates, in combination with a manufacturer's authorizing
    service, both online and offline.  We call this process the
-   Bootstrapping Remote Secure Key Infrastructure (BRSKI) protocol,
-   pronounced "brewski".  Bootstrapping a new device can occur using a
-   routable address and a cloud service, or using only link-local
-   connectivity, or on limited/disconnected networks.  Support for lower
-   security models, including devices with minimal identity, is
-   described for legacy reasons but not encouraged.  Bootstrapping to is
-   complete when the cryptographic identity of the new key
-   infrastructure is successfully deployed to the device.  The
-   established secure connection can be used to deploy a locally issued
-   certificate to the device as well.
+   Bootstrapping Remote Secure Key Infrastructure (BRSKI) protocol.
+   Bootstrapping a new device can occur using a routable address and a
+   cloud service, or using only link-local connectivity, or on limited/
+   disconnected networks.  Support for lower security models, including
+   devices with minimal identity, is described for legacy reasons but
+   not encouraged.  Bootstrapping to is complete when the cryptographic
+   identity of the new key infrastructure is successfully deployed to
+   the device.  The established secure connection can be used to deploy
+   a locally issued certificate to the device as well.
 
 Status of This Memo
 
@@ -50,6 +49,7 @@ Status of This Memo
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
+
 
 
 
@@ -87,7 +87,7 @@ Table of Contents
        1.3.4.  Bootstrapping is not Booting  . . . . . . . . . . . .  12
      1.4.  Leveraging the new key infrastructure / next steps  . . .  12
      1.5.  Requirements for Autonomic Network Infrastructure (ANI)
-           devices . . . . . . . . . . . . . . . . . . . . . . . . .  12
+           devices . . . . . . . . . . . . . . . . . . . . . . . . .  13
    2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .  13
      2.1.  Behavior of a Pledge  . . . . . . . . . . . . . . . . . .  15
      2.2.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  16
@@ -202,7 +202,7 @@ Internet-Draft                    BRSKI                     October 2019
    13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  86
      13.1.  Normative References . . . . . . . . . . . . . . . . . .  86
      13.2.  Informative References . . . . . . . . . . . . . . . . .  89
-   Appendix A.  IPv4 and non-ANI operations  . . . . . . . . . . . .  92
+   Appendix A.  IPv4 and non-ANI operations  . . . . . . . . . . . .  93
      A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  93
      A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  93
    Appendix B.  mDNS / DNSSD proxy discovery options . . . . . . . .  93
@@ -228,9 +228,13 @@ Internet-Draft                    BRSKI                     October 2019
 
 1.  Introduction
 
-   BRSKI provides a solution for secure zero-touch (automated) bootstrap
-   of new (unconfigured) devices that are called pledges in this
-   document.  Pledges have an IDevID installed in them at the factory.
+   The Bootstrapping Remote Secure Key Infrastructure (BRSKI) protocol
+   provides a solution for secure zero-touch (automated) bootstrap of
+   new (unconfigured) devices that are called pledges in this document.
+   Pledges have an IDevID installed in them at the factory.
+
+   "BRSKI" is pronounced like "brewski", a colloquial term for beer in
+   Canada and parts of the US-midwest. [brewski]
 
    This document primarily provides for the needs of the ISP and
    Enterprise focused ANIMA Autonomic Control Plane (ACP)
@@ -270,10 +274,6 @@ Internet-Draft                    BRSKI                     October 2019
 
    This document details protocols and messages to answer the above
    questions.  It uses a TLS connection and an PKIX-shaped (X.509v3)
-   certificate (an IEEE 802.1AR [IDevID] IDevID) of the pledge to answer
-   points 1 and 2.  It uses a new artifact called a "voucher" that the
-   registrar receives from a "Manufacturer Authorized Signing Authority"
-   (MASA) and passes to the pledge to answer points 3 and 4.
 
 
 
@@ -281,6 +281,11 @@ Pritikin, et al.         Expires April 18, 2020                 [Page 5]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   certificate (an IEEE 802.1AR [IDevID] IDevID) of the pledge to answer
+   points 1 and 2.  It uses a new artifact called a "voucher" that the
+   registrar receives from a "Manufacturer Authorized Signing Authority"
+   (MASA) and passes to the pledge to answer points 3 and 4.
 
    A proxy provides very limited connectivity between the pledge and the
    registrar.
@@ -325,11 +330,6 @@ Internet-Draft                    BRSKI                     October 2019
    bootstrap but does not provide solutions for how the following
    protocol steps can be made autonomic (not involving user actions):
 
-   o  using the Implicit Trust Anchor [RFC7030] database to authenticate
-      an owner specific service (not an autonomic solution because the
-      URL must be securely distributed),
-
-
 
 
 
@@ -337,6 +337,10 @@ Pritikin, et al.         Expires April 18, 2020                 [Page 6]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   o  using the Implicit Trust Anchor [RFC7030] database to authenticate
+      an owner specific service (not an autonomic solution because the
+      URL must be securely distributed),
 
    o  engaging a human user to authorize the CA certificate using out-
       of-band data (not an autonomic solution because the human user is
@@ -381,10 +385,6 @@ Internet-Draft                    BRSKI                     October 2019
 
    The following terms are defined for clarity:
 
-   domainID:  The domain IDentity is a unique hash based upon the
-      Registrar CA's certificate.  Section 5.8.2 specifies how it is
-      calculated.
-
 
 
 
@@ -393,6 +393,10 @@ Pritikin, et al.         Expires April 18, 2020                 [Page 7]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   domainID:  The domain IDentity is a unique hash based upon the
+      Registrar CA's certificate.  Section 5.8.2 specifies how it is
+      calculated.
 
    drop-ship:  The physical distribution of equipment containing the
       "factory default" configuration to a final destination.  In zero-
@@ -438,10 +442,6 @@ Internet-Draft                    BRSKI                     October 2019
    Join Registrar (and Coordinator):  A representative of the domain
       that is configured, perhaps autonomically, to decide whether a new
       device is allowed to join the domain.  The administrator of the
-      domain interfaces with a "join registrar (and coordinator)" to
-      control this process.  Typically a join registrar is "inside" its
-      domain.  For simplicity this document often refers to this as just
-      "registrar".  Within [I-D.ietf-anima-reference-model] this is
 
 
 
@@ -450,6 +450,10 @@ Pritikin, et al.         Expires April 18, 2020                 [Page 8]
 Internet-Draft                    BRSKI                     October 2019
 
 
+      domain interfaces with a "join registrar (and coordinator)" to
+      control this process.  Typically a join registrar is "inside" its
+      domain.  For simplicity this document often refers to this as just
+      "registrar".  Within [I-D.ietf-anima-reference-model] this is
       referred to as the "join registrar autonomic service agent".
       Other communities use the abbreviation "JRC".
 
@@ -493,10 +497,6 @@ Internet-Draft                    BRSKI                     October 2019
    IDevID:  An Initial Device Identity X.509 certificate installed by
       the vendor on new equipment.
 
-   TOFU:  Trust on First Use. Used similarly to [RFC7435].  This is
-      where a pledge device makes no security decisions but rather
-      simply trusts the first registrar it is contacted by.  This is
-      also known as the "resurrecting duckling" model.
 
 
 
@@ -505,6 +505,11 @@ Pritikin, et al.         Expires April 18, 2020                 [Page 9]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   TOFU:  Trust on First Use. Used similarly to [RFC7435].  This is
+      where a pledge device makes no security decisions but rather
+      simply trusts the first registrar it is contacted by.  This is
+      also known as the "resurrecting duckling" model.
 
    nonced:  a voucher (or request) that contains a nonce (the normal
       case).
@@ -548,12 +553,7 @@ Internet-Draft                    BRSKI                     October 2019
    warehouse from a common stock and shipped directly to the target
    location at the request of a domain owner is explicitly supported.
    That stock ("SKU") could be provided to a number of potential domain
-   owners, and the eventual domain owner will not know a-priori which
-   device will go to which location.
 
-   The bootstrapping process can take minutes to complete depending on
-   the network infrastructure and device processing speed.  The network
-   communication itself is not optimized for speed; for privacy reasons,
 
 
 
@@ -562,6 +562,12 @@ Pritikin, et al.         Expires April 18, 2020                [Page 10]
 Internet-Draft                    BRSKI                     October 2019
 
 
+   owners, and the eventual domain owner will not know a-priori which
+   device will go to which location.
+
+   The bootstrapping process can take minutes to complete depending on
+   the network infrastructure and device processing speed.  The network
+   communication itself is not optimized for speed; for privacy reasons,
    the discovery process allows for the pledge to avoid announcing its
    presence through broadcasting.
 
@@ -604,12 +610,6 @@ Internet-Draft                    BRSKI                     October 2019
    802.11).  It could also be used by non-constrained devices across a
    non-energy constrained, but challenged network (such as 802.15.4).
    The certificate contents, and the process by which the four questions
-   above are resolved do apply to constrained devices.  It is simply the
-   actual on-the-wire imprint protocol that could be inappropriate.
-
-
-
-
 
 
 
@@ -617,6 +617,9 @@ Pritikin, et al.         Expires April 18, 2020                [Page 11]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   above are resolved do apply to constrained devices.  It is simply the
+   actual on-the-wire imprint protocol that could be inappropriate.
 
 1.3.3.  Network Access Controls
 
@@ -659,12 +662,9 @@ Internet-Draft                    BRSKI                     October 2019
    credentials deployed by this protocol to secure the Autonomic Control
    Plane (ACP) ([I-D.ietf-anima-autonomic-control-plane]).
 
-1.5.  Requirements for Autonomic Network Infrastructure (ANI) devices
 
-   The BRSKI protocol can be used in a number of environments.  Some of
-   the options in this document are the result of requirements that are
-   out of the ANI scope.  This section defines the base requirements for
-   ANI devices.
+
+
 
 
 
@@ -673,6 +673,13 @@ Pritikin, et al.         Expires April 18, 2020                [Page 12]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+1.5.  Requirements for Autonomic Network Infrastructure (ANI) devices
+
+   The BRSKI protocol can be used in a number of environments.  Some of
+   the options in this document are the result of requirements that are
+   out of the ANI scope.  This section defines the base requirements for
+   ANI devices.
 
    For devices that intend to become part of an Autonomic Network
    Infrastructure (ANI) ([I-D.ietf-anima-reference-model]) that includes
@@ -702,13 +709,6 @@ Internet-Draft                    BRSKI                     October 2019
    The logical elements of the bootstrapping framework are described in
    this section.  Figure 1 provides a simplified overview of the
    components.
-
-
-
-
-
-
-
 
 
 
@@ -4974,10 +4974,10 @@ Internet-Draft                    BRSKI                     October 2019
 
 13.2.  Informative References
 
-   [Dingledine2004]
-              Dingledine, R., Mathewson, N., and P. Syverson, "Tor: the
-              second-generation onion router", 2004,
-              <https://spec.torproject.org/tor-spec>.
+   [brewski]  Internet, , "Urban Dictionary: Brewski", October 2019,
+              <https://www.urbandictionary.com/define.php?term=brewski>.
+
+
 
 
 
@@ -4985,6 +4985,11 @@ Pritikin, et al.         Expires April 18, 2020                [Page 89]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   [Dingledine2004]
+              Dingledine, R., Mathewson, N., and P. Syverson, "Tor: the
+              second-generation onion router", 2004,
+              <https://spec.torproject.org/tor-spec>.
 
    [docsisroot]
               CableLabs, , "CableLabs Digital Certificate Issuance
@@ -5028,12 +5033,7 @@ Internet-Draft                    BRSKI                     October 2019
               Wikipedia, , "Wikipedia article: Imprinting", July 2015,
               <https://en.wikipedia.org/wiki/Imprinting_(psychology)>.
 
-   [IoTstrangeThings]
-              Internet, , "IoT of toys stranger than fiction:
-              Cybersecurity and data privacy update (accessed
-              2018-12-02)", March 2017,
-              <https://www.welivesecurity.com/2017/03/03/internet-of-
-              things-security-privacy-iot-update/>.
+
 
 
 
@@ -5041,6 +5041,13 @@ Pritikin, et al.         Expires April 18, 2020                [Page 90]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   [IoTstrangeThings]
+              Internet, , "IoT of toys stranger than fiction:
+              Cybersecurity and data privacy update (accessed
+              2018-12-02)", March 2017,
+              <https://www.welivesecurity.com/2017/03/03/internet-of-
+              things-security-privacy-iot-update/>.
 
    [livingwithIoT]
               Internet, , "What is it actually like to live in a house
@@ -5083,13 +5090,6 @@ Internet-Draft                    BRSKI                     October 2019
               DOI 10.17487/RFC7228, May 2014, <https://www.rfc-
               editor.org/info/rfc7228>.
 
-   [RFC7258]  Farrell, S. and H. Tschofenig, "Pervasive Monitoring Is an
-              Attack", BCP 188, RFC 7258, DOI 10.17487/RFC7258, May
-              2014, <https://www.rfc-editor.org/info/rfc7258>.
-
-   [RFC7435]  Dukhovni, V., "Opportunistic Security: Some Protection
-              Most of the Time", RFC 7435, DOI 10.17487/RFC7435,
-              December 2014, <https://www.rfc-editor.org/info/rfc7435>.
 
 
 
@@ -5097,6 +5097,14 @@ Pritikin, et al.         Expires April 18, 2020                [Page 91]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   [RFC7258]  Farrell, S. and H. Tschofenig, "Pervasive Monitoring Is an
+              Attack", BCP 188, RFC 7258, DOI 10.17487/RFC7258, May
+              2014, <https://www.rfc-editor.org/info/rfc7258>.
+
+   [RFC7435]  Dukhovni, V., "Opportunistic Security: Some Protection
+              Most of the Time", RFC 7435, DOI 10.17487/RFC7435,
+              December 2014, <https://www.rfc-editor.org/info/rfc7435>.
 
    [RFC7575]  Behringer, M., Pritikin, M., Bjarnason, S., Clemm, A.,
               Carpenter, B., Jiang, S., and L. Ciavaglia, "Autonomic
@@ -5139,20 +5147,19 @@ Internet-Draft                    BRSKI                     October 2019
               February 2014,
               <http://www.w3.org/TR/2014/WD-capability-urls-20140218>.
 
-Appendix A.  IPv4 and non-ANI operations
-
-   The secification of BRSKI in Section 4 intentionally only covers the
-   mechanisms for an IPv6 pledge using Link-Local addresses.  This
-   section describes non-normative extensions that can be used in other
-   environments.
-
-
 
 
 Pritikin, et al.         Expires April 18, 2020                [Page 92]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+Appendix A.  IPv4 and non-ANI operations
+
+   The secification of BRSKI in Section 4 intentionally only covers the
+   mechanisms for an IPv6 pledge using Link-Local addresses.  This
+   section describes non-normative extensions that can be used in other
+   environments.
 
 A.1.  IPv4 Link Local addresses
 
@@ -5194,6 +5201,15 @@ Appendix B.  mDNS / DNSSD proxy discovery options
    discovered as described in [RFC6763] section 11 (Appendix A.2
    suggests the use of DHCP parameters).
 
+
+
+
+
+Pritikin, et al.         Expires April 18, 2020                [Page 93]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    If no local proxy or registrar service is located using the GRASP
    mechanisms or the above mentioned DNS-based Service Discovery
    methods, the pledge MAY contact a well known manufacturer provided
@@ -5202,13 +5218,6 @@ Appendix B.  mDNS / DNSSD proxy discovery options
    of the URI are manufacturer specific.  Manufacturers that leverage
    this method on the pledge are responsible for providing the registrar
    service.  Also see Section 2.7.
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 93]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    The current DNS services returned during each query are maintained
    until bootstrapping is completed.  If bootstrapping fails and the
@@ -5229,15 +5238,6 @@ Appendix C.  MUD Extension
    +--rw masa-server?   inet:uri
 
    The model is defined as follows:
-
-
-
-
-
-
-
-
-
 
 
 
