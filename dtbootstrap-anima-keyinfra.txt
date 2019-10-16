@@ -87,7 +87,7 @@ Table of Contents
        1.3.4.  Bootstrapping is not Booting  . . . . . . . . . . . .  12
      1.4.  Leveraging the new key infrastructure / next steps  . . .  12
      1.5.  Requirements for Autonomic Network Infrastructure (ANI)
-           devices . . . . . . . . . . . . . . . . . . . . . . . . .  13
+           devices . . . . . . . . . . . . . . . . . . . . . . . . .  12
    2.  Architectural Overview  . . . . . . . . . . . . . . . . . . .  13
      2.1.  Behavior of a Pledge  . . . . . . . . . . . . . . . . . .  15
      2.2.  Secure Imprinting using Vouchers  . . . . . . . . . . . .  16
@@ -394,14 +394,38 @@ Pritikin, et al.         Expires April 18, 2020                 [Page 7]
 Internet-Draft                    BRSKI                     October 2019
 
 
-   domainID:  The domain IDentity is a unique hash based upon the
-      Registrar CA's certificate.  Section 5.8.2 specifies how it is
-      calculated.
+   ANI:  The Autonomic Network Infrastructure as defined by
+      [I-D.ietf-anima-reference-model].  This document details specific
+      requirements for pledges, proxies and registrars when they are
+      part of an ANI.
+
+   Circuit Proxy:  A stateful implementation of the join proxy.  This is
+      the assumed type of proxy.
 
    drop-ship:  The physical distribution of equipment containing the
       "factory default" configuration to a final destination.  In zero-
       touch scenarios there is no staging or pre-configuration during
       drop-ship.
+
+   Domain:  The set of entities that share a common local trust anchor.
+      This includes the proxy, registrar, Domain Certificate Authority,
+      Management components and any existing entity that is already a
+      member of the domain.
+
+   domainID:  The domain IDentity is a unique hash based upon the
+      Registrar CA's certificate.  Section 5.8.2 specifies how it is
+      calculated.
+
+   Domain CA:  The domain Certification Authority (CA) provides
+      certification functionalities to the domain.  At a minimum it
+      provides certification functionalities to a registrar and manages
+      the private key that defines the domain.  Optionally, it certifies
+      all elements.
+
+   enrollment:  The process where a device presents key material to a
+      network and acquires a network-specific identity.  For example
+      when a certificate signing request is presented to a certification
+      authority and a certificate is obtained in response.
 
    imprint:  The process where a device obtains the cryptographic key
       material to identify and trust future interactions with a network.
@@ -415,33 +439,9 @@ Internet-Draft                    BRSKI                     October 2019
       primary focus of this document [imprinting].  The analogy to
       Lorenz's work was first noted in [Stajano99theresurrecting].
 
-   enrollment:  The process where a device presents key material to a
-      network and acquires a network-specific identity.  For example
-      when a certificate signing request is presented to a certification
-      authority and a certificate is obtained in response.
+   IDevID:  An Initial Device Identity X.509 certificate installed by
+      the vendor on new equipment.
 
-   Pledge:  The prospective (unconfigured) device, which has an identity
-      installed at the factory.
-
-   Voucher:  A signed artifact from the MASA that indicates to a pledge
-      the cryptographic identity of the registrar it should trust.
-      There are different types of vouchers depending on how that trust
-      is asserted.  Multiple voucher types are defined in [RFC8366]
-
-   Domain:  The set of entities that share a common local trust anchor.
-      This includes the proxy, registrar, Domain Certificate Authority,
-      Management components and any existing entity that is already a
-      member of the domain.
-
-   Domain CA:  The domain Certification Authority (CA) provides
-      certification functionalities to the domain.  At a minimum it
-      provides certification functionalities to a registrar and manages
-      the private key that defines the domain.  Optionally, it certifies
-      all elements.
-
-   Join Registrar (and Coordinator):  A representative of the domain
-      that is configured, perhaps autonomically, to decide whether a new
-      device is allowed to join the domain.  The administrator of the
 
 
 
@@ -450,17 +450,7 @@ Pritikin, et al.         Expires April 18, 2020                 [Page 8]
 Internet-Draft                    BRSKI                     October 2019
 
 
-      domain interfaces with a "join registrar (and coordinator)" to
-      control this process.  Typically a join registrar is "inside" its
-      domain.  For simplicity this document often refers to this as just
-      "registrar".  Within [I-D.ietf-anima-reference-model] this is
-      referred to as the "join registrar autonomic service agent".
-      Other communities use the abbreviation "JRC".
-
-   (Public) Key Infrastructure:  The collection of systems and processes
-      that sustain the activities of a public key system.  The registrar
-      acts as an [RFC5280] and [RFC5272] (see section 7) "Registration
-      Authority".
+   IPIP Proxy:  A stateless proxy alternative.
 
    Join Proxy:  A domain entity that helps the pledge join the domain.
       A join proxy facilitates communication for devices that find
@@ -471,52 +461,15 @@ Internet-Draft                    BRSKI                     October 2019
       they are communicating with a proxy rather than directly with a
       registrar.
 
-   Circuit Proxy:  A stateful implementation of the join proxy.  This is
-      the assumed type of proxy.
-
-   IPIP Proxy:  A stateless proxy alternative.
-
-   MASA Service:  A third-party Manufacturer Authorized Signing
-      Authority (MASA) service on the global Internet.  The MASA signs
-      vouchers.  It also provides a repository for audit-log information
-      of privacy protected bootstrapping events.  It does not track
-      ownership.
-
-   MASA Audit-Log:  A list of previous owners maintained by the MASA on
-      a per device (per pledge) basis.  Described in Section 5.8.1.
-
-   Ownership Tracker:  An Ownership Tracker service on the global
-      Internet.  The Ownership Tracker uses business processes to
-      accurately track ownership of all devices shipped against domains
-      that have purchased them.  Although optional, this component
-      allows vendors to provide additional value in cases where their
-      sales and distribution channels allow for accurately tracking of
-      such ownership.  Ownership tracking information is indicated in
-      vouchers as described in [RFC8366]
-
-   IDevID:  An Initial Device Identity X.509 certificate installed by
-      the vendor on new equipment.
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                 [Page 9]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
-   TOFU:  Trust on First Use. Used similarly to [RFC7435].  This is
-      where a pledge device makes no security decisions but rather
-      simply trusts the first registrar it is contacted by.  This is
-      also known as the "resurrecting duckling" model.
-
-   nonced:  a voucher (or request) that contains a nonce (the normal
-      case).
-
-   nonceless:  a voucher (or request) that does not contain a nonce,
-      relying upon accurate clocks for expiration, or which does not
-      expire.
+   Join Registrar (and Coordinator):  A representative of the domain
+      that is configured, perhaps autonomically, to decide whether a new
+      device is allowed to join the domain.  The administrator of the
+      domain interfaces with a "join registrar (and coordinator)" to
+      control this process.  Typically a join registrar is "inside" its
+      domain.  For simplicity this document often refers to this as just
+      "registrar".  Within [I-D.ietf-anima-reference-model] this is
+      referred to as the "join registrar autonomic service agent".
+      Other communities use the abbreviation "JRC".
 
    manufacturer:  the term manufacturer is used throughout this document
       to be the entity that created the device.  This is typically the
@@ -530,15 +483,60 @@ Internet-Draft                    BRSKI                     October 2019
       number of products supported in the field increasing the chance
       that firmware will be more up to date.
 
-   ANI:  The Autonomic Network Infrastructure as defined by
-      [I-D.ietf-anima-reference-model].  This document details specific
-      requirements for pledges, proxies and registrars when they are
-      part of an ANI.
+   MASA Audit-Log:  A list of previous owners maintained by the MASA on
+      a per device (per pledge) basis.  Described in Section 5.8.1.
+
+   MASA Service:  A third-party Manufacturer Authorized Signing
+      Authority (MASA) service on the global Internet.  The MASA signs
+      vouchers.  It also provides a repository for audit-log information
+      of privacy protected bootstrapping events.  It does not track
+      ownership.
+
+   nonced:  a voucher (or request) that contains a nonce (the normal
+      case).
+
+   nonceless:  a voucher (or request) that does not contain a nonce,
+      relying upon accurate clocks for expiration, or which does not
+      expire.
+
+
+
+Pritikin, et al.         Expires April 18, 2020                 [Page 9]
+
+Internet-Draft                    BRSKI                     October 2019
+
 
    offline:  When an architectural component cannot perform realtime
       communications with a peer, either due to network connectivity or
       because the peer is turned off, the operation is said to be
       occurring offline.
+
+   Ownership Tracker:  An Ownership Tracker service on the global
+      Internet.  The Ownership Tracker uses business processes to
+      accurately track ownership of all devices shipped against domains
+      that have purchased them.  Although optional, this component
+      allows vendors to provide additional value in cases where their
+      sales and distribution channels allow for accurately tracking of
+      such ownership.  Ownership tracking information is indicated in
+      vouchers as described in [RFC8366]
+
+   Pledge:  The prospective (unconfigured) device, which has an identity
+      installed at the factory.
+
+   (Public) Key Infrastructure:  The collection of systems and processes
+      that sustain the activities of a public key system.  The registrar
+      acts as an [RFC5280] and [RFC5272] (see section 7) "Registration
+      Authority".
+
+   TOFU:  Trust on First Use. Used similarly to [RFC7435].  This is
+      where a pledge device makes no security decisions but rather
+      simply trusts the first registrar it is contacted by.  This is
+      also known as the "resurrecting duckling" model.
+
+   Voucher:  A signed artifact from the MASA that indicates to a pledge
+      the cryptographic identity of the registrar it should trust.
+      There are different types of vouchers depending on how that trust
+      is asserted.  Multiple voucher types are defined in [RFC8366]
 
 1.3.  Scope of solution
 
@@ -553,6 +551,8 @@ Internet-Draft                    BRSKI                     October 2019
    warehouse from a common stock and shipped directly to the target
    location at the request of a domain owner is explicitly supported.
    That stock ("SKU") could be provided to a number of potential domain
+   owners, and the eventual domain owner will not know a-priori which
+   device will go to which location.
 
 
 
@@ -561,9 +561,6 @@ Pritikin, et al.         Expires April 18, 2020                [Page 10]
 
 Internet-Draft                    BRSKI                     October 2019
 
-
-   owners, and the eventual domain owner will not know a-priori which
-   device will go to which location.
 
    The bootstrapping process can take minutes to complete depending on
    the network infrastructure and device processing speed.  The network
@@ -610,6 +607,9 @@ Internet-Draft                    BRSKI                     October 2019
    802.11).  It could also be used by non-constrained devices across a
    non-energy constrained, but challenged network (such as 802.15.4).
    The certificate contents, and the process by which the four questions
+   above are resolved do apply to constrained devices.  It is simply the
+   actual on-the-wire imprint protocol that could be inappropriate.
+
 
 
 
@@ -617,9 +617,6 @@ Pritikin, et al.         Expires April 18, 2020                [Page 11]
 
 Internet-Draft                    BRSKI                     October 2019
 
-
-   above are resolved do apply to constrained devices.  It is simply the
-   actual on-the-wire imprint protocol that could be inappropriate.
 
 1.3.3.  Network Access Controls
 
@@ -662,9 +659,12 @@ Internet-Draft                    BRSKI                     October 2019
    credentials deployed by this protocol to secure the Autonomic Control
    Plane (ACP) ([I-D.ietf-anima-autonomic-control-plane]).
 
+1.5.  Requirements for Autonomic Network Infrastructure (ANI) devices
 
-
-
+   The BRSKI protocol can be used in a number of environments.  Some of
+   the options in this document are the result of requirements that are
+   out of the ANI scope.  This section defines the base requirements for
+   ANI devices.
 
 
 
@@ -673,13 +673,6 @@ Pritikin, et al.         Expires April 18, 2020                [Page 12]
 
 Internet-Draft                    BRSKI                     October 2019
 
-
-1.5.  Requirements for Autonomic Network Infrastructure (ANI) devices
-
-   The BRSKI protocol can be used in a number of environments.  Some of
-   the options in this document are the result of requirements that are
-   out of the ANI scope.  This section defines the base requirements for
-   ANI devices.
 
    For devices that intend to become part of an Autonomic Network
    Infrastructure (ANI) ([I-D.ietf-anima-reference-model]) that includes
@@ -709,6 +702,13 @@ Internet-Draft                    BRSKI                     October 2019
    The logical elements of the bootstrapping framework are described in
    this section.  Figure 1 provides a simplified overview of the
    components.
+
+
+
+
+
+
+
 
 
 
