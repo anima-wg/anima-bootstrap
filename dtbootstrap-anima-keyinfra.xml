@@ -280,15 +280,40 @@
         <t>The following terms are defined for clarity:</t>
 
         <t><list style="hanging">
-            <t hangText="domainID:">The domain IDentity is a unique hash
-            based upon the Registrar CA's certificate.
-            <xref target="domainID" /> specifies how it is calculated.
-            </t>
+            <t hangText="ANI:">The Autonomic Network Infrastructure as
+            defined by <xref target="I-D.ietf-anima-reference-model" />.
+            This document details specific requirements for pledges,
+            proxies and registrars when they are part of an ANI.</t>
+
+            <t hangText="Circuit Proxy:">A stateful implementation
+              of the join proxy. This is the assumed type of proxy.</t>
 
             <t hangText="drop-ship:">The physical distribution of equipment
             containing the "factory default" configuration to a final
             destination. In zero-touch scenarios there is no staging or
             pre-configuration during drop-ship.</t>
+
+            <t hangText="Domain:">The set of entities that share a common local
+            trust anchor. This includes the proxy, registrar,
+            Domain Certificate Authority, Management components and any
+            existing entity that is already a member of the domain.</t>
+
+            <t hangText="domainID:">The domain IDentity is a unique hash
+            based upon the Registrar CA's certificate.
+            <xref target="domainID" /> specifies how it is calculated.
+            </t>
+
+            <t hangText="Domain CA:">The domain Certification Authority (CA)
+            provides certification functionalities to the domain. At a minimum
+            it provides certification functionalities to a registrar and
+            manages the private key that defines the domain. Optionally, it
+            certifies all elements.</t>
+
+            <t hangText="enrollment:">The process where a device presents key
+            material to a network and acquires a network-specific identity.
+            For example when a certificate signing request is presented to a
+            certification authority and a certificate is obtained in
+            response.</t>
 
             <t hangText="imprint:">The process where a device obtains the
             cryptographic key material to identify and trust future
@@ -304,47 +329,10 @@
             Lorenz's work was first noted in <xref
             target="Stajano99theresurrecting"></xref>.</t>
 
-            <t hangText="enrollment:">The process where a device presents key
-            material to a network and acquires a network-specific identity.
-            For example when a certificate signing request is presented to a
-            certification authority and a certificate is obtained in
-            response.</t>
+            <t hangText="IDevID:">An Initial Device Identity X.509 certificate
+            installed by the vendor on new equipment.</t>
 
-            <t hangText="Pledge:">The prospective (unconfigured) device, which has an
-            identity installed at the factory.</t>
-
-            <t hangText="Voucher:">A signed artifact from the MASA
-            that indicates to a pledge the cryptographic identity of the
-            registrar it should trust. There are different types of vouchers
-            depending on how that trust is asserted. Multiple voucher types are
-            defined in <xref target="RFC8366" /></t>
-
-            <t hangText="Domain:">The set of entities that share a common local
-            trust anchor. This includes the proxy, registrar,
-            Domain Certificate Authority, Management components and any
-            existing entity that is already a member of the domain.</t>
-
-            <t hangText="Domain CA:">The domain Certification Authority (CA)
-            provides certification functionalities to the domain. At a minimum
-            it provides certification functionalities to a registrar and
-            manages the private key that defines the domain. Optionally, it
-            certifies all elements.</t>
-
-            <t hangText="Join Registrar (and Coordinator):">A representative of the domain that is
-            configured, perhaps autonomically, to decide whether a new device
-            is allowed to join the domain. The administrator of the domain
-            interfaces with a "join registrar (and coordinator)" to control this process. Typically a
-            join registrar is "inside" its domain. For simplicity this document
-            often refers to this as just "registrar". Within <xref target="I-D.ietf-anima-reference-model" /> this is
-            referred to as the "join registrar autonomic service agent".
-            Other communities use the abbreviation "JRC".
-            </t>
-
-            <t hangText="(Public) Key Infrastructure:"> The collection of systems and
-            processes that sustain the activities of a public key system.
-            The registrar acts as an
-            <xref target="RFC5280" /> and <xref target="RFC5272" /> (see
-              section 7) "Registration Authority".</t>
+            <t hangText="IPIP Proxy:">A stateless proxy alternative.</t>
 
             <t hangText="Join Proxy:">A domain entity that helps the pledge join
             the domain. A join proxy facilitates communication for devices that
@@ -355,46 +343,15 @@
             is unaware that they are communicating with a
             proxy rather than directly with a registrar.</t>
 
-            <t hangText="Circuit Proxy:">A stateful implementation
-              of the join proxy. This is the assumed type of proxy.</t>
-
-            <t hangText="IPIP Proxy:">A stateless proxy alternative.</t>
-
-            <t hangText="MASA Service:">A third-party Manufacturer Authorized
-            Signing Authority (MASA) service on the global Internet. The MASA
-            signs vouchers. It also provides a repository for audit-log
-            information of privacy protected bootstrapping events. It does
-            not track ownership. </t>
-
-            <t hangText="MASA Audit-Log:">A list of previous owners
-            maintained by the MASA on a per device (per pledge)
-            basis. Described in <xref target="MASAauditlog" />.
+            <t hangText="Join Registrar (and Coordinator):">A representative of the domain that is
+            configured, perhaps autonomically, to decide whether a new device
+            is allowed to join the domain. The administrator of the domain
+            interfaces with a "join registrar (and coordinator)" to control this process. Typically a
+            join registrar is "inside" its domain. For simplicity this document
+            often refers to this as just "registrar". Within <xref target="I-D.ietf-anima-reference-model" /> this is
+            referred to as the "join registrar autonomic service agent".
+            Other communities use the abbreviation "JRC".
             </t>
-
-            <t hangText="Ownership Tracker:">An Ownership Tracker service on
-            the global Internet. The Ownership Tracker uses business processes
-            to accurately track ownership of all devices shipped against
-            domains that have purchased them. Although optional, this component
-            allows vendors to provide additional value in cases where their
-            sales and distribution channels allow for accurately tracking of
-            such ownership. Ownership tracking information is indicated in
-            vouchers as described in <xref target="RFC8366"/></t>
-
-            <t hangText="IDevID:">An Initial Device Identity X.509 certificate
-            installed by the vendor on new equipment.</t>
-
-            <t hangText="TOFU:">Trust on First Use. Used similarly to <xref
-            target="RFC7435" />. This is where a pledge
-            device makes no security decisions but rather simply trusts the
-            first registrar it is contacted by. This is also known as the
-            "resurrecting duckling" model.</t>
-
-            <t hangText="nonced:">a voucher (or request) that contains a nonce (the normal
-            case).</t>
-
-            <t hangText="nonceless:">a voucher (or request) that does not
-            contain a nonce, relying upon accurate clocks for expiration, or
-            which does not expire.</t>
 
             <t hangText="manufacturer:">the term manufacturer is used
             throughout this document to be the entity that created the
@@ -410,16 +367,61 @@
             be more up to date.
             </t>
 
-            <t hangText="ANI:">The Autonomic Network Infrastructure as
-            defined by <xref target="I-D.ietf-anima-reference-model" />.
-            This document details specific requirements for pledges,
-            proxies and registrars when they are part of an ANI.</t>
+            <t hangText="MASA Audit-Log:">A list of previous owners
+            maintained by the MASA on a per device (per pledge)
+            basis. Described in <xref target="MASAauditlog" />.
+            </t>
+
+            <t hangText="MASA Service:">A third-party Manufacturer Authorized
+            Signing Authority (MASA) service on the global Internet. The MASA
+            signs vouchers. It also provides a repository for audit-log
+            information of privacy protected bootstrapping events. It does
+            not track ownership. </t>
+
+            <t hangText="nonced:">a voucher (or request) that contains a nonce (the normal
+            case).</t>
+
+            <t hangText="nonceless:">a voucher (or request) that does not
+            contain a nonce, relying upon accurate clocks for expiration, or
+            which does not expire.</t>
 
             <t hangText="offline:">When an architectural component cannot
               perform realtime communications with a peer, either due to
               network connectivity or because the peer is turned off, the
               operation is said to be occurring offline.</t>
-          </list></t>
+
+            <t hangText="Ownership Tracker:">An Ownership Tracker service on
+            the global Internet. The Ownership Tracker uses business processes
+            to accurately track ownership of all devices shipped against
+            domains that have purchased them. Although optional, this component
+            allows vendors to provide additional value in cases where their
+            sales and distribution channels allow for accurately tracking of
+            such ownership. Ownership tracking information is indicated in
+            vouchers as described in <xref target="RFC8366"/></t>
+
+            <t hangText="Pledge:">The prospective (unconfigured) device, which has an
+            identity installed at the factory.</t>
+
+            <t hangText="(Public) Key Infrastructure:"> The collection of systems and
+            processes that sustain the activities of a public key system.
+            The registrar acts as an
+            <xref target="RFC5280" /> and <xref target="RFC5272" /> (see
+              section 7) "Registration Authority".</t>
+
+            <t hangText="TOFU:">Trust on First Use. Used similarly to <xref
+            target="RFC7435" />. This is where a pledge
+            device makes no security decisions but rather simply trusts the
+            first registrar it is contacted by. This is also known as the
+            "resurrecting duckling" model.</t>
+
+            <t hangText="Voucher:">A signed artifact from the MASA
+            that indicates to a pledge the cryptographic identity of the
+            registrar it should trust. There are different types of vouchers
+            depending on how that trust is asserted. Multiple voucher types are
+            defined in <xref target="RFC8366" /></t>
+
+          </list>
+          </t>
       </section>
 
       <section title="Scope of solution">
