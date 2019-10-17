@@ -57,12 +57,12 @@ ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
 	cat ${DRAFT}.xml | ./insert-figures > ALL-${DRAFT}.xml
 
 %.txt: ALL-%.xml
-	./validate-json
+	./validate-json >.json-errors || cat .json-errors
 	@echo PROCESSING: $(subst ALL-,,$@)
-	unset DISPLAY; XML_LIBRARY=$(XML_LIBRARY):./src xml2rfc --text -o $(subst ALL-,,$@) $?
+	unset DISPLAY; XML_LIBRARY=$(XML_LIBRARY):./src xml2rfc ${NETWORK} --text -o $(subst ALL-,,$@) $?
 
 %.html: ALL-%.xml
-	unset DISPLAY; XML_LIBRARY=$(XML_LIBRARY):./src xml2rfc --html -o $(subst ALL-,,$@) $?
+	unset DISPLAY; XML_LIBRARY=$(XML_LIBRARY):./src xml2rfc ${NETWORK} --html -o $(subst ALL-,,$@) $?
 
 submit: ALL-${DRAFT}.xml
 	curl -S -F "user=${IETFUSER}" -F "xml=@ALL-${DRAFT}.xml" https://datatracker.ietf.org/api/submit
