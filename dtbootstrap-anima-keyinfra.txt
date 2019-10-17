@@ -5,14 +5,14 @@
 ANIMA WG                                                     M. Pritikin
 Internet-Draft                                                     Cisco
 Intended status: Standards Track                           M. Richardson
-Expires: April 18, 2020                                        Sandelman
+Expires: April 19, 2020                                        Sandelman
                                                                T. Eckert
                                                            Futurewei USA
                                                             M. Behringer
 
                                                                K. Watsen
                                                          Watsen Networks
-                                                        October 16, 2019
+                                                        October 17, 2019
 
 
         Bootstrapping Remote Secure Key Infrastructures (BRSKI)
@@ -29,11 +29,10 @@ Abstract
    Bootstrapping a new device can occur using a routable address and a
    cloud service, or using only link-local connectivity, or on limited/
    disconnected networks.  Support for lower security models, including
-   devices with minimal identity, is described for legacy reasons but
-   not encouraged.  Bootstrapping is complete when the cryptographic
-   identity of the new key infrastructure is successfully deployed to
-   the device.  The established secure connection can be used to deploy
-   a locally issued certificate to the device as well.
+   devices with minimal identity.  Bootstrapping is complete when the
+   cryptographic identity of the new key infrastructure is successfully
+   deployed to the device.  The established secure connection can be
+   used to deploy a locally issued certificate to the device as well.
 
 Status of This Memo
 
@@ -50,15 +49,14 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
+   This Internet-Draft will expire on April 19, 2020.
 
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 1]
+Pritikin, et al.         Expires April 19, 2020                 [Page 1]
 
 Internet-Draft                    BRSKI                     October 2019
 
-
-   This Internet-Draft will expire on April 18, 2020.
 
 Copyright Notice
 
@@ -106,16 +104,16 @@ Table of Contents
        2.6.2.  Infinite Lifetime of IDevID . . . . . . . . . . . . .  24
      2.7.  Cloud Registrar . . . . . . . . . . . . . . . . . . . . .  25
      2.8.  Determining the MASA to contact . . . . . . . . . . . . .  25
+   3.  Voucher-Request artifact  . . . . . . . . . . . . . . . . . .  26
+     3.1.  Nonceless Voucher Requests  . . . . . . . . . . . . . . .  26
 
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 2]
+Pritikin, et al.         Expires April 19, 2020                 [Page 2]
 
 Internet-Draft                    BRSKI                     October 2019
 
 
-   3.  Voucher-Request artifact  . . . . . . . . . . . . . . . . . .  26
-     3.1.  Nonceless Voucher Requests  . . . . . . . . . . . . . . .  26
      3.2.  Tree Diagram  . . . . . . . . . . . . . . . . . . . . . .  27
      3.3.  Examples  . . . . . . . . . . . . . . . . . . . . . . . .  27
      3.4.  YANG Module . . . . . . . . . . . . . . . . . . . . . . .  29
@@ -132,7 +130,7 @@ Internet-Draft                    BRSKI                     October 2019
            Pledge  . . . . . . . . . . . . . . . . . . . . . . . . .  41
      5.4.  BRSKI-MASA TLS establishment details  . . . . . . . . . .  42
        5.4.1.  MASA authentication of
-               customer Registrar  . . . . . . . . . . . . . . . . .  42
+               customer Registrar  . . . . . . . . . . . . . . . . .  43
      5.5.  Registrar Requests Voucher from MASA  . . . . . . . . . .  43
        5.5.1.  MASA renewal of expired vouchers  . . . . . . . . . .  45
        5.5.2.  MASA pinning of registrar . . . . . . . . . . . . . .  45
@@ -162,50 +160,50 @@ Internet-Draft                    BRSKI                     October 2019
      7.2.  Pledge security reductions  . . . . . . . . . . . . . . .  63
      7.3.  Registrar security reductions . . . . . . . . . . . . . .  64
      7.4.  MASA security reductions  . . . . . . . . . . . . . . . .  65
+       7.4.1.  Issuing Nonceless vouchers  . . . . . . . . . . . . .  65
+       7.4.2.  Trusting Owners on First Use  . . . . . . . . . . . .  66
 
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 3]
+Pritikin, et al.         Expires April 19, 2020                 [Page 3]
 
 Internet-Draft                    BRSKI                     October 2019
 
 
-       7.4.1.  Issuing Nonceless vouchers  . . . . . . . . . . . . .  65
-       7.4.2.  Trusting Owners on First Use  . . . . . . . . . . . .  66
        7.4.3.  Updating or extending voucher trust anchors . . . . .  66
    8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  67
      8.1.  The IETF XML Registry . . . . . . . . . . . . . . . . . .  67
-     8.2.  Well-known EST registration . . . . . . . . . . . . . . .  67
+     8.2.  Well-known EST registration . . . . . . . . . . . . . . .  68
      8.3.  PKIX Registry . . . . . . . . . . . . . . . . . . . . . .  68
      8.4.  Pledge BRSKI Status Telemetry . . . . . . . . . . . . . .  68
      8.5.  DNS Service Names . . . . . . . . . . . . . . . . . . . .  68
      8.6.  MUD File Extension for the MASA . . . . . . . . . . . . .  69
    9.  Applicability to the Autonomic Control Plane (ACP)  . . . . .  69
      9.1.  Operational Requirements  . . . . . . . . . . . . . . . .  70
-       9.1.1.  MASA Operational Requirements . . . . . . . . . . . .  70
+       9.1.1.  MASA Operational Requirements . . . . . . . . . . . .  71
        9.1.2.  Domain Owner Operational Requirements . . . . . . . .  71
        9.1.3.  Device Operational Requirements . . . . . . . . . . .  72
    10. Privacy Considerations  . . . . . . . . . . . . . . . . . . .  72
      10.1.  MASA audit log . . . . . . . . . . . . . . . . . . . . .  72
      10.2.  What BRSKI-EST reveals . . . . . . . . . . . . . . . . .  73
-     10.3.  What BRSKI-MASA reveals to the manufacturer  . . . . . .  73
+     10.3.  What BRSKI-MASA reveals to the manufacturer  . . . . . .  74
      10.4.  Manufacturers and Used or Stolen Equipment . . . . . . .  76
      10.5.  Manufacturers and Grey market equipment  . . . . . . . .  77
-     10.6.  Some mitigations for meddling by manufacturers . . . . .  77
-     10.7.  Death of a manufacturer  . . . . . . . . . . . . . . . .  78
+     10.6.  Some mitigations for meddling by manufacturers . . . . .  78
+     10.7.  Death of a manufacturer  . . . . . . . . . . . . . . . .  79
    11. Security Considerations . . . . . . . . . . . . . . . . . . .  79
      11.1.  Denial of Service (DoS) against MASA . . . . . . . . . .  80
-     11.2.  Availability of good random numbers  . . . . . . . . . .  80
+     11.2.  Availability of good random numbers  . . . . . . . . . .  81
      11.3.  Freshness in Voucher-Requests  . . . . . . . . . . . . .  81
      11.4.  Trusting manufacturers . . . . . . . . . . . . . . . . .  82
      11.5.  Manufacturer Maintenance of trust anchors  . . . . . . .  83
-       11.5.1.  Compromise of Manufacturer IDevID signing keys . . .  84
+       11.5.1.  Compromise of Manufacturer IDevID signing keys . . .  85
        11.5.2.  Compromise of MASA signing keys  . . . . . . . . . .  85
        11.5.3.  Compromise of MASA web service . . . . . . . . . . .  87
-   12. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  87
+   12. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  88
    13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  88
      13.1.  Normative References . . . . . . . . . . . . . . . . . .  88
-     13.2.  Informative References . . . . . . . . . . . . . . . . .  91
+     13.2.  Informative References . . . . . . . . . . . . . . . . .  92
    Appendix A.  IPv4 and non-ANI operations  . . . . . . . . . . . .  95
      A.1.  IPv4 Link Local addresses . . . . . . . . . . . . . . . .  95
      A.2.  Use of DHCPv4 . . . . . . . . . . . . . . . . . . . . . .  95
@@ -218,16 +216,16 @@ Internet-Draft                    BRSKI                     October 2019
        D.1.3.  Registrar key pair  . . . . . . . . . . . . . . . . .  99
        D.1.4.  Pledge key pair . . . . . . . . . . . . . . . . . . . 101
      D.2.  Example process . . . . . . . . . . . . . . . . . . . . . 102
+       D.2.1.  Pledge to Registrar . . . . . . . . . . . . . . . . . 103
+       D.2.2.  Registrar to MASA . . . . . . . . . . . . . . . . . . 106
 
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 4]
+Pritikin, et al.         Expires April 19, 2020                 [Page 4]
 
 Internet-Draft                    BRSKI                     October 2019
 
 
-       D.2.1.  Pledge to Registrar . . . . . . . . . . . . . . . . . 103
-       D.2.2.  Registrar to MASA . . . . . . . . . . . . . . . . . . 106
        D.2.3.  MASA to Registrar . . . . . . . . . . . . . . . . . . 111
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 115
 
@@ -275,14 +273,14 @@ Internet-Draft                    BRSKI                     October 2019
    3.  Pledge authenticating the registrar: "What is this registrar's
        identity?"
 
+   4.  Pledge authorizing the registrar: "Should I join this network?"
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 5]
+
+Pritikin, et al.         Expires April 19, 2020                 [Page 5]
 
 Internet-Draft                    BRSKI                     October 2019
 
-
-   4.  Pledge authorizing the registrar: "Should I join this network?"
 
    This document details protocols and messages to answer the above
    questions.  It uses a TLS connection and an PKIX-shaped (X.509v3)
@@ -330,15 +328,16 @@ Internet-Draft                    BRSKI                     October 2019
 
    Another prior approach has been to try and minimize user actions
    during bootstrapping, but not eliminate all user-actions.  The
+   original EST protocol [RFC7030] does reduce user actions during
 
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 6]
+
+Pritikin, et al.         Expires April 19, 2020                 [Page 6]
 
 Internet-Draft                    BRSKI                     October 2019
 
 
-   original EST protocol [RFC7030] does reduce user actions during
    bootstrap but does not provide solutions for how the following
    protocol steps can be made autonomic (not involving user actions):
 
@@ -389,7 +388,8 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 7]
+
+Pritikin, et al.         Expires April 19, 2020                 [Page 7]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -445,7 +445,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 8]
+Pritikin, et al.         Expires April 19, 2020                 [Page 8]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -501,7 +501,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                 [Page 9]
+Pritikin, et al.         Expires April 19, 2020                 [Page 9]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -557,7 +557,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 10]
+Pritikin, et al.         Expires April 19, 2020                [Page 10]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -613,7 +613,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 11]
+Pritikin, et al.         Expires April 19, 2020                [Page 11]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -662,14 +662,14 @@ Internet-Draft                    BRSKI                     October 2019
 
    o  Service discovery.
 
-   The major intended beneficiary is that it possible to use the
-   credentials deployed by this protocol to secure the Autonomic Control
-   Plane (ACP) ([I-D.ietf-anima-autonomic-control-plane]).
+   The major intended benefit is that it possible to use the credentials
+   deployed by this protocol to secure the Autonomic Control Plane (ACP)
+   ([I-D.ietf-anima-autonomic-control-plane]).
 
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 12]
+Pritikin, et al.         Expires April 19, 2020                [Page 12]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -725,7 +725,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 13]
+Pritikin, et al.         Expires April 19, 2020                [Page 13]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -781,7 +781,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 14]
+Pritikin, et al.         Expires April 19, 2020                [Page 14]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -837,7 +837,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 15]
+Pritikin, et al.         Expires April 19, 2020                [Page 15]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -893,7 +893,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 16]
+Pritikin, et al.         Expires April 19, 2020                [Page 16]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -949,7 +949,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 17]
+Pritikin, et al.         Expires April 19, 2020                [Page 17]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -961,9 +961,10 @@ Internet-Draft                    BRSKI                     October 2019
    number" field of voucher or voucher-requests (see Section 3) and in
    local policies on registrar or MASA (see Section 5).
 
-   The serialNumber fields is defined in [RFC5280], and is a SHOULD
-   field in [IDevID].  IDevID certificates for use with this protocol
-   MUST include the "serialNumber" attribute with the device's unique
+   The serialNumber fields is defined in [RFC5280].  That specification
+   allows for the field to be omitted if there is a good technical
+   reason.  IDevID certificates for use with this protocol are REQUIRED
+   to include the "serialNumber" attribute with the device's unique
    serial number (from [IDevID] section 7.2.8, and [RFC5280] section
    4.1.2.4's list of standard attributes).
 
@@ -1000,15 +1001,17 @@ Internet-Draft                    BRSKI                     October 2019
    'authority', and 'path', The complete URI will typically be used in
    diagnostic or experimental situations.  Typically, (and in
    consideration to constrained systems), this SHOULD be reduced to only
-   the 'authority', in which case a scheme of "https://" ([RFC7230]
-   section 2.7.3) and 'path' of "/.well-known/est" is to be assumed.
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 18]
+
+Pritikin, et al.         Expires April 19, 2020                [Page 18]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   the 'authority', in which case a scheme of "https://" ([RFC7230]
+   section 2.7.3) and 'path' of "/.well-known/est" is to be assumed.
 
    The registrar can assume that only the 'authority' is present in the
    extension, if there are no slash ("/") characters in the extension.
@@ -1055,17 +1058,16 @@ Internet-Draft                    BRSKI                     October 2019
 
                       Figure 3: MASAURL ASN.1 Module
 
-   The choice of id-pe is based on guidance found in Section 4.2.2 of
-   [RFC5280], "These extensions may be used to direct applications to
 
 
 
-
-Pritikin, et al.         Expires April 18, 2020                [Page 19]
+Pritikin, et al.         Expires April 19, 2020                [Page 19]
 
 Internet-Draft                    BRSKI                     October 2019
 
 
+   The choice of id-pe is based on guidance found in Section 4.2.2 of
+   [RFC5280], "These extensions may be used to direct applications to
    on-line information about the issuer or the subject".  The MASA URL
    is precisely that: online information about the particular subject.
 
@@ -1115,9 +1117,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 20]
+Pritikin, et al.         Expires April 19, 2020                [Page 20]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1173,7 +1173,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 21]
+Pritikin, et al.         Expires April 19, 2020                [Page 21]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1229,7 +1229,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 22]
+Pritikin, et al.         Expires April 19, 2020                [Page 22]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1285,7 +1285,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 23]
+Pritikin, et al.         Expires April 19, 2020                [Page 23]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1341,7 +1341,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 24]
+Pritikin, et al.         Expires April 19, 2020                [Page 24]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1397,7 +1397,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 25]
+Pritikin, et al.         Expires April 19, 2020                [Page 25]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1453,7 +1453,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 26]
+Pritikin, et al.         Expires April 19, 2020                [Page 26]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1509,7 +1509,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 27]
+Pritikin, et al.         Expires April 19, 2020                [Page 27]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1565,7 +1565,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 28]
+Pritikin, et al.         Expires April 19, 2020                [Page 28]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1621,7 +1621,7 @@ module ietf-voucher-request {
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 29]
+Pritikin, et al.         Expires April 19, 2020                [Page 29]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1677,7 +1677,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 30]
+Pritikin, et al.         Expires April 19, 2020                [Page 30]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1733,7 +1733,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 31]
+Pritikin, et al.         Expires April 19, 2020                [Page 31]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1789,7 +1789,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 32]
+Pritikin, et al.         Expires April 19, 2020                [Page 32]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1845,7 +1845,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 33]
+Pritikin, et al.         Expires April 19, 2020                [Page 33]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1857,13 +1857,13 @@ Internet-Draft                    BRSKI                     October 2019
    through the proxy using the bootstrapping protocol defined in
    Section 5.
 
-   While the GRASP M_FLOOD mechanism is passive for the pledge, the
-   optional other methods (mDNS, and IPv4 methods) are active.  The
-   pledge SHOULD run those methods in parallel with listening to for the
-   M_FLOOD.  The active methods SHOULD back-off by doubling to a maximum
-   of one hour to avoid overloading the network with discovery attempts.
-   Detection of change of physical link status (Ethernet carrier for
-   instance) SHOULD reset the back off timers.
+   While the GRASP M_FLOOD mechanism is passive for the pledge, the non-
+   normative other methods (mDNS, and IPv4 methods) described Appendix B
+   are active.  The pledge SHOULD run those methods in parallel with
+   listening to for the M_FLOOD.  The active methods SHOULD back-off by
+   doubling to a maximum of one hour to avoid overloading the network
+   with discovery attempts.  Detection of change of physical link status
+   (Ethernet carrier for instance) SHOULD reset the back off timers.
 
    The pledge could discover more than one proxy on a given physical
    interface.  The pledge can have a multitude of physical interfaces as
@@ -1901,7 +1901,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 34]
+Pritikin, et al.         Expires April 19, 2020                [Page 34]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -1957,7 +1957,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 35]
+Pritikin, et al.         Expires April 19, 2020                [Page 35]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2013,7 +2013,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 36]
+Pritikin, et al.         Expires April 19, 2020                [Page 36]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2069,7 +2069,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 37]
+Pritikin, et al.         Expires April 19, 2020                [Page 37]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2125,7 +2125,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 38]
+Pritikin, et al.         Expires April 19, 2020                [Page 38]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2181,7 +2181,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 39]
+Pritikin, et al.         Expires April 19, 2020                [Page 39]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2198,7 +2198,7 @@ Internet-Draft                    BRSKI                     October 2019
    A pledge that can not maintain as many connections as there are
    eligible proxies will need to rotate among the various choices,
    terminating connections that do not appear to be making progress.  If
-   no connection is making progess after 5 seconds then the pledge
+   no connection is making progress after 5 seconds then the pledge
    SHOULD drop the oldest connection and go on to a different proxy: the
    proxy that has been communicated with least recently.  If there were
    no other proxies discovered, the pledge MAY continue to wait, as long
@@ -2217,7 +2217,7 @@ Internet-Draft                    BRSKI                     October 2019
    application/voucher-cms+json  [RFC8366] defines a "YANG-defined JSON
       document that has been signed using a CMS structure", and the
       voucher-request described in Section 3 is created in the same way.
-      The media type is the same as defined in [RFC8366].  and is also
+      The media type is the same as defined in [RFC8366].  This is also
       used for the pledge voucher-request.  The pledge MUST sign the
       request using the Section 2.3 credential.
 
@@ -2237,7 +2237,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 40]
+Pritikin, et al.         Expires April 19, 2020                [Page 40]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2264,8 +2264,9 @@ Internet-Draft                    BRSKI                     October 2019
 
    The registrar confirms that the assertion is 'proximity' and that
    pinned 'proximity-registrar-cert' is the Registrar's certificate.  If
-   this validation fails, then there a On-Path Attacker (MITM), and the
-   connection MUST be closed after the returning an HTTP 401 error code.
+   this validation fails, then there is an On-Path Attacker (MITM), and
+   the connection MUST be closed after the returning an HTTP 401 error
+   code.
 
 5.3.  Registrar Authorization of Pledge
 
@@ -2289,15 +2290,15 @@ Internet-Draft                    BRSKI                     October 2019
 
    If validation fails the registrar SHOULD respond with the HTTP 404
    error code.  If the voucher-request is in an unknown format, then an
-   HTTP 406 error code is more appropriate.  A situation that could be
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 41]
+Pritikin, et al.         Expires April 19, 2020                [Page 41]
 
 Internet-Draft                    BRSKI                     October 2019
 
 
+   HTTP 406 error code is more appropriate.  A situation that could be
    resolved with administrative action (such as adding a vendor to a
    whitelist) MAY be responded with an 403 HTTP error code.
 
@@ -2341,19 +2342,23 @@ Internet-Draft                    BRSKI                     October 2019
    administrative notifications or logs in the advent of unexpected HTTP
    401 (Unauthorized) responses from the MASA.
 
+
+
+
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 42]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
 5.4.1.  MASA authentication of customer Registrar
 
    Providing per-customer options requires that the customer's registrar
    be uniquely identified.  This can be done by any stateless method
    that HTTPS supports: such as with HTTP Basic or Digest authentication
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 42]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
    (that is using a password), but the use of TLS Client Certificate
    authentication is RECOMMENDED.
 
@@ -2379,11 +2384,11 @@ Internet-Draft                    BRSKI                     October 2019
    Registrars without any authentication, or can accept them on a blind
    Trust-on-First-Use basis as described in Section 7.4.2.
 
-   This document does not make a specific recommendation as there is
-   likely different tradeoffs in different environments and product
-   values.  Even within the ANIMA ACP applicability, there is a
-   significant difference between supply chain logistics for $100 CPE
-   devices and $100,000 core routers.
+   This document does not make a specific recommendation on how the MASA
+   authenticates the Registrar as there is likely different tradeoffs in
+   different environments and product values.  Even within the ANIMA ACP
+   applicability, there is a significant difference between supply chain
+   logistics for $100 CPE devices and $100,000 core routers.
 
 5.5.  Registrar Requests Voucher from MASA
 
@@ -2397,18 +2402,17 @@ Internet-Draft                    BRSKI                     October 2019
    The voucher media type "application/voucher-cms+json" is defined in
    [RFC8366] and is also used for the registrar voucher-request.  It is
    a JSON document that has been signed using a CMS structure.  The
-   registrar MUST sign the registrar voucher-request.  The entire
-   registrar certificate chain, up to and including the Domain CA, MUST
-   be included in the CMS structure.
 
 
 
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 43]
+Pritikin, et al.         Expires April 19, 2020                [Page 43]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   registrar MUST sign the registrar voucher-request.  The entire
+   registrar certificate chain, up to and including the Domain CA, MUST
+   be included in the CMS structure.
 
    MASA impementations SHOULD anticipate future media types but of
    course will simply fail the request if those types are not yet known.
@@ -2454,17 +2458,18 @@ Internet-Draft                    BRSKI                     October 2019
    Doing so allows the registrar to request a voucher when the pledge is
    offline, or when the registrar anticipates not being able to connect
    to the MASA while the pledge is being deployed.  Some use cases
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 44]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    require the registrar to learn the appropriate IDevID SerialNumber
    field and appropriate 'Accept header field' values from the physical
    device labeling or from the sales channel (out-of-scope for this
    document).
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 44]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    All other fields MAY be omitted in the registrar voucher-request.
 
@@ -2508,19 +2513,17 @@ Internet-Draft                    BRSKI                     October 2019
    If this domain CA is unknown to the MASA, then it is to be considered
    a temporary trust anchor for the rest of the steps in this section.
    The intention is not to authenticate the message as having come from
-   a fully validated origin, but to establish the consistency of the
-   domain PKI.
 
 
 
 
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 45]
+Pritikin, et al.         Expires April 19, 2020                [Page 45]
 
 Internet-Draft                    BRSKI                     October 2019
 
+
+   a fully validated origin, but to establish the consistency of the
+   domain PKI.
 
 5.5.3.  MASA checking of voucher request signature
 
@@ -2570,10 +2573,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 46]
+Pritikin, et al.         Expires April 19, 2020                [Page 46]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2629,7 +2629,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 47]
+Pritikin, et al.         Expires April 19, 2020                [Page 47]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2685,7 +2685,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 48]
+Pritikin, et al.         Expires April 19, 2020                [Page 48]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2741,7 +2741,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 49]
+Pritikin, et al.         Expires April 19, 2020                [Page 49]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2797,7 +2797,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 50]
+Pritikin, et al.         Expires April 19, 2020                [Page 50]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2853,7 +2853,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 51]
+Pritikin, et al.         Expires April 19, 2020                [Page 51]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2869,7 +2869,7 @@ Internet-Draft                    BRSKI                     October 2019
 
    The posted data media type: application/json
 
-   The client HTTP POSTs the following to the server at the URI ".well-
+   The client sends an HTTP POST to the server at the URI ".well-
    known/est/voucher_status".
 
    The format and semantics described below are for version 1.  A
@@ -2909,7 +2909,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 52]
+Pritikin, et al.         Expires April 19, 2020                [Page 52]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -2965,7 +2965,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 53]
+Pritikin, et al.         Expires April 19, 2020                [Page 53]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3021,7 +3021,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 54]
+Pritikin, et al.         Expires April 19, 2020                [Page 54]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3077,7 +3077,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 55]
+Pritikin, et al.         Expires April 19, 2020                [Page 55]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3133,7 +3133,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 56]
+Pritikin, et al.         Expires April 19, 2020                [Page 56]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3189,7 +3189,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 57]
+Pritikin, et al.         Expires April 19, 2020                [Page 57]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3245,7 +3245,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 58]
+Pritikin, et al.         Expires April 19, 2020                [Page 58]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3301,7 +3301,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 59]
+Pritikin, et al.         Expires April 19, 2020                [Page 59]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3357,7 +3357,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 60]
+Pritikin, et al.         Expires April 19, 2020                [Page 60]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3413,7 +3413,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 61]
+Pritikin, et al.         Expires April 19, 2020                [Page 61]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -3436,9 +3436,16 @@ Internet-Draft                    BRSKI                     October 2019
 7.  Reduced security operational modes
 
    A common requirement of bootstrapping is to support less secure
-   operational modes for support specific use cases.  The following
-   sections detail specific ways that the pledge, registrar and MASA can
-   be configured to run in a less secure mode for the indicated reasons.
+   operational modes for support specific use cases.  This section
+   suggests a range of mechanisms that would alter the security
+   assurance of BRSKI to accommodate alternative deployment
+   architectures and mitigate lifecycle management issues identified in
+   Section 10.  They are presented here as informative (non-normative)
+   design guidance for future standardization activities.  Section 9
+   provides standardization applicability statements for the ANIMA ACP.
+   Other users would be expected that subsets of these mechanisms could
+   be profiled with an accompanying applicability statements similar to
+   the one described in Section 9.
 
    This section is considered non-normative in the generality of the
    protocol.  Use of the suggested mechanisms here MUST be detailed in
@@ -3459,20 +3466,20 @@ Internet-Draft                    BRSKI                     October 2019
 
    Pledge:  The pledge could be compromised and providing an attack
       vector for malware.  The entity is trusted to only imprint using
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 62]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
       secure methods described in this document.  Additional endpoint
       assessment techniques are RECOMMENDED but are out-of-scope of this
       document.
 
    Join Proxy:  Provides proxy functionalities but is not involved in
       security considerations.
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 62]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    Registrar:  When interacting with a MASA a registrar makes all
       decisions.  For Ownership Audit Vouchers (see [RFC8366]) the
@@ -3493,7 +3500,7 @@ Internet-Draft                    BRSKI                     October 2019
 
    The following are a list of alternatives behaviours that the pledge
    can be programmed to implement.  These behaviours are not mutually
-   exclusive, nor are they dependant upon other.  Some of these methods
+   exclusive, nor are they dependent upon other.  Some of these methods
    enable offline and emergency (touch based) deployment use cases.
    Normative language is used as these behaviours are referenced in
    later sections in a normative fashion.
@@ -3515,6 +3522,14 @@ Internet-Draft                    BRSKI                     October 2019
        validation one time.  For example if a physical button is
        depressed during the bootstrapping operation.  This can be useful
        if the manufacturer service is unavailable.  This behavior SHOULD
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 63]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
        be available via local configuration or physical presence methods
        (such as use of a serial/craft console) to ensure new entities
        can always be deployed even when autonomic methods fail.  This
@@ -3522,14 +3537,6 @@ Internet-Draft                    BRSKI                     October 2019
 
    4.  A craft/serial console could include a command such as "est-
        enroll [2001:db8:0:1]:443" that begins the EST process from the
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 63]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
        point after the voucher is validated.  This process SHOULD
        include server certificate verification using an on-screen
        fingerprint.
@@ -3571,6 +3578,14 @@ Internet-Draft                    BRSKI                     October 2019
        new entities can communicate with a registrar (presumably via a
        physically secured perimeter.)
 
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 64]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    3.  A registrar MAY submit a nonceless voucher-requests to the MASA
        service (by not including a nonce in the voucher-request.)  The
        resulting vouchers can then be stored by the registrar until they
@@ -3578,13 +3593,6 @@ Internet-Draft                    BRSKI                     October 2019
        cases where the target network is protected by an air gap and
        therefore cannot contact the MASA service during pledge
        deployment.
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 64]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    4.  A registrar MAY ignore unrecognized nonceless log entries.  This
        could occur when used equipment is purchased with a valid history
@@ -3607,10 +3615,10 @@ Internet-Draft                    BRSKI                     October 2019
 
 7.4.1.  Issuing Nonceless vouchers
 
-   A MASA has the option of not including a nonce is in the voucher,
-   and/or not requiring one to be present in the voucher-request.  This
-   results in distribution of a voucher that never expires and in effect
-   makes the Domain an always trusted entity to the pledge during any
+   A MASA has the option of not including a nonce in the voucher, and/or
+   not requiring one to be present in the voucher-request.  This results
+   in distribution of a voucher that never expires and in effect makes
+   the Domain an always trusted entity to the pledge during any
    subsequent bootstrapping attempts.  That a nonceless voucher was
    issued is captured in the log information so that the registrar can
    make appropriate security decisions when a pledge joins the Domain.
@@ -3625,6 +3633,15 @@ Internet-Draft                    BRSKI                     October 2019
    A more typical case for a nonceless voucher is for use with offline
    onboarding scenarios where it is not possible to pass a fresh
    voucher-request to the MASA.  The use of a long-lived voucher also
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 65]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    eliminates concern about the availability of the MASA many years in
    the future.  Thus many nonceless vouchers will have no expiry dates.
 
@@ -3634,13 +3651,6 @@ Internet-Draft                    BRSKI                     October 2019
    authorized to provide this functionality to this customer.  The MASA
    is RECOMMENDED to use this functionality only in concert with an
    enhanced level of ownership tracking (out-of-scope.)
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 65]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    If the pledge device is known to have a real-time-clock that is set
    from the factory, use of a voucher validity period is RECOMMENDED.
@@ -3664,7 +3674,7 @@ Internet-Draft                    BRSKI                     October 2019
    identity may wish to annotate the origin of the connection by IP
    address or netblock, and restrict future use of that identity from
    other locations.  A MASA that does this SHOULD take care to not
-   create nuissance situations for itself when a customer has multiple
+   create nuisance situations for itself when a customer has multiple
    registrars, or uses outgoing IPv4 NAT44 connections that change
    frequently.
 
@@ -3681,6 +3691,13 @@ Internet-Draft                    BRSKI                     October 2019
    which keys have voucher validation authority from among those signed
    by the domain CA.  This is future work.
 
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 66]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    With the above change to the list of anchors, vouchers can be issued
    by an alternate MASA.  This could be the previous owner (the seller),
    or some other trusted third party who is mediating the sale.  If it
@@ -3690,14 +3707,6 @@ Internet-Draft                    BRSKI                     October 2019
    could however use a mechanism described in Section 7.2 to take
    control of the device after receiving it physically.  This would
    permit the third party to act as the MASA for future onboarding
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 66]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
    actions.  As the IDevID certificate probably can not be replaced, the
    new owner's Registrar would have to support an override of the MASA
    URL.
@@ -3720,9 +3729,9 @@ Internet-Draft                    BRSKI                     October 2019
    device and this may be unacceptable to some owners.
 
    As a third option, the manufacturer's trust anchors could be entirely
-   overwitten with local trust anchors.  A factory default would never
+   overwritten with local trust anchors.  A factory default would never
    restore those anchors.  This option comes with a lot of power, but
-   also a lot of responsability: if the new anchors are lost the
+   also a lot of responsibility: if the new anchors are lost the
    manufacturer may be unable to help.
 
 8.  IANA Considerations
@@ -3738,21 +3747,19 @@ Internet-Draft                    BRSKI                     October 2019
       Registrant Contact: The ANIMA WG of the IETF.
       XML: N/A, the requested URI is an XML namespace.
 
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 67]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
 8.2.  Well-known EST registration
 
    This document extends the definitions of "est" (so far defined via
    RFC7030) in the "https://www.iana.org/assignments/well-known-uris/
    well-known-uris.xhtml" registry.  IANA is asked to change the
    registration of "est" to include RFC7030 and this document.
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 67]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
 8.3.  PKIX Registry
 
@@ -3787,6 +3794,22 @@ Internet-Draft                    BRSKI                     October 2019
 
    IANA is requested to register the following Service Names:
 
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 68]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    Service Name: brski-proxy
    Transport Protocol(s): tcp
    Assignee: IESG <iesg@ietf.org>.
@@ -3802,13 +3825,6 @@ Internet-Draft                    BRSKI                     October 2019
    Description: The Bootstrapping Remote Secure Key
                 Infrastructures Registrar
    Reference: [This document]
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 68]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
 8.6.  MUD File Extension for the MASA
 
@@ -3843,6 +3859,13 @@ Internet-Draft                    BRSKI                     October 2019
    ACP will create and maintain will not reflect the topology until all
    devices participate in the ACP).
 
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 69]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    In the ACP, the Join Proxy is found to be proximal because
    communication between the pledge and the join proxy is exclusively on
    IPv6 Link-Local addresses.  The proximity of the Join Proxy to the
@@ -3857,14 +3880,6 @@ Internet-Draft                    BRSKI                     October 2019
    can do things like install, configure and operate the Registrar
    function.  The operator makes purchasing decisions and is aware of
    what manufacturers it expects to see on its network.
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 69]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    Such an operator is also capable of performing bootstrapping of a
    device using a serial-console (craft console).  The zero-touch
@@ -3898,9 +3913,17 @@ Internet-Draft                    BRSKI                     October 2019
    The requirements in this section are presented using BCP14
    ([RFC2119], [RFC8174]) language.  These do not represent new
    normative statements, just a review of a few such things in one place
-   by role.  They also apply specifically to the the ANIMA ACP use case.
-   Other use cases likely have similar, but MAY not have identical
-   requirements.
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 70]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
+   by role.  They also apply specifically to the ANIMA ACP use case.
+   Other use cases likely have similar, but MAY different requirements.
 
 9.1.1.  MASA Operational Requirements
 
@@ -3912,15 +3935,6 @@ Internet-Draft                    BRSKI                     October 2019
    sign [RFC8366] format voucher artifacts.  The public key,
    certificate, or certificate chain MUST be built in to the device as
    part of the firmware.
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 70]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    It is RECOMMENDED that the manufacturer arrange for this signing key
    (or keys) to be escrowed according to typical software source code
@@ -3946,7 +3960,7 @@ Internet-Draft                    BRSKI                     October 2019
    This EST server will typically reside with the Network Operations
    Center for the organization.
 
-   The domain owner MAY operate an internal certifiate authority (CA)
+   The domain owner MAY operate an internal certificate authority (CA)
    that is seperate from the EST server, or it MAY combine all
    activities into a single device.  The determination of the
    architecture depends upon the scale and resiliency requirements of
@@ -3956,6 +3970,14 @@ Internet-Draft                    BRSKI                     October 2019
 
    In order to recognize which devices and which manufacturers are
    welcome on the domain owner's network, the domain owner SHOULD
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 71]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    maintain a white list of manufacturers.  This MAY extend to
    integration with purchasing departments to know the serial numbers of
    devices.
@@ -3967,16 +3989,6 @@ Internet-Draft                    BRSKI                     October 2019
    used to renew the domain certificates (LDevIDs) which are deployed to
    devices.  These servers MAY be the same as the JRC, or MAY be a
    distinct set of devices, as approriate for resiliency.
-
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 71]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    The organization MUST take appropriate precautions against loss of
    access to the certificate authority private key.  Hardware security
@@ -3990,13 +4002,17 @@ Internet-Draft                    BRSKI                     October 2019
    Device MUST come with (unique, per-device) IDevID certificates that
    include their serial numbers, and the MASA URL extension.
 
-   Devices are expected to Join Proxies using GRASP, and then connect to
-   the JRC using the protocol described in this document.
+   Devices are expected to find Join Proxies using GRASP, and then
+   connect to the JRC using the protocol described in this document.
 
    Once a domain owner has been validated with the voucher, devices are
    expected to enroll into the domain using EST.  Devices are then
    expected to form ACPs using IPsec over IPv6 Link-Local addresses as
    described in [I-D.ietf-anima-autonomic-control-plane]
+
+   Once a device has been enrolled it SHOULD listen for the address of
+   the JRC using GRASP, and it SHOULD enable itself as a Join Proxy, and
+   announce itself on all links/interfaces using GRASP DULL.
 
    Devices are expected to renew their certificates before they expire.
 
@@ -4010,6 +4026,14 @@ Internet-Draft                    BRSKI                     October 2019
    Denial of Service attacks (Section 11.1), and this may involve
    collecting additional (unspecified here) information.  This could
    provide sufficient information for the MASA service to build a
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 72]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    detailed understanding the devices that have been provisioned within
    a domain.
 
@@ -4026,14 +4050,6 @@ Internet-Draft                    BRSKI                     October 2019
    significant level of privacy while maintaining the security
    characteristics provided by Registrar based audit log inspection.
 
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 72]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
 10.2.  What BRSKI-EST reveals
 
    During the provisional phase of the BRSKI-EST connection between the
@@ -4048,15 +4064,15 @@ Internet-Draft                    BRSKI                     October 2019
    but as the connection is provisional, an on-path attacker (MTIM) can
    see the certificates.  This includes not just malicious attackers,
    but also Registrars that are visible to the Pledge, but which are not
-   part of the the intended domain.
+   part of the intended domain.
 
-   The certificate of the Registrar is rather arbtirary from the point
+   The certificate of the Registrar is rather arbitrary from the point
    of view of the BRSKI protocol.  As no [RFC6125] validations are
    expected to be done, the contents could be easily pseudonymized.  Any
    device that can see a join proxy would be able to connect to the
    Registrar and learn the identity of the network in question.  Even if
    the contents of the certificate are pseudonymized, it would be
-   possible to coorelate different connections in different locations
+   possible to correlate different connections in different locations
    belong to the same entity.  This is unlikely to present a significant
    privacy concern to ANIMA ACP uses of BRSKI, but may be a concern to
    other users of BRSKI.
@@ -4065,6 +4081,14 @@ Internet-Draft                    BRSKI                     October 2019
    Proxy that performed a MITM attack on the provisional TLS connection.
    Such an attacker would be able to reveal the identity of the Pledge
    to third parties if it chose to so.
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 73]
+
+Internet-Draft                    BRSKI                     October 2019
+
 
    Research into a mechanism to do multi-step, multi-party authenticated
    key agreement, incorporating some kind of zero-knowledge proof would
@@ -4080,15 +4104,6 @@ Internet-Draft                    BRSKI                     October 2019
    MASA connection standardizes what has been deemed by some as a
    sinister mechanism for corporate oversight of individuals.
    ([livingwithIoT] and [IoTstrangeThings] for a small sample).
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 73]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    As the Autonomic Control Plane (ACP) usage of BRSKI is not targeted
    at individual usage of IoT devices, but rather at the Enterprise and
@@ -4122,6 +4137,15 @@ Internet-Draft                    BRSKI                     October 2019
 
    o  the identity of the device being enrolled.  This is revealed by
       transmission of a signed voucher-request containing the serial-
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 74]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
       number.  The manufacturer can usually link the serial number to a
       device model.
 
@@ -4138,14 +4162,6 @@ Internet-Draft                    BRSKI                     October 2019
       Enterprises, the IP address provides very clear geolocation of the
       owner.  No amount of IP address privacy extensions ([RFC4941]) can
       do anything about this, as a simple whois lookup likely identifies
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 74]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
       the ISP or Enterprise from the upper bits anyway.  A passive
       attacker who observes the connection definitely may conclude that
       the given enterprise/ISP is a customer of the particular equipment
@@ -4160,8 +4176,8 @@ Internet-Draft                    BRSKI                     October 2019
    The manufacturer knows the IP address of the Registrar, but it can
    not see the IP address of the device itself.  The manufacturer can
    not track the device to a detailed physical or network location, only
-   to the the location of the Registrar itself.  That is likely to be at
-   the Enterprise or ISPs headquarters.
+   to the location of the Registrar itself.  That is likely to be at the
+   Enterprise or ISPs headquarters.
 
    The above situation is to be distinguished from a residential/
    individual person who registers a device from a manufacturer.
@@ -4178,6 +4194,14 @@ Internet-Draft                    BRSKI                     October 2019
    identifying the enterprise/ISP involved.  TLS 1.3 is better in this
    regard, but an active attacker can still discover the parties
    involved by performing a Man-In-The-Middle-Attack on the first
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 75]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    attempt (breaking/killing it with a TCP RST), and then letting
    subsequent connection pass through.
 
@@ -4194,13 +4218,6 @@ Internet-Draft                    BRSKI                     October 2019
    reasons to keep the marketing site (which is often subject to
    frequent re-designs, outsourcing, etc.) separate from the MASA, which
    may need to operate reliably for decades.
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 75]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
 10.4.  Manufacturers and Used or Stolen Equipment
 
@@ -4231,8 +4248,16 @@ Internet-Draft                    BRSKI                     October 2019
    4.  There is a fourth case, if the manufacturer is providing
        protection against stolen devices.  The manufacturer then has a
        responsibility to protect the legitimate owner against fraudulent
-       claims that the equipment was stolen.  In the absense of such
+       claims that the equipment was stolen.  In the absence of such
        manufacturer protection, such a claim would cause the
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 76]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
        manufacturer to refuse to issue a new voucher.  Should the device
        go through a deep factory reset (for instance, replacement of a
        damaged main board component, the device would not bootstrap.
@@ -4250,13 +4275,6 @@ Internet-Draft                    BRSKI                     October 2019
    vouchers would find it rather ineffective as the terms would only be
    enforced when the device is enrolled, and this is not (to repeat), a
    daily or even monthly occurrence.
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 76]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
 10.5.  Manufacturers and Grey market equipment
 
@@ -4286,6 +4304,16 @@ Internet-Draft                    BRSKI                     October 2019
    been made), and receive either a new updated firmware, or a license
    key that will activate the correct firmware.
 
+
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 77]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    BRSKI permits the above process to automated (in an autonomic
    fashion), and therefore perhaps encourages this kind of
    differentiation by reducing the cost of doing it.
@@ -4302,23 +4330,15 @@ Internet-Draft                    BRSKI                     October 2019
 
    The most obvious mitigation is not to buy the product.  Pick
    manufacturers that are up-front about their policies, who do not
-   change them gratuitiously.
+   change them gratuitously.
 
-   Section Section 7.4.3 describes some ways in which a manufacturer
-   could provide a mechanism to manage the trust anchors and built-in
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 77]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
+   Section 7.4.3 describes some ways in which a manufacturer could
+   provide a mechanism to manage the trust anchors and built-in
    certificates (IDevID) as an extension.  There are a variety of
    mechanism, and some may take a substantial amount of work to get
    exactly correct.  These mechanisms do not change the flow of the
    protocol described here, but rather allow the starting trust
-   assumptions to be changed.  This is an an area for future
+   assumptions to be changed.  This is an area for future
    standardization work.
 
    Replacement of the voucher validation anchors (usually pointing to
@@ -4343,6 +4363,13 @@ Internet-Draft                    BRSKI                     October 2019
    requirements of some deployments might consider this a standard
    operating practice.
 
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 78]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    As discussed at the end of Section 5.8.1, new work could be done to
    use a distributed consensus technology for the audit log.  This would
    permit the audit log to continue to be useful, even when there is a
@@ -4362,13 +4389,6 @@ Internet-Draft                    BRSKI                     October 2019
    to exist that deal with the creation of vouchers in much the same way
    that many companies have outsourced email, advertising and janitorial
    services.
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 78]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    Further, it is expected that as part of any service agreement that
    the manufacturer would arrange to escrow appropriate private keys
@@ -4398,6 +4418,14 @@ Internet-Draft                    BRSKI                     October 2019
    requirements that the client MUST support a client authentication
    model have been reduced in Section 7 to a statement that the
    registrar "MAY" choose to accept devices that fail cryptographic
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 79]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    authentication.  This reflects current (poor) practices in shipping
    devices without a cryptographic identity that are NOT RECOMMENDED.
 
@@ -4414,17 +4442,6 @@ Internet-Draft                    BRSKI                     October 2019
    voucher to accept based on internal logic.  The registrars verifying
    log information will see multiple entries and take this into account
    for their analytics purposes.
-
-
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 79]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
 11.1.  Denial of Service (DoS) against MASA
 
@@ -4457,6 +4474,14 @@ Internet-Draft                    BRSKI                     October 2019
    of a valid manufacturer customer, even without validating ownership
    of specific pledge devices, helps to mitigate this.  Pledge
    signatures on the pledge voucher-request, as forwarded by the
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 80]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    registrar in the prior-signed-voucher-request field of the registrar
    voucher-request, significantly reduce this risk by ensuring the MASA
    can confirm proximity between the pledge and the registrar making the
@@ -4470,17 +4495,10 @@ Internet-Draft                    BRSKI                     October 2019
    the protocols in this document does.
 
    In particular implementations should pay attention to the advance in
-   [RFC4086] section 3, particulary section 3.4.  Devices which are
+   [RFC4086] section 3, particularly section 3.4.  Devices which are
    reset to factory default in order to perform a second bootstrap with
    a new owner MUST NOT seed their random number generators in the same
    way.
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 80]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
 11.3.  Freshness in Voucher-Requests
 
@@ -4513,6 +4531,13 @@ Internet-Draft                    BRSKI                     October 2019
    information, or because the MASA is in audit-log only mode), then a
    voucher linking the pledge to the registrar Rm is issued.
 
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 81]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    Such a voucher, when passed back to the pledge, would link the pledge
    to registrar Rm, and would permit the pledge to end the provisional
    state.  It now trusts Rm and, if it has any security vulnerabilities
@@ -4530,14 +4555,6 @@ Internet-Draft                    BRSKI                     October 2019
    Reducing the possibility of this is why the pledge is mandated to
    generate a strong random or pseudo-random number nonce.
 
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 81]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
    Additionally, in order to successfully use the resulting voucher the
    Rm would have to attack the pledge and return it to a bootstrapping
    enabled state.  This would require wiping the pledge of current
@@ -4550,8 +4567,8 @@ Internet-Draft                    BRSKI                     October 2019
       by pledges.
 
    o  Retrieval and examination of MASA log information upon the
-      occurence of any such unexpected events.  Rm will be listed in the
-      logs along with nonce information for analysis.
+      occurrence of any such unexpected events.  Rm will be listed in
+      the logs along with nonce information for analysis.
 
 11.4.  Trusting manufacturers
 
@@ -4569,6 +4586,14 @@ Internet-Draft                    BRSKI                     October 2019
 
    BRSKI does not, however, fundamentally change the trust model from
    domain owner to manufacturer.  Assuming that the pledge used its
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 82]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    IDevID with RFC7030 EST and BRSKI, the domain (registrar) still needs
    to trust the manufacturer.
 
@@ -4585,14 +4610,6 @@ Internet-Draft                    BRSKI                     October 2019
       validated using something like the WebPKI, there remains the
       possibility that the name is a look alike: e.g, dem0.example. vs
       demO.example.
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 82]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    o  scanning the trust anchor from a QR code that came with the
       packaging (this is really a manual TOFU mechanism)
@@ -4624,6 +4641,15 @@ Internet-Draft                    BRSKI                     October 2019
    that can be validated for the lifetime that the device could be
    onboarded.  Whether this onboarding lifetime is less than the device
    lifetime depends upon how the device is used.  An inventory of
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 83]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    devices kept in a warehouse as spares might not be onboarded for many
    decades.
 
@@ -4641,15 +4667,6 @@ Internet-Draft                    BRSKI                     October 2019
    different factories, or on different days, or any other consideration
    could have different trust anchors built in, and the record of which
    batch the device is in would be recorded in the asset database.  The
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 83]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
    manufacturer would then know which anchor to sign an artifact
    against.
 
@@ -4666,7 +4683,7 @@ Internet-Draft                    BRSKI                     October 2019
    was in a warehouse), updates to trust anchors would also be done at
    the same time.
 
-   The set of standard operating proceedures for maintaining high value
+   The set of standard operating procedures for maintaining high value
    private keys is well documented.  For instance, the WebPKI provides a
    number of options for audits at [cabforumaudit], and the DNSSEC root
    operations are well documented at [dnssecroot].
@@ -4681,6 +4698,13 @@ Internet-Draft                    BRSKI                     October 2019
    examines the situation where MASA web server itself is under attacker
    control, but that the MASA signing key itself is safe in a not-
    directly connected hardware module.
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 84]
+
+Internet-Draft                    BRSKI                     October 2019
+
 
 11.5.1.  Compromise of Manufacturer IDevID signing keys
 
@@ -4697,14 +4721,6 @@ Internet-Draft                    BRSKI                     October 2019
    In addition to creating fake devices, the attacker may also be able
    to issue revocations for existing certificates if the IDevID
    certificate process relies upon CRL lists that are distributed.
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 84]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    There does not otherwise seem to be any risk from this compromise to
    devices which are already deployed, or which are sitting locally in
@@ -4738,6 +4754,14 @@ Internet-Draft                    BRSKI                     October 2019
    factory reset.  This might be accomplished through social engineering
    of data center staff.  Most locked cages have ventilation holes, and
    possibly a long "paperclip" could reach through to depress a factory
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 85]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    reset button.  Once such a piece of ISP equipment has been
    compromised, it could be used to compromise equipment that was
    connected to (through long haul links even), assuming that those
@@ -4753,15 +4777,6 @@ Internet-Draft                    BRSKI                     October 2019
    eliminated, but the need to do a factory reset is not.  Physical
    possession of the device is not required as above, provided that
    there is some way to force a factory reset.  With some consumers
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 85]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
    devices with low overall implementation quality, the end users might
    be familiar with needing to reset the device regularly.
 
@@ -4795,6 +4810,14 @@ Internet-Draft                    BRSKI                     October 2019
    If the onboarding process includes attestations about firmware
    versions, then through that process the operator would be advised to
    upgrade the firmware before going into production.  Unfortunately,
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 86]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    this does not help against situations where the attacker operates
    their own Registrar (as listed above).
 
@@ -4810,14 +4833,6 @@ Internet-Draft                    BRSKI                     October 2019
    short-lived vouchers.  That key needs significantly better
    protection.  If both keys come from a common trust-anchor (the
    manufacturer's CA), then a compromise of the manufacturer's CA would
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 86]
-
-Internet-Draft                    BRSKI                     October 2019
-
-
    compromise both keys.  Such a compromise of the manufacturer's CA
    likely compromises all keys outlined in this section.
 
@@ -4849,6 +4864,16 @@ Internet-Draft                    BRSKI                     October 2019
    warehouses (a potentially ruinously expensive process), a
    manufacturer might be reluctant to admit this possibility.
 
+
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 87]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
 12.  Acknowledgements
 
    We would like to thank the various reviewers for their input, in
@@ -4863,16 +4888,6 @@ Internet-Draft                    BRSKI                     October 2019
 
    This document started it's life as a two-page idea from Steinthor
    Bjarnason.
-
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 87]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    In addition, significant review comments were received by many IESG
    members, including Adam Roach, Alexey Melnikov, Alissa Cooper,
@@ -4907,6 +4922,14 @@ Internet-Draft                    BRSKI                     October 2019
               December 2009, <http://standards.ieee.org/findstds/
               standard/802.1AR-2009.html>.
 
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 88]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    [REST]     Fielding, R., "Architectural Styles and the Design of
               Network-based Software Architectures", 2000,
               <http://www.ics.uci.edu/~fielding/pubs/dissertation/
@@ -4920,15 +4943,6 @@ Internet-Draft                    BRSKI                     October 2019
    [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the Internet:
               Timestamps", RFC 3339, DOI 10.17487/RFC3339, July 2002,
               <https://www.rfc-editor.org/info/rfc3339>.
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 88]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    [RFC3688]  Mealling, M., "The IETF XML Registry", BCP 81, RFC 3688,
               DOI 10.17487/RFC3688, January 2004, <https://www.rfc-
@@ -4963,6 +4977,15 @@ Internet-Draft                    BRSKI                     October 2019
               DOI 10.17487/RFC4862, September 2007, <https://www.rfc-
               editor.org/info/rfc4862>.
 
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 89]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    [RFC4941]  Narten, T., Draves, R., and S. Krishnan, "Privacy
               Extensions for Stateless Address Autoconfiguration in
               IPv6", RFC 4941, DOI 10.17487/RFC4941, September 2007,
@@ -4977,14 +5000,6 @@ Internet-Draft                    BRSKI                     October 2019
               Infrastructure Certificate and Certificate Revocation List
               (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
               <https://www.rfc-editor.org/info/rfc5280>.
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 89]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    [RFC5386]  Williams, N. and M. Richardson, "Better-Than-Nothing
               Security: An Unauthenticated Mode of IPsec", RFC 5386,
@@ -5019,6 +5034,14 @@ Internet-Draft                    BRSKI                     October 2019
               Discovery", RFC 6763, DOI 10.17487/RFC6763, February 2013,
               <https://www.rfc-editor.org/info/rfc6763>.
 
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 90]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    [RFC7030]  Pritikin, M., Ed., Yee, P., Ed., and D. Harkins, Ed.,
               "Enrollment over Secure Transport", RFC 7030,
               DOI 10.17487/RFC7030, October 2013, <https://www.rfc-
@@ -5033,14 +5056,6 @@ Internet-Draft                    BRSKI                     October 2019
               Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
               DOI 10.17487/RFC7231, June 2014, <https://www.rfc-
               editor.org/info/rfc7231>.
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 90]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    [RFC7469]  Evans, C., Palmer, C., and R. Sleevi, "Public Key Pinning
               Extension for HTTP", RFC 7469, DOI 10.17487/RFC7469, April
@@ -5074,6 +5089,15 @@ Internet-Draft                    BRSKI                     October 2019
               RFC 8368, DOI 10.17487/RFC8368, May 2018,
               <https://www.rfc-editor.org/info/rfc8368>.
 
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 91]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    [RFC8446]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
               Version 1.3", RFC 8446, DOI 10.17487/RFC8446, August 2018,
               <https://www.rfc-editor.org/info/rfc8446>.
@@ -5088,15 +5112,6 @@ Internet-Draft                    BRSKI                     October 2019
 
    [brewski]  Internet, , "Urban Dictionary: Brewski", October 2019,
               <https://www.urbandictionary.com/define.php?term=brewski>.
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 91]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    [Dingledine2004]
               Dingledine, R., Mathewson, N., and P. Syverson, "Tor: the
@@ -5132,6 +5147,13 @@ Internet-Draft                    BRSKI                     October 2019
               anima-stable-connectivity-10 (work in progress), February
               2018.
 
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 92]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    [I-D.ietf-netconf-keystore]
               Watsen, K., "A YANG Data Model for a Keystore", draft-
               ietf-netconf-keystore-12 (work in progress), July 2019.
@@ -5144,15 +5166,6 @@ Internet-Draft                    BRSKI                     October 2019
    [imprinting]
               Wikipedia, , "Wikipedia article: Imprinting", July 2015,
               <https://en.wikipedia.org/wiki/Imprinting_(psychology)>.
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 92]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    [IoTstrangeThings]
               Internet, , "IoT of toys stranger than fiction:
@@ -5186,6 +5199,17 @@ Internet-Draft                    BRSKI                     October 2019
               DOI 10.17487/RFC5785, April 2010, <https://www.rfc-
               editor.org/info/rfc5785>.
 
+
+
+
+
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 93]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    [RFC6960]  Santesson, S., Myers, M., Ankney, R., Malpani, A.,
               Galperin, S., and C. Adams, "X.509 Internet Public Key
               Infrastructure Online Certificate Status Protocol - OCSP",
@@ -5201,14 +5225,6 @@ Internet-Draft                    BRSKI                     October 2019
               Constrained-Node Networks", RFC 7228,
               DOI 10.17487/RFC7228, May 2014, <https://www.rfc-
               editor.org/info/rfc7228>.
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 93]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    [RFC7258]  Farrell, S. and H. Tschofenig, "Pervasive Monitoring Is an
               Attack", BCP 188, RFC 7258, DOI 10.17487/RFC7258, May
@@ -5243,6 +5259,13 @@ Internet-Draft                    BRSKI                     October 2019
               2019, <https://en.wikipedia.org/wiki/
               Slowloris_(computer_security)/>.
 
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 94]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    [softwareescrow]
               Wikipedia, , "Wikipedia article: Software Escrow", October
               2019, <https://en.wikipedia.org/wiki/Source_code_escrow>.
@@ -5256,15 +5279,6 @@ Internet-Draft                    BRSKI                     October 2019
    [TR069]    Broadband Forum, , "TR-69: CPE WAN Management Protocol",
               February 2018, <https://www.broadband-forum.org/standards-
               and-software/technical-specifications/tr-069-files-tools>.
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 94]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    [W3C.WD-capability-urls-20140218]
               Tennison, J., "Good Practices for Capability URLs", World
@@ -5301,6 +5315,13 @@ Appendix B.  mDNS / DNSSD proxy discovery options
    DNS-based Service Discovery [RFC6763] over Multicast DNS [RFC6762] to
    discover the proxy at "_brski-proxy._tcp.local.".
 
+
+
+Pritikin, et al.         Expires April 19, 2020                [Page 95]
+
+Internet-Draft                    BRSKI                     October 2019
+
+
    Proxy discovery of the registrar (Section 4.3) MAY be performed with
    DNS-based Service Discovery over Multicast DNS to discover registrars
    by searching for the service "_brski-registrar._tcp.local.".
@@ -5312,15 +5333,6 @@ Appendix B.  mDNS / DNSSD proxy discovery options
    avoid announcing their presence via mDNS broadcasts and instead
    silently join a network by watching for periodic unsolicited
    broadcast responses.
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 95]
-
-Internet-Draft                    BRSKI                     October 2019
-
 
    Discovery of registrar MAY also be performed with DNS-based service
    discovery by searching for the service "_brski-
@@ -5361,19 +5373,7 @@ Appendix C.  MUD Extension
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Pritikin, et al.         Expires April 18, 2020                [Page 96]
+Pritikin, et al.         Expires April 19, 2020                [Page 96]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5429,7 +5429,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 97]
+Pritikin, et al.         Expires April 19, 2020                [Page 97]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5485,7 +5485,7 @@ D.1.2.  Manufacturer key pair for IDevID signatures
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 98]
+Pritikin, et al.         Expires April 19, 2020                [Page 98]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5541,7 +5541,7 @@ D.1.3.  Registrar key pair
 
 
 
-Pritikin, et al.         Expires April 18, 2020                [Page 99]
+Pritikin, et al.         Expires April 19, 2020                [Page 99]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5597,7 +5597,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 100]
+Pritikin, et al.         Expires April 19, 2020               [Page 100]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5653,7 +5653,7 @@ D.1.4.  Pledge key pair
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 101]
+Pritikin, et al.         Expires April 19, 2020               [Page 101]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5709,7 +5709,7 @@ D.2.  Example process
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 102]
+Pritikin, et al.         Expires April 19, 2020               [Page 102]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5765,7 +5765,7 @@ D.2.1.  Pledge to Registrar
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 103]
+Pritikin, et al.         Expires April 19, 2020               [Page 103]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5821,7 +5821,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 104]
+Pritikin, et al.         Expires April 19, 2020               [Page 104]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5877,7 +5877,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 105]
+Pritikin, et al.         Expires April 19, 2020               [Page 105]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5933,7 +5933,7 @@ D.2.2.  Registrar to MASA
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 106]
+Pritikin, et al.         Expires April 19, 2020               [Page 106]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -5989,7 +5989,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 107]
+Pritikin, et al.         Expires April 19, 2020               [Page 107]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -6045,7 +6045,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 108]
+Pritikin, et al.         Expires April 19, 2020               [Page 108]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -6101,7 +6101,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 109]
+Pritikin, et al.         Expires April 19, 2020               [Page 109]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -6157,7 +6157,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 110]
+Pritikin, et al.         Expires April 19, 2020               [Page 110]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -6213,7 +6213,7 @@ D.2.3.  MASA to Registrar
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 111]
+Pritikin, et al.         Expires April 19, 2020               [Page 111]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -6269,7 +6269,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 112]
+Pritikin, et al.         Expires April 19, 2020               [Page 112]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -6325,7 +6325,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 113]
+Pritikin, et al.         Expires April 19, 2020               [Page 113]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -6381,7 +6381,7 @@ Internet-Draft                    BRSKI                     October 2019
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 114]
+Pritikin, et al.         Expires April 19, 2020               [Page 114]
 
 Internet-Draft                    BRSKI                     October 2019
 
@@ -6437,4 +6437,4 @@ Authors' Addresses
 
 
 
-Pritikin, et al.         Expires April 18, 2020               [Page 115]
+Pritikin, et al.         Expires April 19, 2020               [Page 115]
