@@ -3217,13 +3217,13 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
           <t>
             A MASA has the option of not including a nonce in the voucher,
             and/or not requiring one to be present in the voucher-request. This
-            results in distribution of a voucher that never expires and in
-            effect makes the Domain an always trusted entity to the pledge
-            during any subsequent bootstrapping attempts. That a nonceless
+            results in distribution of a voucher that may never expire and in
+            effect makes the specified Domain an always trusted entity to the
+            pledge during any subsequent bootstrapping attempts. That a nonceless
             voucher was issued
             is captured in the log information so that the registrar
             can make appropriate security decisions when a pledge joins the
-            Domain. This is useful to support use cases where registrars might
+            Domain. Nonceless vouchers are useful to support use cases where registrars might
             not be online during actual device deployment.
           </t>
           <t>
@@ -3249,7 +3249,7 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
             customer.
             The MASA is RECOMMENDED to use this
             functionality only in concert with an enhanced level of ownership
-            tracking (out-of-scope.)
+            tracking, the details of which are out of scope for this document.
           </t>
           <t>
             If the pledge device is known to have
@@ -3273,7 +3273,9 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
             information is reported.) The MASA SHOULD verify the
             'prior-signed-voucher-request' information for pledges that support
             that functionality. This provides a proof-of-proximity
-            check that reduces the need for ownership verification.
+            check that reduces the need for ownership verification.  The
+            proof-of-proximity comes from the assumption that the pledge and
+            Join Proxy are on the same link-local connection.
           </t>
           <t>
             A MASA that practices Trust-on-First-Use (TOFU) for Registrar
@@ -3288,6 +3290,11 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
 
         <section anchor="masasecurityreduction_newanchor"
                  title="Updating or extending voucher trust anchors">
+          <t>
+            This section deals with the problem of a MASA that is no longer
+            available due to a failed business, or the situation where a
+            MASA is uncooperative to a secondary sale.
+          </t>
           <t>
             A manufacturer could offer a management mechanism that allows the
             list of voucher verification trust anchors to be extended.
@@ -3332,7 +3339,7 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
             manufacturer state, including removing any added trust anchors,
             and the second (more commonly used) one would just restore the
             configuration back to a known default without erasing trust
-            anchors.  This weaker factor reset might leave valuable
+            anchors.  This weaker factory reset might leave valuable
             credentials on the device and this may be unacceptable to
             some owners.
           </t>
@@ -3460,7 +3467,7 @@ Reference: [This document]
       <t>
         The autonomic control plane (ACP) that is bootstrapped by
         the BRSKI protocol is typically used in medium to large Internet
-        Service Provider organizations. Equivalent enterprises that has
+        Service Provider organizations. Equivalent enterprises that have
         significant layer-3 router connectivity also will find significant
         benefit, particularly if the Enterprise has many sites.
         (A network consisting of primarily layer-2
@@ -3477,7 +3484,7 @@ Reference: [This document]
         ULAs are not routable over the Internet, so as long as the Join
         Proxy is operating correctly the proximity asssertion is satisfied.
         Other uses of BRSKI will need make similar analysis if they
-        use proximity.
+        use proximity assertions.
       </t>
       <t>
         As specified in the ANIMA charter, this work "..focuses on
@@ -3751,7 +3758,7 @@ Reference: [This document]
             While the contents of the signed part of the pledge voucher request
             can not be changed, they are not encrypted at the registrar.
             The ability to audit the messages by the owner of the network
-            a mechanism to defend against exfiltration of data by a nefarious
+            is a mechanism to defend against exfiltration of data by a nefarious
             pledge. Both are, to re-iterate, encrypted by TLS while in transit.
           </t>
           <t>
@@ -3800,8 +3807,8 @@ Reference: [This document]
             The manufacturer knows the IP address of the Registrar, but it
             can not see the IP address of the device itself.  The
             manufacturer can not track the device to a detailed physical
-            or network location, only to the location of the Registrar
-            itself.  That is likely to be at the Enterprise or ISPs headquarters.
+            or network location, only to the location of the Registrar.
+            That is likely to be at the Enterprise or ISPs headquarters.
           </t>
           <t>
             The above situation is to be distinguished from a
@@ -3810,7 +3817,7 @@ Reference: [This document]
             and their registrar is likely on the same network as the device.
             A manufacturer that sells switching/routing products to enterprises
             should hardly be surprised if additional purchases
-            switching/routing products are purchased.
+            switching/routing products are made.
             Deviations from a historical trend or
             an establish baseline would, however, be notable.
           </t>
@@ -4009,9 +4016,10 @@ Reference: [This document]
           <t>
             A common concern has been that a manufacturer could go out of
             business, leaving owners of devices unable to get new vouchers
-            for existing products.  Said products might be previously deployed
-            and need to be re-initialized, purchased used, or just kept in a
-            warehouse as long-term spares.
+            for existing products.  Said products might have been previously
+            deployed, but need to be re-initialized, they might have been
+            purchased used, or they might have kept in a warehouse as
+            long-term spares.
           </t>
           <t>
             The MASA was named the Manufacturer *Authorized* Signing
@@ -4118,7 +4126,7 @@ Reference: [This document]
           Devices which are
           reset to factory default in order to perform a second bootstrap
           with a new owner MUST NOT seed their random number generators
-          in the same way.
+          in the same way across bootstraps.
         </t>
       </section>
       <section title="Freshness in Voucher-Requests">
