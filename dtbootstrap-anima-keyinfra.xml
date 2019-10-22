@@ -2026,7 +2026,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
 
     </section>
 
-      <section anchor="RequestVoucherFromMASA" title="Registrar Requests Voucher from MASA">
+    <section anchor="RequestVoucherFromMASA" title="Registrar Requests Voucher from MASA">
         <t>
           When a registrar receives a pledge voucher-request it in turn
           submits a registrar voucher-request to the MASA service via an
@@ -2516,7 +2516,8 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
         </t>
 
         <t>The Status field indicates if the voucher was acceptable.
-        Boolean values are acceptable.
+        Boolean values are acceptable, where "true" indicates the voucher was
+        accesptable.
         </t>
 
         <t>
@@ -2538,12 +2539,12 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
         </t>
 
         <t>
-          The version, and status fields MUST be present.
+          The version and status fields MUST be present.
           The Reason field SHOULD be present whenever the status field
-          is negative.  The Reason-Context field is optional.
+          is false.  The Reason-Context field is optional.
         </t>
         <t>
-          The keys to this JSON hash are case-insensitive.
+          The keys to this JSON object are case-sensitive and MUST be lowercase.
           <xref target="telemetryexample" /> shows an example JSON.
         </t>
 
@@ -2658,7 +2659,7 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
           </t>
 
           <t>
-            The domainID is a binary value calculated SubjectKeyIdentifier
+            The domainID is a binary SubjectKeyIdentifier value calculated
             according to <xref target="domainID" />.
             It is encoded once in base64 in order to be transported in this
             JSON container.
@@ -2741,7 +2742,7 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
             If the "pinned-domain-cert" certificate
             includes the SubjectKeyIdentifier (<xref target="RFC5280">Section
             4.2.1.2</xref>), then it is to be used as the domainID.  If not,
-            then it is the SPKI Fingerprint as described in
+            the SPKI Fingerprint as described in
             <xref target="RFC7469" /> section 2.4 is to be used.
             This value needs to be calculated by both MASA (to
             populate the audit-log), and by the Registrar (to recognize
@@ -2822,9 +2823,8 @@ INSERT_TEXT_FROM_FILE example-auditlog.json END
           </list></t>
           <t>
             A relatively simple policy is to white list known (internal or
-            external) domainIDs.
-            To require all vouchers to have a nonce.
-            Alternatively to require that all nonceless vouchers be from a
+            external) domainIDs, and require all vouchers to have a nonce.
+            An alternative is to require that all nonceless vouchers be from a
             subset (e.g. only internal) of domainIDs.
             If the policy is violated a simple action is to revoke any
             locally issued credentials for the pledge in question or to
@@ -3017,8 +3017,8 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
       <t>
         When used within BRSKI, the original RFC7030 EST endpoints remain
         Base64 encoded, but the new BRSKI end points which send and receive binary
-        artifacts (specifically, /requestvoucher) are binary. That is, no
-        encoding is used.
+        artifacts (specifically, "/.well-known/est/requestvoucher") are
+        binary. That is, no encoding is used.
       </t>
       <t>
         In the BRSKI context, the EST "Content-Transfer-Encoding" header
@@ -3096,9 +3096,9 @@ INSERT_TEXT_FROM_FILE example-enrollstatus.json END
 
       <section anchor="pledgeReductions" title="Pledge security reductions">
         <t>
-          The following are a list of alternatives behaviours that the
+          The following is a list of alternative behaviours that the
           pledge can be programmed to implement.  These behaviours are not
-          mutually exclusive, nor are they dependent upon other.
+          mutually exclusive, nor are they dependent upon each other.
           Some of these methods enable offline and emergency (touch based)
           deployment use cases.  Normative language is used as these behaviours
           are referenced in later sections in a normative fashion.
