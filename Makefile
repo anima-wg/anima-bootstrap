@@ -55,6 +55,8 @@ examples/%.json: examples/%.pkcs
 
 ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
 	cat ${DRAFT}.xml | ./insert-figures > ALL-${DRAFT}.xml
+	xml2rfc --v2v3 ALL-${DRAFT}.xml
+	mv ALL-${DRAFT}.v2v3.xml ALL-${DRAFT}.xml
 
 %.txt: ALL-%.xml
 	./validate-json >.json-errors || cat .json-errors
