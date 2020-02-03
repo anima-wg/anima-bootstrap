@@ -2,7 +2,7 @@
 # base files that come from debug traces of production code.
 # the private keys provided here are not in production!!
 
-EXAMPLE1=00-D0-E5-02-00-2D
+EXAMPLE1=00-D0-E5-F2-00-02
 ALL=idevid_${EXAMPLE1}.asn1.txt idevid_${EXAMPLE1}.txt
 ALL+=vr_${EXAMPLE1}.pkcs vr_${EXAMPLE1}.asn1.txt vr_${EXAMPLE1}.json
 ALL+=parboiled_vr_${EXAMPLE1}.pkcs parboiled_vr_${EXAMPLE1}.asn1.txt parboiled_vr_${EXAMPLE1}.json
@@ -28,11 +28,11 @@ idevid_${EXAMPLE1}.txt: idevid_${EXAMPLE1}.crt
 	openssl cms -verify -noverify -in $? -inform pem | fold -60 > $@
 
 update:
-	cp /ssw/projects/pandora/reach/spec/files/product/00-D0-E5-02-00-2D/device.crt idevid_${EXAMPLE1}.crt
-	cp /ssw/projects/pandora/reach/spec/files/product/00-D0-E5-02-00-2D/key.pem idevid_${EXAMPLE1}.key
-	cp /ssw/projects/pandora/reach/spec/files/product/00-D0-E5-02-00-2D/voucher_00-d0-e5-02-00-2d.b64 voucher_00-D0-E5-02-00-2D.b64
-	cp /ssw/projects/pandora/reach/spec/files/product/00-D0-E5-02-00-2D/vr_00-d0-e5-02-00-2d.b64 vr_00-D0-E5-02-00-2D.b64
-	cp /ssw/projects/pandora/reach/spec/files/product/00-D0-E5-02-00-2D/parboiled_vr_00-d0-e5-02-00-2d.b64 parboiled_vr_00-D0-E5-02-00-2D.b64
+	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/device.crt idevid_${EXAMPLE1}.crt
+	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/key.pem idevid_${EXAMPLE1}.key
+	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/voucher_${EXAMPLE1}.b64 voucher_${EXAMPLE1}.b64
+	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/vr_${EXAMPLE1}.b64 vr_${EXAMPLE1}.b64
+	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/parboiled_vr_${EXAMPLE1}.b64 parboiled_vr_${EXAMPLE1}.b64
 
 
 
