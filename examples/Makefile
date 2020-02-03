@@ -30,8 +30,8 @@ idevid_${EXAMPLE1}.txt: idevid_${EXAMPLE1}.crt
 update:
 	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/device.crt idevid_${EXAMPLE1}.crt
 	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/key.pem idevid_${EXAMPLE1}.key
-	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/voucher_${EXAMPLE1}.b64 voucher_${EXAMPLE1}.b64
-	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/vr_${EXAMPLE1}.b64 vr_${EXAMPLE1}.b64
+	base64 /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/voucher_${EXAMPLE1}.pkcs >voucher_${EXAMPLE1}.b64
+	base64 /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/vr_${EXAMPLE1}.pkcs >vr_${EXAMPLE1}.b64
 	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/parboiled_vr_${EXAMPLE1}.b64 parboiled_vr_${EXAMPLE1}.b64
 
 

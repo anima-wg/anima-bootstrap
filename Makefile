@@ -9,22 +9,23 @@ EXTRA_FILES+=ietf-voucher-request-tree.txt
 EXTRA_FILES+=${VRDATE} ${MUDDATE}
 EXTRA_FILES+=time-sequence-diagram.txt
 EXTRA_FILES+=component-diagram.txt
+EXAMPLE1=00-D0-E5-F2-00-02
 EXTRA_FILES+=examples/jrc_prime256v1.txt
 EXTRA_FILES+=examples/jrc_prime256v1.crt
 EXTRA_FILES+=examples/jrc_prime256v1.key
-EXTRA_FILES+=examples/vr_00-D0-E5-02-00-2D.pkcs
-EXTRA_FILES+=examples/vr_00-D0-E5-02-00-2D.asn1.txt
-EXTRA_FILES+=examples/vr_00-D0-E5-02-00-2D.json
-EXTRA_FILES+=examples/parboiled_vr_00-D0-E5-02-00-2D.pkcs
-EXTRA_FILES+=examples/parboiled_vr_00-D0-E5-02-00-2D.asn1.txt
-EXTRA_FILES+=examples/parboiled_vr_00-D0-E5-02-00-2D.json
-EXTRA_FILES+=examples/voucher_00-D0-E5-02-00-2D.pkcs
-EXTRA_FILES+=examples/voucher_00-D0-E5-02-00-2D.asn1.txt
-EXTRA_FILES+=examples/voucher_00-D0-E5-02-00-2D.json
-EXTRA_FILES+=examples/idevid_00-D0-E5-02-00-2D.crt
-EXTRA_FILES+=examples/idevid_00-D0-E5-02-00-2D.txt
-EXTRA_FILES+=examples/idevid_00-D0-E5-02-00-2D.asn1.txt
-EXTRA_FILES+=examples/idevid_00-D0-E5-02-00-2D.key
+EXTRA_FILES+=examples/vr_${EXAMPLE1}.b64
+EXTRA_FILES+=examples/vr_${EXAMPLE1}.asn1.txt
+EXTRA_FILES+=examples/vr_${EXAMPLE1}.json
+EXTRA_FILES+=examples/parboiled_vr_${EXAMPLE1}.b64
+EXTRA_FILES+=examples/parboiled_vr_${EXAMPLE1}.asn1.txt
+EXTRA_FILES+=examples/parboiled_vr_${EXAMPLE1}.json
+EXTRA_FILES+=examples/voucher_${EXAMPLE1}.b64
+EXTRA_FILES+=examples/voucher_${EXAMPLE1}.asn1.txt
+EXTRA_FILES+=examples/voucher_${EXAMPLE1}.json
+EXTRA_FILES+=examples/idevid_${EXAMPLE1}.crt
+EXTRA_FILES+=examples/idevid_${EXAMPLE1}.txt
+EXTRA_FILES+=examples/idevid_${EXAMPLE1}.asn1.txt
+EXTRA_FILES+=examples/idevid_${EXAMPLE1}.key
 
 ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt ${DRAFT}.html
 	cp ${DRAFT}.txt ${DRAFT}-${VERSION}.txt
@@ -44,13 +45,13 @@ ${MUDDATE}: ietf-mud-brski-masaurl-extension.yang
 examples/%.txt: examples/%.crt
 	openssl x509 -noout -text -in $? | fold -w 60 >$@
 
-examples/%.asn1.txt: examples/%.pkcs
+examples/%.asn1.txt: examples/%.b64
 	base64 --decode <$? |	openssl asn1parse -inform der | fold -w 60 >$@
 
 examples/%.asn1.txt: examples/%.crt
 	openssl asn1parse -in $? | fold -w 60 >$@
 
-examples/%.json: examples/%.pkcs
+examples/%.json: examples/%.b64
 	base64 --decode <$? | openssl cms -verify -inform der -nosigs -noverify | fold -w 60 >$@
 
 ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
