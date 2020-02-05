@@ -7,6 +7,7 @@ ALL=idevid_${EXAMPLE1}.asn1.txt idevid_${EXAMPLE1}.txt
 ALL+=vr_${EXAMPLE1}.pkcs vr_${EXAMPLE1}.asn1.txt vr_${EXAMPLE1}.json
 ALL+=parboiled_vr_${EXAMPLE1}.pkcs parboiled_vr_${EXAMPLE1}.asn1.txt parboiled_vr_${EXAMPLE1}.json
 ALL+=voucher_${EXAMPLE1}.pkcs voucher_${EXAMPLE1}.asn1.txt voucher_${EXAMPLE1}.json
+ALL+=jrc_prime256v1.txt
 
 all: ${ALL}
 
@@ -17,6 +18,9 @@ idevid_${EXAMPLE1}.asn1.txt: idevid_${EXAMPLE1}.crt
 
 idevid_${EXAMPLE1}.txt: idevid_${EXAMPLE1}.crt
 	openssl x509 -noout -text -in idevid_${EXAMPLE1}.crt >idevid_${EXAMPLE1}.txt
+
+jrc_prime256v1.txt: jrc_prime256v1.crt
+	openssl x509 -noout -text -in jrc_prime256v1.crt     > jrc_prime256v1.txt
 
 %.pkcs: %.b64
 	base64 -d <$? | openssl cms -cmsout -inform der -in - -outform pem -out $@ -text
@@ -33,7 +37,8 @@ update:
 	base64 /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/voucher_${EXAMPLE1}.pkcs >voucher_${EXAMPLE1}.b64
 	base64 /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/vr_${EXAMPLE1}.pkcs >vr_${EXAMPLE1}.b64
 	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/parboiled_vr_${EXAMPLE1}.b64 parboiled_vr_${EXAMPLE1}.b64
-
+	cp /ssw/projects/pandora/fountain/spec/files/cert/jrc_prime256v1.crt .
+	cp /ssw/projects/pandora/fountain/spec/files/cert/jrc_prime256v1.key .
 
 
 
