@@ -57,6 +57,7 @@ examples/%.json: examples/%.b64
 ALL-${DRAFT}.xml: ${DRAFT}.xml ${EXTRA_FILES}
 	cat ${DRAFT}.xml | ./insert-figures > ALL-${DRAFT}.xml
 	xml2rfc --v2v3 ALL-${DRAFT}.xml
+	cp ALL-${DRAFT}.xml ALL-${DRAFT}.v2.xml
 	mv ALL-${DRAFT}.v2v3.xml ALL-${DRAFT}.xml
 
 %.txt: ALL-%.xml

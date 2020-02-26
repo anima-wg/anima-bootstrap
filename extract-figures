@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+
+use File::Basename;
+
+my $extracting = 0;
+my $filename = "";
+my $prefix = "";
+
+while(<>) {
+  if(/(.*)\<CODE BEGINS\> file \"(.*)\"/) {
+      $prefix = $1;
+      $extracting = 1;
+      $filename = $2;
+      my $basename = basename($filename);
+      open(FILENAME, ">" . $basename) || die "file ${basename}: $!\n";
+      print "Processing $basename\n";
+      next;
+  }
+  next unless $extracting;
+  # drop empty lines
+  next if(/^\s+$/);
+  # drop lines that say "Internet-Draft"
+  next if(/^Internet-Draft/);
+  # drop lines that say "Expires"
+  next if(/Expires/ && /Page/);
+
+  if(/\<CODE ENDS\>/) {
+      $extracting = 0;
+      close(FILENAME);
+      next;
+  }
+  # remove leading data
+  s/^${prefix}//;
+  print FILENAME;
+}
+
+

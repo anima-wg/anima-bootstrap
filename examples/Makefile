@@ -3,25 +3,20 @@
 # the private keys provided here are not in production!!
 
 EXAMPLE1=00-D0-E5-F2-00-02
-ALL=idevid_${EXAMPLE1}.asn1.txt idevid_${EXAMPLE1}.txt
+ALL=idevid_${EXAMPLE1}.asn1.txt idevid_${EXAMPLE1}.cert
 ALL+=vr_${EXAMPLE1}.pkcs vr_${EXAMPLE1}.asn1.txt vr_${EXAMPLE1}.json
 ALL+=parboiled_vr_${EXAMPLE1}.pkcs parboiled_vr_${EXAMPLE1}.asn1.txt parboiled_vr_${EXAMPLE1}.json
 ALL+=voucher_${EXAMPLE1}.pkcs voucher_${EXAMPLE1}.asn1.txt voucher_${EXAMPLE1}.json
-ALL+=vendor.txt masa.txt
-ALL+=ownerca_secp384r1.txt jrc_prime256v1.txt
+ALL+=vendor.cert masa.cert
+ALL+=ownerca_secp384r1.cert jrc_prime256v1.cert
 
 all: ${ALL}
 
-# product 00-D0-E5-02-00-20 comes from https://github.com/AnimaGUS-minerva/reach.git/spec/files/product
-# it was produced on the MASA called masa.honeydukes.sandelman.ca.
 idevid_${EXAMPLE1}.asn1.txt: idevid_${EXAMPLE1}.crt
-	openssl asn1parse -in idevid_${EXAMPLE1}.crt >idevid_${EXAMPLE1}.asn1.txt
+	openssl asn1parse -in idevid_${EXAMPLE1}.crt | fold -60 >idevid_${EXAMPLE1}.asn1.txt
 
-%.txt: %.crt
+%.cert: %.crt
 	openssl x509 -text -in $< >$@
-
-jrc_prime256v1.txt: jrc_prime256v1.crt
-	openssl x509 -noout -text -in jrc_prime256v1.crt     > jrc_prime256v1.txt
 
 %.pkcs: %.b64
 	base64 -d <$? | openssl cms -cmsout -inform der -in - -outform pem -out $@ -text
