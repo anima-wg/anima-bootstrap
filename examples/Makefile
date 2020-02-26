@@ -7,7 +7,8 @@ ALL=idevid_${EXAMPLE1}.asn1.txt idevid_${EXAMPLE1}.txt
 ALL+=vr_${EXAMPLE1}.pkcs vr_${EXAMPLE1}.asn1.txt vr_${EXAMPLE1}.json
 ALL+=parboiled_vr_${EXAMPLE1}.pkcs parboiled_vr_${EXAMPLE1}.asn1.txt parboiled_vr_${EXAMPLE1}.json
 ALL+=voucher_${EXAMPLE1}.pkcs voucher_${EXAMPLE1}.asn1.txt voucher_${EXAMPLE1}.json
-ALL+=jrc_prime256v1.txt
+ALL+=vendor.txt masa.txt
+ALL+=ownerca_secp384r1.txt jrc_prime256v1.txt
 
 all: ${ALL}
 
@@ -16,8 +17,8 @@ all: ${ALL}
 idevid_${EXAMPLE1}.asn1.txt: idevid_${EXAMPLE1}.crt
 	openssl asn1parse -in idevid_${EXAMPLE1}.crt >idevid_${EXAMPLE1}.asn1.txt
 
-idevid_${EXAMPLE1}.txt: idevid_${EXAMPLE1}.crt
-	openssl x509 -noout -text -in idevid_${EXAMPLE1}.crt >idevid_${EXAMPLE1}.txt
+%.txt: %.crt
+	openssl x509 -text -in $< >$@
 
 jrc_prime256v1.txt: jrc_prime256v1.crt
 	openssl x509 -noout -text -in jrc_prime256v1.crt     > jrc_prime256v1.txt
@@ -31,14 +32,25 @@ jrc_prime256v1.txt: jrc_prime256v1.crt
 %.json: %.pkcs
 	openssl cms -verify -noverify -in $? -inform pem | fold -60 > $@
 
+HIGHWAYDIR=/ssw/projects/pandora/highway/spec/files/cert/
+FOUNTAINDIR=/ssw/projects/pandora/fountain/spec/files/cert/
+ORIGINDIR=/ssw/projects/pandora/reach/spec/files/product/00-D0-E5-F2-00-02
 update:
-	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/device.crt idevid_${EXAMPLE1}.crt
-	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/key.pem idevid_${EXAMPLE1}.key
-	base64 /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/voucher_${EXAMPLE1}.pkcs >voucher_${EXAMPLE1}.b64
-	base64 /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/vr_${EXAMPLE1}.pkcs >vr_${EXAMPLE1}.b64
-	cp /ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}/parboiled_vr_${EXAMPLE1}.b64 parboiled_vr_${EXAMPLE1}.b64
-	cp /ssw/projects/pandora/fountain/spec/files/cert/jrc_prime256v1.crt .
-	cp /ssw/projects/pandora/fountain/spec/files/cert/jrc_prime256v1.key .
+	cp ${HIGHWAYDIR}/vendor_secp384r1.crt vendor.crt
+	cp ${HIGHWAYDIR}/vendor_secp384r1.key vendor.key
+	cp ${HIGHWAYDIR}/masa_prime256v1.crt  masa.crt
+	cp ${HIGHWAYDIR}/masa_prime256v1.key  masa.key
+	cp ${FOUNTAINDIR}/ownerca_secp384r1.crt .
+	cp ${FOUNTAINDIR}/ownerca_secp384r1.key .
+	cp ${FOUNTAINDIR}/jrc_prime256v1.crt .
+	cp ${FOUNTAINDIR}/jrc_prime256v1.key .
+	cp ${ORIGINDIR}/device.crt idevid_${EXAMPLE1}.crt
+	cp ${ORIGINDIR}/key.pem idevid_${EXAMPLE1}.key
+	base64 ${ORIGINDIR}/voucher_${EXAMPLE1}.pkcs    >voucher_${EXAMPLE1}.b64
+	base64 ${ORIGINDIR}/vr_${EXAMPLE1}.pkcs         >vr_${EXAMPLE1}.b64
+	cp ${ORIGINDIR}/parboiled_vr_${EXAMPLE1}.b64    .
+	./checkit
+
 
 
 
