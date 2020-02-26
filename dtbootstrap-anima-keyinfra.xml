@@ -4827,6 +4827,26 @@ Reference: [This document]
         </front>
       </reference>
 
+      <reference anchor="minerva"
+                 target="https://minerva.sandelman.ca/">
+        <front>
+          <title>Minerva reference implementation for BRSKI</title>
+
+          <author fullname="Michael Richardson" initials="M." surname="Richardsdon"></author>
+          <date year="2020" />
+        </front>
+      </reference>
+
+      <reference anchor="minervagithub"
+                 target="https://github.com/ANIMAgus-minerva">
+        <front>
+          <title>GITHUB hosting of Minerva reference code</title>
+
+          <author fullname="Michael Richardson" initials="M." surname="Richardsdon"></author>
+          <date year="2020" />
+        </front>
+      </reference>
+
 <reference anchor="Dingledine2004" target="https://spec.torproject.org/tor-spec">
   <front>
     <title>Tor: the second-generation onion router</title>
@@ -4937,6 +4957,20 @@ Reference: [This document]
         the public and private keys for an example MASA and registrar are
         first listed.
       </t>
+      <t>
+        The keys come from an open source reference implementation of BRSKI,
+        called "Minerva" <xref target="minerva" />.
+        It is available on github <xref target="minervagithub" />.
+        The keys presented here are used in the unit and integration tests.
+        The MASA code is called "highway", the Registrar code is called
+        "fountain", and the example client is called "reach".
+      </t>
+      <t>
+        The public key components of each are presented as both base64
+        certificates, as well as being decoded by openssl's x509
+        utility so that the extensions can be seen.  This was version
+        1.1.1c of the <xref target="openssl" /> library and utility.
+      </t>
       <section title="Keys involved">
         <t>
           The Manufacturer has a Certificate Authority that signs the
@@ -4945,44 +4979,53 @@ Reference: [This document]
           distributed to the devices at manufacturing time so that vouchers
           can be validated.
         </t>
+        <section title="Manufacturer Certificate Authority for IDevID signatures">
+          <t>
+            This private key is Certificate Authority that signs IDevID certificates:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/vendor.key END
+            </figure>
+            This public key validates IDevID certificates:
+            <figure>
+              INSERT_TEXT_FROM_FILE examples/vendor.txt END
+            </figure>
+          </t>
+        </section>
         <section title="MASA key pair for voucher signatures">
           <t>
             This private key signs vouchers:
             <figure>
-              INSERT_TEXT_FROM_FILE examples/masa_secp384r1.key END
+              INSERT_TEXT_FROM_FILE examples/masa.key END
             </figure>
-            This public key validates vouchers:
+            This public key validates vouchers, and it has been signed by the
+            CA above:
             <figure>
-              INSERT_TEXT_FROM_FILE examples/masa_secp384r1.crt END
+              INSERT_TEXT_FROM_FILE examples/masa.txt END
             </figure>
           </t>
         </section>
-        <section title="Manufacturer key pair for IDevID signatures">
+        <section title="Registrar Certificate Authority">
           <t>
-            This private key signs IDevID certificates:
+            This Certificate Authority enrolls the pledge once it is
+            authorized, and it also signs the Registrar's certificate.
             <figure>
-              INSERT_TEXT_FROM_FILE examples/masa_secp384r1.key END
+              INSERT_TEXT_FROM_FILE examples/ownerca_secp384r1.key END
             </figure>
-            This public key validates IDevID certificates:
+            The public key is indicated in a pledge voucher-request to show proximity.
             <figure>
-              INSERT_TEXT_FROM_FILE examples/masa_secp384r1.crt END
+              INSERT_TEXT_FROM_FILE examples/ownerca_secp384r1.txt END
             </figure>
           </t>
         </section>
         <section title="Registrar key pair">
           <t>
-            The registrar key (or chain) is the representative of the domain
-            owner.  This key signs registrar voucher-requests:
+            The Registrar is the representative of the domain owner.
+            This key signs registrar voucher-requests, and terminates
+            the TLS connection from the pledge.
             <figure>
               INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.key END
             </figure>
             The public key is indicated in a pledge voucher-request to show proximity.
-            <figure>
-              INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.crt END
-            </figure>
-            The registrar public certificate as decoded by openssl's x509
-            utility.
-            Note that the registrar certificate is marked with the cmcRA extension.
             <figure>
               INSERT_TEXT_FROM_FILE examples/jrc_prime256v1.txt END
             </figure>
@@ -4994,17 +5037,8 @@ Reference: [This document]
             <figure>
               INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.key END
             </figure>
-            The public key is used by the registrar to find the MASA. The
-            MASA URL is in an extension described in <xref target="IDevIDextension" />.
-            <figure>
-              INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.crt END
-            </figure>
-            The pledge public certificate as decoded by openssl's x509
-            utility so that the extensions can be seen.  This was version
-            1.1.1c of the <xref target="openssl" /> library and utility.
-            The 1.3.6.1.5.5.7.1.32 extension is the MASA URL extension.
-            There are two bytes that preceed the extension which are part of
-            the ASN.1 encoding, which the tool does not know to how to decode.
+            The public key is used by the registrar to find the MASA.
+            There is a second
             <figure>
               INSERT_TEXT_FROM_FILE examples/idevid_00-D0-E5-F2-00-02.txt END
             </figure>
