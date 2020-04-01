@@ -2043,8 +2043,39 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>The voucher media type "application/voucher-cms+json" is defined in
           <xref target="RFC8366" /> and is also used for the registrar voucher-request. It is a JSON document that has been
           signed using a CMS structure.
-          The registrar MUST sign the registrar voucher-request. The entire registrar certificate chain,
-          up to and including the Domain CA, MUST be included in the CMS structure.
+          The registrar MUST sign the registrar voucher-request.
+        </t>
+        <t>
+          <xref target="RFC8366" /> is quite flexible in what may be put into
+          the 'pinned-domain-cert': it may range from the End Entity (EE)
+          Certificate that the Registrar uses, to the entire private
+          Enterprise CA certificate.
+          More specific certificates result in a tighter binding, while less
+          specific certificates result in more flexibility.
+        </t>
+        <t>
+          A Registrar which is seeking a nonceless voucher for later offline use
+          benefits from a less specific certificate, as it permits the actual
+          keypair used by a future Registrar to be determined by the pinned
+          certificate authority.
+        </t>
+        <t>
+          A less specific certificate, such a public WebPKI certificate authority, would be
+          too open, and could permit any entity that can receive a
+          certificate from that authority to assume ownership of a device
+          that has a voucher pinned.
+          Future work may provide a solution to pin both a certificate and a
+          name.
+        </t>
+        <t>
+          The Registrar SHOULD request a voucher with the most specificity
+          consistent with the mode that it is operating in.
+          In order to do this, when the Registrar prepares the CMS structure
+          for the signed voucher-request, it SHOULD include only certificates
+          which are part of the chain that it wishes the MASA to pin.
+          This MAY be as small as only the End-Entity certificate (with cmcRC set) that
+          it uses as it's TLS Server Certificate, or it MAY be the entire
+          chain, including the Domain CA.
         </t>
 
         <t>MASA impementations SHOULD anticipate future media
