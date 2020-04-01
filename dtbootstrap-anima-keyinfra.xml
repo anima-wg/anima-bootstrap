@@ -2500,11 +2500,20 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
         </section>
         <section anchor="PledgeAuthenticationOfProvisionalTLS"
                  title="Pledge authentication of provisional TLS connection">
-          <t>The 'pinned-domain-cert' element of the voucher contains the domain
-            CA's public key. The pledge MUST use the 'pinned-domain-cert' trust
-            anchor to immediately complete authentication of the provisional TLS
-            connection.</t>
-          <t>If a registrar's credentials cannot be verified using the
+          <t>
+            Following the process described in <xref target="RFC8366" />,
+            the pledge should consider the public key from the
+            pinned-domain-cert as the sole temporary trust anchor.
+          </t>
+          <t>
+            The pledge then evaluates the TLS Server Certificate chain that it
+            received when the TLS connection was formed using this trust
+            anchor.
+            It is possible that the pinned-domain-cert matches the End-Entity
+            Certificate provided in the TLS Server.
+          </t>
+          <t>
+            If a registrar's credentials cannot be verified using the
             pinned-domain-cert trust anchor from the voucher then the TLS
             connection is immediately
             discarded and the pledge abandons attempts to bootstrap with this
