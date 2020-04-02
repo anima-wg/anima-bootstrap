@@ -2047,12 +2047,17 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           The registrar MUST sign the registrar voucher-request.
         </t>
         <t>
+          The voucher-request CMS object includes some number of certificates
+          that are input to the MASA as it populates the
+          'pinned-domain-cert'. As the
           <xref target="RFC8366" /> is quite flexible in what may be put into
-          the 'pinned-domain-cert': it may range from the End Entity (EE)
-          Certificate that the Registrar uses, to the entire private
-          Enterprise CA certificate.
-          More specific certificates result in a tighter binding, while less
-          specific certificates result in more flexibility.
+          the 'pinned-domain-cert', the MASA needs some signal as to what
+          certificate would be effective to populate the field with: it may
+          range from the End Entity (EE) Certificate that the Registrar uses,
+          to the entire private Enterprise CA certificate.
+          More specific certificates result in a tighter binding of the
+          voucher to the domain, while less specific certificates result in
+          more flexibility in how the domain is represented by certificates.
         </t>
         <t>
           A Registrar which is seeking a nonceless voucher for later offline use
@@ -2061,12 +2066,13 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           certificate authority.
         </t>
         <t>
-          A less specific certificate, such a public WebPKI certificate authority, would be
-          too open, and could permit any entity that can receive a
-          certificate from that authority to assume ownership of a device
+          In some cases, a less specific certificate, such a public WebPKI
+          certificate authority, could be too open, and could permit any
+          entity issued a certificate by that
+          authority to assume ownership of a device
           that has a voucher pinned.
           Future work may provide a solution to pin both a certificate and a
-          name.
+          name that would reduce such risk of malicious ownership assertions.
         </t>
         <t>
           The Registrar SHOULD request a voucher with the most specificity
@@ -2187,11 +2193,11 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
           <t>
             The MASA MAY use the highest certificate from the certificate
-            chain that it received from the Registrar as determined by MASA policy.
+            chain that it received from the Registrar, as determined by MASA policy.
             A MASA MAY have a local policy that it only pins the End-Entity
             certificate. This is consistent with <xref target="RFC8366" />.
             Details of the policy will typically depend upon the degree of
-            Supply Chain Integration, the mechanism used by the Registrar to
+            Supply Chain Integration, and the mechanism used by the Registrar to
             authenticate.  Such a policy would also determine how a
             the MASA will respond to a request for a nonceless voucher.
           </t>
