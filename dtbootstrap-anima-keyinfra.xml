@@ -1751,7 +1751,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
               enrollment.
             </t>
             <t>
-              The signatures in the certificate MUST be validated even if a
+              The signature in the certificate MUST be validated even if a
               signing key can not (yet) be validated.  The certificate (or
               chain) MUST be retained for later validation.
             </t>
@@ -1860,7 +1860,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             <t hangText="assertion:">
               The pledge indicates support for the mechanism
               described in this document, by putting the value "proximity" in the
-              voucher-request, and MUST include the
+              voucher-request, MUST include the
               "proximity-registrar-cert" field (below).
             </t>
 
@@ -1954,7 +1954,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
         <t>
           As described in <xref target="RFC7030" />, the MASA and the
           registrars SHOULD be prepared to support TLS client
-          certificate authentication and/or HTTP Basic or Digest authentication.
+          certificate authentication and/or HTTP Basic, Digest, or SCRAM authentication.
           This connection MAY also have no client authentication at all.
         </t>
         <t>
@@ -2047,6 +2047,12 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           The registrar MUST sign the registrar voucher-request.
         </t>
         <t>
+          MASA implementations SHOULD anticipate future media
+          ntypes but of course will simply fail the request if those types are
+          not yet known.
+        </t>
+
+        <t>
           The voucher-request CMS object includes some number of certificates
           that are input to the MASA as it populates the
           'pinned-domain-cert'. As the
@@ -2084,9 +2090,6 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           it uses as it's TLS Server Certificate, or it MAY be the entire
           chain, including the Domain CA.
         </t>
-
-        <t>MASA impementations SHOULD anticipate future media
-            types but of course will simply fail the request if those types are not yet known.</t>
 
         <t>
           The Registrar SHOULD include an <xref target="RFC7231" /> section
@@ -2192,8 +2195,9 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             to establish the consistency of the domain PKI.
           </t>
           <t>
-            The MASA MAY use the highest certificate from the certificate
-            chain that it received from the Registrar, as determined by MASA policy.
+            The MASA MAY use the certificate farthest in the chain
+            chain that it received from the Registrar from the
+            end-entity, as determined by MASA policy.
             A MASA MAY have a local policy that it only pins the End-Entity
             certificate. This is consistent with <xref target="RFC8366" />.
             Details of the policy will typically depend upon the degree of
@@ -2381,7 +2385,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           registrar might do in order to keep the pledge from
           discovering the correct registrar, the pledge MUST NOT
           follow more than one redirection (3xx code) to another web
-          origins. EST supports redirection but requires user
+          origin. EST supports redirection but requires user
           input; this change allows the pledge to follow a single
           redirection without a user interaction.
         </t>
@@ -2491,7 +2495,7 @@ INSERT_TEXT_FROM_FILE example-voucher.json END
           verify the nonce information in the voucher.  If present, the nonce in
           the voucher must match the nonce the pledge submitted to the
           registrar; vouchers with no nonce can also be accepted (according
-          to local policy, see <xref target="pledgeReductions"/>.
+          to local policy, see <xref target="pledgeReductions"/>)
         </t>
 
         <t>
@@ -3825,12 +3829,6 @@ Reference: [This document]
             a different class of privacy and lifecycle management concerns.
           </t>
           <t>
-            As the Autonomic Control Plane (ACP) usage of BRSKI is not
-            targeted at individual usage of IoT devices, but rather at the
-            Enterprise and ISP creation of networks in a zero-touch fashion,
-            the "call-home" represents a different kind of concern.
-          </t>
-          <t>
             It needs to be re-iterated that the BRSKI-MASA mechanism
             only occurs once during the commissioning of the device.  It is
             well defined, and although encrypted with TLS, it could in theory
@@ -4979,8 +4977,9 @@ Reference: [This document]
         unsolicited broadcast responses.
       </t>
 
-      <t>Discovery of registrar MAY also be performed with DNS-based
-        service discovery by searching for the service "_brski-registrar._tcp.&lt;domain&gt;".
+      <t>
+        Discovery of registrar MAY also be performed with DNS-based
+        service discovery by searching for the service "_brski-registrar._tcp.example.com".
         In this case the domain
         "example.com" is discovered as described in <xref
         target="RFC6763"></xref> section 11 (<xref target="IPv4dhcp" />
