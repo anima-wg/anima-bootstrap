@@ -9,13 +9,13 @@
 <!ENTITY RFC7951 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7951.xml">
 <!ENTITY RFC3748 SYSTEM "https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3748.xml">
 ]>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-41" ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" tocInclude="true" symRefs="true" sortRefs="true" version="3">
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-ietf-anima-bootstrapping-keyinfra-42" ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" tocInclude="true" symRefs="true" sortRefs="true" version="3">
   <!-- xml2rfc v2v3 conversion 2.23.1 -->
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
   <front>
     <title abbrev="BRSKI">Bootstrapping Remote Secure Key Infrastructures
     (BRSKI)</title>
-    <seriesInfo name="Internet-Draft" value="draft-ietf-anima-bootstrapping-keyinfra-41"/>
+    <seriesInfo name="Internet-Draft" value="draft-ietf-anima-bootstrapping-keyinfra-42"/>
     <author fullname="Max Pritikin" initials="M." surname="Pritikin">
       <organization>Cisco</organization>
       <address>
@@ -1643,7 +1643,7 @@ module ietf-voucher-request {
 </t>
           <figure anchor="proxy_discovery_cddl">
             <name>CDDL definition of Proxy Discovery message</name>
-            <artwork name="" type="" align="left" alt=""><![CDATA[
+            <sourcecode name="proxygrasp.cddl" type="" markers="true"><![CDATA[
 flood-message = [M_FLOOD, session-id, initiator, ttl,
                  +[objective, (locator-option / [])]]
 
@@ -1664,7 +1664,7 @@ $transport-proto /= IPPROTO_TCP   ; note this can be any value from the
                                  ; IANA protocol registry, as per
                                  ; [GRASP] section 2.9.5.1, note 3.
 port-number      = selected by Proxy
-]]></artwork>
+]]></sourcecode>
           </figure>
           <t>
                Here is an example M_FLOOD announcing a proxy at fe80::1,
@@ -1674,9 +1674,9 @@ port-number      = selected by Proxy
             <name>Example of Proxy Discovery message</name>
             <artwork name="" type="" align="left" alt=""><![CDATA[
 [M_FLOOD, 12340815, h'fe800000000000000000000000000001', 180000,
-            ["AN_Proxy", 4, 1, ""],
-            [O_IPv6_LOCATOR,
-              h'fe800000000000000000000000000001', IPPROTO_TCP, 4443]]
+            [["AN_Proxy", 4, 1, ""],
+             [O_IPv6_LOCATOR,
+              h'fe800000000000000000000000000001', IPPROTO_TCP, 4443]]]
 ]]></artwork>
           </figure>
           <t>
@@ -1719,9 +1719,9 @@ port-number      = selected by Proxy
           <name>An example of a Registrar announcement message</name>
           <artwork name="" type="" align="left" alt=""><![CDATA[
 [M_FLOOD, 12340815, h'fda379a6f6ee00000200000064000001', 180000,
-            ["AN_join_registrar", 4, 255, "EST-TLS"],
-            [O_IPv6_LOCATOR,
-              h'fda379a6f6ee00000200000064000001', IPPROTO_TCP, 8443]]
+            [["AN_join_registrar", 4, 255, "EST-TLS"],
+             [O_IPv6_LOCATOR,
+              h'fda379a6f6ee00000200000064000001', IPPROTO_TCP, 8443]]]
 ]]></artwork>
         </figure>
         <t>
@@ -1729,7 +1729,7 @@ port-number      = selected by Proxy
 </t>
         <figure anchor="registrar_discovery_cddl">
           <name>CDDL definition for Registrar announcement message</name>
-          <artwork name="" type="" align="left" alt=""><![CDATA[
+          <sourcecode name="jrcgrasp.cddl" type="" markers="true"><![CDATA[
 flood-message = [M_FLOOD, session-id, initiator, ttl,
                  +[objective, (locator-option / [])]]
 
@@ -1742,7 +1742,7 @@ sync-only =  4               ; M_FLOOD only requires synchronization
 loop-count      = 255        ; mandatory maximum
 objective-value = text       ; name of the (list of) of supported
                              ; protocols: "EST-TLS" for RFC7030.
-]]></artwork>
+]]></sourcecode>
         </figure>
         <t>
           The M_FLOOD message MUST be sent periodically.  The default period SHOULD be
@@ -2339,7 +2339,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             certificate. This is consistent with <xref target="RFC8366" format="default"/>.
             Details of the policy will typically depend upon the degree of
             Supply Chain Integration, and the mechanism used by the Registrar to
-            authenticate.  Such a policy would also determine how a
+            authenticate.  Such a policy would also determine how
             the MASA will respond to a request for a nonceless voucher.
           </t>
         </section>
@@ -2674,7 +2674,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
             period information is as described in <xref target="timeunknown" format="default"/>.
             Once the PKIX path validation is successful the TLS connection is
             no longer provisional.</t>
-          <t>The pinned-domain-cert MAY be installed as an
+          <t>The pinned-domain-cert MAY be installed as a
             trust anchor for future operations such as enrollment (e.g. <xref target="RFC7030" format="default"/> as recommended) or trust anchor management or raw protocols that do not need full PKI based key management. It can be used to authenticate any dynamically
             discovered EST server that contain the id-kp-cmcRA extended key
             usage extension as detailed in EST RFC7030 section 3.6.1; but to
@@ -2843,7 +2843,7 @@ locator3  = [O_IPv6_LOCATOR, fe80::1234, 41, nil]]]></artwork>
           </t>
           <figure anchor="cddl-auditlog">
             <name>CDDL for audit-log response</name>
-            <artwork name="" type="" align="left" alt=""><![CDATA[
+            <sourcecode name="auditlog.cddl" type="" markers="true"><![CDATA[
 audit-log-response = {
   "version": uint,
   "events": [ + event ]
@@ -2861,7 +2861,7 @@ event = {
   "assertion": "verified" / "logged" / "proximity",
   ? "truncated": uint,
 }
-]]></artwork>
+]]></sourcecode>
           </figure>
           <t>An example:
           </t>
@@ -2963,7 +2963,7 @@ event = {
           <name>Calculation of domainID</name>
           <t>
             The domainID is a binary value (a BIT STRING) that uniquely
-            identifies a Registrar by the "pinned-domain-cert"
+            identifies a Registrar by the "pinned-domain-cert".
           </t>
           <t>
             If the "pinned-domain-cert" certificate
@@ -3193,7 +3193,7 @@ event = {
           </t>
           <figure anchor="cddl-enrollstatus">
             <name>CDDL for enrollment status POST</name>
-            <artwork name="" type="" align="left" alt=""><![CDATA[
+            <sourcecode name="enrollstatus.cddl" type="" markers="true"><![CDATA[
 enrollstatus-post = {
     "version": uint,
     "status": bool,
@@ -3201,7 +3201,7 @@ enrollstatus-post = {
     ? "reason-context" : { $$arbitrary-map }
   }
 }
-]]></artwork>
+]]></sourcecode>
           </figure>
           <t>
             An example status report can be seen below.  It is sent with
@@ -3865,7 +3865,7 @@ Reference: [This document]
             Once a domain owner has been validated with the voucher, devices
             are expected to enroll into the domain using EST.  Devices are then
             expected to form ACPs using IPsec over IPv6 Link-Local addresses as
-            described in  <xref target="I-D.ietf-anima-autonomic-control-plane" format="default"/>
+            described in  <xref target="I-D.ietf-anima-autonomic-control-plane" format="default"/>.
           </t>
           <t>
             Once a device has been enrolled it SHOULD listen for the address
@@ -5724,16 +5724,16 @@ Reference: [This document]
             </abstract>
           </front>
         </reference>
-        <reference anchor="I-D.ietf-netconf-keystore" xml:base="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-netconf-keystore.xml" target="http://www.ietf.org/internet-drafts/draft-ietf-netconf-keystore-16.txt">
+        <reference anchor="I-D.ietf-netconf-keystore" xml:base="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-netconf-keystore.xml" target="http://www.ietf.org/internet-drafts/draft-ietf-netconf-keystore-17.txt">
           <front>
             <title>A YANG Data Model for a Keystore</title>
-            <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-keystore-16"/>
+            <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-keystore-17"/>
             <author initials="K" surname="Watsen" fullname="Kent Watsen">
               <organization/>
             </author>
-            <date month="March" day="8" year="2020"/>
+            <date month="May" day="20" year="2020"/>
             <abstract>
-              <t>This document defines a YANG 1.1 module called "ietf-keystore" that enables centralized configuration of both symmetric and asymmetric keys.  The secret value for both key types may be encrypted. Asymmetric keys may be associated with certificates.  Notifications are sent when certificates are about to expire.  Editorial Note (To be removed by RFC Editor)  This draft contains many placeholder values that need to be replaced with finalized values at the time of publication.  This note summarizes all of the substitutions that are needed.  No other RFC Editor instructions are specified elsewhere in this document.  Artwork in this document contains shorthand references to drafts in progress.  Please apply the following replacements:  o  "AAAA" --&gt; the assigned RFC value for [I-D.ietf-netconf-crypto-types].  o  "XXXX" --&gt; the assigned RFC value for this draft  Artwork in this document contains placeholder values for the date of publication of this draft.  Please apply the following replacement:  o  "2020-03-08" --&gt; the publication date of this draft  The following Appendix section is to be removed prior to publication:  o  Appendix A.  Change Log</t>
+              <t>This document defines a YANG 1.1 module called "ietf-keystore" that enables centralized configuration of both symmetric and asymmetric keys.  The secret value for both key types may be encrypted. Asymmetric keys may be associated with certificates.  Notifications are sent when certificates are about to expire.  Editorial Note (To be removed by RFC Editor)  This draft contains placeholder values that need to be replaced with finalized values at the time of publication.  This note summarizes all of the substitutions that are needed.  No other RFC Editor instructions are specified elsewhere in this document.  Artwork in this document contains shorthand references to drafts in progress.  Please apply the following replacements:  o  "AAAA" --&gt; the assigned RFC value for draft-ietf-netconf-crypto- types  o  "CCCC" --&gt; the assigned RFC value for this draft  Artwork in this document contains placeholder values for the date of publication of this draft.  Please apply the following replacement:  o  "2020-05-20" --&gt; the publication date of this draft  The following Appendix section is to be removed prior to publication:  o  Appendix A.  Change Log  Note to Reviewers (To be removed by RFC Editor)  This document presents a YANG module or modules that is/are part of a collection of drafts that work together to produce the ultimate goal of the NETCONF WG: to define configuration modules for NETCONF client and servers, and RESTCONF client and servers.  The relationship between the various drafts in the collection is presented in the below diagram.  crypto-types ^      ^ /        \ /          \ trust-anchors        keystore ^     ^              ^  ^ |     +---------+    |  | |               |    |  | |       +------------+  | tcp-client-server     |      /        |       | ^    ^        ssh-client-server    |       | |    |           ^            tls-client-server |    |           |              ^     ^        http-client-server |    |           |              |     |                 ^ |    |           |        +-----+     +---------+       | |    |           |        |                     |       | |    +-----------|--------|--------------+      |       | |                |        |              |      |       | +-----------+    |        |              |      |       | |    |        |              |      |       | |    |        |              |      |       | netconf-client-server       restconf-client-server   Full draft names and link to drafts:  o  draft-ietf-netconf-crypto-types (html [1])  o  draft-ietf-netconf-trust-anchors (html [2])  o  draft-ietf-netconf-keystore (html [3])  o  draft-ietf-netconf-tcp-client-server (html [4])  o  draft-ietf-netconf-ssh-client-server (html [5])  o  draft-ietf-netconf-tls-client-server (html [6])  o  draft-ietf-netconf-http-client-server (html [7])  o  draft-ietf-netconf-netconf-client-server (html [8])  o  draft-ietf-netconf-restconf-client-server (html [9])</t>
             </abstract>
           </front>
         </reference>
