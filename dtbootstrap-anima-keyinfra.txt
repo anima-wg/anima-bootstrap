@@ -152,14 +152,14 @@ Internet-Draft                    BRSKI                   September 2020
        5.9.3.  EST Client Certificate Request  . . . . . . . . . . .  64
        5.9.4.  Enrollment Status Telemetry . . . . . . . . . . . . .  64
        5.9.5.  Multiple certificates . . . . . . . . . . . . . . . .  65
-       5.9.6.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  65
+       5.9.6.  EST over CoAP . . . . . . . . . . . . . . . . . . . .  66
    6.  Clarification of transfer-encoding  . . . . . . . . . . . . .  66
    7.  Reduced security operational modes  . . . . . . . . . . . . .  66
      7.1.  Trust Model . . . . . . . . . . . . . . . . . . . . . . .  66
      7.2.  Pledge security reductions  . . . . . . . . . . . . . . .  67
      7.3.  Registrar security reductions . . . . . . . . . . . . . .  68
      7.4.  MASA security reductions  . . . . . . . . . . . . . . . .  69
-       7.4.1.  Issuing Nonceless vouchers  . . . . . . . . . . . . .  70
+       7.4.1.  Issuing Nonceless vouchers  . . . . . . . . . . . . .  69
        7.4.2.  Trusting Owners on First Use  . . . . . . . . . . . .  70
        7.4.3.  Updating or extending voucher trust anchors . . . . .  71
 
@@ -174,32 +174,32 @@ Internet-Draft                    BRSKI                   September 2020
      8.1.  The IETF XML Registry . . . . . . . . . . . . . . . . . .  72
      8.2.  YANG Module Names Registry  . . . . . . . . . . . . . . .  72
      8.3.  BRSKI well-known considerations . . . . . . . . . . . . .  72
-       8.3.1.  BRSKI .well-known registration  . . . . . . . . . . .  73
+       8.3.1.  BRSKI .well-known registration  . . . . . . . . . . .  72
        8.3.2.  BRSKI .well-known registry  . . . . . . . . . . . . .  73
      8.4.  PKIX Registry . . . . . . . . . . . . . . . . . . . . . .  73
      8.5.  Pledge BRSKI Status Telemetry . . . . . . . . . . . . . .  73
      8.6.  DNS Service Names . . . . . . . . . . . . . . . . . . . .  74
    9.  Applicability to the Autonomic Control Plane (ACP)  . . . . .  74
-     9.1.  Operational Requirements  . . . . . . . . . . . . . . . .  76
+     9.1.  Operational Requirements  . . . . . . . . . . . . . . . .  75
        9.1.1.  MASA Operational Requirements . . . . . . . . . . . .  76
-       9.1.2.  Domain Owner Operational Requirements . . . . . . . .  77
+       9.1.2.  Domain Owner Operational Requirements . . . . . . . .  76
        9.1.3.  Device Operational Requirements . . . . . . . . . . .  77
    10. Privacy Considerations  . . . . . . . . . . . . . . . . . . .  78
      10.1.  MASA audit log . . . . . . . . . . . . . . . . . . . . .  78
      10.2.  What BRSKI-EST reveals . . . . . . . . . . . . . . . . .  78
      10.3.  What BRSKI-MASA reveals to the manufacturer  . . . . . .  79
      10.4.  Manufacturers and Used or Stolen Equipment . . . . . . .  81
-     10.5.  Manufacturers and Grey market equipment  . . . . . . . .  83
+     10.5.  Manufacturers and Grey market equipment  . . . . . . . .  82
      10.6.  Some mitigations for meddling by manufacturers . . . . .  83
      10.7.  Death of a manufacturer  . . . . . . . . . . . . . . . .  84
    11. Security Considerations . . . . . . . . . . . . . . . . . . .  85
-     11.1.  Denial of Service (DoS) against MASA . . . . . . . . . .  86
+     11.1.  Denial of Service (DoS) against MASA . . . . . . . . . .  85
      11.2.  DomainID must be resistant to second-preimage attacks  .  86
-     11.3.  Availability of good random numbers  . . . . . . . . . .  87
+     11.3.  Availability of good random numbers  . . . . . . . . . .  86
      11.4.  Freshness in Voucher-Requests  . . . . . . . . . . . . .  87
      11.5.  Trusting manufacturers . . . . . . . . . . . . . . . . .  88
      11.6.  Manufacturer Maintenance of trust anchors  . . . . . . .  89
-       11.6.1.  Compromise of Manufacturer IDevID signing keys . . .  91
+       11.6.1.  Compromise of Manufacturer IDevID signing keys . . .  90
        11.6.2.  Compromise of MASA signing keys  . . . . . . . . . .  91
        11.6.3.  Compromise of MASA web service . . . . . . . . . . .  93
      11.7.  YANG Module Security Considerations  . . . . . . . . . .  94
@@ -3071,9 +3071,9 @@ Internet-Draft                    BRSKI                   September 2020
    specific to this pledge.  The contents of this field are not subject
    to standardization.
 
-   The version and status fields MUST be present.  The Reason field
-   SHOULD be present whenever the status field is false.  The Reason-
-   Context field is optional.
+
+
+
 
 
 
@@ -3082,6 +3082,11 @@ Pritikin, et al.          Expires 25 March 2021                [Page 55]
 Internet-Draft                    BRSKI                   September 2020
 
 
+   The version and status fields MUST be present.  The Reason field
+   SHOULD be present whenever the status field is false.  The Reason-
+   Context field is optional.  In the case of a SUCCESS the Reason
+   string MAY be omitted.
+
    The keys to this JSON object are case-sensitive and MUST be
    lowercase.  Figure 16 shows an example JSON.
 
@@ -3089,7 +3094,7 @@ Internet-Draft                    BRSKI                   September 2020
    voucherstatus-post = {
        "version": uint,
        "status": bool,
-       "reason": text,
+       ? "reason": text,
        ? "reason-context" : { $$arbitrary-map }
      }
    }
@@ -3122,14 +3127,9 @@ Internet-Draft                    BRSKI                   September 2020
    This is done with an HTTP POST using the operation path value of
    "/.well-known/brski/requestauditlog".
 
-
-
-
-
-
-
-
-
+   The registrar SHOULD HTTP POST the same registrar voucher-request as
+   it did when requesting a voucher (using the same Content-Type).  It
+   is posted to the /requestauditlog URI instead.  The "idevid-issuer"
 
 
 
@@ -3138,9 +3138,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 56]
 Internet-Draft                    BRSKI                   September 2020
 
 
-   The registrar SHOULD HTTP POST the same registrar voucher-request as
-   it did when requesting a voucher (using the same Content-Type).  It
-   is posted to the /requestauditlog URI instead.  The "idevid-issuer"
    and "serial-number" informs the MASA which log is requested so the
    appropriate log can be prepared for the response.  Using the same
    media type and message minimizes cryptographic and message operations
@@ -3183,6 +3180,9 @@ Internet-Draft                    BRSKI                   September 2020
 
    A MASA that returns a code 200 MAY also include a Location: header
    for future reference by the registrar.
+
+
+
 
 
 
@@ -3571,13 +3571,13 @@ Internet-Draft                    BRSKI                   September 2020
    is the most reliable way to correlate server-side information with
    what the client provides.)
 
-   The reason-context attribute is an arbitrary JSON object (literal
-   value or hash of values) which provides additional information
-   specific to the failure to unroll from this pledge.  The contents of
-   this field are not subject to standardization.  This is represented
-   by the group-socket "$$arbitrary-map" in the CDDL.
+   The version and status fields MUST be present.  The Reason field
+   SHOULD be present whenever the status field is false.  In the case of
+   a SUCCESS the Reason string MAY be omitted.
 
-   In the case of a SUCCESS the Reason string is omitted.
+
+
+
 
 
 
@@ -3586,11 +3586,19 @@ Pritikin, et al.          Expires 25 March 2021                [Page 64]
 Internet-Draft                    BRSKI                   September 2020
 
 
+   The reason-context attribute is an arbitrary JSON object (literal
+   value or hash of values) which provides additional information
+   specific to the failure to unroll from this pledge.  The contents of
+   this field are not subject to standardization.  This is represented
+   by the group-socket "$$arbitrary-map" in the CDDL.
+
+   In the case of a SUCCESS the Reason string is omitted.
+
    <CODE BEGINS> file "enrollstatus.cddl"
    enrollstatus-post = {
        "version": uint,
        "status": bool,
-       "reason": text,
+       ? "reason": text,
        ? "reason-context" : { $$arbitrary-map }
      }
    }
@@ -3621,16 +3629,8 @@ Internet-Draft                    BRSKI                   September 2020
    Pledges that require multiple certificates could establish direct EST
    connections to the registrar.
 
-5.9.6.  EST over CoAP
 
-   This document describes extensions to EST for the purposes of
-   bootstrapping of remote key infrastructures.  Bootstrapping is
-   relevant for CoAP enrollment discussions as well.  The definition of
-   EST and BRSKI over CoAP is not discussed within this document beyond
-   ensuring proxy support for CoAP operations.  Instead it is
-   anticipated that a definition of CoAP mappings will occur in
-   subsequent documents such as [I-D.ietf-ace-coap-est] and that CoAP
-   mappings for BRSKI will be discussed either there or in future work.
+
 
 
 
@@ -3641,6 +3641,17 @@ Pritikin, et al.          Expires 25 March 2021                [Page 65]
 
 Internet-Draft                    BRSKI                   September 2020
 
+
+5.9.6.  EST over CoAP
+
+   This document describes extensions to EST for the purposes of
+   bootstrapping of remote key infrastructures.  Bootstrapping is
+   relevant for CoAP enrollment discussions as well.  The definition of
+   EST and BRSKI over CoAP is not discussed within this document beyond
+   ensuring proxy support for CoAP operations.  Instead it is
+   anticipated that a definition of CoAP mappings will occur in
+   subsequent documents such as [I-D.ietf-ace-coap-est] and that CoAP
+   mappings for BRSKI will be discussed either there or in future work.
 
 6.  Clarification of transfer-encoding
 
@@ -3680,6 +3691,13 @@ Internet-Draft                    BRSKI                   September 2020
    This section explains the trust relationships detailed in
    Section 2.4:
 
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 66]
+
+Internet-Draft                    BRSKI                   September 2020
+
+
    +--------+         +---------+    +------------+     +------------+
    | Pledge |         | Join    |    | Domain     |     |Manufacturer|
    |        |         | Proxy   |    | Registrar  |     | Service    |
@@ -3689,15 +3707,6 @@ Internet-Draft                    BRSKI                   September 2020
    Figure 10
 
    Pledge:  The pledge could be compromised and providing an attack
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 66]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
       vector for malware.  The entity is trusted to only imprint using
       secure methods described in this document.  Additional endpoint
       assessment techniques are RECOMMENDED but are out-of-scope of this
@@ -3735,6 +3744,16 @@ Internet-Draft                    BRSKI                   September 2020
        deployment time.  Logging and validity periods address the
        security considerations of supporting these use cases.
 
+
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 67]
+
+Internet-Draft                    BRSKI                   September 2020
+
+
    2.  Many devices already support "trust on first use" for physical
        interfaces such as console ports.  This document does not change
        that reality.  Devices supporting this protocol MUST NOT support
@@ -3746,14 +3765,6 @@ Internet-Draft                    BRSKI                   September 2020
    3.  The pledge MAY have an operational mode where it skips voucher
        validation one time.  For example if a physical button is
        depressed during the bootstrapping operation.  This can be useful
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 67]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
        if the manufacturer service is unavailable.  This behavior SHOULD
        be available via local configuration or physical presence methods
        (such as use of a serial/craft console) to ensure new entities
@@ -3787,21 +3798,10 @@ Internet-Draft                    BRSKI                   September 2020
        occur when informing all registrars of unique identifiers of new
        entities might be operationally difficult.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+   2.  A registrar MAY choose to accept devices that claim a unique
+       identity without the benefit of authenticating that claimed
+       identity.  This could occur when the pledge does not include an
+       X.509 IDevID factory installed credential.  New Entities without
 
 
 
@@ -3810,10 +3810,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 68]
 Internet-Draft                    BRSKI                   September 2020
 
 
-   2.  A registrar MAY choose to accept devices that claim a unique
-       identity without the benefit of authenticating that claimed
-       identity.  This could occur when the pledge does not include an
-       X.509 IDevID factory installed credential.  New Entities without
        an X.509 IDevID credential MAY form the Section 5.2 request using
        the Section 5.5 format to ensure the pledge's serial number
        information is provided to the registrar (this includes the
@@ -3854,18 +3850,6 @@ Internet-Draft                    BRSKI                   September 2020
    also be bound to specific customers (independent of the device
    identity) by authenticating the customer's Registrar.
 
-
-
-
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 69]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
 7.4.1.  Issuing Nonceless vouchers
 
    A MASA has the option of not including a nonce in the voucher, and/or
@@ -3874,6 +3858,14 @@ Internet-Draft                    BRSKI                   September 2020
    makes the specified Domain an always trusted entity to the pledge
    during any subsequent bootstrapping attempts.  That a nonceless
    voucher was issued is captured in the log information so that the
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 69]
+
+Internet-Draft                    BRSKI                   September 2020
+
+
    registrar can make appropriate security decisions when a pledge joins
    the Domain.  Nonceless vouchers are useful to support use cases where
    registrars might not be online during actual device deployment.
@@ -3914,6 +3906,14 @@ Internet-Draft                    BRSKI                   September 2020
    voucher-request' information for pledges that support that
    functionality.  This provides a proof-of-proximity check that reduces
    the need for ownership verification.  The proof-of-proximity comes
+   from the assumption that the pledge and Join Proxy are on the same
+   link-local connection.
+
+
+
+
+
+
 
 
 
@@ -3921,9 +3921,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 70]
 
 Internet-Draft                    BRSKI                   September 2020
 
-
-   from the assumption that the pledge and Join Proxy are on the same
-   link-local connection.
 
    A MASA that practices Trust-on-First-Use (TOFU) for Registrar
    identity may wish to annotate the origin of the connection by IP
@@ -3963,11 +3960,14 @@ Internet-Draft                    BRSKI                   September 2020
    new owner's Registrar would have to support an override of the MASA
    URL.
 
-
-
-
-
-
+   To be useful for resale or other transfers of ownership one of two
+   situations will need to occur.  The simplest is that the device is
+   not put through any kind of factory default/reset before going
+   through onboarding again.  Some other secure, physical signal would
+   be needed to initiate it.  This is most suitable for redeploying a
+   device within the same Enterprise.  This would entail having previous
+   configuration in the system until entirely replaced by the new owner,
+   and represents some level of risk.
 
 
 
@@ -3977,15 +3977,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 71]
 
 Internet-Draft                    BRSKI                   September 2020
 
-
-   To be useful for resale or other transfers of ownership one of two
-   situations will need to occur.  The simplest is that the device is
-   not put through any kind of factory default/reset before going
-   through onboarding again.  Some other secure, physical signal would
-   be needed to initiate it.  This is most suitable for redeploying a
-   device within the same Enterprise.  This would entail having previous
-   configuration in the system until entirely replaced by the new owner,
-   and represents some level of risk.
 
    The second mechanism is that there would need to be two levels of
    factory reset.  One would take the system back entirely to
@@ -4026,14 +4017,6 @@ Internet-Draft                    BRSKI                   September 2020
 
 8.3.  BRSKI well-known considerations
 
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 72]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
 8.3.1.  BRSKI .well-known registration
 
    To the Well-Known URIs Registry, at:
@@ -4043,6 +4026,13 @@ Internet-Draft                    BRSKI                   September 2020
 
                    URI suffix: brski
                    Change Controller: IETF
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 72]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
    IANA is asked to change the registration of "est" to now only include
    RFC7030 and no longer this document.  Earlier versions of this
@@ -4083,13 +4073,6 @@ Internet-Draft                    BRSKI                   September 2020
    be in the initial registration, with this document (Section 5.7) as
    the reference:
 
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 73]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    *  version
 
    *  Status
@@ -4097,6 +4080,15 @@ Internet-Draft                    BRSKI                   September 2020
    *  Reason
 
    *  reason-context
+
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 73]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
 8.6.  DNS Service Names
 
@@ -4137,15 +4129,6 @@ Internet-Draft                    BRSKI                   September 2020
    statements, and will need to address unique privacy and security
    considerations for the environments in which they are used.
 
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 74]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    The autonomic control plane (ACP) that is bootstrapped by the BRSKI
    protocol is typically used in medium to large Internet Service
    Provider organizations.  Equivalent enterprises that have significant
@@ -4154,6 +4137,14 @@ Internet-Draft                    BRSKI                   September 2020
    of primarily layer-2 is not excluded, but the adjacencies that the
    ACP will create and maintain will not reflect the topology until all
    devices participate in the ACP).
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 74]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
    In the ACP, the Join Proxy is found to be proximal because
    communication between the pledge and the join proxy is exclusively on
@@ -4190,6 +4181,15 @@ Internet-Draft                    BRSKI                   September 2020
    secure credentials that are provisioned by BRSKI.  The connectivity
    requirements of said management systems are provided by the ACP.
 
+9.1.  Operational Requirements
+
+   This section collects operational requirements based upon the three
+   roles involved in BRSKI: The Manufacturer Authorized Signing
+   Authority (MASA), the (Domain) Owner and the Device.  It should be
+   recognized that the manufacturer may be involved in two roles, as it
+   creates the software/firmware for the device, and also may be the
+   operator of the MASA.
+
 
 
 
@@ -4201,15 +4201,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 75]
 
 Internet-Draft                    BRSKI                   September 2020
 
-
-9.1.  Operational Requirements
-
-   This section collects operational requirements based upon the three
-   roles involved in BRSKI: The Manufacturer Authorized Signing
-   Authority (MASA), the (Domain) Owner and the Device.  It should be
-   recognized that the manufacturer may be involved in two roles, as it
-   creates the software/firmware for the device, and also may be the
-   operator of the MASA.
 
    The requirements in this section are presented using BCP14
    ([RFC2119], [RFC8174]) language.  These do not represent new
@@ -4245,6 +4236,15 @@ Internet-Draft                    BRSKI                   September 2020
    The audit log is designed to be easily cacheable and the MASA MAY
    find it useful to put this content on a CDN.
 
+9.1.2.  Domain Owner Operational Requirements
+
+   The domain owner MUST operate an EST ([RFC7030]) server with the
+   extensions described in this document.  This is the JRC or Registrar.
+   This JRC/EST server MUST announce itself using GRASP within the ACP.
+   This EST server will typically reside with the Network Operations
+   Center for the organization.
+
+
 
 
 
@@ -4257,14 +4257,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 76]
 
 Internet-Draft                    BRSKI                   September 2020
 
-
-9.1.2.  Domain Owner Operational Requirements
-
-   The domain owner MUST operate an EST ([RFC7030]) server with the
-   extensions described in this document.  This is the JRC or Registrar.
-   This JRC/EST server MUST announce itself using GRASP within the ACP.
-   This EST server will typically reside with the Network Operations
-   Center for the organization.
 
    The domain owner MAY operate an internal certificate authority (CA)
    that is seperate from the EST server, or it MAY combine all
@@ -4303,17 +4295,6 @@ Internet-Draft                    BRSKI                   September 2020
    Devices are expected to find Join Proxies using GRASP, and then
    connect to the JRC using the protocol described in this document.
 
-
-
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 77]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    Once a domain owner has been validated with the voucher, devices are
    expected to enroll into the domain using EST.  Devices are then
    expected to form ACPs using IPsec over IPv6 Link-Local addresses as
@@ -4324,6 +4305,14 @@ Internet-Draft                    BRSKI                   September 2020
    announce itself on all links/interfaces using GRASP DULL.
 
    Devices are expected to renew their certificates before they expire.
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 77]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
 10.  Privacy Considerations
 
@@ -4361,15 +4350,6 @@ Internet-Draft                    BRSKI                   September 2020
    TLS 1.2 reveals the certificate identities to on-path observers,
    including the Join Proxy.
 
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 78]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    TLS 1.3 reveals the certificate identities only to the end parties,
    but as the connection is provisional, an on-path attacker (MTIM) can
    see the certificates.  This includes not just malicious attackers,
@@ -4382,6 +4362,14 @@ Internet-Draft                    BRSKI                   September 2020
    device that can see a join proxy would be able to connect to the
    Registrar and learn the identity of the network in question.  Even if
    the contents of the certificate are pseudonymized, it would be
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 78]
+
+Internet-Draft                    BRSKI                   September 2020
+
+
    possible to correlate different connections in different locations
    belong to the same entity.  This is unlikely to present a significant
    privacy concern to ANIMA ACP uses of BRSKI, but may be a concern to
@@ -4410,22 +4398,6 @@ Internet-Draft                    BRSKI                   September 2020
    touch fashion where the "call-home" represents a different class of
    privacy and lifecycle management concerns.
 
-
-
-
-
-
-
-
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 79]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    It needs to be re-iterated that the BRSKI-MASA mechanism only occurs
    once during the commissioning of the device.  It is well defined, and
    although encrypted with TLS, it could in theory be made auditable as
@@ -4441,6 +4413,18 @@ Internet-Draft                    BRSKI                   September 2020
    device owner.  This is in stark contrast to many "call-home"
    protocols where the device autonomously calls home and uses an
    undocumented protocol.
+
+
+
+
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 79]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
    While the contents of the signed part of the pledge voucher request
    can not be changed, they are not encrypted at the registrar.  The
@@ -4475,13 +4459,6 @@ Internet-Draft                    BRSKI                   September 2020
       vendor.  The precise model that is being enrolled will remain
       private.
 
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 80]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    Based upon the above information, the manufacturer is able to track a
    specific device from pseudonymous domain identity to the next
    pseudonymous domain identity.  If there is sales-channel integration,
@@ -4497,6 +4474,14 @@ Internet-Draft                    BRSKI                   September 2020
    individual person who registers a device from a manufacturer.
    Individuals do not tend to have multiple offices, and their registrar
    is likely on the same network as the device.  A manufacturer that
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 80]
+
+Internet-Draft                    BRSKI                   September 2020
+
+
    sells switching/routing products to enterprises should hardly be
    surprised if additional purchases switching/routing products are
    made.  Deviations from a historical trend or an establish baseline
@@ -4531,13 +4516,6 @@ Internet-Draft                    BRSKI                   September 2020
    that a device which is in factory-default mode does a zero-touch
    bootstrap, and attempts to enroll into a domain owner's registrar.
 
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 81]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    The manufacturer is therefore in a position to decline to issue a
    voucher if it detects that the new owner is not the same as the
    previous owner.
@@ -4552,6 +4530,13 @@ Internet-Draft                    BRSKI                   September 2020
        manufacturer of the sale, or the manufacturer may just permit
        resales unless told otherwise.  In which case, the transfer of
        ownership simply occurs.
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 81]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
    3.  A manufacturer could however decide not to issue a new voucher in
        response to a transfer of ownership.  This is essentially the
@@ -4581,19 +4566,6 @@ Internet-Draft                    BRSKI                   September 2020
    enforced when the device is enrolled, and this is not (to repeat), a
    daily or even monthly occurrence.
 
-
-
-
-
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 82]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
 10.5.  Manufacturers and Grey market equipment
 
    Manufacturers of devices often sell different products into different
@@ -4613,6 +4585,14 @@ Internet-Draft                    BRSKI                   September 2020
    (un-)available in that market.  If the device has a GPS the
    coordinates of the device could even be placed into an extension of
    the voucher.
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 82]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
    The above actions are not illegal, and not new.  Many manufacturers
    have shipped crypto-weak (exportable) versions of firmware as the
@@ -4640,16 +4620,6 @@ Internet-Draft                    BRSKI                   September 2020
    manufacturers that are up-front about their policies, who do not
    change them gratuitously.
 
-
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 83]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    Section 7.4.3 describes some ways in which a manufacturer could
    provide a mechanism to manage the trust anchors and built-in
    certificates (IDevID) as an extension.  There are a variety of
@@ -4663,6 +4633,22 @@ Internet-Draft                    BRSKI                   September 2020
    the original manufacturer's MASA) with those of the new owner permits
    the new owner to issue vouchers to subsequent owners.  This would be
    done by having the selling (old) owner to run a MASA.
+
+
+
+
+
+
+
+
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 83]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
    The BRSKI protocol depends upon a trust anchor on the device and an
    identity on the device.  Management of these entities facilitates a
@@ -4698,14 +4684,6 @@ Internet-Draft                    BRSKI                   September 2020
    The MASA was named the Manufacturer *Authorized* Signing Authority to
    emphasize that it need not be the manufacturer itself that performs
    this.  It is anticipated that specialist service providers will come
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 84]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    to exist that deal with the creation of vouchers in much the same way
    that many companies have outsourced email, advertising and janitorial
    services.
@@ -4714,6 +4692,19 @@ Internet-Draft                    BRSKI                   September 2020
    the manufacturer would arrange to escrow appropriate private keys
    such that a MASA service could be provided by a third party.  This
    has routinely been done for source code for decades.
+
+
+
+
+
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 84]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
 11.  Security Considerations
 
@@ -4755,13 +4746,6 @@ Internet-Draft                    BRSKI                   September 2020
    log information will see multiple entries and take this into account
    for their analytics purposes.
 
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 85]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
 11.1.  Denial of Service (DoS) against MASA
 
    There are uses cases where the MASA could be unavailable or
@@ -4770,6 +4754,14 @@ Internet-Draft                    BRSKI                   September 2020
    other instances where MASA policy rejects a claim.  These introduce
    an operational risk to the Registrar owner in that MASA behavior
    might limit the ability to bootstrap a pledge device.  For example
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 85]
+
+Internet-Draft                    BRSKI                   September 2020
+
+
    this might be an issue during disaster recovery.  This risk can be
    mitigated by Registrars that request and maintain long term copies of
    "nonceless" vouchers.  In that way they are guaranteed to be able to
@@ -4806,18 +4798,6 @@ Internet-Draft                    BRSKI                   September 2020
    to a second-preimage attack.  Such an attack would allow a second
    registrar to create audit log entries that are fake.
 
-
-
-
-
-
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 86]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
 11.3.  Availability of good random numbers
 
    The nonce used by the Pledge in the voucher-request SHOULD be
@@ -4829,6 +4809,14 @@ Internet-Draft                    BRSKI                   September 2020
    by a device at boot MUST be unique across all devices and all
    bootstraps.  Resetting a device to factory default state does not
    obviate this requirement.
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 86]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
 11.4.  Freshness in Voucher-Requests
 
@@ -4867,13 +4855,6 @@ Internet-Draft                    BRSKI                   September 2020
    leveragable by an Rm with full administrative control, can be assumed
    to be a threat against the intended registrar.
 
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 87]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    This flow is mitigated by the intended registrar verifying the audit
    logs available from the MASA as described in Section 5.8.  Rm might
    chose to collect a voucher-request but wait until after the intended
@@ -4884,6 +4865,14 @@ Internet-Draft                    BRSKI                   September 2020
    the stale nonce or anticipate the pledge's future nonce state.
    Reducing the possibility of this is why the pledge is mandated to
    generate a strong random or pseudo-random number nonce.
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 87]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
    Additionally, in order to successfully use the resulting voucher the
    Rm would have to attack the pledge and return it to a bootstrapping
@@ -4923,13 +4912,6 @@ Internet-Draft                    BRSKI                   September 2020
    the scope of BRSKI.  There are a number of mechanisms that can
    adopted including:
 
-
-
-Pritikin, et al.          Expires 25 March 2021                [Page 88]
-
-Internet-Draft                    BRSKI                   September 2020
-
-
    *  Manually configuring each manufacturer's trust anchor.
 
    *  A Trust-On-First-Use (TOFU) mechanism.  A human would be queried
@@ -4939,6 +4921,14 @@ Internet-Draft                    BRSKI                   September 2020
       validated using something like the WebPKI, there remains the
       possibility that the name is a look alike: e.g, dem0.example. vs
       demO.example.
+
+
+
+
+Pritikin, et al.          Expires 25 March 2021                [Page 88]
+
+Internet-Draft                    BRSKI                   September 2020
+
 
    *  scanning the trust anchor from a QR code that came with the
       packaging (this is really a manual TOFU mechanism)
@@ -4973,6 +4963,16 @@ Internet-Draft                    BRSKI                   September 2020
    devices kept in a warehouse as spares might not be onboarded for many
    decades.
 
+   There are good cryptographic hygiene reasons why a manufacturer would
+   not want to maintain access to a private key for many decades.  A
+   manufacturer in that situation can leverage a long-term certificate
+   authority anchor, built-in to the pledge, and then a certificate
+   chain may be incorporated using the normal CMS certificate set.  This
+   may increase the size of the voucher artifacts, but that is not a
+   significant issues in non-constrained environments.
+
+
+
 
 
 
@@ -4985,14 +4985,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 89]
 
 Internet-Draft                    BRSKI                   September 2020
 
-
-   There are good cryptographic hygiene reasons why a manufacturer would
-   not want to maintain access to a private key for many decades.  A
-   manufacturer in that situation can leverage a long-term certificate
-   authority anchor, built-in to the pledge, and then a certificate
-   chain may be incorporated using the normal CMS certificate set.  This
-   may increase the size of the voucher artifacts, but that is not a
-   significant issues in non-constrained environments.
 
    There are a few other operational variations that manufacturers could
    consider.  For instance, there is no reason that every device need
@@ -5032,6 +5024,14 @@ Internet-Draft                    BRSKI                   September 2020
    but that the MASA signing key itself is safe in a not-directly
    connected hardware module.
 
+11.6.1.  Compromise of Manufacturer IDevID signing keys
+
+   An attacker that has access to the key that the manufacturer uses to
+   sign IDevID certificates can create counterfeit devices.  Such
+   devices can claim to be from a particular manufacturer, but be
+   entirely different devices: Trojan horses in effect.
+
+
 
 
 
@@ -5041,13 +5041,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 90]
 
 Internet-Draft                    BRSKI                   September 2020
 
-
-11.6.1.  Compromise of Manufacturer IDevID signing keys
-
-   An attacker that has access to the key that the manufacturer uses to
-   sign IDevID certificates can create counterfeit devices.  Such
-   devices can claim to be from a particular manufacturer, but be
-   entirely different devices: Trojan horses in effect.
 
    As the attacker controls the MASA URL in the certificate, the
    registrar can be convinced to talk to the attackers' MASA.  The
@@ -5090,6 +5083,13 @@ Internet-Draft                    BRSKI                   September 2020
    factory reset.  This might be accomplished through social engineering
    of data center staff.  Most locked cages have ventilation holes, and
    possibly a long "paperclip" could reach through to depress a factory
+   reset button.  Once such a piece of ISP equipment has been
+   compromised, it could be used to compromise equipment that was
+   connected to (through long haul links even), assuming that those
+   pieces of equipment could also be forced through a factory reset.
+
+
+
 
 
 
@@ -5097,11 +5097,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 91]
 
 Internet-Draft                    BRSKI                   September 2020
 
-
-   reset button.  Once such a piece of ISP equipment has been
-   compromised, it could be used to compromise equipment that was
-   connected to (through long haul links even), assuming that those
-   pieces of equipment could also be forced through a factory reset.
 
    The above scenario seems rather unlikely as it requires some element
    of physical access; but were there a remote exploit that did not
@@ -5143,6 +5138,11 @@ Internet-Draft                    BRSKI                   September 2020
    <4hr service window) may be to validate the device operation on a
    regular basis anyway.
 
+   If the onboarding process includes attestations about firmware
+   versions, then through that process the operator would be advised to
+   upgrade the firmware before going into production.  Unfortunately,
+   this does not help against situations where the attacker operates
+   their own Registrar (as listed above).
 
 
 
@@ -5153,12 +5153,6 @@ Pritikin, et al.          Expires 25 March 2021                [Page 92]
 
 Internet-Draft                    BRSKI                   September 2020
 
-
-   If the onboarding process includes attestations about firmware
-   versions, then through that process the operator would be advised to
-   upgrade the firmware before going into production.  Unfortunately,
-   this does not help against situations where the attacker operates
-   their own Registrar (as listed above).
 
    [RFC8366] section 6.1 explains the need for short-lived vouchers.
    The nonce guarantees freshness, and the short-lived nature of the
@@ -5202,6 +5196,12 @@ Internet-Draft                    BRSKI                   September 2020
    as it would involve doing firmware updates on every device in
    warehouses (a potentially ruinously expensive process), a
    manufacturer might be reluctant to admit this possibility.
+
+
+
+
+
+
 
 
 
