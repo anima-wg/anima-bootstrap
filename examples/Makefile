@@ -27,9 +27,9 @@ idevid_${EXAMPLE1}.asn1.txt: idevid_${EXAMPLE1}.crt
 %.json: %.pkcs
 	openssl cms -verify -noverify -in $? -inform pem | fold -60 > $@
 
-HIGHWAYDIR=/ssw/projects/pandora/highway/spec/files/cert/
-FOUNTAINDIR=/ssw/projects/pandora/fountain/spec/files/cert/
-ORIGINDIR=/ssw/projects/pandora/reach/spec/files/product/00-D0-E5-F2-00-02
+HIGHWAYDIR=/ssw/projects/pandora/highway/spec/files/cert
+FOUNTAINDIR=/ssw/projects/pandora/fountain/spec/files/cert
+ORIGINDIR=/ssw/projects/pandora/reach/spec/files/product/${EXAMPLE1}
 update:
 	cp ${HIGHWAYDIR}/vendor_secp384r1.crt vendor.crt
 	cp ${HIGHWAYDIR}/vendor_secp384r1.key vendor.key
@@ -41,9 +41,11 @@ update:
 	cp ${FOUNTAINDIR}/jrc_prime256v1.key .
 	cp ${ORIGINDIR}/device.crt idevid_${EXAMPLE1}.crt
 	cp ${ORIGINDIR}/key.pem idevid_${EXAMPLE1}.key
-	base64 ${ORIGINDIR}/voucher_${EXAMPLE1}.pkcs    >voucher_${EXAMPLE1}.b64
-	base64 ${ORIGINDIR}/vr_${EXAMPLE1}.pkcs         >vr_${EXAMPLE1}.b64
-	cp ${ORIGINDIR}/parboiled_vr_${EXAMPLE1}.b64    .
+	base64 -w 68 ${ORIGINDIR}/voucher_${EXAMPLE1}.pkcs    >voucher_${EXAMPLE1}.b64
+	base64 -w 68 ${ORIGINDIR}/vr_${EXAMPLE1}.pkcs         >vr_${EXAMPLE1}.b64
+	base64 -d ${ORIGINDIR}/parboiled_vr_${EXAMPLE1}.b64 | base64 -w 68 >parboiled_vr_${EXAMPLE1}.b64
+
+check: vendor.cert
 	./checkit
 
 
