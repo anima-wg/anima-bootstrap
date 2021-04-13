@@ -16,10 +16,10 @@ idevid_${EXAMPLE1}.asn1.txt: idevid_${EXAMPLE1}.crt
 	openssl asn1parse -in idevid_${EXAMPLE1}.crt | fold -60 >idevid_${EXAMPLE1}.asn1.txt
 
 %.cert: %.crt
-	openssl x509 -text -in $< >$@
+	openssl x509 -text -in $< | fold -70 >$@
 
 %.pkcs: %.b64
-	base64 -d <$? | openssl cms -cmsout -inform der -in - -outform pem -out $@ -text
+	base64 -d <$? | openssl cms -cmsout -inform der -in - -outform pem -out - -text | fold -68 >$@
 
 %.asn1.txt: %.pkcs
 	openssl asn1parse -inform pem -in $? | cut -c1-72 >$@
